@@ -23,7 +23,7 @@
 #'   strong tagList
 #' @importFrom rlang .data
 #' 
-shinyMain <- function(id, projects_info) {
+mainServer <- function(id, projects_info) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
   
@@ -100,27 +100,27 @@ shinyMain <- function(id, projects_info) {
 }
 
 #' @param id shiny identifier
-#' @rdname shinyMain
+#' @rdname mainServer
 #' @export
-shinyMainInput <- function(id) {
+mainInput <- function(id) {
   ns <- shiny::NS(id)
   shinySetupInput(ns("setup"))
 }
-#' @rdname shinyMain
+#' @rdname mainServer
 #' @export
-shinyMainUI <- function(id) {
+mainUI <- function(id) {
   ns <- shiny::NS(id)
   shinySetupUI(ns("setup"))
 }
-#' @rdname shinyMain
+#' @rdname mainServer
 #' @export
-shinyMainOutput <- function(id) {
+mainOutput <- function(id) {
   ns <- shiny::NS(id)
   shinyHaploUI(ns("hap_scan"))
 }
-#' @rdname shinyMain
+#' @rdname mainServer
 #' @export
-shinyMainOutput2 <- function(id) {
+mainOutput2 <- function(id) {
   ns <- shiny::NS(id)
   shinyDiploUI(ns("dip_scan"))
 }
