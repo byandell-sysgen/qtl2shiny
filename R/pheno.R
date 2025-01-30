@@ -1,6 +1,6 @@
 #' Shiny phenotype selection
 #'
-#' Shiny module for phenotype selection, with interfaces \code{phenosUI} and  \code{phenosOutput}.
+#' Shiny module for phenotype selection, with interfaces \code{phenoUI} and  \code{phenoOutput}.
 #'
 #' @param id identifier for shiny reactive
 #' @param set_par,win_par,peaks_df,analyses_tbl,cov_df,project_info reactive arguments
@@ -13,7 +13,7 @@
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom shiny moduleServer NS radioButtons reactive req tagList uiOutput
 #' @importFrom rlang .data
-phenosServer <- function(id, set_par, win_par, peaks_df, analyses_tbl, cov_df,
+phenoServer <- function(id, set_par, win_par, peaks_df, analyses_tbl, cov_df,
                         project_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -38,8 +38,8 @@ phenosServer <- function(id, set_par, win_par, peaks_df, analyses_tbl, cov_df,
     raw_phe_mx <- shiny::reactive({
       pheno_read(project_info(), analyses_plot(), FALSE)
     })
-    shinyPhenoPlot("PhenoPlotRaw", set_par, raw_phe_mx, cov_df)
-    shinyPhenoPlot("PhenoPlotTrans", set_par, phe_mx, cov_df)
+    phenoPlotServer("PhenoPlotRaw", set_par, raw_phe_mx, cov_df)
+    phenoPlotServer("PhenoPlotTrans", set_par, phe_mx, cov_df)
     
     # Show data.
     output$radio <- renderUI({
@@ -51,8 +51,8 @@ phenosServer <- function(id, set_par, win_par, peaks_df, analyses_tbl, cov_df,
     output$show_data <- renderUI({
       shiny::tagList(
         switch(shiny::req(input$radio),
-               "Raw Data"   = shinyPhenoPlotUI(ns("PhenoPlotRaw")),
-               "Trans Data" = shinyPhenoPlotUI(ns("PhenoPlotTrans")),
+               "Raw Data"   = phenoPlotUI(ns("PhenoPlotRaw")),
+               "Trans Data" = phenoPlotUI(ns("PhenoPlotTrans")),
                "Covariates" = DT::dataTableOutput(ns("analyses_tbl"))),
         if(!(input$radio %in% c("Raw Data","Trans Data")))
           DT::dataTableOutput(ns("peaks")))
@@ -65,14 +65,14 @@ phenosServer <- function(id, set_par, win_par, peaks_df, analyses_tbl, cov_df,
   })
 }
 #' @export
-#' @rdname phenosServer
-phenosUI <- function(id) {
+#' @rdname phenoServer
+phenoUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("radio"))
 }
 #' @export
-#' @rdname phenosServer
-phenosOutput <- function(id) {
+#' @rdname phenoServer
+phenoOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("show_data"))
 }
