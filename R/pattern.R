@@ -32,7 +32,7 @@ patternServer <- function(id, job_par, chr_pos, win_par,
     phe1_mx <- reactive({
       phe_mx()[, shiny::req(input$pheno_name), drop = FALSE]
     })
-    shinyAllele("alleles", win_par,  phe1_mx, cov_df, pairprobs_obj, K_chr,
+    alleleServer("allele", win_par,  phe1_mx, cov_df, pairprobs_obj, K_chr,
                 analyses_df, patterns, scan_pat, project_info, snp_action)
     
     ## Select phenotype for plots.
@@ -154,7 +154,7 @@ patternServer <- function(id, job_par, chr_pos, win_par,
     })
     output$Means <- shiny::renderUI({
       switch(shiny::req(input$button),
-             "Allele Means"  = shinyAlleleOutput(ns("alleles")))
+             "Allele Means"  = alleleOutput(ns("allele")))
     })
     output$Summary <- shiny::renderUI({
       switch(shiny::req(input$button),
@@ -207,7 +207,7 @@ patternServer <- function(id, job_par, chr_pos, win_par,
     })
     output$select <- shiny::renderUI({
       switch(shiny::req(input$button),
-             "Allele Means"  = shinyAlleleUI(ns("alleles")),
+             "Allele Means"  = alleleUI(ns("allele")),
              uiOutput(ns("patterndown")))
       
     })
