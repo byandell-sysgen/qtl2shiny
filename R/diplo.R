@@ -34,7 +34,7 @@ diploServer <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
     patterns <- setupSnpServer("snp_setup", input, win_par, phe_mx, cov_df, K_chr,
                               analyses_df, project_info, allele_info, snp_action)
     
-    shinyPattern("dip_pat", input, chr_pos, win_par, phe_mx, cov_df, pairprobs_obj, K_chr,
+    patternServer("dip_pat", input, chr_pos, win_par, phe_mx, cov_df, pairprobs_obj, K_chr,
                  analyses_df, patterns, project_info, allele_info, snp_action)
     
     output$allele_names <- shiny::renderText({
@@ -44,13 +44,13 @@ diploServer <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
     
     output$dip_input <- shiny::renderUI({
       switch(shiny::req(input$button),
-             "Genome Scans"    = shinyPatternUI(ns("dip_pat")),
+             "Genome Scans"    = patternUI(ns("dip_pat")),
              "SNP Association" =,
              "Allele Pattern"  = setupSnpUI(ns("snp_setup")))
     })
     output$dip_output <- shiny::renderUI({
       switch(shiny::req(input$button),
-             "Genome Scans"    = shinyPatternOutput(ns("dip_pat")),
+             "Genome Scans"    = patternOutput(ns("dip_pat")),
              "SNP Association" = ,
              "Allele Pattern"  = setupSnpOutput(ns("snp_setup")))
     })
