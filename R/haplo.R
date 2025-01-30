@@ -24,7 +24,7 @@ haploServer <- function(id, win_par, pmap_obj,
     probs_obj <- probsServer("probs", win_par, project_info)
     
     ## Genome Scan.
-    shinyScanCoef("hap_scan", input, win_par, phe_mx, cov_df, probs_obj, K_chr,
+    scanCoefServer("hap_scan", input, win_par, phe_mx, cov_df, probs_obj, K_chr,
                   analyses_df, project_info, allele_info)
     
     ## SNP Association
@@ -42,14 +42,14 @@ haploServer <- function(id, win_par, pmap_obj,
     
     output$hap_input <- shiny::renderUI({
       switch(shiny::req(input$button),
-             "Genome Scans"    = shinyScanCoefUI(ns("hap_scan")),
+             "Genome Scans"    = scanCoefUI(ns("hap_scan")),
              "SNP Association" =,
              "Allele Pattern"  = setupSnpUI(ns("snp_setup")),
              "Mediation"       = shinyMediateUI(ns("mediate")))
     })
     output$hap_output <- shiny::renderUI({
       switch(shiny::req(input$button),
-             "Genome Scans"    = shinyScanCoefOutput(ns("hap_scan")),
+             "Genome Scans"    = scanCoefOutput(ns("hap_scan")),
              "SNP Association" = ,
              "Allele Pattern"  = setupSnpOutput(ns("snp_setup")),
              "Mediation"       = shinyMediateOutput(ns("mediate")))
