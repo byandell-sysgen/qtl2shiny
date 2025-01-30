@@ -202,7 +202,7 @@ shinySetupInput <- function(id) {
 shinySetupUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    sidebarPanel(
+    shiny::sidebarPanel(
       shiny::uiOutput(ns("title")),
       shiny::uiOutput(ns("radio")),
       shiny::uiOutput(ns("sidebar_setup")),
@@ -212,6 +212,6 @@ shinySetupUI <- function(id) {
       shiny::uiOutput(ns("sidebar_hot")),
       shiny::uiOutput(ns("version"))
     ),
-    mainPanel(shiny::uiOutput(ns("main_setup")))
+    shiny::mainPanel(shiny::uiOutput(ns("main_setup")))
   )
 }
