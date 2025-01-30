@@ -1,6 +1,6 @@
 #' Shiny SNP Features in SNP Region module
 #'
-#' Shiny module for scan1 analysis and plots, with interfaces \code{featureSnpInput}, \code{featureSnpUI} and  \code{featureSnpOutput}.
+#' Shiny module for scan1 analysis and plots, with interfaces \code{snpFeatureInput}, \code{snpFeatureUI} and  \code{snpFeatureOutput}.
 #'
 #' @param id identifier for shiny reactive
 #' @param snp_par,chr_pos,snp_scan_obj,top_snps_tbl,snpinfo,gene_exon_tbl,snp_action reactive arguments
@@ -16,7 +16,7 @@
 #'             setProgress tagList uiOutput withProgress
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf   
-featureSnpServer <- function(id, snp_par, chr_pos, snp_scan_obj, snpinfo,
+snpFeatureServer <- function(id, snp_par, chr_pos, snp_scan_obj, snpinfo,
                             top_snps_tbl, gene_exon_tbl, 
                             snp_action = shiny::reactive({"basic"})) {
   shiny::moduleServer(id, function(input, output, session) {
@@ -87,23 +87,23 @@ featureSnpServer <- function(id, snp_par, chr_pos, snp_scan_obj, snpinfo,
   })
 }
 #' @export
-#' @rdname featureSnpServer
-featureSnpInput <- function(id) {
+#' @rdname snpFeatureServer
+snpFeatureInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::selectInput(ns("by_choice"), NULL, 
               c("Pattern","Consequence"))
 }
 #' @export
-#' @rdname featureSnpServer
-featureSnpUI <- function(id) {
+#' @rdname snpFeatureServer
+snpFeatureUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::fluidRow(
     shiny::column(6, shiny::downloadButton(ns("downloadData"), "CSV")),
     shiny::column(6, shiny::downloadButton(ns("downloadPlot"), "Plots")))
 }
 #' @export
-#' @rdname featureSnpServer
-featureSnpOutput <- function(id) {
+#' @rdname snpFeatureServer
+snpFeatureOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("by_choice"))
 }

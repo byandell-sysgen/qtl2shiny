@@ -1,6 +1,6 @@
 #' Shiny top SNP analysis and plot module
 #'
-#' Shiny module for top SNP analysis and plots, with interfaces \code{patternSnpInput}, \code{patternSnpUI} and  \code{patternSnpOutput}.
+#' Shiny module for top SNP analysis and plots, with interfaces \code{snpPatternInput}, \code{snpPatternUI} and  \code{snpPatternOutput}.
 #'
 #' @param id identifier for shiny reactive
 #' @param snp_par,chr_pos,pheno_names,snp_scan_obj,snpinfo,top_snps_tbl,gene_exon_tbl,allele_info,snp_action reactive arguments
@@ -21,14 +21,14 @@
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
-patternSnpServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
+snpPatternServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
                             snpinfo, top_snps_tbl, gene_exon_tbl, allele_info, 
                             snp_action = shiny::reactive({"basic"})) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     ## Shiny Module
-    featureSnpServer("top_feature", snp_par, chr_pos, snp_scan_obj, snpinfo,
+    snpFeatureServer("top_feature", snp_par, chr_pos, snp_scan_obj, snpinfo,
                     top_snps_tbl, gene_exon_tbl, snp_action)
     
     sum_top_pat <- shiny::reactive({
@@ -144,11 +144,11 @@ patternSnpServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
     output$pat_input <- shiny::renderUI({
       switch(shiny::req(input$button),
              #           "All Patterns" = shiny::uiOutput(ns("pattern")),
-             "Top SNPs"     = featureSnpInput(ns("top_feature")))
+             "Top SNPs"     = snpFeatureInput(ns("top_feature")))
     })
     output$pat_output <- shiny::renderUI({
       switch(shiny::req(input$button),
-             "Top SNPs"     = featureSnpOutput(ns("top_feature")),
+             "Top SNPs"     = snpFeatureOutput(ns("top_feature")),
              "By Pheno"     = shiny::plotOutput(ns("snpPatternPlot")),
              "All Phenos"   = shiny::plotOutput(ns("snp_phe_pat")),
              "All Patterns" = shiny::plotOutput(ns("snp_pat_phe")),
@@ -162,7 +162,7 @@ patternSnpServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
     ## Downloads
     output$download_csv_plot <- shiny::renderUI({
       switch(shiny::req(input$button),
-        "Top SNPs" = featureSnpUI(ns("top_feature")),
+        "Top SNPs" = snpFeatureUI(ns("top_feature")),
         shiny::fluidRow(
           shiny::column(6, shiny::downloadButton(ns("downloadData"), "CSV")),
           shiny::column(6, shiny::downloadButton(ns("downloadPlot"), "Plots"))))
@@ -250,8 +250,8 @@ patternSnpServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
   })
 }
 #' @export
-#' @rdname patternSnpServer
-patternSnpInput <- function(id) {
+#' @rdname snpPatternServer
+snpPatternInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("radio")),
@@ -259,14 +259,14 @@ patternSnpInput <- function(id) {
   )
 }
 #' @export
-#' @rdname patternSnpServer
-patternSnpUI <- function(id) {
+#' @rdname snpPatternServer
+snpPatternUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("download_csv_plot"))
 }
 #' @export
-#' @rdname patternSnpServer
-patternSnpOutput <- function(id) {
+#' @rdname snpPatternServer
+snpPatternOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("pat_output")),

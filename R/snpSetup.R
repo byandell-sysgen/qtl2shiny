@@ -93,7 +93,7 @@ snpSetupServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses
                             snp_scan_obj, snpinfo, top_snps_tbl, 
                             gene_exon_tbl, project_info, snp_action)
     ## Allele Patterns
-    pat_par <- patternSnpServer("snp_pattern", input, chr_pos, pheno_names,
+    pat_par <- snpPatternServer("snp_pattern", input, chr_pos, pheno_names,
                                snp_scan_obj, snpinfo, top_snps_tbl, 
                                gene_exon_tbl, allele_info, snp_action)
     
@@ -165,19 +165,19 @@ snpSetupServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses
     output$snp_input <- shiny::renderUI({
       switch(shiny::req(job_par$button),
              "SNP Association" = geneSnpInput(ns("snp_gene")),
-             "Allele Pattern"  = patternSnpInput(ns("snp_pattern")))
+             "Allele Pattern"  = snpPatternInput(ns("snp_pattern")))
     })
     output$snp_output <- shiny::renderUI({
       switch(shiny::req(job_par$button),
              "SNP Association" = geneSnpOutput(ns("snp_gene")),
-             "Allele Pattern"  = patternSnpOutput(ns("snp_pattern")))
+             "Allele Pattern"  = snpPatternOutput(ns("snp_pattern")))
     })
     
     ## Downloads
     output$download_csv_plot <- shiny::renderUI({
       switch(shiny::req(job_par$button),
              "SNP Association" = geneSnpUI(ns("snp_gene")),
-             "Allele Pattern"  = patternSnpUI(ns("snp_pattern")))
+             "Allele Pattern"  = snpPatternUI(ns("snp_pattern")))
     })
     
     ## Return patterns
