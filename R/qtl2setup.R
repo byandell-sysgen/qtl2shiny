@@ -127,8 +127,8 @@ qtl2setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl,
       })
     })
     
-    ## Use window as input to shinyPhenos.
-    shinyPhenos("phenos", input, win_par, peaks_df, analyses_tbl, cov_df, project_info)
+    ## Use window as input to phenosServer.
+    phenosServer("phenos", input, win_par, peaks_df, analyses_tbl, cov_df, project_info)
     
     ## Setup input logic.
     output$project_name <- renderUI({
@@ -158,7 +158,7 @@ qtl2setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl,
       switch(shiny::req(input$radio),
              Phenotypes = shiny::tagList(
                shiny::uiOutput(ns("filter")),
-               shinyPhenosUI(ns("phenos"))),
+               phenosUI(ns("phenos"))),
              Region     = shinyPeaksInput(ns("shinypeaks")))
     })
     output$sidebar_hot <- shiny::renderUI({
@@ -167,7 +167,7 @@ qtl2setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl,
     })
     output$main_setup <- shiny::renderUI({
       switch(shiny::req(input$radio),
-             Phenotypes = shinyPhenosOutput(ns("phenos")),
+             Phenotypes = phenosOutput(ns("phenos")),
              Region     = shinyPeaksOutput(ns("shinypeaks")))
     })
     

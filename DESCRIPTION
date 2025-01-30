@@ -9,19 +9,11 @@ Authors@R: c(person("Brian S Yandell", "Author",
 Description: Shiny Interface for 'qtl2'.
 License: GPL-3
 Imports:
-    gdata, grid, GGally,
-    assertthat, dplyr, ggplot2, stringr, tidyr, purrr,
-    shiny,shinydashboard,
-    plotly, RSQLite, fst,
-    qtl2,
-    qtl2ggplot,
-    qtl2pattern,
-    qtl2mediate, intermediate,
-    tools, utils, grDevices, rlang
+    assertthat, dplyr, DT, fst, gdata, GGally, ggplot2, grDevices, grid,
+    intermediate, plotly, purrr, qtl2, qtl2ggplot, qtl2mediate, qtl2pattern,
+    rlang, RSQLite, shiny, shinydashboard, stringr, tidyr, tools, utils
 Suggests:
-    qtl2fst, igraph,
-    knitr,
-    rmarkdown, readr
+    igraph, knitr, qtl2fst, readr, rmarkdown
 VignetteBuilder: knitr
 RoxygenNote: 7.3.1
 Encoding: UTF-8
