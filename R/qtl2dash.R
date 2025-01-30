@@ -1,8 +1,8 @@
-#' Shiny main module for qtl2
+#' Shiny qtl2dash module for qtl2
 #'
 #' Shiny module for phenotype selection.
 #'
-#' @param id identifier for shiny reactive
+#' @param id shiny identifier
 #' @param projects_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
@@ -12,18 +12,11 @@
 #'
 #' @export
 #' @importFrom qtl2mediate get_covar
-#' @importFrom gdata humanReadable
-#' @importFrom dplyr distinct filter mutate one_of select 
-#' @importFrom tidyr unite
+#' @importFrom dplyr filter 
 #' @importFrom shiny moduleServer NS reactive req 
-#'   radioButtons selectInput
-#'   dataTableOutput textOutput uiOutput
-#'   renderDataTable renderText renderUI
-#'   observeEvent
-#'   strong tagList
 #' @importFrom rlang .data
 #' 
-mainServer <- function(id, projects_info) {
+qtl2dashServer <- function(id, projects_info) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
   
@@ -58,7 +51,7 @@ mainServer <- function(id, projects_info) {
     read_project(project_info(), "kinship")
   })
   
-  set_par <- shinySetup("setup", 
+  set_par <- qtl2setupServer("qtl2setup", 
                                pheno_type, peaks, 
                                pmap_obj, analyses_tbl, 
                                cov_df, projects_info)
@@ -99,28 +92,27 @@ mainServer <- function(id, projects_info) {
 })
 }
 
-#' @param id shiny identifier
-#' @rdname mainServer
+#' @rdname qtl2dashServer
 #' @export
-mainInput <- function(id) {
+qtl2dashInput <- function(id) {
   ns <- shiny::NS(id)
-  shinySetupInput(ns("setup"))
+  qtl2setupInput(ns("qtl2setup"))
 }
-#' @rdname mainServer
+#' @rdname qtl2dashServer
 #' @export
-mainUI <- function(id) {
+qtl2dashUI <- function(id) {
   ns <- shiny::NS(id)
-  shinySetupUI(ns("setup"))
+  qtl2setupUI(ns("qtl2setup"))
 }
-#' @rdname mainServer
+#' @rdname qtl2dashServer
 #' @export
-mainOutput <- function(id) {
+qtl2dashOutput <- function(id) {
   ns <- shiny::NS(id)
   shinyHaploUI(ns("hap_scan"))
 }
-#' @rdname mainServer
+#' @rdname qtl2dashServer
 #' @export
-mainOutput2 <- function(id) {
+qtl2dashOutput2 <- function(id) {
   ns <- shiny::NS(id)
   shinyDiploUI(ns("dip_scan"))
 }

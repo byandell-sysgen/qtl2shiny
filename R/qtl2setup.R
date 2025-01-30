@@ -1,6 +1,6 @@
-#' Shiny setup for DOQTL selection
+#' Shiny qtl2setup module
 #'
-#' Shiny module for phenotype selection, with interfaces \code{shinySetupInput} and  \code{shinySetupUI}.
+#' Shiny module for phenotype selection, with interfaces \code{qtl2setupInput} and  \code{qtl2setupUI}.
 #'
 #' @param id identifier for shiny reactive
 #' @param pheno_typer,peaks_tbl,pmap_obj,analyses_tbl,cov_df,projects_info reactive arguments
@@ -11,16 +11,11 @@
 #' @return No return value; called for side effects.
 #'
 #' @export
-#' @importFrom gdata humanReadable
-#' @importFrom dplyr arrange desc distinct filter mutate one_of select 
-#' @importFrom tidyr unite
-#' @importFrom shiny moduleServer NS reactive req 
-#'   radioButtons selectInput
-#'   dataTableOutput textOutput uiOutput
-#'   renderDataTable renderText renderUI
-#'   observeEvent
-#'   strong tagList
-shinySetup <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl, 
+#' @importFrom dplyr filter 
+#' @importFrom shiny checkboxInput isTruthy mainPanel moduleServer NS
+#'             observeEvent radioButtons reactive renderText renderUI req
+#'             sidebarPanel strong tagList textOutput uiOutput
+qtl2setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl, 
                        cov_df, projects_info) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
@@ -191,7 +186,7 @@ shinySetup <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl,
   })
   })
 }
-shinySetupInput <- function(id) {
+qtl2setupInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("project_name")),
@@ -199,7 +194,7 @@ shinySetupInput <- function(id) {
     shiny::uiOutput(ns("chr_pos"))
   )
 }
-shinySetupUI <- function(id) {
+qtl2setupUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::sidebarPanel(

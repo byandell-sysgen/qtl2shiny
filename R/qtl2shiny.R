@@ -10,6 +10,8 @@
 #' @details 
 #' See qtl2shinyData vignette for data setup.
 #' 
+#' @param id identifier for shiny module
+#' @param projects static data frame with project information
 #' @importFrom shiny includeMarkdown, moduleServer, NS, reactive, shinyApp
 #' @importFrom shinydashboard ashboardPage, dashboardHeader, dashboardSidebar,
 #'             dashboardBody, menuItem, sidebarMenu, tabItem, tabItems
@@ -18,7 +20,7 @@ qtl2shinyServer <- function(id, projects) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     projects_info <- shiny::reactive({projects})
-    shinyMain("main", projects_info)
+    qtl2dashServer("qtl2dash", projects_info)
   })
 }
 #' @rdname qtl2shinyServer
@@ -26,7 +28,7 @@ qtl2shinyServer <- function(id, projects) {
 qtl2shinyInput <- function(id) {
   ns <- shiny::NS(id)
   shinydashboard::sidebarMenu(
-    shinyMainInput(ns("qtl2shiny")),
+    qtl2dashInput(ns("qtl2shiny")),
     shinydashboard::menuItem(
       "Phenotypes and Region",
       tabName = "phenos",
@@ -53,11 +55,11 @@ qtl2shinyOutput <- function(id) {
   ns <- shiny::NS(id)
   shinydashboard::tabItems(
     ## Phenotypes and Region
-    shinydashboard::tabItem("phenos", qtl2shiny::shinyMainUI(ns("main"))),
+    shinydashboard::tabItem("phenos", qtl2dashUI(ns("qtl2dash"))),
     ## Scans
-    shinydashboard::tabItem("hap_scan", qtl2shiny::shinyMainOutput(ns("main"))),
+    shinydashboard::tabItem("hap_scan", qtl2dashOutput(ns("qtl2dash"))),
     ## Diploid Analysis
-    shinydashboard::tabItem("dip_scan", qtl2shiny::shinyMainOutput2(ns("main")))
+    shinydashboard::tabItem("dip_scan", qtl2dashOutput2(ns("qtl2dash")))
   )
 }
 #' @rdname qtl2shinyServer
