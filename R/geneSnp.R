@@ -29,7 +29,7 @@ geneSnpServer <- function(id, snp_par, chr_pos, pheno_names,
     ## Gene Region
     shinyGeneRegion("gene_region", snp_par, top_snps_tbl, project_info, snp_action)
     ## Genes and Exons
-    shinyGeneExon("gene_exon", snp_par, chr_pos, top_snps_tbl, gene_exon_tbl, snp_action)
+    geneExonServer("gene_exon", snp_par, chr_pos, top_snps_tbl, gene_exon_tbl, snp_action)
     
     output$snp_check <- shiny::renderUI({
       switch(shiny::req(input$button),
@@ -37,7 +37,7 @@ geneSnpServer <- function(id, snp_par, chr_pos, pheno_names,
     })
     output$snp_input <- shiny::renderUI({
       switch(shiny::req(input$button),
-             Exons   = shinyGeneExonInput(ns("gene_exon")),
+             Exons   = geneExonInput(ns("gene_exon")),
              Scan = shinySNPSumInput(ns("best_snp")))
     })
     output$snp_output <- shiny::renderUI({
@@ -46,7 +46,7 @@ geneSnpServer <- function(id, snp_par, chr_pos, pheno_names,
                shinySNPPlotOutput(ns("snp_scan")),
                shinySNPSumOutput(ns("best_snp"))),
              Genes   = shinyGeneRegionOutput(ns("gene_region")),
-             Exons   = shinyGeneExonOutput(ns("gene_exon")))
+             Exons   = geneExonOutput(ns("gene_exon")))
     })
     
     ## Downloads
@@ -56,7 +56,7 @@ geneSnpServer <- function(id, snp_par, chr_pos, pheno_names,
                shiny::column(6, shinySNPSumUI(ns("best_snp"))),
                shiny::column(6, shinySNPPlotUI(ns("snp_scan"))))),
              Genes   = shinyGeneRegionUI(ns("gene_region")),
-             Exons   = shinyGeneExonUI(ns("gene_exon")))
+             Exons   = geneExonUI(ns("gene_exon")))
     })
     output$radio <- shiny::renderUI({
       shiny::radioButtons(ns("button"), "",
