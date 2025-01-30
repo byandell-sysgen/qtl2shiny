@@ -22,7 +22,7 @@ geneSnpServer <- function(id, snp_par, chr_pos, pheno_names,
     
     ## Shiny Modules
     ## SNP Association Scan
-    shinySNPPlot("snp_scan", snp_par, chr_pos, pheno_names,
+    snpPlotServer("snp_scan", snp_par, chr_pos, pheno_names,
                  snp_scan_obj, snpinfo, snp_action)
     ## SNP Summary
     shinySNPSum("best_snp", chr_pos, top_snps_tbl, project_info, snp_action)
@@ -43,7 +43,7 @@ geneSnpServer <- function(id, snp_par, chr_pos, pheno_names,
     output$snp_output <- shiny::renderUI({
       switch(shiny::req(input$button),
              Scan    = shiny::tagList(
-               shinySNPPlotOutput(ns("snp_scan")),
+               snpPlotOutput(ns("snp_scan")),
                shinySNPSumOutput(ns("best_snp"))),
              Genes   = geneRegionOutput(ns("gene_region")),
              Exons   = geneExonOutput(ns("gene_exon")))
@@ -54,7 +54,7 @@ geneSnpServer <- function(id, snp_par, chr_pos, pheno_names,
       switch(shiny::req(input$button),
              Scan    = shiny::tagList(shiny::fluidRow(
                shiny::column(6, shinySNPSumUI(ns("best_snp"))),
-               shiny::column(6, shinySNPPlotUI(ns("snp_scan"))))),
+               shiny::column(6, snpPlotUI(ns("snp_scan"))))),
              Genes   = geneRegionUI(ns("gene_region")),
              Exons   = geneExonUI(ns("gene_exon")))
     })
