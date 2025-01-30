@@ -21,7 +21,7 @@ haploServer <- function(id, win_par, pmap_obj,
     ns <- session$ns
     
     ## Genotype Probabilities.
-    probs_obj <- shinyProbs("probs", win_par, project_info)
+    probs_obj <- probsServer("probs", win_par, project_info)
     
     ## Genome Scan.
     shinyScanCoef("hap_scan", input, win_par, phe_mx, cov_df, probs_obj, K_chr,

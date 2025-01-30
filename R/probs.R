@@ -1,4 +1,4 @@
-#' Shiny Probability module
+#' Shiny Probability modules
 #'
 #' Shiny genotype probability access.
 #' 
@@ -11,11 +11,9 @@
 #' @return Object of class \code{probs}.
 #'
 #' @export
-#' @importFrom assertthat assert_that
 #' @importFrom qtl2mediate get_snpprobs
-#' @importFrom shiny reactive req 
-#'   withProgress setProgress
-shinyProbs <- function(id, win_par, project_info) {
+#' @importFrom shiny isTruthy moduleServer reactive req setProgress withProgress
+probsServer <- function(id, win_par, project_info) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
 
@@ -43,9 +41,9 @@ shinyProbs <- function(id, win_par, project_info) {
   probs_obj
 })
 }
-#' @rdname shinyProbs
+#' @rdname probsServer
 #' @export
-shinyPairProbs <- function(id, win_par, project_info) {
+probsPairServer <- function(id, win_par, project_info) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
 
@@ -67,9 +65,9 @@ shinyPairProbs <- function(id, win_par, project_info) {
   probs_obj
 })
 }
-#' @rdname shinyProbs
+#' @rdname probsServer
 #' @export
-shinySNPProbs <- function(id, win_par, pheno_names, project_info) {
+probsSNPServer <- function(id, win_par, pheno_names, project_info) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
   

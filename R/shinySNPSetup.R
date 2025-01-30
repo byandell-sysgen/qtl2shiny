@@ -37,7 +37,7 @@ shinySNPSetup <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses_
   
   ## Reactives
   ## SNP Probabilities.
-  snpprobs_obj <- shinySNPProbs("snp_probs", win_par, pheno_names, project_info)
+  snpprobs_obj <- probsSNPServer("snp_probs", win_par, pheno_names, project_info)
   snpinfo <- reactive({
     shiny::req(project_info(), phe_mx())
     shiny::req(snpprobs_obj())$snpinfo
