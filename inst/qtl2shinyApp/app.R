@@ -1,16 +1,14 @@
 ## qtl2shiny/inst/qtl2shinyApp/app.R ##
 
-# Master control file for projects
 projects <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
-
-ui <- qtl2shiny::shinyDash()
+ui <- shinydashboard::dashboardPage(skin="red",
+  shinydashboard::dashboardHeader(title = "qtl2shiny"),
+  shinydashboard::dashboardSidebar(qtl2shiny::qtl2shinyInput("qtl2shiny")),
+  shinydashboard::dashboardBody(qtl2shiny::qtl2shinyOutput("qtl2shiny"))
+)
 server <- function(input, output, session) {
-  
-  projects_info <- shiny::reactive({projects})
-  qtl2shiny::shinyMain("qtl2shiny", projects_info)
-  
+  qtl2shiny::qtl2shinyServer("qtl2shiny", projects)
   # Allow reconnect with Shiny Server.
   session$allowReconnect(TRUE)
 }
-
-shinyApp(ui, server)
+shiny::shinyApp(ui, server)
