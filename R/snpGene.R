@@ -1,6 +1,6 @@
 #' Shiny SNP Association
 #' 
-#' Shiny module for SNP association mapping, with interfaces \code{geneSnpInput}, \code{geneSnpUI} and  \code{geneSnpOutput}.
+#' Shiny module for SNP association mapping, with interfaces \code{snpGeneInput}, \code{snpGeneUI} and  \code{snpGeneOutput}.
 #'
 #' @param id identifier for shiny reactive
 #' @param snp_par,chr_pos,pheno_names,snp_scan_obj,snpinfo,top_snps_tbl,gene_exon_tbl,project_info,snp_action reactive arguments
@@ -13,7 +13,7 @@
 #' @export
 #' @importFrom shiny column fluidRow moduleServer NS radioButtons reactive
 #'             renderUI req tagList uiOutput
-geneSnpServer <- function(id, snp_par, chr_pos, pheno_names,
+snpGeneServer <- function(id, snp_par, chr_pos, pheno_names,
                          snp_scan_obj, snpinfo, top_snps_tbl, 
                          gene_exon_tbl, project_info,
                          snp_action = shiny::reactive({"basic"})) {
@@ -67,8 +67,8 @@ geneSnpServer <- function(id, snp_par, chr_pos, pheno_names,
   })
 }
 #' @export
-#' @rdname geneSnpServer
-geneSnpInput <- function(id) {
+#' @rdname snpGeneServer
+snpGeneInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::fluidRow(
@@ -78,14 +78,14 @@ geneSnpInput <- function(id) {
   )
 }
 #' @export
-#' @rdname geneSnpServer
-geneSnpUI <- function(id) {
+#' @rdname snpGeneServer
+snpGeneUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("download_csv_plot"))
 }
 #' @export
-#' @rdname geneSnpServer
-geneSnpOutput <- function(id) {
+#' @rdname snpGeneServer
+snpGeneOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("snp_output"))
 }
