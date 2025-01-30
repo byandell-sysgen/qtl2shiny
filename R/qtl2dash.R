@@ -83,7 +83,7 @@ qtl2dashServer <- function(id, projects_info) {
   })
   
   ## Haplotype Analysis.
-  shinyHaplo("hap_scan", set_par()$win_par, pmap_obj, phe_mx, cov_df, K_chr,
+  haploServer("hap_scan", set_par()$win_par, pmap_obj, phe_mx, cov_df, K_chr,
              analyses_df, covar, analyses_tbl, peaks, project_info, allele_info)
   
   ## Diplotype Analysis.
@@ -108,7 +108,7 @@ qtl2dashUI <- function(id) {
 #' @export
 qtl2dashOutput <- function(id) {
   ns <- shiny::NS(id)
-  shinyHaploUI(ns("hap_scan"))
+  haploUI(ns("hap_scan"))
 }
 #' @rdname qtl2dashServer
 #' @export
