@@ -92,7 +92,7 @@ qtl2setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl,
     })
     
     ## Locate Peak.
-    win_par <- shinyPeaks("shinypeaks", input, pheno_type, peaks_tbl, pmap_obj, 
+    win_par <- peaksServer("peaks", input, pheno_type, peaks_tbl, pmap_obj, 
                           project_info)
     
     chr_pos <- shiny::reactive({
@@ -159,16 +159,16 @@ qtl2setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl,
              Phenotypes = shiny::tagList(
                shiny::uiOutput(ns("filter")),
                phenosUI(ns("phenos"))),
-             Region     = shinyPeaksInput(ns("shinypeaks")))
+             Region     = peaksInput(ns("peaks")))
     })
     output$sidebar_hot <- shiny::renderUI({
       switch(shiny::req(input$radio),
-             Region     = shinyPeaksUI(ns("shinypeaks")))
+             Region     = peaksUI(ns("peaks")))
     })
     output$main_setup <- shiny::renderUI({
       switch(shiny::req(input$radio),
              Phenotypes = phenosOutput(ns("phenos")),
-             Region     = shinyPeaksOutput(ns("shinypeaks")))
+             Region     = peaksOutput(ns("peaks")))
     })
     
     output$radio <- shiny::renderUI({
