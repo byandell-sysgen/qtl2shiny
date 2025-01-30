@@ -1,4 +1,4 @@
-#' Shiny app for DOQTL selection
+#' Shiny main module for qtl2
 #'
 #' Shiny module for phenotype selection.
 #'
