@@ -74,7 +74,7 @@ peaksServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj,
       shiny::textInput(ns("chr_pos"), "pos", input$chr_pos)
     })
     
-    scan_tbl <- shinyHotspot("hotspot", set_par, pheno_type, peaks_tbl, pmap_obj, project_info)
+    scan_tbl <- hotspotServer("hotspot", set_par, pheno_type, peaks_tbl, pmap_obj, project_info)
     
     shiny::observeEvent(scan_tbl(), {
       update_chr()
@@ -161,11 +161,11 @@ peaksInput <- function(id) {
 peaksUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shinyHotspotInput(ns("hotspot")))
+    hotspotInput(ns("hotspot")))
 }
 #' @export
 #' @rdname peaksServer
 peaksOutput <- function(id) {
   ns <- shiny::NS(id)
-  shinyHotspotOutput(ns("hotspot"))
+  hotspotOutput(ns("hotspot"))
 }
