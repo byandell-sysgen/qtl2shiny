@@ -28,7 +28,7 @@ patternSnpServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
     ns <- session$ns
     
     ## Shiny Module
-    shinySNPFeature("top_feature", snp_par, chr_pos, snp_scan_obj, snpinfo,
+    featureSnpServer("top_feature", snp_par, chr_pos, snp_scan_obj, snpinfo,
                     top_snps_tbl, gene_exon_tbl, snp_action)
     
     sum_top_pat <- shiny::reactive({
@@ -144,11 +144,11 @@ patternSnpServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
     output$pat_input <- shiny::renderUI({
       switch(shiny::req(input$button),
              #           "All Patterns" = shiny::uiOutput(ns("pattern")),
-             "Top SNPs"     = shinySNPFeatureInput(ns("top_feature")))
+             "Top SNPs"     = featureSnpInput(ns("top_feature")))
     })
     output$pat_output <- shiny::renderUI({
       switch(shiny::req(input$button),
-             "Top SNPs"     = shinySNPFeatureOutput(ns("top_feature")),
+             "Top SNPs"     = featureSnpOutput(ns("top_feature")),
              "By Pheno"     = shiny::plotOutput(ns("snpPatternPlot")),
              "All Phenos"   = shiny::plotOutput(ns("snp_phe_pat")),
              "All Patterns" = shiny::plotOutput(ns("snp_pat_phe")),
@@ -162,7 +162,7 @@ patternSnpServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
     ## Downloads
     output$download_csv_plot <- shiny::renderUI({
       switch(shiny::req(input$button),
-        "Top SNPs" = shinySNPFeatureUI(ns("top_feature")),
+        "Top SNPs" = featureSnpUI(ns("top_feature")),
         shiny::fluidRow(
           shiny::column(6, shiny::downloadButton(ns("downloadData"), "CSV")),
           shiny::column(6, shiny::downloadButton(ns("downloadPlot"), "Plots"))))
