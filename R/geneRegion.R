@@ -12,16 +12,12 @@
 #'
 #' @export
 #' @importFrom ggplot2 autoplot ggtitle
-#' @importFrom shiny moduleServer NS reactive req isTruthy
-#'   checkboxInput
-#'   tableOutput plotOutput uiOutput
-#'   renderPlot renderTable renderUI
-#'   fluidRow column tagList
-#'   withProgress setProgress
-#'   downloadButton downloadHandler
+#' @importFrom DT dataTableOutput renderDataTable
+#' @importFrom shiny checkboxInput column downloadButton downloadHandler
+#'             fluidRow isTruthy moduleServer NS plotOutput reactive renderPlot
+#'             renderUI req setProgress tagList uiOutput withProgress
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
-#' 
 geneRegionServer <- function(id, snp_par, top_snps_tbl, project_info,
                             snp_action = shiny::reactive({"basic"})) {
   shiny::moduleServer(id, function(input, output, session) {
@@ -41,7 +37,7 @@ geneRegionServer <- function(id, snp_par, top_snps_tbl, project_info,
                             gene_region(chr_id(), wrng, project_info())
                           })
     })
-    output$gene_sum <- shiny::renderTable({
+    output$gene_sum <- DT::renderDataTable({
       summary(gene_region_tbl())
     })
     chr_pos_all <- shiny::reactive({
@@ -113,6 +109,6 @@ geneRegionOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::plotOutput(ns("gene_plot")),
-    shiny::tableOutput(ns("gene_sum"))
+    DT::dataTableOutput(ns("gene_sum"))
   )
 }

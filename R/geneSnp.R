@@ -27,13 +27,13 @@ geneSnpServer <- function(id, snp_par, chr_pos, pheno_names,
     ## SNP Summary
     shinySNPSum("best_snp", chr_pos, top_snps_tbl, project_info, snp_action)
     ## Gene Region
-    shinyGeneRegion("gene_region", snp_par, top_snps_tbl, project_info, snp_action)
+    geneRegionServer("gene_region", snp_par, top_snps_tbl, project_info, snp_action)
     ## Genes and Exons
     geneExonServer("gene_exon", snp_par, chr_pos, top_snps_tbl, gene_exon_tbl, snp_action)
     
     output$snp_check <- shiny::renderUI({
       switch(shiny::req(input$button),
-             Genes   = shinyGeneRegionInput(ns("gene_region")))
+             Genes   = geneRegionInput(ns("gene_region")))
     })
     output$snp_input <- shiny::renderUI({
       switch(shiny::req(input$button),
@@ -45,7 +45,7 @@ geneSnpServer <- function(id, snp_par, chr_pos, pheno_names,
              Scan    = shiny::tagList(
                shinySNPPlotOutput(ns("snp_scan")),
                shinySNPSumOutput(ns("best_snp"))),
-             Genes   = shinyGeneRegionOutput(ns("gene_region")),
+             Genes   = geneRegionOutput(ns("gene_region")),
              Exons   = geneExonOutput(ns("gene_exon")))
     })
     
@@ -55,7 +55,7 @@ geneSnpServer <- function(id, snp_par, chr_pos, pheno_names,
              Scan    = shiny::tagList(shiny::fluidRow(
                shiny::column(6, shinySNPSumUI(ns("best_snp"))),
                shiny::column(6, shinySNPPlotUI(ns("snp_scan"))))),
-             Genes   = shinyGeneRegionUI(ns("gene_region")),
+             Genes   = geneRegionUI(ns("gene_region")),
              Exons   = geneExonUI(ns("gene_exon")))
     })
     output$radio <- shiny::renderUI({
