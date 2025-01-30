@@ -11,11 +11,8 @@
 #' @return No return value; called for side effects.
 #'
 #' @export
-#' @importFrom shiny moduleServer NS req 
-#'   radioButtons
-#'   textOutput uiOutput
-#'   renderText renderUI
-#'   mainPanel sidebarPanel strong tagList
+#' @importFrom shiny mainPanel moduleServer NS radioButtons renderText renderUI
+#'             req sidebarPanel strong tagList textOutput uiOutput
 haploServer <- function(id, win_par, pmap_obj, 
                        phe_mx, cov_df, K_chr, analyses_df, 
                        covar, analyses_tbl, peaks,

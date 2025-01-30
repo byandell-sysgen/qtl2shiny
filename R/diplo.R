@@ -1,6 +1,6 @@
 #' Shiny Diplotype module
 #'
-#' Shiny diplotype SNP/Gene action analysis, with interface \code{shinyDiploUI}.
+#' Shiny diplotype SNP/Gene action analysis, with interface \code{diploUI}.
 #' 
 #' @param id identifier for shiny reactive
 #' @param win_par,phe_mx,cov_df,K_chr,analyses_df,project_info,allele_info reactive arguments
@@ -11,12 +11,10 @@
 #' @return No return value; called for side effects.
 #'
 #' @export
-#' @importFrom shiny moduleServer NS reactive req
-#'    radioButtons selectInput
-#'    renderText renderUI
-#'    textOutput uiOutput
-#'    mainPanel sidebarPanel strong tagList
-shinyDiplo <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
+#' @importFrom shiny mainPanel moduleServer NS radioButtons reactive renderText
+#'             renderUI req selectInput sidebarPanel strong tagList textOutput
+#'             uiOutput
+diploServer <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
                        project_info, allele_info) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
@@ -83,7 +81,7 @@ shinyDiplo <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
   })
 })
 }
-shinyDiploUI <- function(id) {
+diploUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::sidebarPanel(

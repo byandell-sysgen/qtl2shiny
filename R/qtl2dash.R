@@ -87,7 +87,7 @@ qtl2dashServer <- function(id, projects_info) {
              analyses_df, covar, analyses_tbl, peaks, project_info, allele_info)
   
   ## Diplotype Analysis.
-  shinyDiplo("dip_scan", set_par()$win_par, phe_mx, cov_df, K_chr, analyses_df,
+  diploServer("dip_scan", set_par()$win_par, phe_mx, cov_df, K_chr, analyses_df,
              project_info, allele_info)
 })
 }
@@ -114,5 +114,5 @@ qtl2dashOutput <- function(id) {
 #' @export
 qtl2dashOutput2 <- function(id) {
   ns <- shiny::NS(id)
-  shinyDiploUI(ns("dip_scan"))
+  diploUI(ns("dip_scan"))
 }
