@@ -32,7 +32,7 @@ haploServer <- function(id, win_par, pmap_obj,
                               analyses_df, project_info, allele_info)
     
     ## Mediation
-    shinyMediate("mediate", input, win_par, patterns, phe_mx, cov_df, probs_obj, K_chr,
+    mediateServer("mediate", input, win_par, patterns, phe_mx, cov_df, probs_obj, K_chr,
                  analyses_df, pmap_obj, covar, analyses_tbl, peaks, project_info, allele_info)
     
     output$allele_names <- shiny::renderText({
@@ -45,14 +45,14 @@ haploServer <- function(id, win_par, pmap_obj,
              "Genome Scans"    = scanCoefUI(ns("hap_scan")),
              "SNP Association" =,
              "Allele Pattern"  = setupSnpUI(ns("snp_setup")),
-             "Mediation"       = shinyMediateUI(ns("mediate")))
+             "Mediation"       = mediateUI(ns("mediate")))
     })
     output$hap_output <- shiny::renderUI({
       switch(shiny::req(input$button),
              "Genome Scans"    = scanCoefOutput(ns("hap_scan")),
              "SNP Association" = ,
              "Allele Pattern"  = setupSnpOutput(ns("snp_setup")),
-             "Mediation"       = shinyMediateOutput(ns("mediate")))
+             "Mediation"       = mediateOutput(ns("mediate")))
     })
     output$radio <- shiny::renderUI({
       shiny::radioButtons(ns("button"), "",
