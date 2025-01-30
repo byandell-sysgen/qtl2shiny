@@ -1,6 +1,6 @@
 #' Shiny SNP and Allele analysis and plot module
 #'
-#' Shiny module to coordinate SNP and allele analyses and plots, with interfaces \code{setupSnpUI} and  \code{setupSnpOutput}.
+#' Shiny module to coordinate SNP and allele analyses and plots, with interfaces \code{snpSetupUI} and  \code{snpSetupOutput}.
 #'
 #' @param id identifier for shiny reactive
 #' @param job_par,win_par,phe_mx,cov_df,K_chr,analyses_df,project_info,allele_info,snp_action reactive arguments
@@ -15,7 +15,7 @@
 #' @importFrom shiny isTruthy moduleServer NS numericInput reactive renderUI req
 #'             selectInput setProgress sliderInput tagList uiOutput withProgress
 #' @importFrom rlang .data
-setupSnpServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses_df,
+snpSetupServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses_df,
                           project_info, allele_info,
                           snp_action = shiny::reactive({"basic"})) {
   shiny::moduleServer(id, function(input, output, session) {
@@ -197,8 +197,8 @@ setupSnpServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses
   })
 }
 #' @export
-#' @rdname setupSnpServer
-setupSnpUI <- function(id) {
+#' @rdname snpSetupServer
+snpSetupUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("title")),
@@ -209,8 +209,8 @@ setupSnpUI <- function(id) {
     shiny::uiOutput(ns("download_csv_plot")))
 }
 #' @export
-#' @rdname setupSnpServer
-setupSnpOutput <- function(id) {
+#' @rdname snpSetupServer
+snpSetupOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("snp_output"))
 }

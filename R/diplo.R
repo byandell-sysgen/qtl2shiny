@@ -31,7 +31,7 @@ diploServer <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
     snp_action <- shiny::reactive({input$snp_action})
     
     ## SNP Association
-    patterns <- setupSnpServer("snp_setup", input, win_par, phe_mx, cov_df, K_chr,
+    patterns <- snpSetupServer("snp_setup", input, win_par, phe_mx, cov_df, K_chr,
                               analyses_df, project_info, allele_info, snp_action)
     
     patternServer("dip_pat", input, chr_pos, win_par, phe_mx, cov_df, pairprobs_obj, K_chr,
@@ -46,13 +46,13 @@ diploServer <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
       switch(shiny::req(input$button),
              "Genome Scans"    = patternUI(ns("dip_pat")),
              "SNP Association" =,
-             "Allele Pattern"  = setupSnpUI(ns("snp_setup")))
+             "Allele Pattern"  = snpSetupUI(ns("snp_setup")))
     })
     output$dip_output <- shiny::renderUI({
       switch(shiny::req(input$button),
              "Genome Scans"    = patternOutput(ns("dip_pat")),
              "SNP Association" = ,
-             "Allele Pattern"  = setupSnpOutput(ns("snp_setup")))
+             "Allele Pattern"  = snpSetupOutput(ns("snp_setup")))
     })
     output$radio <- shiny::renderUI({
       shiny::radioButtons(ns("button"), "",
