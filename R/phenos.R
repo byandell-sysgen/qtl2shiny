@@ -9,23 +9,16 @@
 #' @keywords utilities
 #'
 #' @export
-#' @importFrom dplyr filter
-#' @importFrom shiny NS reactive req 
-#'   checkboxInput selectInput
-#'   uiOutput
-#'   renderUI
-#'   tagList
-#'   withProgress setProgress
-#'   downloadButton downloadHandler
+#' @importFrom dplyr arrange desc filter select
+#' @importFrom DT dataTableOutput renderDataTable
+#' @importFrom shiny moduleServer NS radioButtons reactive req tagList uiOutput
 #' @importFrom rlang .data
-#' @importFrom qtl2mediate pheno_trans
-#' 
 phenosServer <- function(id, set_par, win_par, peaks_df, analyses_tbl, cov_df,
                         project_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Output the peaks table
-    output$peaks <- shiny::renderDataTable({
+    output$peaks <- DT::renderDataTable({
       dplyr::arrange(
         dplyr::select(
           peaks_df(), .data$pheno, .data$chr, .data$pos, .data$lod),
@@ -60,13 +53,13 @@ phenosServer <- function(id, set_par, win_par, peaks_df, analyses_tbl, cov_df,
         switch(shiny::req(input$radio),
                "Raw Data"   = shinyPhenoPlotUI(ns("PhenoPlotRaw")),
                "Trans Data" = shinyPhenoPlotUI(ns("PhenoPlotTrans")),
-               "Covariates" = shiny::dataTableOutput(ns("analyses_tbl"))),
+               "Covariates" = DT::dataTableOutput(ns("analyses_tbl"))),
         if(!(input$radio %in% c("Raw Data","Trans Data")))
-          shiny::dataTableOutput(ns("peaks")))
+          DT::dataTableOutput(ns("peaks")))
     })
     
     # Output the analyses table
-    output$analyses_tbl <- shiny::renderDataTable({
+    output$analyses_tbl <- DT::renderDataTable({
       collapse_covar(analyses_plot())
     }, options = list(scrollX = TRUE, pageLength = 5))
   })
