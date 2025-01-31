@@ -26,7 +26,7 @@ diploServer <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
     })
     
     ## Probs object for allele pair diplotypes.
-    pairprobs_obj <- probsPairServer("pairprobs", win_par, project_info)
+    pairprobs_obj <- pairProbsServer("pairprobs", win_par, project_info)
     
     snp_action <- shiny::reactive({input$snp_action})
     

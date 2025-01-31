@@ -43,7 +43,7 @@ probsServer <- function(id, win_par, project_info) {
 }
 #' @rdname probsServer
 #' @export
-probsPairServer <- function(id, win_par, project_info) {
+pairProbsServer <- function(id, win_par, project_info) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
 
@@ -67,7 +67,7 @@ probsPairServer <- function(id, win_par, project_info) {
 }
 #' @rdname probsServer
 #' @export
-probsSNPServer <- function(id, win_par, pheno_names, project_info) {
+snpProbsServer <- function(id, win_par, pheno_names, project_info) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
   
