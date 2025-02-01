@@ -1,4 +1,4 @@
-#' Shiny qtl2dash module for qtl2
+#' Shiny dash module for qtl2
 #'
 #' Shiny module for phenotype selection.
 #'
@@ -16,7 +16,7 @@
 #' @importFrom shiny moduleServer NS reactive req 
 #' @importFrom rlang .data
 #' 
-qtl2dashServer <- function(id, projects_info) {
+dashServer <- function(id, projects_info) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
   
@@ -92,27 +92,27 @@ qtl2dashServer <- function(id, projects_info) {
 })
 }
 
-#' @rdname qtl2dashServer
+#' @rdname dashServer
 #' @export
-qtl2dashInput <- function(id) {
+dashInput <- function(id) {
   ns <- shiny::NS(id)
   qtl2setupInput(ns("qtl2setup"))
 }
-#' @rdname qtl2dashServer
+#' @rdname dashServer
 #' @export
-qtl2dashUI <- function(id) {
+dashUI <- function(id) {
   ns <- shiny::NS(id)
   qtl2setupUI(ns("qtl2setup"))
 }
-#' @rdname qtl2dashServer
+#' @rdname dashServer
 #' @export
-qtl2dashOutput <- function(id) {
+dashOutput <- function(id) {
   ns <- shiny::NS(id)
   haploUI(ns("hap_scan"))
 }
-#' @rdname qtl2dashServer
+#' @rdname dashServer
 #' @export
-qtl2dashOutput2 <- function(id) {
+dashOutput2 <- function(id) {
   ns <- shiny::NS(id)
   diploUI(ns("dip_scan"))
 }

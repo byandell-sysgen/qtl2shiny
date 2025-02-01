@@ -16,19 +16,19 @@
 #' @importFrom shinydashboard ashboardPage, dashboardHeader, dashboardSidebar,
 #'             dashboardBody, menuItem, sidebarMenu, tabItem, tabItems
 #' @export
-qtl2shinyServer <- function(id, projects) {
+mainServer <- function(id, projects) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     projects_info <- shiny::reactive({projects})
-    qtl2dashServer("qtl2dash", projects_info)
+    dashServer("dash", projects_info)
   })
 }
-#' @rdname qtl2shinyServer
+#' @rdname mainServer
 #' @export
-qtl2shinyInput <- function(id) {
+mainInput <- function(id) {
   ns <- shiny::NS(id)
   shinydashboard::sidebarMenu(
-    qtl2dashInput(ns("qtl2shiny")),
+    dashInput(ns("dash")),
     shinydashboard::menuItem(
       "Phenotypes and Region",
       tabName = "phenos",
@@ -51,29 +51,29 @@ qtl2shinyInput <- function(id) {
 }
 #' @rdname qtl2shinyServer
 #' @export
-qtl2shinyOutput <- function(id) {
+mainOutput <- function(id) {
   ns <- shiny::NS(id)
   shinydashboard::tabItems(
     ## Phenotypes and Region
-    shinydashboard::tabItem("phenos", qtl2dashUI(ns("qtl2dash"))),
+    shinydashboard::tabItem("phenos", dashUI(ns("dash"))),
     ## Scans
-    shinydashboard::tabItem("hap_scan", qtl2dashOutput(ns("qtl2dash"))),
+    shinydashboard::tabItem("hap_scan", dashOutput(ns("dash"))),
     ## Diploid Analysis
-    shinydashboard::tabItem("dip_scan", qtl2dashOutput2(ns("qtl2dash")))
+    shinydashboard::tabItem("dip_scan", dashOutput2(ns("dash")))
   )
 }
-#' @rdname qtl2shinyServer
+#' @rdname mainServer
 #' @export
-qtl2shinyApp <- function() {
+mainApp <- function() {
   projects <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   
   ui <-   shinydashboard::dashboardPage(skin="red",
     shinydashboard::dashboardHeader(title = "qtl2shiny"),
-    shinydashboard::dashboardSidebar(qtl2shinyInput("qtl2shiny")),
-    shinydashboard::dashboardBody(qtl2shinyOutput("qtl2shiny"))
+    shinydashboard::dashboardSidebar(mainInput("main")),
+    shinydashboard::dashboardBody(mainOutput("main"))
   )
   server <- function(input, output, session) {
-    qtl2shinyServer("qtl2shiny", projects)
+    mainServer("main", projects)
   }
   shiny::shinyApp(ui, server)
 }
