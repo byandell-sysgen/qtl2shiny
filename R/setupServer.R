@@ -1,6 +1,6 @@
-#' Shiny qtl2setup module
+#' Shiny setup module
 #'
-#' Shiny module for phenotype selection, with interfaces \code{qtl2setupInput} and  \code{qtl2setupUI}.
+#' Shiny module for phenotype selection, with interfaces \code{setupInput} and  \code{setupUI}.
 #'
 #' @param id identifier for shiny reactive
 #' @param pheno_typer,peaks_tbl,pmap_obj,analyses_tbl,cov_df,projects_info reactive arguments
@@ -15,7 +15,7 @@
 #' @importFrom shiny checkboxInput isTruthy mainPanel moduleServer NS
 #'             observeEvent radioButtons reactive renderText renderUI req
 #'             sidebarPanel strong tagList textOutput uiOutput
-qtl2setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl, 
+setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl, 
                        cov_df, projects_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -187,8 +187,8 @@ qtl2setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl,
   })
 }
 #' @export
-#' @rdname qtl2setupServer
-qtl2setupInput <- function(id) {
+#' @rdname setupServer
+setupInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("project_name")),
@@ -197,8 +197,8 @@ qtl2setupInput <- function(id) {
   )
 }
 #' @export
-#' @rdname qtl2setupServer
-qtl2setupUI <- function(id) {
+#' @rdname setupServer
+setupUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::sidebarPanel(

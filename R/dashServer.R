@@ -51,7 +51,7 @@ dashServer <- function(id, projects_info) {
     read_project(project_info(), "kinship")
   })
   
-  set_par <- qtl2setupServer("qtl2setup", 
+  set_par <- setupServer("setup", 
                                pheno_type, peaks, 
                                pmap_obj, analyses_tbl, 
                                cov_df, projects_info)
@@ -96,13 +96,13 @@ dashServer <- function(id, projects_info) {
 #' @export
 dashInput <- function(id) {
   ns <- shiny::NS(id)
-  qtl2setupInput(ns("qtl2setup"))
+  setupInput(ns("setup"))
 }
 #' @rdname dashServer
 #' @export
 dashUI <- function(id) {
   ns <- shiny::NS(id)
-  qtl2setupUI(ns("qtl2setup"))
+  setupUI(ns("setup"))
 }
 #' @rdname dashServer
 #' @export
