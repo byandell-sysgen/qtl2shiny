@@ -12,18 +12,12 @@
 #'
 #' @export
 #' @importFrom dplyr filter
-#' @importFrom qtl2 scan1
+#' @importFrom rlang .data
 #' @importFrom ggplot2 autoplot
 #' @importFrom qtl2mediate mediation_triad_qtl2
-#' @importFrom qtl2pattern sdp_to_pattern
-#' @importFrom shiny moduleServer NS reactive req isTruthy
-#'   radioButtons selectInput sliderInput updateSliderInput
-#'   dataTableOutput plotOutput uiOutput
-#'   renderDataTable renderPlot renderUI
-#'   fluidRow column strong tagList
-#'   withProgress setProgress
-#'   downloadButton downloadHandler
-#' @importFrom plotly renderPlotly plotlyOutput
+#' @importFrom shiny column downloadButton downloadHandler fluidRow isTruthy
+#'             moduleServer NS plotOutput reactive renderPlot renderUI req
+#'             selectInput setProgress tagList uiOutput withProgress
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #
@@ -130,7 +124,8 @@ triadServer <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
   med_ls
 })
 }
-
+#' @export
+#' @rdname triadServer
 triadUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -141,6 +136,8 @@ triadUI <- function(id) {
       shiny::column(6, shiny::downloadButton(ns("downloadData"), "CSV")),
       shiny::column(6, shiny::downloadButton(ns("downloadPlot"), "Plots"))))
 }
+#' @export
+#' @rdname triadServer
 triadOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::plotOutput(ns("scatPlot"))

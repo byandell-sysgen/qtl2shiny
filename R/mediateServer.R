@@ -113,7 +113,7 @@ mediateServer <- function(id, job_par, win_par, patterns, phe_mx, cov_df, probs_
     })
     
     ## Triad Plots
-    shinyTriad("triad", input, patterns, geno_max, peak_mar, med_ls, mediate_signif,
+    triadServer("triad", input, patterns, geno_max, peak_mar, med_ls, mediate_signif,
                phe1_mx, cov_df, K_chr, probs_obj, chr_id, sdp)
     
     ## Mediate1
@@ -342,12 +342,12 @@ mediateServer <- function(id, job_par, win_par, patterns, phe_mx, cov_df, probs_
              {
                shiny::tagList(
                  shiny::uiOutput(ns("pattern")), # Works sort of. 
-                 shinyTriadUI(ns("triad")))
+                 triadUI(ns("triad")))
              })
     })
     output$medOutput <- shiny::renderUI({
       if(shiny::isTruthy(input$checkplot))
-        shinyTriadOutput(ns("triad"))
+        triadOutput(ns("triad"))
       else
         shiny::tagList(
           shiny::uiOutput(ns("out_choice")),
