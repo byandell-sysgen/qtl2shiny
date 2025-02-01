@@ -1,6 +1,6 @@
 #' Shiny triad plot module
 #'
-#' Shiny module for triad plots, with interfaces \code{shinyTriadUI} and  \code{shinyTriadOutput}.
+#' Shiny module for triad plots, with interfaces \code{triadUI} and  \code{triadOutput}.
 #'
 #' @param id identifier for shiny reactive
 #' @param med_par,patterns,geno_max,peak_mar,med_ls,mediate_obj,phe_mx,cov_df,K_chr,probs_obj,chr_id,sdp reactive arguments
@@ -27,7 +27,7 @@
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #
-shinyTriad <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
+triadServer <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
                        mediate_obj, phe_mx, cov_df, K_chr, probs_obj, chr_id, sdp) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
@@ -131,7 +131,7 @@ shinyTriad <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
 })
 }
 
-shinyTriadUI <- function(id) {
+triadUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("triad")),
@@ -141,7 +141,7 @@ shinyTriadUI <- function(id) {
       shiny::column(6, shiny::downloadButton(ns("downloadData"), "CSV")),
       shiny::column(6, shiny::downloadButton(ns("downloadPlot"), "Plots"))))
 }
-shinyTriadOutput <- function(id) {
+triadOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::plotOutput(ns("scatPlot"))
 }
