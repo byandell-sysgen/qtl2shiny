@@ -16,6 +16,21 @@
 #' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar
 #'             dashboardBody menuItem sidebarMenu tabItem tabItems
 #' @export
+mainApp <- function() {
+  projects <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  
+  ui <-   shinydashboard::dashboardPage(skin="red",
+    shinydashboard::dashboardHeader(title = "qtl2shiny"),
+    shinydashboard::dashboardSidebar(mainInput("main")),
+    shinydashboard::dashboardBody(mainOutput("main"))
+  )
+  server <- function(input, output, session) {
+    mainServer("main", projects)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @rdname mainApp
+#' @export
 mainServer <- function(id, projects) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -23,7 +38,7 @@ mainServer <- function(id, projects) {
     dashServer("dash", projects_info)
   })
 }
-#' @rdname mainServer
+#' @rdname mainApp
 #' @export
 mainInput <- function(id) {
   ns <- shiny::NS(id)
@@ -49,7 +64,7 @@ mainInput <- function(id) {
         placement = "right", trigger = "click"))
   )
 }
-#' @rdname mainServer
+#' @rdname mainApp
 #' @export
 mainOutput <- function(id) {
   ns <- shiny::NS(id)
@@ -61,19 +76,4 @@ mainOutput <- function(id) {
     ## Diploid Analysis
     shinydashboard::tabItem("dip_scan", dashOutput2(ns("dash")))
   )
-}
-#' @rdname mainServer
-#' @export
-mainApp <- function() {
-  projects <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
-  
-  ui <-   shinydashboard::dashboardPage(skin="red",
-    shinydashboard::dashboardHeader(title = "qtl2shiny"),
-    shinydashboard::dashboardSidebar(mainInput("main")),
-    shinydashboard::dashboardBody(mainOutput("main"))
-  )
-  server <- function(input, output, session) {
-    mainServer("main", projects)
-  }
-  shiny::shinyApp(ui, server)
 }
