@@ -3,12 +3,15 @@
 \name{mainServer}
 \alias{mainServer}
 \alias{mainInput}
+\alias{mainOutput}
 \alias{mainApp}
 \title{Shiny app for qtl2}
 \usage{
 mainServer(id, projects)
 
 mainInput(id)
+
+mainOutput(id)
 
 mainApp()
 }

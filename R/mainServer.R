@@ -12,9 +12,9 @@
 #' 
 #' @param id identifier for shiny module
 #' @param projects static data frame with project information
-#' @importFrom shiny includeMarkdown, moduleServer, NS, reactive, shinyApp
-#' @importFrom shinydashboard ashboardPage, dashboardHeader, dashboardSidebar,
-#'             dashboardBody, menuItem, sidebarMenu, tabItem, tabItems
+#' @importFrom shiny icon includeMarkdown moduleServer NS reactive shinyApp
+#' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar
+#'             dashboardBody menuItem sidebarMenu tabItem tabItems
 #' @export
 mainServer <- function(id, projects) {
   shiny::moduleServer(id, function(input, output, session) {
@@ -32,15 +32,15 @@ mainInput <- function(id) {
     shinydashboard::menuItem(
       "Phenotypes and Region",
       tabName = "phenos",
-      icon = icon("dashboard", verify_fa = FALSE)),
+      icon = shiny::icon("dashboard", verify_fa = FALSE)),
     shinydashboard::menuItem(
       "Haplotype Scans",
       tabName = "hap_scan",
-      icon = icon("dashboard", verify_fa = FALSE)),
+      icon = shiny::icon("dashboard", verify_fa = FALSE)),
     shinydashboard::menuItem(
       "SNP/Gene Action",
       tabName = "dip_scan",
-      icon = icon("dashboard", verify_fa = FALSE)),
+      icon = shiny::icon("dashboard", verify_fa = FALSE)),
     tags$div(
       id = "popup",
       helpPopup(
@@ -49,7 +49,7 @@ mainInput <- function(id) {
         placement = "right", trigger = "click"))
   )
 }
-#' @rdname qtl2shinyServer
+#' @rdname mainServer
 #' @export
 mainOutput <- function(id) {
   ns <- shiny::NS(id)
