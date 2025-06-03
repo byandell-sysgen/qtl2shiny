@@ -12,7 +12,7 @@
 #' 
 #' @param id identifier for shiny module
 #' @param projects static data frame with project information
-#' @importFrom shiny icon includeMarkdown moduleServer NS reactive shinyApp
+#' @importFrom shiny icon includeMarkdown moduleServer NS reactive shinyApp tags
 #' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar
 #'             dashboardBody menuItem sidebarMenu tabItem tabItems
 #' @export
@@ -56,7 +56,7 @@ mainInput <- function(id) {
       "SNP/Gene Action",
       tabName = "dip_scan",
       icon = shiny::icon("dashboard", verify_fa = FALSE)),
-    tags$div(
+    shiny::tags$div(
       id = "popup",
       helpPopup(
         "qtl2shiny help",
