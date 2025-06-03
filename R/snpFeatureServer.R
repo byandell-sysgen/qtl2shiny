@@ -48,7 +48,7 @@ snpFeatureServer <- function(id, snp_par, chr_pos, snp_scan_obj, snpinfo,
       shiny::req(top_feature(), snp_par$pheno_name)
       ggplot2::autoplot(top_feature(), snp_par$pheno_name, "pattern")
     })
-    output$by_choice <- shiny::renderUI({
+    output$by_choice_input <- shiny::renderUI({
       switch(input$by_choice,
              Pattern = {
                shiny::tagList(
@@ -105,5 +105,5 @@ snpFeatureUI <- function(id) {
 #' @rdname snpFeatureServer
 snpFeatureOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("by_choice"))
+  shiny::uiOutput(ns("by_choice_input"))
 }

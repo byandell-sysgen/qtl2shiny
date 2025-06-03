@@ -60,7 +60,7 @@ snpSetupServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses
         max(3, round(max(unclass(shiny::req(snp_scan_obj()))), 1) - 1.5)
       }
     })
-    output$minLOD <- shiny::renderUI({
+    output$minLOD_input <- shiny::renderUI({
       value <- minLOD()
       shiny::numericInput(ns("minLOD"), "LOD threshold", value, min = 0, step = 0.5)
     })
@@ -203,7 +203,7 @@ snpSetupUI <- function(id) {
   shiny::tagList(
     shiny::uiOutput(ns("title")),
     shiny::uiOutput(ns("snp_input")),
-    shiny::uiOutput(ns("minLOD")),
+    shiny::uiOutput(ns("minLOD_input")),
     shiny::uiOutput(ns("phe_choice")),
     shiny::uiOutput(ns("win_choice")),
     shiny::uiOutput(ns("download_csv_plot")))

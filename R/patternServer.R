@@ -36,7 +36,7 @@ patternServer <- function(id, job_par, chr_pos, win_par,
                 analyses_df, patterns, scan_pat, project_info, snp_action)
     
     ## Select phenotype for plots.
-    output$pheno_name <- shiny::renderUI({
+    output$pheno_name_input <- shiny::renderUI({
       shiny::selectInput(ns("pheno_name"), NULL,
                          choices = colnames(shiny::req(phe_mx())),
                          selected = input$pheno_name)
@@ -197,12 +197,12 @@ patternServer <- function(id, job_par, chr_pos, win_par,
         grDevices::dev.off()
       }
     )
-    output$radio <- shiny::renderUI({
+    output$button_input <- shiny::renderUI({
       shiny::radioButtons(ns("button"), "",
                           c("LOD","Effects","LOD & Effects","Allele Means","Summary"),
                           input$button)
     })
-    output$blups <- shiny::renderUI({
+    output$blups_input <- shiny::renderUI({
       shiny::checkboxInput(ns("blups"), "BLUPs?")
     })
     output$select <- shiny::renderUI({
@@ -224,9 +224,9 @@ patternUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::fluidRow(
-      shiny::column(6, shiny::uiOutput(ns("radio"))),
-      shiny::column(6, shiny::uiOutput(ns("blups")))),
-    shiny::uiOutput(ns("pheno_name")),
+      shiny::column(6, shiny::uiOutput(ns("button_input"))),
+      shiny::column(6, shiny::uiOutput(ns("blups_input")))),
+    shiny::uiOutput(ns("pheno_name_input")),
     shiny::uiOutput(ns("select")))
 }
 #' @export

@@ -176,10 +176,10 @@ scanCoefServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_ch
         grDevices::dev.off()
       }
     )
-    output$blups <- shiny::renderUI({
+    output$blups_input <- shiny::renderUI({
       shiny::checkboxInput(ns("blups"), "BLUPs?")
     })
-    output$radio <- shiny::renderUI({
+    output$button_input <- shiny::renderUI({
       shiny::radioButtons(ns("button"), "",
                           c("LOD","Effects","LOD & Effects","Summary"),
                           input$button)
@@ -193,8 +193,8 @@ scanCoefUI <- function(id) {
   shiny::tagList(
     shiny::strong("Genome Scans"),
     shiny::fluidRow(
-      shiny::column(6, shiny::uiOutput(ns("radio"))),
-      shiny::column(6, shiny::uiOutput(ns("blups")))),
+      shiny::column(6, shiny::uiOutput(ns("button_input"))),
+      shiny::column(6, shiny::uiOutput(ns("blups_input")))),
     shiny::uiOutput(ns("pheno_choice")),
     shiny::uiOutput(ns("win_choice")),
     shiny::fluidRow(

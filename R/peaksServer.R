@@ -32,7 +32,7 @@ peaksServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj,
     })
     
     # Select chromosome. Defaults to blank.
-    output$chr_id <- shiny::renderUI({
+    output$chr_id_input <- shiny::renderUI({
       shiny::req(project_info())
       choices <- names(pmap_obj())
       selected <- input$chr_id
@@ -44,7 +44,7 @@ peaksServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj,
     })
     
     ## Window numeric
-    output$window_Mbp <- shiny::renderUI({
+    output$window_Mbp_input <- shiny::renderUI({
       shiny::req(project_info())
       if(is.null(win <- input$window_Mbp))
         win <- 1
@@ -53,7 +53,7 @@ peaksServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj,
     })
     
     # Peak position slider.
-    output$peak_Mbp <- shiny::renderUI({
+    output$peak_Mbp_input <- shiny::renderUI({
       shiny::req(project_info(), pmap_obj())
       chr_id <- shiny::req(input$chr_id)
       rng <- round(range(pmap_obj()[[chr_id]]), 2)
@@ -151,9 +151,9 @@ peaksInput <- function(id) {
   shiny::tagList(
     shiny::checkboxInput(ns("local"), "Local Scan in Window?", TRUE),
     shiny::fluidRow(
-      shiny::column(4, shiny::uiOutput(ns("chr_id"))),
-      shiny::column(4, shiny::uiOutput(ns("peak_Mbp"))),
-      shiny::column(4, shiny::uiOutput(ns("window_Mbp")))
+      shiny::column(4, shiny::uiOutput(ns("chr_id_input"))),
+      shiny::column(4, shiny::uiOutput(ns("peak_Mbp_input"))),
+      shiny::column(4, shiny::uiOutput(ns("window_Mbp_input")))
     ))
 }
 #' @export

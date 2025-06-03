@@ -42,7 +42,7 @@ phenoServer <- function(id, set_par, win_par, peaks_df, analyses_tbl, cov_df,
     phenoPlotServer("PhenoPlotTrans", set_par, phe_mx, cov_df)
     
     # Show data.
-    output$radio <- renderUI({
+    output$radio_input <- renderUI({
       shiny::radioButtons(ns("radio"), NULL,
                           c("LOD Peaks","Covariates",
                             "Trans Data","Raw Data"),
@@ -68,7 +68,7 @@ phenoServer <- function(id, set_par, win_par, peaks_df, analyses_tbl, cov_df,
 #' @rdname phenoServer
 phenoUI <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("radio"))
+  shiny::uiOutput(ns("radio_input"))
 }
 #' @export
 #' @rdname phenoServer

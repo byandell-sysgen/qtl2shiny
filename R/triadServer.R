@@ -27,7 +27,7 @@ triadServer <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
   ns <- session$ns
 
   ## Select triad for plots.
-  output$triad <- shiny::renderUI({
+  output$triad_input <- shiny::renderUI({
     triad <- shiny::req(mediate_obj())$best$triad
     choices <- levels(triad)
     choices <- choices[choices %in% unique(triad)]
@@ -38,7 +38,7 @@ triadServer <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
     ifelse("symbol" %in% names(shiny::req(mediate_obj())$best), "symbol", "longname")
   })
   ## Select mediator for plots.
-  output$med_name <- shiny::renderUI({
+  output$med_name_input <- shiny::renderUI({
     shiny::req(mediate_obj(), input$triad, medID())
     choices <- dplyr::filter(mediate_obj()$best, .data$triad == input$triad)[[medID()]]
     shiny::selectInput(ns("med_name"), NULL,
@@ -64,7 +64,7 @@ triadServer <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
   })
   
   ## Select plot format.
-  output$med_plot <- shiny::renderUI({
+  output$med_plot_input <- shiny::renderUI({
     shiny::selectInput(ns("med_plot"), NULL,
                        choices = c("by_mediator", 
                                    "by_target", 
@@ -129,9 +129,9 @@ triadServer <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
 triadUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::uiOutput(ns("triad")),
-    shiny::uiOutput(ns("med_name")),
-    shiny::uiOutput(ns("med_plot")),
+    shiny::uiOutput(ns("triad_input")),
+    shiny::uiOutput(ns("med_name_input")),
+    shiny::uiOutput(ns("med_plot_input")),
     shiny::fluidRow(
       shiny::column(6, shiny::downloadButton(ns("downloadData"), "CSV")),
       shiny::column(6, shiny::downloadButton(ns("downloadPlot"), "Plots"))))

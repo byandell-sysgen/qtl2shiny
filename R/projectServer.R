@@ -18,7 +18,7 @@ projectServer <- function(id, projects_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    output$project <- shiny::renderUI({
+    output$project_input <- shiny::renderUI({
       shiny::req(projects_info())
       choices <- unique(projects_info()$project)
       if(is.null(selected <- input$project)) {
@@ -48,5 +48,5 @@ projectServer <- function(id, projects_info) {
 #' @rdname projectServer
 projectUI <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("project"))
+  shiny::uiOutput(ns("project_input"))
 }

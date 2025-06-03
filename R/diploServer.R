@@ -54,18 +54,18 @@ diploServer <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
              "SNP Association" = ,
              "Allele Pattern"  = snpSetupOutput(ns("snp_setup")))
     })
-    output$radio <- shiny::renderUI({
+    output$button_input <- shiny::renderUI({
       shiny::radioButtons(ns("button"), "",
                           c("SNP Association","Allele Pattern","Genome Scans"),
                           input$button)
     })
-    output$select <- shiny::renderUI({
+    output$snp_action_input <- shiny::renderUI({
       shiny::selectInput(ns("snp_action"), "",
                          c("add+dom","additive","non-add",
                            "recessive","dominant"),
-                         input$select)
+                         input$snp_action)
     })
-    output$sex_type <- shiny::renderUI({
+    output$sex_type_input <- shiny::renderUI({
       choices <- c("A","I","F","M","all")
       if(ncol(shiny::req(phe_mx())) > 1 | shiny::req(input$button) == "Genome Scans") {
         choices <- choices[1:4]
@@ -89,9 +89,8 @@ diploUI <- function(id) {
     shiny::sidebarPanel(
       shiny::uiOutput(ns("project")),
       shiny::strong("SNP/Gene Action"),
-      shiny::uiOutput(ns("radio")),
-      shiny::uiOutput(ns("select")),
-      shiny::uiOutput(ns("sex_type")),
+      shiny::uiOutput(ns("snp_action_input")),
+      shiny::uiOutput(ns("sex_type_input")),
       shiny::uiOutput(ns("dip_input")),
       shiny::textOutput(ns("allele_names"))),
   shiny::mainPanel(

@@ -254,7 +254,7 @@ mediateServer <- function(id, job_par, win_par, patterns, phe_mx, cov_df, probs_
                           c("Static","Interactive"),
                           "Static")
     })
-    output$checkplot <- shiny::renderUI({
+    output$checkplot_input <- shiny::renderUI({
       shiny::checkboxInput(ns("checkplot"), "Triad Plot", input$checkplot)
     })
     output$local_other <- shiny::renderUI({
@@ -361,7 +361,7 @@ mediateUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::strong("Mediation"),
-    shiny::uiOutput(ns("checkplot")),
+    shiny::uiOutput(ns("checkplot_input")),
     shiny::uiOutput(ns("medUI")))
 }
 #' @export

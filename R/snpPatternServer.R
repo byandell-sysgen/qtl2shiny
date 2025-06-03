@@ -214,7 +214,7 @@ snpPatternServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
         grDevices::dev.off()
       }
     )
-    output$radio <- shiny::renderUI({
+    output$button_input <- shiny::renderUI({
       button_val <- c("All Phenos","All Patterns",
                       "By Pheno",
                       "Top SNPs","Interactive")
@@ -254,7 +254,7 @@ snpPatternServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
 snpPatternInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::uiOutput(ns("radio")),
+    shiny::uiOutput(ns("button_input")),
     shiny::uiOutput(ns("pat_input"))
   )
 }

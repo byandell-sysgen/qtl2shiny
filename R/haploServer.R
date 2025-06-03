@@ -54,12 +54,12 @@ haploServer <- function(id, win_par, pmap_obj,
              "Allele Pattern"  = snpSetupOutput(ns("snp_setup")),
              "Mediation"       = mediateOutput(ns("mediate")))
     })
-    output$radio <- shiny::renderUI({
+    output$button_input <- shiny::renderUI({
       shiny::radioButtons(ns("button"), "",
                           c("Genome Scans","SNP Association","Allele Pattern","Mediation"),
                           input$button)
     })
-    output$sex_type <- shiny::renderUI({
+    output$sex_type_input <- shiny::renderUI({
       choices <- c("A","I","F","M","all")
       if(ncol(shiny::req(phe_mx())) > 1 & shiny::req(input$button) != "Mediation") {
         choices <- choices[1:4]
@@ -83,8 +83,8 @@ haploUI <- function(id) {
     shiny::sidebarPanel(
       shiny::uiOutput(ns("project")),
       shiny::strong("SNP/Gene Additive"),
-      shiny::uiOutput(ns("radio")),
-      shiny::uiOutput(ns("sex_type")),
+      shiny::uiOutput(ns("button_input")),
+      shiny::uiOutput(ns("sex_type_input")),
       shiny::uiOutput(ns("hap_input")),
       shiny::textOutput(ns("allele_names"))),
     shiny::mainPanel(

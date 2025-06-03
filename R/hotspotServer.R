@@ -40,12 +40,12 @@ hotspotServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_
       shiny::req(project_info())
       names(shiny::req(pmap_obj()))
     })
-    # Hotspot Search (if desired)
-    output$hotspot <- shiny::renderUI({
+    # Hotspot Search (if desired--not used)
+    output$hotspot_input <- shiny::renderUI({
       shiny::checkboxInput(ns("hotspot"), "Search Hotspots?", input$hotspot)
     })
     # Select chromosome.
-    output$chr_ct <- shiny::renderUI({
+    output$chr_ct_input <- shiny::renderUI({
       shiny::req(project_info())
       choices <- chr_names()
       if(is.null(selected <- input$chr_ct))
@@ -69,7 +69,7 @@ hotspotServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_
     })
     
     ## Window numeric
-    output$window_Mbp <- shiny::renderUI({
+    output$window_Mbp_input <- shiny::renderUI({
       shiny::req(project_info())
       if(is.null(win <- input$window_Mbp))
         win <- 1
@@ -79,24 +79,22 @@ hotspotServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_
     
     scan_obj_all <- shiny::reactive({
       shiny::req(project_info(), input$window_Mbp, input$minLOD)
-      shiny::withProgress(message = 'Hotspot scan ...', value = 0,
-                          {
-                            shiny::setProgress(1)
-                            hotspot_wrap(pmap_obj(), peaks_tbl(), input$window_Mbp, input$minLOD,
-                                         project_info())
-                          })
+      shiny::withProgress(message = 'Hotspot scan ...', value = 0, {
+        shiny::setProgress(1)
+        hotspot_wrap(pmap_obj(), peaks_tbl(), input$window_Mbp, input$minLOD,
+                     project_info())
+        })
     })
     
     scan_obj <- shiny::reactive({
       out_peaks <- scan_obj_all()
-      shiny::withProgress(message = 'Hotspot search ...', value = 0,
-                          {
-                            shiny::setProgress(1)
-                            chr_ct <- input$chr_ct
-                            if(!("all" %in% chr_ct)) {
-                              out_peaks <- subset(out_peaks, chr_ct)
-                            }
-                          })
+      shiny::withProgress(message = 'Hotspot search ...', value = 0, {
+        shiny::setProgress(1)
+        chr_ct <- input$chr_ct
+        if(!("all" %in% chr_ct)) {
+          out_peaks <- subset(out_peaks, chr_ct)
+          }
+        })
       out_peaks
     })
     
@@ -116,7 +114,7 @@ hotspotServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_
         dat_sets <- dplyr::distinct(peaks_tbl(), 
                                     .data$pheno_type, .data$pheno_group)
         dat_groups <- unique(dplyr::filter(dat_sets,
-                                           .data$pheno_type %in% peak_set)$pheno_group)
+          .data$pheno_type %in% peak_set)$pheno_group)
         peak_set <- c(peak_grp[!(peak_grp %in% dat_groups)], peak_set)
       } else {
         peak_set <- peak_grp
@@ -159,7 +157,7 @@ hotspotServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_
         max(5.5, round(min(peaks_tbl$lod), 1))
       }
     }
-    output$minLOD <- shiny::renderUI({
+    output$minLOD_input <- shiny::renderUI({
       shiny::req(peaks_tbl())
       value <- minLOD(input$minLOD, peaks_tbl())
       shiny::numericInput(ns("minLOD"), "min LOD", value, min = 0, step = 0.5)
@@ -178,9 +176,9 @@ hotspotInput <- function(id) {
       shiny::column(6, shiny::strong("Hotspot Info")),
       shiny::column(6, shiny::checkboxInput(ns("peak_ck"), "plot?", FALSE))),
     shiny::fluidRow(
-      shiny::column(4, shiny::uiOutput(ns("chr_ct"))),
-      shiny::column(4, shiny::uiOutput(ns("minLOD"))),
-      shiny::column(4, shiny::uiOutput(ns("window_Mbp")))))
+      shiny::column(4, shiny::uiOutput(ns("chr_ct_input"))),
+      shiny::column(4, shiny::uiOutput(ns("minLOD_input"))),
+      shiny::column(4, shiny::uiOutput(ns("window_Mbp_input")))))
 }
 #' @export
 #' @rdname hotspotServer

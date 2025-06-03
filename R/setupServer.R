@@ -36,7 +36,7 @@ setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl,
           pheno_group %in% phe_gp)
       sort(unique(analyses_group$pheno_type))
     })
-    output$pheno_group <- shiny::renderUI({
+    output$pheno_group_input <- shiny::renderUI({
       shiny::req(choices <- pheno_group())
       if(is.null(selected <- input$pheno_group)) {
         selected <- choices[1]
@@ -46,7 +46,7 @@ setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl,
                          selected = selected,
                          multiple = TRUE)
     })
-    output$dataset <- shiny::renderUI({
+    output$dataset_input <- shiny::renderUI({
       shiny::req(project_info())
       choices <- c("all", shiny::req(pheno_type()))
       if(is.null(selected <- input$dataset))
@@ -81,7 +81,7 @@ setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl,
     })
     
     # Pick phenotype names
-    output$pheno_names <- shiny::renderUI({
+    output$pheno_names_input <- shiny::renderUI({
       shiny::req(project_info(), win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
       out <- select_phenames(input$pheno_names, peaks_df(), win_par$local,
                              win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
@@ -171,7 +171,7 @@ setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl,
              Region     = peaksOutput(ns("peaks")))
     })
     
-    output$radio <- shiny::renderUI({
+    output$radio_input <- shiny::renderUI({
       shiny::radioButtons(ns("radio"), NULL,
                           c("Region", "Phenotypes"),
                           input$radio,
@@ -203,11 +203,11 @@ setupUI <- function(id) {
   shiny::tagList(
     shiny::sidebarPanel(
       shiny::uiOutput(ns("title")),
-      shiny::uiOutput(ns("radio")),
+      shiny::uiOutput(ns("radio_input")),
       shiny::uiOutput(ns("sidebar_setup")),
-      shiny::uiOutput(ns("pheno_names")),
-      shiny::uiOutput(ns("pheno_group")),
-      shiny::uiOutput(ns("dataset")),
+      shiny::uiOutput(ns("pheno_names_input")),
+      shiny::uiOutput(ns("pheno_group_input")),
+      shiny::uiOutput(ns("dataset_input")),
       shiny::uiOutput(ns("sidebar_hot")),
       shiny::uiOutput(ns("version"))
     ),
