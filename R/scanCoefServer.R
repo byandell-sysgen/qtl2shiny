@@ -39,7 +39,7 @@ scanCoefServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_ch
     })
     
     # Scan Window slider
-    output$scan_window <- shiny::renderUI({
+    output$scan_window_input <- shiny::renderUI({
       shiny::req(project_info(), phe_mx(), win_par$window_Mbp)
       chr_id <- shiny::req(win_par$chr_id)
       map <- shiny::req(probs_obj())$map[[chr_id]]
@@ -130,7 +130,7 @@ scanCoefServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_ch
       switch(shiny::req(input$button),
              LOD     =,
              "LOD & Effects" =,
-             Effects = shiny::uiOutput(ns("scan_window")))
+             Effects = shiny::uiOutput(ns("scan_window_input")))
     })
     output$LOD <- shiny::renderUI({
       switch(shiny::req(input$button),
