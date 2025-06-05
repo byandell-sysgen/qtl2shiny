@@ -73,7 +73,7 @@ snpSumServer <- function(id, chr_pos, top_snps_tbl, project_info,
                           })
     }, escape = FALSE,
     options = list(scrollX = TRUE, pageLength = 5))
-    output$snp_sum <- shiny::renderUI({
+    output$snp_sum_input <- shiny::renderUI({
       switch(input$snp_sum,
              best   = DT::dataTableOutput(ns("top_snps_best")),
              indels = DT::dataTableOutput(ns("top_indels")),
@@ -109,8 +109,5 @@ snpSumUI <- function(id) {
 #' @rdname snpSumServer
 snpSumOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::uiOutput(ns("snp_sum")),
-    shiny::uiOutput(ns("radio")),
-  )
+  shiny::uiOutput(ns("snp_sum_input"))
 }
