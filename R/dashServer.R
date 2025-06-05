@@ -60,14 +60,19 @@ dashServer <- function(id, projects_info) {
   
   ## Phenotypes and Covariates.
   analyses_df <- shiny::reactive({
-    phename <- shiny::req(set_par()$pheno_names)
+    phename <- set_par()$pheno_names
+    if(is.null(phename)) return(NULL)
     dplyr::filter(analyses_tbl(), .data$pheno %in% phename)
   })
   phe_mx <- shiny::reactive({
-    shiny::req(analyses_df(), project_info())
-    pheno_read(project_info(), analyses_df())
+    analyses <- analyses_df() 
+    if(is.null(analyses)) return(NULL)
+    shiny::req(project_info())
+    pheno_read(project_info(), analyses)
   })
   cov_df <- shiny::reactive({
+    analyses <- analyses_df() 
+    if(is.null(analyses)) return(NULL)
     qtl2mediate::get_covar(covar(), analyses_df())
   })
   

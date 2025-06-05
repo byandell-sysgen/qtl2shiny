@@ -1,5 +1,6 @@
 #' @importFrom dplyr rename select
 #' @importFrom rlang .data
+#' @importFrom qtl2ggplot summary_scan1
 #' 
 summary_hot <- function(peak_set, scan_obj) {
   # Used chosen datasets, or all if not chosen.
@@ -15,7 +16,7 @@ summary_hot <- function(peak_set, scan_obj) {
     chr_id <- names(map)
     dplyr::select(
       dplyr::rename(
-        summary(
+        qtl2ggplot::summary_scan1(
           subset(scan, lodcolumn = lodcol),
           map, chr = chr_id),
         count = .data$lod),
