@@ -15,9 +15,10 @@
 #' @importFrom shiny isTruthy moduleServer NS numericInput reactive renderUI req
 #'             selectInput setProgress sliderInput tagList uiOutput withProgress
 #' @importFrom rlang .data
-snpSetupServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses_df,
-                          project_info, allele_info,
-                          snp_action = shiny::reactive({"basic"})) {
+snpSetupServer <- function(id,
+  job_par, win_par, phe_mx, cov_df, K_chr, analyses_df,
+  project_info, allele_info,
+  snp_action = shiny::reactive({"basic"})) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -32,7 +33,8 @@ snpSetupServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses
     
     ## Reactives
     ## SNP Probabilities.
-    snpprobs_obj <- snpProbsServer("snp_probs", win_par, pheno_names, project_info)
+    snpprobs_obj <- snpProbsServer("snp_probs", win_par, pheno_names,
+                                   project_info)
     snpinfo <- reactive({
       shiny::req(project_info(), phe_mx())
       shiny::req(snpprobs_obj())$snpinfo
@@ -47,8 +49,8 @@ snpSetupServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses
         shiny::setProgress(1)
         snpprobs_act <- 
           qtl2pattern::snpprob_collapse(snpprobs, snp_action())
-        qtl2mediate::scan1covar(phe_mx(), cov_df(), snpprobs_act, K_chr(), analyses_df(),
-                                sex_type = job_par$sex_type)
+        qtl2mediate::scan1covar(phe_mx(), cov_df(), snpprobs_act, K_chr(),
+                                analyses_df(), sex_type = job_par$sex_type)
       })
     })
     
@@ -62,7 +64,8 @@ snpSetupServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses
     })
     output$minLOD_input <- shiny::renderUI({
       value <- minLOD()
-      shiny::numericInput(ns("minLOD"), "LOD threshold", value, min = 0, step = 0.5)
+      shiny::numericInput(ns("minLOD"), "LOD threshold", value,
+                          min = 0, step = 0.5)
     })
     
     ## Top SNPs table.
@@ -110,7 +113,7 @@ snpSetupServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses
     })
     
     ## Select phenotype for plots.
-    output$pheno_name <- shiny::renderUI({
+    output$pheno_name_input <- shiny::renderUI({
       shiny::req(pheno_names())
       shiny::selectInput(ns("pheno_name"), NULL,
                          choices = shiny::req(pheno_names()),
@@ -133,7 +136,7 @@ snpSetupServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses
                }
              })
       if(pheno_choice) {
-        shiny::uiOutput(ns("pheno_name"))
+        shiny::uiOutput(ns("pheno_name_input"))
       }
     })
     output$win_choice <- shiny::renderUI({

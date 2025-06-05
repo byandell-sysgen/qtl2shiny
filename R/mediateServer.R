@@ -27,9 +27,10 @@
 #' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
 #' 
-mediateServer <- function(id, job_par, win_par, patterns, phe_mx, cov_df, probs_obj, K_chr,
-                         analyses_df, pmap_obj, covar, analyses_tbl, peaks,
-                         project_info, allele_info) {
+mediateServer <- function(id,
+  job_par, win_par, patterns, phe_mx, cov_df, probs_obj, K_chr,
+  analyses_df, pmap_obj, covar, analyses_tbl, peaks,
+  project_info, allele_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -58,17 +59,16 @@ mediateServer <- function(id, job_par, win_par, patterns, phe_mx, cov_df, probs_
     ## Comediator data
     comed_ls <- reactive({
       shiny::req(input$pheno_name, win_par, project_info())
-      qtl2mediate::comediator_region(input$pheno_name, chr_id(), scan_window(), 
-                                     covar(), analyses_tbl(), peaks(), 
-                                     shiny::req(input$qtls), shiny::req(pmap_obj()),
-                                     pheno_data())
+      qtl2mediate::comediator_region(
+        input$pheno_name, chr_id(), scan_window(), covar(), analyses_tbl(),
+        peaks(), shiny::req(input$qtls), shiny::req(pmap_obj()), pheno_data())
     })
     med_ls <- reactive({
       out <- switch(shiny::req(input$med_type, input$pheno_name),
-                    expression = expr_ls(),
-                    phenotype = qtl2mediate::comediator_type(comed_ls(), shiny::req(peaks()),
-                                                             input$pheno_name,
-                                                             shiny::isTruthy(input$other)))
+        expression = expr_ls(),
+        phenotype = qtl2mediate::comediator_type(
+          comed_ls(), shiny::req(peaks()), input$pheno_name,
+          shiny::isTruthy(input$other)))
       out
     })
     
@@ -113,8 +113,8 @@ mediateServer <- function(id, job_par, win_par, patterns, phe_mx, cov_df, probs_
     })
     
     ## Triad Plots
-    triadServer("triad", input, patterns, geno_max, peak_mar, med_ls, mediate_signif,
-               phe1_mx, cov_df, K_chr, probs_obj, chr_id, sdp)
+    triadServer("triad", input, patterns, geno_max, peak_mar, med_ls,
+                mediate_signif, phe1_mx, cov_df, K_chr, probs_obj, chr_id, sdp)
     
     ## Mediate1
     probs_chr <- reactive({
@@ -155,7 +155,7 @@ mediateServer <- function(id, job_par, win_par, patterns, phe_mx, cov_df, probs_
       }
     })
     ## Select phenotype for plots.
-    output$pheno_name <- shiny::renderUI({
+    output$pheno_name_input <- shiny::renderUI({
       shiny::req(phe_mx())
       shiny::selectInput(ns("pheno_name"), NULL,
                          choices = colnames(phe_mx()),
@@ -259,8 +259,9 @@ mediateServer <- function(id, job_par, win_par, patterns, phe_mx, cov_df, probs_
     })
     output$local_other <- shiny::renderUI({
       switch(shiny::req(input$med_type),
-             expression = shiny::checkboxInput(ns("local"), "Local?", input$local),
-             phenotype  = shiny::checkboxInput(ns("other"), "Other types?", input$other))
+        expression = shiny::checkboxInput(ns("local"), "Local?", input$local),
+        phenotype  = shiny::checkboxInput(ns("other"), "Other types?",
+                                          input$other))
     })
     output$signif <- shiny::renderUI({
       if(shiny::isTruthy(input$signif)) {
@@ -274,7 +275,8 @@ mediateServer <- function(id, job_par, win_par, patterns, phe_mx, cov_df, probs_
     ## Downloads.
     output$downloadData <- shiny::downloadHandler(
       filename = function() {
-        file.path(paste0("mediate_", chr_id(), "_", win_par$peak_Mbp, ".csv")) },
+        file.path(paste0("mediate_", chr_id(), "_", win_par$peak_Mbp, ".csv"))
+      },
       content = function(file) {
         shiny::req(mediate_obj())
         utils::write.csv(mediate_obj()$best, file)
@@ -282,7 +284,8 @@ mediateServer <- function(id, job_par, win_par, patterns, phe_mx, cov_df, probs_
     )
     output$downloadPlot <- shiny::downloadHandler(
       filename = function() {
-        file.path(paste0("mediate_", chr_id(), "_", win_par$peak_Mbp, ".pdf")) },
+        file.path(paste0("mediate_", chr_id(), "_", win_par$peak_Mbp, ".pdf"))
+      },
       content = function(file) {
         shiny::req(phe_mx(), geno_max(), K_chr(), cov_df(),
                    input$pos_Mbp, input$med_type)
@@ -323,7 +326,7 @@ mediateServer <- function(id, job_par, win_par, patterns, phe_mx, cov_df, probs_
       shiny::tagList(
         shiny::uiOutput(ns("qtls")),
         shiny::uiOutput(ns("radio")),
-        shiny::uiOutput(ns("pheno_name")),
+        shiny::uiOutput(ns("pheno_name_input")),
         shiny::uiOutput(ns("med_type")),
         shiny::fluidRow(
           shiny::column(6, shiny::uiOutput(ns("signif"))),

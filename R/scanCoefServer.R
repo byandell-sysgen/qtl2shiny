@@ -59,7 +59,7 @@ scanCoefServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_ch
     })
     
     ## Select phenotype for plots.
-    output$pheno_name <- shiny::renderUI({
+    output$pheno_name_input <- shiny::renderUI({
       shiny::req(phe_mx())
       shiny::selectInput(ns("pheno_name"), NULL,
                          choices = colnames(phe_mx()))
@@ -124,7 +124,7 @@ scanCoefServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_ch
     output$pheno_choice <- shiny::renderUI({
       switch(shiny::req(input$button),
              "LOD & Effects" =,
-             Effects = shiny::uiOutput(ns("pheno_name")))
+             Effects = shiny::uiOutput(ns("pheno_name_input")))
     })
     output$win_choice <- shiny::renderUI({
       switch(shiny::req(input$button),
