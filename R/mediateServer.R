@@ -93,7 +93,7 @@ mediateServer <- function(id,
       shiny::req(sdps(), haplos())
       qtl2pattern::sdp_to_pattern(sdps(), haplos())
     })
-    output$pattern <- shiny::renderUI({
+    output$pattern_input <- shiny::renderUI({
       # This does not quite work right.
       choices <- choices_pattern()
       selected <- input$pattern
@@ -344,7 +344,7 @@ mediateServer <- function(id,
              },
              {
                shiny::tagList(
-                 shiny::uiOutput(ns("pattern")), # Works sort of. 
+                 shiny::uiOutput(ns("pattern_input")), # Works sort of. 
                  triadUI(ns("triad")))
              })
     })
