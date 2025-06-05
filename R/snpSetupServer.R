@@ -98,7 +98,7 @@ snpSetupServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses
                                gene_exon_tbl, allele_info, snp_action)
     
     # Scan Window slider
-    output$scan_window <- shiny::renderUI({
+    output$scan_window_input <- shiny::renderUI({
       shiny::req(pheno_names())
       rng <- round(shiny::req(win_par$peak_Mbp) + 
                      c(-1,1) * shiny::req(win_par$window_Mbp), 
@@ -153,7 +153,7 @@ snpSetupServer <- function(id, job_par, win_par, phe_mx, cov_df, K_chr, analyses
                }
              })
       if(win_choice) {
-        shiny::uiOutput(ns("scan_window"))
+        shiny::uiOutput(ns("scan_window_input"))
       }
     })
     
