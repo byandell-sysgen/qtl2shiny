@@ -162,7 +162,7 @@ mediateServer <- function(id,
                          selected = input$pheno_name)
     })
     ## Select plot format.
-    output$med_plot <- shiny::renderUI({
+    output$med_plot_input <- shiny::renderUI({
       shiny::selectInput(ns("med_plot"), NULL,
                          choices = c("Position by LR", 
                                      "Position by P-value", 
@@ -172,7 +172,7 @@ mediateServer <- function(id,
                          selected = input$med_plot)
     })
     ## Select type of mediation.
-    output$med_type <- shiny::renderUI({
+    output$med_type_input <- shiny::renderUI({
       shiny::selectInput(ns("med_type"), NULL,
                          choices = c("phenotype","expression"),
                          selected = input$med_type)
@@ -220,7 +220,7 @@ mediateServer <- function(id,
     options = list(scrollX = TRUE, pageLength = 5))
     
     # Scan Window slider
-    output$pos_Mbp <- shiny::renderUI({
+    output$pos_Mbp_input <- shiny::renderUI({
       map <- shiny::req(probs_obj())$map[[chr_id()]]
       rng <- round(2 * range(map)) / 2
       if(is.null(selected <- input$pos_Mbp))
@@ -242,7 +242,7 @@ mediateServer <- function(id,
              Static      = shiny::plotOutput(ns("medPlot")),
              Interactive = plotly::plotlyOutput(ns("medPlotly")))
     })
-    output$qtls <- shiny::renderUI({
+    output$qtls_input <- shiny::renderUI({
       if(is.null(selected <- input$qtls))
         selected <- 2
       shiny::radioButtons(ns("qtls"), "",
@@ -263,7 +263,7 @@ mediateServer <- function(id,
         phenotype  = shiny::checkboxInput(ns("other"), "Other types?",
                                           input$other))
     })
-    output$signif <- shiny::renderUI({
+    output$signif_input <- shiny::renderUI({
       if(shiny::isTruthy(input$signif)) {
         value <- input$signif
       } else {
@@ -324,15 +324,15 @@ mediateServer <- function(id,
       })
     output$mediation <- renderUI({
       shiny::tagList(
-        shiny::uiOutput(ns("qtls")),
+        shiny::uiOutput(ns("qtls_input")),
         shiny::uiOutput(ns("radio")),
         shiny::uiOutput(ns("pheno_name_input")),
-        shiny::uiOutput(ns("med_type")),
+        shiny::uiOutput(ns("med_type_input")),
         shiny::fluidRow(
-          shiny::column(6, shiny::uiOutput(ns("signif"))),
+          shiny::column(6, shiny::uiOutput(ns("signif_input"))),
           shiny::column(6, shiny::uiOutput(ns("local_other")))),
-        shiny::uiOutput(ns("med_plot")),
-        shiny::uiOutput(ns("pos_Mbp")),
+        shiny::uiOutput(ns("med_plot_input")),
+        shiny::uiOutput(ns("pos_Mbp_input")),
         shiny::fluidRow(
           shiny::column(6, shiny::downloadButton(ns("downloadData"), "CSV")),
           shiny::column(6, shiny::downloadButton(ns("downloadPlot"), "Plots"))))
