@@ -17,10 +17,10 @@
 #' @importFrom ggplot2 autoplot geom_point
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom shiny checkboxInput column downloadButton downloadHandler
-#'             fluidRow isTruthy moduleServer NS plotOutput radioButtons
-#'             reactive renderPlot renderUI req selectInput setProgress
-#'             sliderInput strong tagList uiOutput updateSliderInput
-#'             withProgress
+#'             fluidRow isolate isTruthy moduleServer NS observeEvent plotOutput
+#'             radioButtons reactive renderPlot renderUI req selectInput
+#'             setProgress sliderInput strong tagList uiOutput updateSelectInput
+#'             updateSliderInput withProgress
 #' @importFrom plotly renderPlotly plotlyOutput
 #' @importFrom dplyr filter
 #' @importFrom utils write.csv
@@ -93,8 +93,7 @@ mediateServer <- function(id,
       shiny::req(sdps(), haplos())
       qtl2pattern::sdp_to_pattern(sdps(), haplos())
     })
-    output$pattern_input <- shiny::renderUI({
-      # This does not quite work right.
+    shiny::observeEvent(shiny::req(input$checkplot, choices_pattern()), {
       choices <- choices_pattern()
       selected <- input$pattern
       if(is.null(selected)) {
@@ -103,8 +102,8 @@ mediateServer <- function(id,
       if(!(selected %in% choices)) {
         selected <- choices[1]
       }
-      shiny::selectInput(ns("pattern"), NULL,
-                         choices = choices, selected)
+      shiny::updateSelectInput(session, "pattern",
+                               choices = choices, selected = selected)
     })
     sdp <- reactive({
       shiny::req(input$pattern)
@@ -344,7 +343,9 @@ mediateServer <- function(id,
              },
              {
                shiny::tagList(
-                 shiny::uiOutput(ns("pattern_input")), # Works sort of. 
+                 shiny::selectInput(ns("pattern"), NULL,
+                                    choices_pattern(),
+                                    shiny::isolate(input$pattern)),
                  triadUI(ns("triad")))
              })
     })

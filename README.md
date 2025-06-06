@@ -49,9 +49,6 @@ Minor issues
 * scans
     + multiple traits now use superset of covariates
     + fixed for Scan1Plot; need to do same for Scan1SNP and possibly elsewhere
-* mediation
-    + subscript out of bounds sometimes (seemed to work earlier)
-    + triad plot skips first pattern
 * SNP/Gene Action
     + panel appears not to work at all
 * reset
