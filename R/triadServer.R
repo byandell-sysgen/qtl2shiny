@@ -88,7 +88,7 @@ triadServer <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
              dname = peak_mar(),
              mname = input$med_name,
              tname = colnames(phe_mx()),
-             fitlines = "sdp",
+             fitlines = "sdp-parallel",
              centerline = NULL)
       })
     }
