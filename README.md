@@ -71,31 +71,31 @@ Minor issues
 R/qtl2 is now available on CRAN, as are R/qtl2ggplot and R/qtl2pattern.
 
 You first need to install the
-[devtools](https://cran.r-project.org/package=devtools) package, plus a set of
-package dependencies: [yaml](https://cran.r-project.org/package=yaml),
-[jsonlite](https://cran.r-project.org/package=jsonlite),
-[data.table](https://cran.r-project.org/package=data.table),
-and [RcppEigen](https://cran.r-project.org/package=RcppEigen).
-(Additional, secondary dependencies will also be installed)
+[devtools](https://cran.r-project.org/package=devtools) package, plus a variety
+of package dependencies.
+(Additional, secondary dependencies will also be installed).
+The code below ensures that packages, including `devtools`, are only
+installed if they are missing or have been updated on `CRAN` or `GitHub`.
 
-    install.packages(c("devtools", "yaml", "jsonlite", "data.table", "RcppEigen", "RSQLite"))
-
-You will also need the following packages for qtl2shiny dependencies:
-
-    install.packages(c("tidyverse", "RColorBrewer", "fst",
-      "shiny", "shinydashboard", "grid", "gridBase", "gdata", "GGally", "Rcpp",
-      "mnormt", "corpcor", "qtl2", "qtl2fst", "qtl2ggplot", "qtl2pattern"))
-
-Then, install plotly using `devtools::install_github()`.
-
-    library(devtools)
-    install_github("ropensci/plotly")
-
-Once you have installed these, install qtl2shiny and related packages as
-
-    install_github(paste0("byandell/",
-      c("intermediate","qtl2mediate","qtl2shiny")))
+```
+# Install `devtools` if not already installed
+tryCatch(find.package("devtools"), error = function(e) install.packages("devtools"))
+# Install qtl2shiny dependencies from CRAN if not already installed.
+devtools::install_cran(c("devtools", "yaml", "jsonlite", "data.table"))
+devtools::install_cran(c("RcppEigen", "RSQLite"))
+devtools::install_cran(c("tidyverse", "RColorBrewer", "fst", "shiny"))
+devtools::install_cran(c("shinydashboard", "grid", "gridBase", "gdata"))
+devtools::install_cran(c("GGally", "Rcpp", "mnormt", "corpcor", "plotly"))
+# Install other qtl2 packages from CRAN.
+devtools::install_cran(c("qtl2", "qtl2fst", "qtl2ggplot", "qtl2pattern"))
+# Install byandell packages from GitHub.
+devtools::install_github("byandell-sysgen/intermediate")
+devtools::install_github("byandell-sysgen/qtl2mediate")
+devtools::install_github("byandell-sysgen/qtl2shiny")
+```
 
 To install `qtl2shiny` with vignettes (takes a bit longer):
 
-    install_github("byandell/qtl2shiny", build_vignettes=TRUE)
+```
+devtools::install_github("byandell/qtl2shiny", build_vignettes=TRUE)
+```

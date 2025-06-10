@@ -61,7 +61,7 @@ peaksServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj,
       if(is.null(pos)) {
         pos <- round(mean(rng), 2)
       } else {
-        if(pos < rng[1] | pos > rng[2])
+        if(!is.na(pos) && (pos < rng[1] | pos > rng[2]))
           pos <- round(mean(rng), 2)
       }
       shiny::numericInput(ns("peak_Mbp"), "pos", 
