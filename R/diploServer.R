@@ -89,6 +89,7 @@ diploUI <- function(id) {
     shiny::sidebarPanel(
       shiny::uiOutput(ns("project")),
       shiny::strong("SNP/Gene Action"),
+      shiny::uiOutput(ns("button_input")),
       shiny::uiOutput(ns("snp_action_input")),
       shiny::uiOutput(ns("sex_type_input")),
       shiny::uiOutput(ns("dip_input")),
