@@ -84,13 +84,14 @@ triadServer <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
       shiny::req(input$med_plot, input$med_name, phe_mx())
       shiny::withProgress(message = 'Triad Plot ...', value = 0, {
         shiny::setProgress(1)
-        ggplot2::autoplot(scat_dat(), type = input$med_plot,
+        p <- ggplot2::autoplot(scat_dat(), type = input$med_plot,
              dname = peak_mar(),
              mname = input$med_name,
              tname = colnames(phe_mx()),
              fitlines = "sdp-parallel",
              centerline = NULL)
       })
+      p
     }
   })
 
