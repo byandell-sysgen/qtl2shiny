@@ -1,6 +1,7 @@
 node,type,logic,shiny,task,detail
+server,shiny,shiny,shiny,,
 Allele,module,server,module,,
-SNPPattern,module,server,module,,
+Dash,module,server,module,,
 Diplo,module,server,module,,
 GeneExon,module,server,module,,
 GeneRegion,module,server,module,,
@@ -8,29 +9,33 @@ Haplo,module,server,module,,
 Hotspot,module,server,module,,
 Main,module,server,module,,
 Mediate,module,server,module,,
+PairProbs,module,server,module,,genotype probabilities
 Pattern,module,server,module,,
 Peaks,module,server,module,,
 PhenoPlot,module,server,module,,
-Phenos,module,server,module,,
+Pheno,module,server,module,,
 Probs,module,server,module,,genotype probabilities
-PairProbs,module,server,module,,genotype probabilities
 Project,module,server,module,,
 ScanCoef,module,server,module,,
-SNPPlot,module,server,module,,
-Scatter,module,server,module,,
 Setup,module,server,module,,
-SNPSum,module,server,module,,
-SNPSetup,module,server,module,,
-SNPGene,module,server,module,,
-SNPProbs,module,server,module,,genotype probabilities
 SNPFeature,module,server,module,,
-pat_par,output,reactive,output,,button
-win_par,output,reactive,output,,"chr,peak,window"
-ass_par,output,reactive,reactive,,button
+SNPGene,module,server,module,,
+SNPPattern,module,server,module,,
+SNPPlot,module,server,module,,
+SNPProbs,module,server,module,,genotype probabilities
+SNPSetup,module,server,module,,
+SNPSum,module,server,module,,
+Triad,module,server,module,,
+ass_par,output,reactive,parameters,,button
+job_par,output,reactive,parameters,,
+med_par,output,reactive,parameters,,
+pat_par,output,reactive,parameters,,button
+set_par,output,reactive,parameters,,"project,win_par,phenames"
+win_par,output,reactive,parameters,,"chr,peak,window"
+pairprobs_obj,list,reactive,reactive,,
 patterns,table,reactive,reactive,,
-probs,list,reactive,reactive,,
-pairprobs,list,reactive,reactive,,
-project,table,reactive,reactive,,
-set_par,list,reactive,reactive,,"project,win_par,phenames"
-snpprobs,list,reactive,reactive,,
-server,shiny,shiny,shiny,,
+pairprobs_obj,list,reactive,reactive,,
+probs_obj,list,reactive,reactive,,
+project_info,table,reactive,reactive,,
+scan_tbl,table,reactive,reactive,,
+snpprobs_olbj,list,reactive,reactive,,
