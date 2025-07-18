@@ -200,13 +200,25 @@ probs_obj,triad,argument
 chr_id,triad,argument
 sdp,triad,argument
 # Not sure about this; trying to get list of outputs to UI
-pattern,LOD_plot,output        # diplo
-pattern,Effects_plot,output.   # diplo
-pattern,Means_table,output.    # diplo
-pattern,Summary_table,output.  # diplo
-snpSetup,Allele_options,output # diplo
-snpGene,SNP_plot,output        # snpSetup
-snpGene,SNP_table,output       # snpSetup
-geneRegion,Gene_plot,output    # snpGene
-geneExon,geneExon_plot,output  # snpGene
-snpPattern,pattern_plot,output # snpSetup
+haplo,scanCoef,output
+haplo,snpSetup,output
+haplo,mediate,output
+scanCoef,Genome_Scan_plot,output
+snpSetup,SNP_Association_plot,output
+snpSetup,Allele_Pattern_plot,output
+mediate,Mediation,output
+diplo,pattern,output
+diplo,snpSetup,output
+pattern,LOD_plot,output
+pattern,Effects_plot,output
+pattern,Means_table,output
+pattern,Summary_table,output
+snpSetup,snpGene,output
+snpSetup,snpPattern,output
+snpGene,SNP_plot,output
+snpGene,SNP_table,output
+snpGene,geneRegion,output
+snpGene,geneExon,output
+geneRegion,Gene_plot,output
+geneExon,geneExon_plot,output
+snpPattern,pattern_plot,output
