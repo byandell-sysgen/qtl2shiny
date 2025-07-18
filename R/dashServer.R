@@ -24,10 +24,6 @@ dashServer <- function(id, projects_info) {
   project_info <- reactive({ 
     shiny::req(set_par()$project_info) 
   })
-  pheno_type <- shiny::reactive({
-    analtbl <- shiny::req(analyses_tbl())
-    c("all", sort(unique(analtbl$pheno_type)))
-  })
   peaks <- shiny::reactive({
     shiny::req(project_info())
     read_project(project_info(), "peaks")
@@ -51,10 +47,8 @@ dashServer <- function(id, projects_info) {
     read_project(project_info(), "kinship")
   })
   
-  set_par <- setupServer("setup", 
-                               pheno_type, peaks, 
-                               pmap_obj, analyses_tbl, 
-                               cov_df, projects_info)
+  set_par <- setupServer("setup", peaks, pmap_obj, analyses_tbl, cov_df,
+                         projects_info)
   
   ## Continue with Plots and Analysis.
   

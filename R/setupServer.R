@@ -3,7 +3,7 @@
 #' Shiny module for phenotype selection, with interfaces \code{setupInput} and  \code{setupUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param pheno_typer,peaks_tbl,pmap_obj,analyses_tbl,cov_df,projects_info reactive arguments
+#' @param peaks_tbl,pmap_obj,analyses_tbl,cov_df,projects_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -15,7 +15,7 @@
 #' @importFrom shiny checkboxInput isTruthy mainPanel moduleServer NS
 #'             observeEvent radioButtons reactive renderText renderUI req
 #'             sidebarPanel strong tagList textOutput uiOutput
-setupServer <- function(id, pheno_typer, peaks_tbl, pmap_obj, analyses_tbl, 
+setupServer <- function(id, peaks_tbl, pmap_obj, analyses_tbl, 
                        cov_df, projects_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns

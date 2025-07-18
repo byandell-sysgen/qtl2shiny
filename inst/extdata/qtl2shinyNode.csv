@@ -1,37 +1,37 @@
 node,type,logic,shiny,task,detail
 server,shiny,shiny,shiny,,
-Allele,module,server,module,,
-Dash,module,server,module,,
-Diplo,module,server,module,,
-GeneExon,module,server,module,,
-GeneRegion,module,server,module,,
-Haplo,module,server,module,,
-Hotspot,module,server,module,,
-Main,module,server,module,,
-Mediate,module,server,module,,
-PairProbs,module,server,module,,genotype probabilities
-Pattern,module,server,module,,
-Peaks,module,server,module,,
-PhenoPlot,module,server,module,,
-Pheno,module,server,module,,
-Probs,module,server,module,,genotype probabilities
-Project,module,server,module,,
-ScanCoef,module,server,module,,
-Setup,module,server,module,,
-SNPFeature,module,server,module,,
-SNPGene,module,server,module,,
-SNPPattern,module,server,module,,
-SNPPlot,module,server,module,,
-SNPProbs,module,server,module,,genotype probabilities
-SNPSetup,module,server,module,,
-SNPSum,module,server,module,,
-Triad,module,server,module,,
+allele,module,server,module,,
+dash,module,server,module,,
+diplo,module,server,module,,
+geneExon,module,server,module,,
+geneRegion,module,server,module,,
+haplo,module,server,module,,
+hotspot,module,server,module,,
+main,module,server,module,,
+mediate,module,server,module,,
+pairProbs,module,server,module,,genotype probabilities
+pattern,module,server,module,,
+peaks,module,server,module,,
+phenoPlot,module,server,module,,
+pheno,module,server,module,,
+probs,module,server,module,,genotype probabilities
+project,module,server,module,,
+scanCoef,module,server,module,,
+setup,module,server,module,,
+snpFeature,module,server,module,,
+snpGene,module,server,module,,
+snpPattern,module,server,module,,
+snpPlot,module,server,module,,
+snpProbs,module,server,module,,genotype probabilities
+snpSetup,module,server,module,,
+snpSum,module,server,module,,
+triad,module,server,module,,
 ass_par,output,reactive,parameters,,button
-job_par,output,reactive,parameters,,
-med_par,output,reactive,parameters,,
+job_par,output,reactive,parameters,,"button,sex_type"
+med_par,output,reactive,parameters,,pos_Mbp
 pat_par,output,reactive,parameters,,button
-set_par,output,reactive,parameters,,"project,win_par,phenames"
-win_par,output,reactive,parameters,,"chr,peak,window"
+set_par,output,reactive,parameters,,"chr_ct,dataset,pheno_group,pheno_names"
+win_par,output,reactive,parameters,,"chr_id,local,peak_Mbp,window_Mbp"
 pairprobs_obj,list,reactive,reactive,,
 patterns,table,reactive,reactive,,
 pairprobs_obj,list,reactive,reactive,,
