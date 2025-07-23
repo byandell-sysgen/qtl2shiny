@@ -1,4 +1,5 @@
 source,target,assign
+## Server functions
 server,main,server
 diplo,Pattern,server
 diplo,PairProbs,server
@@ -26,18 +27,21 @@ snpPattern,snpFeature,server
 snpSetup,snpPattern,server
 snpSetup,snpGene,server
 snpSetup,snpProbs,server
+## Results returned by moduleServer calls
 hotspot,scan_tbl,result
 pairProbs,pairprobs_obj,result
 probs,probs_obj,result
 project,project_info,result
 snpProbs,snpprobs_obj,result
 snpSetup,patterns,result
+## Input parameters from user
 snpGene,ass_par,input
 haplo,job_par,input
 mediate,med_par,input
 snpPattern,pat_par,input
 setup,set_par,input
 peaks,win_par,input
+## moduleServer arguments
 win_par,allele,argument
 phe_mx,allele,argument
 cov_df,allele,argument
@@ -199,7 +203,7 @@ K_chr,triad,argument
 probs_obj,triad,argument
 chr_id,triad,argument
 sdp,triad,argument
-## UI graph
+## UI components
 mainInput,dashInput,ui
 mainOutput,dashUI,ui
 mainOutput,dashOutput,ui
@@ -272,3 +276,23 @@ snpPatternOutput,snpPatternSum,output
 snpPlotOutput,snpPlot,output
 snpSumOutput,top_snps_tbl,output
 triadOutput,scatPlot,output
+## Download calls
+allele,Data,download
+allele,Plot,download
+geneExon,Data,download
+geneExon,Plot,download
+geneRegion,Data,download
+geneRegion,Plot,download
+mediate,Data,download
+mediate,Plot,download
+pattern,Data,download
+pattern,Plot,download
+scanCoef,Data,download
+scanCoef,Plot,download
+snpFeature,Data,download
+snpFeature,Plot,download
+snpPattern,Data,download
+snpPattern,Plot,download
+snpPlot,Plot,download
+snpSum,Data,download
+triadServer.R:  output$downloadData,download

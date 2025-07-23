@@ -6,15 +6,7 @@
 \alias{setupUI}
 \title{Shiny setup module}
 \usage{
-setupServer(
-  id,
-  pheno_typer,
-  peaks_tbl,
-  pmap_obj,
-  analyses_tbl,
-  cov_df,
-  projects_info
-)
+setupServer(id, peaks_tbl, pmap_obj, analyses_tbl, cov_df, projects_info)
 
 setupInput(id)
 
@@ -23,7 +15,7 @@ setupUI(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{pheno_typer, peaks_tbl, pmap_obj, analyses_tbl, cov_df, projects_info}{reactive arguments}
+\item{peaks_tbl, pmap_obj, analyses_tbl, cov_df, projects_info}{reactive arguments}
 }
 \value{
 No return value; called for side effects.
