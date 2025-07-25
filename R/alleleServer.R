@@ -22,7 +22,8 @@
 #' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
 alleleServer <- function(id, win_par, phe_mx, cov_df, probs_obj, K_chr,
-                        analyses_df, patterns, scan_pat, project_info, snp_action) {
+                        analyses_df, patterns, scan_pat, project_info,
+                        snp_action) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -77,34 +78,35 @@ alleleServer <- function(id, win_par, phe_mx, cov_df, probs_obj, K_chr,
         summary(allele_obj(), pos = input$pos_Mbp)
       })
     })
-    
     ## Downloads.
-    output$downloadData <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0("allele1_", win_par$chr_id, "_", win_par$peak_Mbp, ".csv")) },
-      content = function(file) {
-        shiny::req(allele_obj())
-        out <- tidyr::pivot_wider(
-          dplyr::select(
-            dplyr::mutate(allele_obj(),
-                          allele = paste(.data$source, .data$allele, sep = ".")),
-            -.data$probe, -.data$source),
-          names_from = "allele", values_from = "effect")
-        utils::write.csv(out, file)
-      }
+    filepath <- shiny::reactive({
+      file.path(paste0("allele1_",
+                       shiny::req(win_par$chr_id), "_",
+                       shiny::req(win_par$peak_Mbp)))
+    })
+    download_list <- shiny::reactiveValues(
+      filename = shiny::isolate(filepath()),
+      Plot = shiny::reactiveValues(
+        allele = shiny::reactive({
+          ggplot2::autoplot(
+            allele_obj(), pos = input$pos_Mbp) +
+            ggplot2::ggtitle(colnames(phe_mx()))
+        })),
+      Table = shiny::reactiveValues(
+        allele = shiny::reactive({
+          tidyr::pivot_wider(
+            dplyr::select(
+              dplyr::mutate(
+                allele_obj(),
+                allele = paste(.data$source, .data$allele, sep = ".")),
+              -.data$probe, -.data$source),
+            names_from = "allele", values_from = "effect")
+        }))
     )
-    output$downloadPlot <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0("allele1_", win_par$chr_id, "_", win_par$peak_Mbp, ".pdf")) },
-      content = function(file) {
-        shiny::req(allele_obj(), input$pos_Mbp)
-        grDevices::pdf(file, width=9,height=9)
-        print(ggplot2::autoplot(
-          allele_obj(), pos = input$pos_Mbp) +
-            ggplot2::ggtitle(colnames(phe_mx())))
-        grDevices::dev.off()
-      }
-    )
+    downloadServer(ns("download"), download_list,
+      selected_item = shiny::reactive("allele"),
+      plot_table = shiny::reactive(input$plot_table),
+      title_download = shiny::reactive("Allele"))
   })
 }
 #' @export
@@ -113,9 +115,8 @@ alleleUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("pos_Mbp")),
-    shiny::fluidRow(
-      shiny::column(6, shiny::downloadButton(ns("downloadData"), "CSV")),
-      shiny::column(6, shiny::downloadButton(ns("downloadPlot"), "Plots"))))
+    shiny::selectInput(ns("plot_table"), "", c("Plot","Table")),
+    downloadOutput(ns("download")))      # downloadButton, filename
 }
 #' @export
 #' @rdname alleleServer

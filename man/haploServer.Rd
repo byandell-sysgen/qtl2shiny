@@ -15,7 +15,7 @@ haploServer(
   analyses_df,
   covar,
   analyses_tbl,
-  peaks,
+  peaks_tbl,
   project_info,
   allele_info
 )
@@ -25,7 +25,7 @@ haploUI(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{win_par, pmap_obj, phe_mx, cov_df, K_chr, analyses_df, covar, analyses_tbl, peaks, project_info, allele_info}{reactive arguments}
+\item{win_par, pmap_obj, phe_mx, cov_df, K_chr, analyses_df, covar, analyses_tbl, peaks_tbl, project_info, allele_info}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

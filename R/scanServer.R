@@ -1,6 +1,6 @@
-#' Shiny coefficient analysis and plot module
+#' Shiny Scan Module
 #'
-#' Shiny module for scan1 LOD and coefficient plots, with interfaces \code{scanCoefUI} and  \code{scanCoefOutput}.
+#' Shiny module for scan1 LOD and coefficient plots, with interfaces \code{scanUI} and  \code{scanOutput}.
 #'
 #' @param id identifier for shiny reactive
 #' @param job_par,win_par,phe_mx,cov_df,probs_obj,K_chr,analyses_df,project_info,allele_info reactive arguments
@@ -22,7 +22,7 @@
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #' @importFrom qtl2mediate scan1covar
-scanCoefServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
+scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
                           analyses_df, project_info, allele_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -146,36 +146,7 @@ scanCoefServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_ch
              Summary = DT::dataTableOutput(ns("effSummary")))
     })
     
-    ## Downloads.
-    output$downloadData <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0("sum_effects_", win_par$chr_id, ".csv")) },
-      content = function(file) {
-        shiny::req(eff_obj(), scan_obj(), probs_obj())
-        utils::write.csv(summary(eff_obj(), scan_obj(), probs_obj()$map), file)
-      }
-    )
-    output$downloadPlot <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0("scan_", win_par$chr_id, ".pdf")) },
-      content = function(file) {
-        shiny::req(win_par$chr_id, allele_info())
-        effs <- shiny::req(eff_obj())
-        scans <- shiny::req(scan_obj())
-        win <- shiny::req(input$scan_window)
-        map <- shiny::req(probs_obj())$map
-        grDevices::pdf(file, width=9,height=9)
-        print(ggplot2::autoplot(scans, map,
-                                lodcolumn = seq_along(names(effs)),
-                                chr = win_par$chr_id,
-                                xlim = win))
-        for(pheno in names(effs)) {
-          plot_eff(pheno, effs, map, scans, win,
-                   addlod = TRUE, allele_info())
-        }
-        grDevices::dev.off()
-      }
-    )
+    
     output$blups_input <- shiny::renderUI({
       shiny::checkboxInput(ns("blups"), "BLUPs?")
     })
@@ -184,11 +155,57 @@ scanCoefServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_ch
                           c("LOD","Effects","LOD & Effects","Summary"),
                           input$button)
     })
+    
+    ## Downloads.
+    filepath <- shiny::reactive({
+      # Catch if `chr_id` is not valid and return "".
+      tryCatch(file.path(paste0("scan_", shiny::req(win_par$chr_id))),
+               error = function(e) return(""))
+    })
+    download_Plot <- shiny::reactiveValues()
+    download_Plot$scan <- shiny::reactive({
+      shiny::req(win_par$chr_id, allele_info())
+      effs <- shiny::req(eff_obj())
+      scans <- shiny::req(scan_obj())
+      win <- shiny::req(input$scan_window)
+      map <- shiny::req(probs_obj())$map
+      ggplot2::autoplot(scans, map, lodcolumn = seq_along(names(effs)),
+                        chr = shiny::req(win_par$chr_id), xlim = win)
+    })
+    # Trick to get Effect plots into `download_Plot` reactiveValues.
+    plot_effs <- shiny::reactive({
+      # Catch if not valid and return NULL.
+      effs <- tryCatch(shiny::req(eff_obj()), error = function(e) return(NULL))
+      for(pheno in names(effs)) {
+        download_Plot[[pheno]] <- shiny::reactive({
+          shiny::req(win_par$chr_id, allele_info())
+          scans <- shiny::req(scan_obj())
+          win <- shiny::req(input$scan_window)
+          map <- shiny::req(probs_obj())$map
+          plot_eff(pheno, effs, map, scans, win, addlod = TRUE, allele_info())
+        })
+      }
+    })
+    shiny::isolate(plot_effs())
+    download_list <- shiny::reactiveValues(
+      filename = shiny::isolate(filepath()),
+      Plot = download_Plot,
+      Table = shiny::reactiveValues(
+        scan = shiny::reactive({
+          shiny::req(eff_obj(), scan_obj(), probs_obj())
+          summary(eff_obj(), scan_obj(), probs_obj()$map)
+        }))
+    )
+    downloadServer(ns("download"), download_list,
+                   selected_item = shiny::reactive("scan"),
+                   plot_table = shiny::reactive(input$plot_table),
+                   title_download = shiny::reactive("Scan"))
+    browser()
   })
 }
 #' @export
-#' @rdname scanCoefServer
-scanCoefUI <- function(id) {
+#' @rdname scanServer
+scanUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::strong("Genome Scans"),
@@ -197,13 +214,12 @@ scanCoefUI <- function(id) {
       shiny::column(6, shiny::uiOutput(ns("blups_input")))),
     shiny::uiOutput(ns("pheno_choice")),
     shiny::uiOutput(ns("win_choice")),
-    shiny::fluidRow(
-      shiny::column(6, shiny::downloadButton(ns("downloadData"), "CSV")),
-      shiny::column(6, shiny::downloadButton(ns("downloadPlot"), "Plots"))))
+    shiny::selectInput(ns("plot_table"), "", c("Plot","Table")),
+    downloadOutput(ns("download")))      # downloadButton, filename
 }
 #' @export
-#' @rdname scanCoefServer
-scanCoefOutput <- function(id) {
+#' @rdname scanServer
+scanOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("LOD")),

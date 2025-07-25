@@ -1,6 +1,6 @@
 #' Shiny peaks module
 #'
-#' Shiny module for peaks selection, with interfaces \code{peaksInput}, \code{peaksUI} and  \code{peaksOutput}.
+#' Shiny module for peaks selection, with interfaces \code{peakInput}, \code{peakUI} and  \code{peakOutput}.
 #'
 #' @param id identifier for shiny reactive
 #' @param set_par,pheno_type,peaks_tbl,pmap_obj,project_info reactive arguments
@@ -17,7 +17,85 @@
 #'             numericInput renderUI req selectInput strong tagList textInput
 #'             uiOutput updateNumericInput updateSelectInput
 #' @importFrom rlang .data
-peaksServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, 
+peakApp <- function() {
+  projects <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_sidebar(
+    title =  "Test Peak",
+    sidebar = bslib::sidebar(
+      projectUI("project"),
+      shiny::uiOutput("pheno_group_input"),
+      shiny::uiOutput("dataset_input"),
+      peakInput("peak"),
+      peakUI("peak")),
+    shiny::uiOutput("win_par"),
+    peakOutput("peak")
+  )
+  server <- function(input, output, session) {
+    projects_info <- shiny::reactive({projects})
+
+    peaks_tbl <- shiny::reactive({
+      shiny::req(project_info())
+      read_project(project_info(), "peaks")
+    })
+    pmap_obj <- shiny::reactive({
+      shiny::req(project_info())
+      read_project(project_info(), "pmap")
+    })
+    analyses_tbl <- shiny::reactive({
+      shiny::req(project_info())
+      ## The analyses_tbl should only have one row per pheno.
+      read_project(project_info(), "analyses")
+    })
+    # Select phenotype dataset
+    pheno_group <- shiny::reactive({
+      shiny::req(project_info())
+      sort(unique(shiny::req(analyses_tbl())$pheno_group))
+    }, label = "pheno_group")
+    pheno_type <- shiny::reactive({
+      shiny::req(project_info())
+      phe_gp <- shiny::req(input$pheno_group)
+      analyses_group <- 
+        dplyr::filter(
+          shiny::req(analyses_tbl()),
+          pheno_group %in% phe_gp)
+      sort(unique(analyses_group$pheno_type))
+    })
+    output$pheno_group_input <- shiny::renderUI({
+      shiny::req(choices <- pheno_group())
+      if(is.null(selected <- input$pheno_group)) {
+        selected <- choices[1]
+      }
+      shiny::selectInput("pheno_group", "",
+                         choices = as.list(choices),
+                         selected = selected,
+                         multiple = TRUE)
+    })
+    output$dataset_input <- shiny::renderUI({
+      shiny::req(project_info())
+      choices <- c("all", shiny::req(pheno_type()))
+      if(is.null(selected <- input$dataset))
+        selected <- NULL
+      shiny::selectInput("dataset", "Phenotype Set",
+                         choices = as.list(choices),
+                         selected = selected,
+                         multiple = TRUE)
+    })
+    
+    project_info <- projectServer("project", projects_info)
+    win_par <- peakServer("peak", input, pheno_type, peaks_tbl, pmap_obj, 
+                          project_info)
+    
+    output$win_par <- shiny::renderUI({
+      paste("win_par: chr=", win_par$chr_id,
+            ", peak=", win_par$peak_Mbp,
+            ", window=", win_par$window_Mbp)
+    })
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname peakApp
+peakServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, 
                        project_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -145,8 +223,8 @@ peaksServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj,
   })
 }
 #' @export
-#' @rdname peaksServer
-peaksInput <- function(id) {
+#' @rdname peakApp
+peakInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::checkboxInput(ns("local"), "Local Scan in Window?", TRUE),
@@ -157,15 +235,15 @@ peaksInput <- function(id) {
     ))
 }
 #' @export
-#' @rdname peaksServer
-peaksUI <- function(id) {
+#' @rdname peakApp
+peakUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     hotspotInput(ns("hotspot")))
 }
 #' @export
-#' @rdname peaksServer
-peaksOutput <- function(id) {
+#' @rdname peakApp
+peakOutput <- function(id) {
   ns <- shiny::NS(id)
   hotspotOutput(ns("hotspot"))
 }

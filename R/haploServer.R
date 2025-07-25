@@ -3,7 +3,7 @@
 #' Shiny module for analysis based on haplotype alleles, with interface \code{haploUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param win_par,pmap_obj,phe_mx,cov_df,K_chr,analyses_df,covar,analyses_tbl,peaks,project_info,allele_info reactive arguments
+#' @param win_par,pmap_obj,phe_mx,cov_df,K_chr,analyses_df,covar,analyses_tbl,peaks_tbl,project_info,allele_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -15,7 +15,7 @@
 #'             req sidebarPanel strong tagList textOutput uiOutput
 haploServer <- function(id, win_par, pmap_obj, 
                        phe_mx, cov_df, K_chr, analyses_df, 
-                       covar, analyses_tbl, peaks,
+                       covar, analyses_tbl, peaks_tbl,
                        project_info, allele_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -24,7 +24,7 @@ haploServer <- function(id, win_par, pmap_obj,
     probs_obj <- probsServer("probs", win_par, project_info)
     
     ## Genome Scan.
-    scanCoefServer("hap_scan", input, win_par, phe_mx, cov_df, probs_obj, K_chr,
+    scanServer("hap_scan", input, win_par, phe_mx, cov_df, probs_obj, K_chr,
                   analyses_df, project_info, allele_info)
     
     ## SNP Association
@@ -33,7 +33,7 @@ haploServer <- function(id, win_par, pmap_obj,
     
     ## Mediation
     mediateServer("mediate", input, win_par, patterns, phe_mx, cov_df, probs_obj, K_chr,
-                 analyses_df, pmap_obj, covar, analyses_tbl, peaks, project_info, allele_info)
+                 analyses_df, pmap_obj, covar, analyses_tbl, peaks_tbl, project_info, allele_info)
     
     output$allele_names <- shiny::renderText({
       shiny::req(allele_info())
@@ -42,14 +42,14 @@ haploServer <- function(id, win_par, pmap_obj,
     
     output$hap_input <- shiny::renderUI({
       switch(shiny::req(input$button),
-             "Genome Scans"    = scanCoefUI(ns("hap_scan")),
+             "Genome Scans"    = scanUI(ns("hap_scan")),
              "SNP Association" =,
              "Allele Pattern"  = snpSetupUI(ns("snp_setup")),
              "Mediation"       = mediateUI(ns("mediate")))
     })
     output$hap_output <- shiny::renderUI({
       switch(shiny::req(input$button),
-             "Genome Scans"    = scanCoefOutput(ns("hap_scan")),
+             "Genome Scans"    = scanOutput(ns("hap_scan")),
              "SNP Association" = ,
              "Allele Pattern"  = snpSetupOutput(ns("snp_setup")),
              "Mediation"       = mediateOutput(ns("mediate")))

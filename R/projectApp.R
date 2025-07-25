@@ -1,4 +1,4 @@
-#' Shiny project module
+#' Shiny Project App
 #'
 #' Shiny module for selection of project, with interface \code{projectUI}.
 #'
@@ -11,9 +11,30 @@
 #' @return No return value; called for side effects.
 #'
 #' @export
-#' @importFrom shiny isTruthy moduleServer NS renderUI selectInput uiOutput
+#' @importFrom shiny isTruthy moduleServer NS renderTable renderUI selectInput
+#'             tableOutput uiOutput
 #' @importFrom dplyr distinct filter
 #' @importFrom rlang .data
+#' @importFrom bslib page
+#' @importFrom DT dataTableOutput renderDataTable
+projectApp <- function() {
+  projects <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page(
+    title =  "Test Project",
+    projectUI("project"),
+    shiny::tableOutput("table")
+  )
+  server <- function(input, output, session) {
+    projects_info <- shiny::reactive({projects})
+    project_info <- projectServer("project", projects_info)
+    message("project_info ", 
+            paste(shiny::isolate(names(project_info())), collapse = ", "))
+    output$table <- shiny::renderTable(project_info())
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname projectApp
 projectServer <- function(id, projects_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -45,7 +66,7 @@ projectServer <- function(id, projects_info) {
   })
 }
 #' @export
-#' @rdname projectServer
+#' @rdname projectApp
 projectUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("project_input"))

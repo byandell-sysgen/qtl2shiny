@@ -1,4 +1,4 @@
-#' Shiny hotspot module
+#' Shiny Hotspot App
 #'
 #' Shiny module to view hotspots for peak selection, with interfaces \code{hotspotInput} and  \code{hotspotOutput}.
 #'
@@ -15,11 +15,90 @@
 #' @export
 #' @importFrom dplyr arrange desc distinct filter
 #' @importFrom shiny checkboxInput column fluidRow isTruthy moduleServer
-#'             numericInput observeEvent reactive renderPlot renderUI req
-#'             selectInput setProgress strong tagList uiOutput
-#'             updateNumericInput updateSelectInput withProgress
+#'             numericInput observeEvent reactive renderPlot renderTable
+#'             renderUI req selectInput setProgress strong tableOutput tagList
+#'             uiOutput updateNumericInput updateSelectInput withProgress
 #' @importFrom DT dataTableOutput renderDataTable 
 #' @importFrom rlang .data
+#' @importFrom bslib page_sidebar sidebar
+hotspotApp <- function() {
+  projects <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_sidebar(
+    title =  "Test Hotspot",
+    sidebar = bslib::sidebar(
+      projectUI("project"),
+      shiny::uiOutput("pheno_group_input"),
+      shiny::uiOutput("dataset_input"),
+      hotspotInput("hotspot")),
+    hotspotOutput("hotspot"),
+    shiny::h4("Returned Scan Table"),
+    shiny::tableOutput("scan_tbl")
+  )
+  server <- function(input, output, session) {
+    projects_info <- shiny::reactive({projects})
+    
+    peaks_tbl <- shiny::reactive({
+      shiny::req(project_info())
+      read_project(project_info(), "peaks")
+    })
+    pmap_obj <- shiny::reactive({
+      shiny::req(project_info())
+      read_project(project_info(), "pmap")
+    })
+    analyses_tbl <- shiny::reactive({
+      shiny::req(project_info())
+      ## The analyses_tbl should only have one row per pheno.
+      read_project(project_info(), "analyses")
+    })
+    # Select phenotype dataset
+    pheno_group <- shiny::reactive({
+      shiny::req(project_info())
+      sort(unique(shiny::req(analyses_tbl())$pheno_group))
+    }, label = "pheno_group")
+    pheno_type <- shiny::reactive({
+      shiny::req(project_info())
+      phe_gp <- shiny::req(input$pheno_group)
+      analyses_group <- 
+        dplyr::filter(
+          shiny::req(analyses_tbl()),
+          pheno_group %in% phe_gp)
+      sort(unique(analyses_group$pheno_type))
+    })
+    output$pheno_group_input <- shiny::renderUI({
+      shiny::req(choices <- pheno_group())
+      if(is.null(selected <- input$pheno_group)) {
+        selected <- choices[1]
+      }
+      shiny::selectInput("pheno_group", "",
+                         choices = as.list(choices),
+                         selected = selected,
+                         multiple = TRUE)
+    })
+    output$dataset_input <- shiny::renderUI({
+      shiny::req(project_info())
+      choices <- c("all", shiny::req(pheno_type()))
+      if(is.null(selected <- input$dataset))
+        selected <- NULL
+      shiny::selectInput("dataset", "Phenotype Set",
+                         choices = as.list(choices),
+                         selected = selected,
+                         multiple = TRUE)
+    })
+    
+    project_info <- projectServer("project", projects_info)
+    # Need `pheno_type` from `setupServer`.
+    # Need `set_par$pheno_group` and `set_par$dataset` from `setupServer`.
+    # May all change with new data organization.
+    # Probably don't have all we need yet.
+    scan_tbl <- hotspotServer("hotspot", input, pheno_type, peaks_tbl,
+                              pmap_obj, project_info)
+    
+    output$scan_tbl <- shiny::renderTable(scan_tbl())
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname hotspotApp
 hotspotServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -105,6 +184,7 @@ hotspotServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_
         DT::dataTableOutput(ns("peak_tbl"))
       }
     })
+    # ** This is causing problems.**
     output$peak_plot <- shiny::renderPlot({
       shiny::req(scan_obj())
       window_Mbp <- shiny::req(input$window_Mbp)
@@ -168,7 +248,7 @@ hotspotServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_
   })
 }
 #' @export
-#' @rdname hotspotServer
+#' @rdname hotspotApp
 hotspotInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -181,7 +261,7 @@ hotspotInput <- function(id) {
       shiny::column(4, shiny::uiOutput(ns("window_Mbp_input")))))
 }
 #' @export
-#' @rdname hotspotServer
+#' @rdname hotspotApp
 hotspotOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(

@@ -12,15 +12,63 @@
 #'
 #' @export
 #' @importFrom dplyr filter 
-#' @importFrom shiny checkboxInput isTruthy mainPanel moduleServer NS
+#' @importFrom shiny checkboxInput isTruthy moduleServer NS
 #'             observeEvent radioButtons reactive renderText renderUI req
-#'             sidebarPanel strong tagList textOutput uiOutput
-setupServer <- function(id, peaks_tbl, pmap_obj, analyses_tbl, 
-                       cov_df, projects_info) {
-  shiny::moduleServer(id, function(input, output, session) {
-    ns <- session$ns
+#'             strong tagList textOutput uiOutput
+#' @importFrom bslib page_sidebar sidebar
+setupApp <- function() {
+  projects <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_sidebar(
+    title =  "Test Setup",
+    sidebar = bslib::sidebar(
+      setupInput("setup"),
+      projectUI("project"),
+      setupUI("setup")),
+    shiny::uiOutput("set_par"),
+    setupOutput("setup")
+  )
+  server <- function(input, output, session) {
+    projects_info <- shiny::reactive({projects})
+
+    peaks_tbl <- shiny::reactive({
+      shiny::req(project_info())
+      read_project(project_info(), "peaks")
+    })
+    pmap_obj <- shiny::reactive({
+      shiny::req(project_info())
+      read_project(project_info(), "pmap")
+    })
+    analyses_tbl <- shiny::reactive({
+      shiny::req(project_info())
+      ## The analyses_tbl should only have one row per pheno.
+      read_project(project_info(), "analyses")
+    })
+    covar <- shiny::reactive({
+      shiny::req(project_info())
+      read_project(project_info(), "covar")
+    })
+    cov_df <- shiny::reactive({
+      analyses <- analyses_df() 
+      if(is.null(analyses)) return(NULL)
+      qtl2mediate::get_covar(covar(), analyses_df())
+    })
     
     project_info <- projectServer("project", projects_info)
+    set_par <- setupServer("setup", peaks_tbl, pmap_obj, analyses_tbl, cov_df,
+                           project_info)
+
+    output$set_par <- shiny::renderUI({
+      paste("pheno_names: ", paste(set_par$pheno_names(), collapse = ", "))
+    })
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname setupApp
+setupServer <- function(id, peaks_tbl, pmap_obj, analyses_tbl, 
+                       cov_df, project_info) {
+  shiny::moduleServer(id, function(input, output, session) {
+    ns <- session$ns
     
     # Select phenotype dataset
     pheno_group <- shiny::reactive({
@@ -92,7 +140,7 @@ setupServer <- function(id, peaks_tbl, pmap_obj, analyses_tbl,
     })
     
     ## Locate Peak.
-    win_par <- peaksServer("peaks", input, pheno_type, peaks_tbl, pmap_obj, 
+    win_par <- peakServer("peak", input, pheno_type, peaks_tbl, pmap_obj, 
                           project_info)
     
     chr_pos <- shiny::reactive({
@@ -136,39 +184,21 @@ setupServer <- function(id, peaks_tbl, pmap_obj, analyses_tbl,
                           shiny::req(project_info()$project),
                           "\n"))
     })
-    output$project_name2 <- renderUI({
-      shiny::strong(paste("Project:", 
-                          shiny::req(project_info()$project),
-                          "\n"))
-    })
-    output$title <- shiny::renderUI({
-      switch(shiny::req(input$radio),
-             Region = {
-               shiny::tagList(
-                 projectUI(ns("project")),
-                 shiny::strong(shiny::req(input$radio)))
-             },
-             Phenotypes = {
-               shiny::tagList(
-                 shiny::uiOutput(ns("project_name2")),
-                 shiny::strong(shiny::req(input$radio)))
-             })
-    })
     output$sidebar_setup <- shiny::renderUI({
       switch(shiny::req(input$radio),
              Phenotypes = shiny::tagList(
                shiny::uiOutput(ns("filter")),
                phenoUI(ns("pheno"))),
-             Region     = peaksInput(ns("peaks")))
+             Region     = peakInput(ns("peak")))
     })
     output$sidebar_hot <- shiny::renderUI({
       switch(shiny::req(input$radio),
-             Region     = peaksUI(ns("peaks")))
+             Region     = peakUI(ns("peak")))
     })
     output$main_setup <- shiny::renderUI({
       switch(shiny::req(input$radio),
              Phenotypes = phenoOutput(ns("pheno")),
-             Region     = peaksOutput(ns("peaks")))
+             Region     = peakOutput(ns("peak")))
     })
     
     output$radio_input <- shiny::renderUI({
@@ -179,15 +209,14 @@ setupServer <- function(id, peaks_tbl, pmap_obj, analyses_tbl,
     })
     
     ## Return.
-    shiny::reactive({
-      list(project_info = project_info(),
-           pheno_names = input$pheno_names,
-           win_par = win_par)
-    })
+    pheno_names <- shiny::reactive(input$pheno_names)
+    shiny::reactiveValues(
+      pheno_names = pheno_names,
+      win_par = win_par)
   })
 }
 #' @export
-#' @rdname setupServer
+#' @rdname setupApp
 setupInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -197,20 +226,22 @@ setupInput <- function(id) {
   )
 }
 #' @export
-#' @rdname setupServer
+#' @rdname setupApp
 setupUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::sidebarPanel(
-      shiny::uiOutput(ns("title")),
-      shiny::uiOutput(ns("radio_input")),
-      shiny::uiOutput(ns("sidebar_setup")),
-      shiny::uiOutput(ns("pheno_names_input")),
-      shiny::uiOutput(ns("pheno_group_input")),
-      shiny::uiOutput(ns("dataset_input")),
-      shiny::uiOutput(ns("sidebar_hot")),
-      shiny::uiOutput(ns("version"))
-    ),
-    shiny::mainPanel(shiny::uiOutput(ns("main_setup")))
+    shiny::uiOutput(ns("radio_input")),
+    shiny::uiOutput(ns("sidebar_setup")),
+    shiny::uiOutput(ns("pheno_names_input")),
+    shiny::uiOutput(ns("pheno_group_input")),
+    shiny::uiOutput(ns("dataset_input")),
+    shiny::uiOutput(ns("sidebar_hot")),
+    shiny::uiOutput(ns("version"))
   )
+}
+#' @export
+#' @rdname setupApp
+setupOutput <- function(id) {
+  ns <- shiny::NS(id)
+  shiny::uiOutput(ns("main_setup"))
 }

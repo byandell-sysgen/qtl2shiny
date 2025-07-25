@@ -21,10 +21,7 @@ dashServer <- function(id, projects_info) {
   ns <- session$ns
   
   ## Data Setup
-  project_info <- reactive({ 
-    shiny::req(set_par()$project_info) 
-  })
-  peaks <- shiny::reactive({
+  peaks_tbl <- shiny::reactive({
     shiny::req(project_info())
     read_project(project_info(), "peaks")
   })
@@ -47,14 +44,15 @@ dashServer <- function(id, projects_info) {
     read_project(project_info(), "kinship")
   })
   
-  set_par <- setupServer("setup", peaks, pmap_obj, analyses_tbl, cov_df,
-                         projects_info)
+  project_info <- projectServer("project", projects_info)
+  set_par <- setupServer("setup", peaks_tbl, pmap_obj, analyses_tbl, cov_df,
+                         project_info)
   
   ## Continue with Plots and Analysis.
   
   ## Phenotypes and Covariates.
   analyses_df <- shiny::reactive({
-    phename <- set_par()$pheno_names
+    phename <- set_par$pheno_names()
     if(is.null(phename)) return(NULL)
     dplyr::filter(analyses_tbl(), .data$pheno %in% phename)
   })
@@ -72,7 +70,7 @@ dashServer <- function(id, projects_info) {
   
   ## Set up shiny::reactives for scan1 module.
   K_chr <- shiny::reactive({
-    kinship()[set_par()$win_par$chr_id]
+    kinship()[set_par$win_par$chr_id]
   })
   
   ## Allele names.
@@ -82,11 +80,11 @@ dashServer <- function(id, projects_info) {
   })
   
   ## Haplotype Analysis.
-  haploServer("hap_scan", set_par()$win_par, pmap_obj, phe_mx, cov_df, K_chr,
-             analyses_df, covar, analyses_tbl, peaks, project_info, allele_info)
+  haploServer("hap_scan", set_par$win_par, pmap_obj, phe_mx, cov_df, K_chr,
+             analyses_df, covar, analyses_tbl, peaks_tbl, project_info, allele_info)
   
   ## Diplotype Analysis.
-  diploServer("dip_scan", set_par()$win_par, phe_mx, cov_df, K_chr, analyses_df,
+  diploServer("dip_scan", set_par$win_par, phe_mx, cov_df, K_chr, analyses_df,
              project_info, allele_info)
 })
 }
