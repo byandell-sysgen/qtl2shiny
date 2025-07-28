@@ -30,9 +30,7 @@ hotspotApp <- function() {
       shiny::uiOutput("pheno_group_input"),
       shiny::uiOutput("dataset_input"),
       hotspotInput("hotspot")),
-    hotspotOutput("hotspot"),
-    shiny::h4("Returned Scan Table"),
-    shiny::tableOutput("scan_tbl")
+    hotspotOutput("hotspot")
   )
   server <- function(input, output, session) {
     projects_info <- shiny::reactive({projects})
@@ -92,8 +90,6 @@ hotspotApp <- function() {
     # Probably don't have all we need yet.
     scan_tbl <- hotspotServer("hotspot", input, pheno_type, peaks_tbl,
                               pmap_obj, project_info)
-    
-    output$scan_tbl <- shiny::renderTable(scan_tbl())
   }
   shiny::shinyApp(ui, server)
 }
