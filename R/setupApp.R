@@ -3,7 +3,7 @@
 #' Shiny module for phenotype selection, with interfaces \code{setupInput} and  \code{setupUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param peaks_tbl,pmap_obj,analyses_tbl,cov_df,projects_info reactive arguments
+#' @param peak_df,pmap_obj,analyses_tbl,cov_df,projects_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -30,7 +30,7 @@ setupApp <- function() {
   server <- function(input, output, session) {
     projects_info <- shiny::reactive({projects})
 
-    peaks_tbl <- shiny::reactive({
+    peak_df <- shiny::reactive({
       shiny::req(project_info())
       read_project(project_info(), "peaks")
     })
@@ -54,7 +54,7 @@ setupApp <- function() {
     })
     
     project_info <- projectServer("project", projects_info)
-    set_par <- setupServer("setup", peaks_tbl, pmap_obj, analyses_tbl, cov_df,
+    set_par <- setupServer("setup", peak_df, pmap_obj, analyses_tbl, cov_df,
                            project_info)
 
     output$set_par <- shiny::renderUI({
@@ -65,12 +65,12 @@ setupApp <- function() {
 }
 #' @export
 #' @rdname setupApp
-setupServer <- function(id, peaks_tbl, pmap_obj, analyses_tbl, 
+setupServer <- function(id, peak_df, pmap_obj, analyses_tbl, 
                        cov_df, project_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # Select phenotype dataset
+    # Select `pheno_type`.
     pheno_group <- shiny::reactive({
       shiny::req(project_info())
       sort(unique(shiny::req(analyses_tbl())$pheno_group))
@@ -94,6 +94,7 @@ setupServer <- function(id, peaks_tbl, pmap_obj, analyses_tbl,
                          selected = selected,
                          multiple = TRUE)
     })
+    # Select `dataset`.
     output$dataset_input <- shiny::renderUI({
       shiny::req(project_info())
       choices <- c("all", shiny::req(pheno_type()))
@@ -111,12 +112,12 @@ setupServer <- function(id, peaks_tbl, pmap_obj, analyses_tbl,
       set_analyses(input$dataset, input$pheno_group, analyses_tbl())
     })
     # Restrict peaks to region.
-    peaks_df <- shiny::reactive({
-      shiny::req(project_info(), analyses_set(), peaks_tbl())
+    peak_dataset_df <- shiny::reactive({
+      shiny::req(project_info(), analyses_set(), peak_df())
       chr_id <- shiny::req(win_par$chr_id)
       peak_Mbp <- shiny::req(win_par$peak_Mbp)
       window_Mbp <- shiny::req(win_par$window_Mbp)
-      peaks_in_pos(analyses_set(), peaks_tbl(),
+      peaks_in_pos(analyses_set(), peak_df(),
                    shiny::isTruthy(input$filter),
                    chr_id, peak_Mbp, window_Mbp)
     })
@@ -131,7 +132,7 @@ setupServer <- function(id, peaks_tbl, pmap_obj, analyses_tbl,
     # Pick phenotype names
     output$pheno_names_input <- shiny::renderUI({
       shiny::req(project_info(), win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
-      out <- select_phenames(input$pheno_names, peaks_df(), win_par$local,
+      out <- select_phenames(input$pheno_names, peak_dataset_df(), win_par$local,
                              win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
       shiny::selectInput(ns("pheno_names"), out$label,
                          choices = out$choices,
@@ -140,7 +141,7 @@ setupServer <- function(id, peaks_tbl, pmap_obj, analyses_tbl,
     })
     
     ## Locate Peak.
-    win_par <- peakServer("peak", input, pheno_type, peaks_tbl, pmap_obj, 
+    win_par <- peakServer("peak", input, pheno_type, peak_df, pmap_obj, 
                           project_info)
     
     chr_pos <- shiny::reactive({
@@ -164,7 +165,7 @@ setupServer <- function(id, peaks_tbl, pmap_obj, analyses_tbl,
         num_pheno(input$pheno_names, analyses_tbl())
       })
       shiny::req(win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
-      out <- select_phenames("none", peaks_df(), win_par$local,
+      out <- select_phenames("none", peak_dataset_df(), win_par$local,
                              win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
       updateSelectInput(session, "pheno_names", out$label,
                         choices = out$choices, selected = "none")
@@ -176,7 +177,7 @@ setupServer <- function(id, peaks_tbl, pmap_obj, analyses_tbl,
     })
     
     ## Use window as input to phenoServer.
-    phenoServer("pheno", input, win_par, peaks_df, analyses_tbl, cov_df, project_info)
+    phenoServer("pheno", input, win_par, peak_dataset_df, analyses_tbl, cov_df, project_info)
     
     ## Setup input logic.
     output$project_name <- renderUI({

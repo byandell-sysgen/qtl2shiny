@@ -1,20 +1,20 @@
 #' @importFrom dplyr arrange desc distinct filter
 #' @importFrom rlang .data
 #' 
-select_phenames <- function(phenames, peaks_df, local,
+select_phenames <- function(phenames, peak_df, local,
                             chr_id, peak_Mbp, window_Mbp) {
   selected <- phenames
-  if(shiny::isTruthy(peaks_df) && nrow(peaks_df)) {
-    peaks_df <- dplyr::filter(peaks_df, 
+  if(shiny::isTruthy(peak_df) && nrow(peak_df)) {
+    peak_df <- dplyr::filter(peak_df, 
                               .data$chr == chr_id)
     if(shiny::isTruthy(local)) {
-      peaks_df <- dplyr::filter(peaks_df, 
+      peak_df <- dplyr::filter(peak_df, 
                                 .data$pos >= peak_Mbp - window_Mbp,
                                 .data$pos <= peak_Mbp + window_Mbp)
     }
     phenames <- dplyr::distinct(
       dplyr::arrange(
-        peaks_df,
+        peak_df,
         dplyr::desc(.data$lod)),
       .data$pheno)$pheno
   }

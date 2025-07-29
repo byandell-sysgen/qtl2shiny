@@ -3,7 +3,7 @@
 #' Shiny module for phenotype selection, with interfaces \code{phenoUI} and  \code{phenoOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param set_par,win_par,peaks_df,analyses_tbl,cov_df,project_info reactive arguments
+#' @param set_par,win_par,peak_df,analyses_tbl,cov_df,project_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -13,7 +13,7 @@
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom shiny moduleServer NS radioButtons reactive req tagList uiOutput
 #' @importFrom rlang .data
-phenoServer <- function(id, set_par, win_par, peaks_df, analyses_tbl, cov_df,
+phenoServer <- function(id, set_par, win_par, peak_df, analyses_tbl, cov_df,
                         project_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -21,7 +21,7 @@ phenoServer <- function(id, set_par, win_par, peaks_df, analyses_tbl, cov_df,
     output$peaks <- DT::renderDataTable({
       dplyr::arrange(
         dplyr::select(
-          peaks_df(), .data$pheno, .data$chr, .data$pos, .data$lod),
+          peak_df(), .data$pheno, .data$chr, .data$pos, .data$lod),
         dplyr::desc(.data$lod))
     }, options = list(scrollX = TRUE, pageLength = 5,
                       lengthMenu = c(5,10,25)))

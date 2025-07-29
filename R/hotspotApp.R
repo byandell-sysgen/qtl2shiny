@@ -3,7 +3,7 @@
 #' Shiny module to view hotspots for peak selection, with interfaces \code{hotspotInput} and  \code{hotspotOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param set_par,pheno_type,peaks_tbl,pmap_obj,project_info reactive arguments
+#' @param set_par,pheno_type,peak_df,pmap_obj,project_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -35,7 +35,7 @@ hotspotApp <- function() {
   server <- function(input, output, session) {
     projects_info <- shiny::reactive({projects})
     
-    peaks_tbl <- shiny::reactive({
+    peak_df <- shiny::reactive({
       shiny::req(project_info())
       read_project(project_info(), "peaks")
     })
@@ -48,7 +48,7 @@ hotspotApp <- function() {
       ## The analyses_tbl should only have one row per pheno.
       read_project(project_info(), "analyses")
     })
-    # Select phenotype dataset
+    # Select `pheno_type`
     pheno_group <- shiny::reactive({
       shiny::req(project_info())
       sort(unique(shiny::req(analyses_tbl())$pheno_group))
@@ -72,6 +72,7 @@ hotspotApp <- function() {
                          selected = selected,
                          multiple = TRUE)
     })
+    # Select `dataset`.
     output$dataset_input <- shiny::renderUI({
       shiny::req(project_info())
       choices <- c("all", shiny::req(pheno_type()))
@@ -88,14 +89,14 @@ hotspotApp <- function() {
     # Need `set_par$pheno_group` and `set_par$dataset` from `setupServer`.
     # May all change with new data organization.
     # Probably don't have all we need yet.
-    scan_tbl <- hotspotServer("hotspot", input, pheno_type, peaks_tbl,
+    scan_tbl <- hotspotServer("hotspot", input, pheno_type, peak_df,
                               pmap_obj, project_info)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname hotspotApp
-hotspotServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_info) {
+hotspotServer <- function(id, set_par, pheno_type, peak_df, pmap_obj, project_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -106,8 +107,8 @@ hotspotServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_
                                selected = NULL)
       shiny::updateNumericInput(session, "window_Mbp", "width",
                                 1, 0.1, 100)
-      if(shiny::isTruthy(peaks_tbl())) {
-        value <- minLOD(NULL, peaks_tbl())
+      if(shiny::isTruthy(peak_df())) {
+        value <- minLOD(NULL, peak_df())
         shiny::updateNumericInput(session, "minLOD", "min LOD", value, min = 0, step = 0.5)
       }
     })
@@ -156,7 +157,7 @@ hotspotServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_
       shiny::req(project_info(), input$window_Mbp, input$minLOD)
       shiny::withProgress(message = 'Hotspot scan ...', value = 0, {
         shiny::setProgress(1)
-        hotspot_wrap(pmap_obj(), peaks_tbl(), input$window_Mbp, input$minLOD,
+        hotspot_wrap(pmap_obj(), peak_df(), input$window_Mbp, input$minLOD,
                      project_info())
         })
     })
@@ -187,7 +188,7 @@ hotspotServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_
       peak_grp <- set_par$pheno_group
       if(shiny::isTruthy(set_par$dataset)) {
         peak_set <- set_par$dataset
-        dat_sets <- dplyr::distinct(peaks_tbl(), 
+        dat_sets <- dplyr::distinct(peak_df(), 
                                     .data$pheno_type, .data$pheno_group)
         dat_groups <- unique(dplyr::filter(dat_sets,
           .data$pheno_type %in% peak_set)$pheno_group)
@@ -215,27 +216,27 @@ hotspotServer <- function(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_
       })
     })
     output$peak_tbl <- DT::renderDataTable({
-      shiny::req(scan_tbl(), peaks_tbl())
-      peakDataTable(scan_tbl(), peaks_tbl())
+      shiny::req(scan_tbl(), peak_df())
+      peakDataTable(scan_tbl(), peak_df())
     }, escape = FALSE,
     options = list(lengthMenu = c(5,10,20,50), pageLength = 5))
-    output$peaks_tbl <- DT::renderDataTable({
+    output$peak_table <- DT::renderDataTable({
       shiny::req(scan_tbl())
       dplyr::arrange(scan_tbl(), desc(.data$count))
     }, escape = FALSE,
     options = list(lengthMenu = c(5,10,20,50), pageLength = 5))
     
     # Minimum LOD for SNP top values.
-    minLOD <- function(value, peaks_tbl) {
+    minLOD <- function(value, peak_df) {
       if(shiny::isTruthy(value)) {
         value
       } else {
-        max(5.5, round(min(peaks_tbl$lod), 1))
+        max(5.5, round(min(peak_df$lod), 1))
       }
     }
     output$minLOD_input <- shiny::renderUI({
-      shiny::req(peaks_tbl())
-      value <- minLOD(input$minLOD, peaks_tbl())
+      shiny::req(peak_df())
+      value <- minLOD(input$minLOD, peak_df())
       shiny::numericInput(ns("minLOD"), "min LOD", value, min = 0, step = 0.5)
     })
     
@@ -263,6 +264,6 @@ hotspotOutput <- function(id) {
   shiny::tagList(
     shiny::strong("Hotspot Info"),
     shiny::uiOutput(ns("peak_show")),
-    DT::dataTableOutput(ns("peaks_tbl"))
+    DT::dataTableOutput(ns("peak_table"))
   )
 }

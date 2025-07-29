@@ -3,7 +3,7 @@
 #' Shiny module for analysis based on haplotype alleles, with interface \code{haploUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param win_par,pmap_obj,phe_mx,cov_df,K_chr,analyses_df,covar,analyses_tbl,peaks_tbl,project_info,allele_info reactive arguments
+#' @param win_par,pmap_obj,phe_mx,cov_df,K_chr,analyses_df,covar,analyses_tbl,peak_df,project_info,allele_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -15,7 +15,7 @@
 #'             req sidebarPanel strong tagList textOutput uiOutput
 haploServer <- function(id, win_par, pmap_obj, 
                        phe_mx, cov_df, K_chr, analyses_df, 
-                       covar, analyses_tbl, peaks_tbl,
+                       covar, analyses_tbl, peak_df,
                        project_info, allele_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -33,7 +33,7 @@ haploServer <- function(id, win_par, pmap_obj,
     
     ## Mediation
     mediateServer("mediate", input, win_par, patterns, phe_mx, cov_df, probs_obj, K_chr,
-                 analyses_df, pmap_obj, covar, analyses_tbl, peaks_tbl, project_info, allele_info)
+                 analyses_df, pmap_obj, covar, analyses_tbl, peak_df, project_info, allele_info)
     
     output$allele_names <- shiny::renderText({
       shiny::req(allele_info())

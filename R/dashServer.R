@@ -21,7 +21,7 @@ dashServer <- function(id, projects_info) {
   ns <- session$ns
   
   ## Data Setup
-  peaks_tbl <- shiny::reactive({
+  peak_df <- shiny::reactive({
     shiny::req(project_info())
     read_project(project_info(), "peaks")
   })
@@ -45,7 +45,7 @@ dashServer <- function(id, projects_info) {
   })
   
   project_info <- projectServer("project", projects_info)
-  set_par <- setupServer("setup", peaks_tbl, pmap_obj, analyses_tbl, cov_df,
+  set_par <- setupServer("setup", peak_df, pmap_obj, analyses_tbl, cov_df,
                          project_info)
   
   ## Continue with Plots and Analysis.
@@ -81,7 +81,7 @@ dashServer <- function(id, projects_info) {
   
   ## Haplotype Analysis.
   haploServer("hap_scan", set_par$win_par, pmap_obj, phe_mx, cov_df, K_chr,
-             analyses_df, covar, analyses_tbl, peaks_tbl, project_info, allele_info)
+             analyses_df, covar, analyses_tbl, peak_df, project_info, allele_info)
   
   ## Diplotype Analysis.
   diploServer("dip_scan", set_par$win_par, phe_mx, cov_df, K_chr, analyses_df,
