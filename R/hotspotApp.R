@@ -245,7 +245,7 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
 #' @rdname hotspotApp
 hotspotInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
+  shiny::tagList(      # Hotspot Info: peak_ck, chr_ct, minLOD, window_Mbp
     shiny::fluidRow(
       shiny::column(6, shiny::strong("Hotspot Info")),
       shiny::column(6, shiny::checkboxInput(ns("peak_ck"), "plot?", FALSE))),
@@ -258,8 +258,8 @@ hotspotInput <- function(id) {
 #' @rdname hotspotApp
 hotspotOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::strong("Hotspot Info"),
+  shiny::tagList(       # Hotspot Output: peak_show, peak_table
+    shiny::strong("Hotspot Output"),
     shiny::uiOutput(ns("peak_show")),
     DT::dataTableOutput(ns("peak_table"))
   )

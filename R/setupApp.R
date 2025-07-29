@@ -159,7 +159,7 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl, covar,
              Phenotypes = shiny::tagList(
                shiny::uiOutput(ns("filter")),
                phenoUI(ns("pheno"))),
-             Region     = peakInput(ns("peak")))
+             Region     = peakInput(ns("peak"))) # Local Scan: local, chr_id, peak_Mbp, window_Mbp
     })
     output$sidebar_hot <- shiny::renderUI({
       switch(shiny::req(input$radio),

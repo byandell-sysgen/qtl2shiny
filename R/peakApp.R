@@ -227,7 +227,7 @@ peakServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
 #' @rdname peakApp
 peakInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
+  shiny::tagList(  # Local Scan: local, chr_id, peak_Mbp, window_Mbp
     shiny::checkboxInput(ns("local"), "Local Scan in Window?", TRUE),
     shiny::fluidRow(
       shiny::column(4, shiny::uiOutput(ns("chr_id_input"))),
@@ -240,11 +240,11 @@ peakInput <- function(id) {
 peakUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    hotspotInput(ns("hotspot")))
+    hotspotInput(ns("hotspot"))) # Hotspot Info: peak_ck, chr_ct, minLOD, window_Mbp
 }
 #' @export
 #' @rdname peakApp
 peakOutput <- function(id) {
   ns <- shiny::NS(id)
-  hotspotOutput(ns("hotspot"))
+  hotspotOutput(ns("hotspot"))    # Hotspot Output: peak_show, peak_table
 }

@@ -22,6 +22,8 @@ phenoApp <- function() {
       shiny::uiOutput("pheno_group_input"),
       shiny::uiOutput("dataset_input"),
       peakInput("peak"),
+      peakUI("peak"),
+      phenoInput("pheno"),
       phenoUI("pheno")),
     phenoOutput("pheno")
   )
@@ -126,7 +128,7 @@ phenoServer <- function(id, set_par, win_par, peak_df, analyses_tbl, covar,
       shiny::req(project_df(), win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
       out <- select_phenames(input$pheno_names, peak_dataset_df(), win_par$local,
                              win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
-      shiny::selectInput("pheno_names", out$label,
+      shiny::selectInput(ns("pheno_names"), out$label,
                          choices = out$choices,
                          selected = out$selected,
                          multiple = TRUE)
@@ -211,7 +213,6 @@ phenoInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("pheno_names_input")),
-    shiny::uiOutput(ns("radio_input")),
     shiny::uiOutput(ns("filter"))
   )
 }
