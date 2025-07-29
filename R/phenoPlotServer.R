@@ -3,7 +3,7 @@
 #' Shiny module to plot phenotypes, with interface \code{phenoPlotUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param set_par,phe_mx,cov_df reactive arguments
+#' @param pheno_names,phe_mx,cov_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -14,7 +14,7 @@
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom shiny moduleServer NS plotOutput renderPlot renderUI req
 #'             setProgress tagList uiOutput withProgress
-phenoPlotServer <- function(id, set_par, phe_mx, cov_df) {
+phenoPlotServer <- function(id, pheno_names, phe_mx, cov_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -33,7 +33,7 @@ phenoPlotServer <- function(id, set_par, phe_mx, cov_df) {
       # If no df, gives blank area.
       # Better to either do nothing or do plot_null()
       # use uiOutput and renderUI?
-      if(!shiny::isTruthy(set_par$pheno_names))
+      if(!shiny::isTruthy(pheno_names()))
         return(plot_null("need to\nChoose phenotype"))
       shiny::withProgress(message = 'Pheno Plot ...', value = 0, {
         shiny::setProgress(1)

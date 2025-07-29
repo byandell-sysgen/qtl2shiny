@@ -3,7 +3,7 @@
 #' Shiny module for phenotype selection, with interfaces \code{setupInput} and  \code{setupUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param peak_df,pmap_obj,analyses_tbl,cov_df,projects_info reactive arguments
+#' @param peak_df,pmap_obj,analyses_tbl,covar,projects_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -45,19 +45,9 @@ setupApp <- function() {
       shiny::req(project_df())
       read_project(project_df(), "covar")
     })
-    analyses_df <- shiny::reactive({
-      phename <- set_par$pheno_names()
-      if(is.null(phename)) return(NULL)
-      dplyr::filter(analyses_tbl(), .data$pheno %in% phename)
-    })
-    cov_df <- shiny::reactive({
-      analyses <- analyses_df() 
-      if(is.null(analyses)) return(NULL)
-      qtl2mediate::get_covar(covar(), analyses_df())
-    })
-    
+
     project_df <- projectServer("project", projects_df)
-    set_par <- setupServer("setup", peak_df, pmap_obj, analyses_tbl, cov_df,
+    set_par <- setupServer("setup", peak_df, pmap_obj, analyses_tbl, covar,
                            project_df)
 
     output$set_par <- shiny::renderUI({
@@ -68,8 +58,8 @@ setupApp <- function() {
 }
 #' @export
 #' @rdname setupApp
-setupServer <- function(id, peak_df, pmap_obj, analyses_tbl, 
-                       cov_df, project_df) {
+setupServer <- function(id, peak_df, pmap_obj, analyses_tbl, covar,
+                        project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -135,20 +125,8 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl,
                            TRUE)
     })
     
-    # Pick phenotype names
-    output$pheno_names_input <- shiny::renderUI({
-      shiny::req(project_df(), win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
-      out <- select_phenames(input$pheno_names, peak_dataset_df(), win_par$local,
-                             win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
-      shiny::selectInput(ns("pheno_names"), out$label,
-                         choices = out$choices,
-                         selected = out$selected,
-                         multiple = TRUE)
-    })
-    
     ## Locate Peak.
-    win_par <- peakServer("peak", input, peak_df, pmap_obj, 
-                          project_df)
+    win_par <- peakServer("peak", input, peak_df, pmap_obj, project_df)
     
     chr_pos <- shiny::reactive({
       shiny::req(project_df())
@@ -166,24 +144,9 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl,
       versions()
     })
     
-    shiny::observeEvent(project_df(), {
-      output$num_pheno <- shiny::renderText({
-        num_pheno(input$pheno_names, analyses_tbl())
-      })
-      shiny::req(win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
-      out <- select_phenames("none", peak_dataset_df(), win_par$local,
-                             win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
-      updateSelectInput(session, "pheno_names", out$label,
-                        choices = out$choices, selected = "none")
-    })
-    shiny::observeEvent(input$pheno_names, {
-      output$num_pheno <- shiny::renderText({
-        num_pheno(input$pheno_names, analyses_tbl())
-      })
-    })
-    
     ## Use window as input to phenoServer.
-    phenoServer("pheno", input, win_par, peak_dataset_df, analyses_tbl, cov_df, project_df)
+    pheno_names <- phenoServer("pheno", input, win_par,
+      peak_df, analyses_tbl, cov_df, project_df)
     
     ## Setup input logic.
     output$project_name <- renderUI({
@@ -216,7 +179,6 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl,
     })
     
     ## Return.
-    pheno_names <- shiny::reactive(input$pheno_names)
     shiny::reactiveValues(
       pheno_names = pheno_names,
       win_par = win_par)
@@ -239,7 +201,6 @@ setupUI <- function(id) {
   shiny::tagList(
     shiny::uiOutput(ns("radio_input")),
     shiny::uiOutput(ns("sidebar_setup")),
-    shiny::uiOutput(ns("pheno_names_input")),
     shiny::uiOutput(ns("pheno_group_input")),
     shiny::uiOutput(ns("dataset_input")),
     shiny::uiOutput(ns("sidebar_hot")),

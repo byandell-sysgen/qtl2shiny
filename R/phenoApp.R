@@ -1,9 +1,9 @@
 #' Shiny phenotype selection
 #'
-#' Shiny module for phenotype selection, with interfaces \code{phenoUI} and  \code{phenoOutput}.
+#' Shiny module for phenotype selection.
 #'
 #' @param id identifier for shiny reactive
-#' @param set_par,win_par,peak_df,analyses_tbl,cov_df,project_df reactive arguments
+#' @param set_par,win_par,peak_df,analyses_tbl,covar,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -19,11 +19,9 @@ phenoApp <- function() {
     title =  "Test Pheno",
     sidebar = bslib::sidebar(
       projectUI("project"),
-      shiny::uiOutput("pheno_names_input"),
       shiny::uiOutput("pheno_group_input"),
       shiny::uiOutput("dataset_input"),
       peakInput("peak"),
-      shiny::uiOutput("filter"),
       phenoUI("pheno")),
     phenoOutput("pheno")
   )
@@ -43,23 +41,10 @@ phenoApp <- function() {
       ## The analyses_tbl should only have one row per pheno.
       read_project(project_df(), "analyses")
     })
-    
-    ## Covariates.
     covar <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "covar")
     })
-    analyses_df <- shiny::reactive({
-      phename <- input$pheno_names()
-      if(is.null(phename)) return(NULL)
-      dplyr::filter(analyses_tbl(), .data$pheno %in% phename)
-    })
-    cov_df <- shiny::reactive({
-      analyses <- analyses_df() 
-      if(is.null(analyses)) return(NULL)
-      qtl2mediate::get_covar(covar(), analyses_df())
-    })
-    
     
     # Input `set_par$pheno_group`.
     pheno_group <- shiny::reactive({
@@ -100,12 +85,32 @@ phenoApp <- function() {
                          multiple = TRUE)
     })
     
-    ## Set up analyses data frame.
+    project_df <- projectServer("project", projects_df)
+    win_par <- peakServer("peak", input, peak_df, pmap_obj, project_df)
+    pheno_names <- phenoServer("pheno", input, win_par, peak_df, analyses_tbl,
+                               covar, project_df)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname phenoApp
+phenoServer <- function(id, set_par, win_par, peak_df, analyses_tbl, covar,
+                        project_df) {
+  shiny::moduleServer(id, function(input, output, session) {
+    ns <- session$ns
+    
+    # Restrict peaks to region.
     analyses_set <- shiny::reactive({
       shiny::req(project_df(), analyses_tbl())
-      set_analyses(input$dataset, input$pheno_group, analyses_tbl())
+      set_analyses(set_par$dataset, set_par$pheno_group, analyses_tbl())
     })
-    # Restrict peaks to region.
+    output$filter <- shiny::renderUI({
+      shiny::checkboxInput(ns("filter"),
+        paste0("Peak on chr ", win_par$chr_id, " in ",
+               paste(win_par$peak_Mbp + c(-1,1) * win_par$window_Mbp,
+                     collapse = "-"), "?"),
+        TRUE)
+    })
     peak_dataset_df <- shiny::reactive({
       shiny::req(project_df(), analyses_set(), peak_df())
       chr_id <- shiny::req(win_par$chr_id)
@@ -115,15 +120,8 @@ phenoApp <- function() {
                    shiny::isTruthy(input$filter),
                    chr_id, peak_Mbp, window_Mbp)
     })
-    output$filter <- shiny::renderUI({
-      shiny::checkboxInput("filter",
-        paste0("Peak on chr ", win_par$chr_id, " in ",
-               paste(win_par$peak_Mbp + c(-1,1) * win_par$window_Mbp,
-                                        collapse = "-"), "?"),
-        TRUE)
-    })
-    
-    # Input `set_par$pheno_names`.
+
+    # Input `input$pheno_names`.
     output$pheno_names_input <- shiny::renderUI({
       shiny::req(project_df(), win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
       out <- select_phenames(input$pheno_names, peak_dataset_df(), win_par$local,
@@ -139,24 +137,11 @@ phenoApp <- function() {
       })
       shiny::req(win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
       out <- select_phenames("none", peak_dataset_df(), win_par$local,
-                             win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
+        win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
       updateSelectInput(session, "pheno_names", out$label,
                         choices = out$choices, selected = "none")
     })
     
-    project_df <- projectServer("project", projects_df)
-    win_par <- peakServer("peak", input, peak_df, pmap_obj, project_df)
-    phenoServer("pheno", input, win_par, peak_dataset_df, analyses_tbl, cov_df,
-                project_df)
-  }
-  shiny::shinyApp(ui, server)
-}
-#' @export
-#' @rdname phenoApp
-phenoServer <- function(id, set_par, win_par, peak_df, analyses_tbl, cov_df,
-                        project_df) {
-  shiny::moduleServer(id, function(input, output, session) {
-    ns <- session$ns
     # Output the peaks table
     output$peaks <- DT::renderDataTable({
       dplyr::arrange(
@@ -169,7 +154,7 @@ phenoServer <- function(id, set_par, win_par, peak_df, analyses_tbl, cov_df,
     ## Density or scatter plot of phenotypes.
     analyses_plot <- shiny::reactive({
       shiny::req(analyses_tbl())
-      phename <- shiny::req(set_par$pheno_names)
+      phename <- shiny::req(input$pheno_names)
       dplyr::filter(analyses_tbl(), .data$pheno %in% phename)
     })
     phe_mx <- shiny::reactive({
@@ -178,8 +163,21 @@ phenoServer <- function(id, set_par, win_par, peak_df, analyses_tbl, cov_df,
     raw_phe_mx <- shiny::reactive({
       pheno_read(project_df(), analyses_plot(), FALSE)
     })
-    phenoPlotServer("PhenoPlotRaw", set_par, raw_phe_mx, cov_df)
-    phenoPlotServer("PhenoPlotTrans", set_par, phe_mx, cov_df)
+    
+    pheno_names <- shiny::reactive(input$pheno_names)
+    analyses_df <- shiny::reactive({
+      phename <- pheno_names()
+      if(is.null(phename)) return(NULL)
+      dplyr::filter(analyses_tbl(), .data$pheno %in% phename)
+    })
+    cov_df <- shiny::reactive({
+      analyses <- analyses_df() 
+      if(is.null(analyses)) return(NULL)
+      qtl2mediate::get_covar(covar(), analyses_df())
+    })
+    
+    phenoPlotServer("PhenoPlotRaw", pheno_names, raw_phe_mx, cov_df)
+    phenoPlotServer("PhenoPlotTrans", pheno_names, phe_mx, cov_df)
     
     # Show data.
     output$radio_input <- renderUI({
@@ -202,7 +200,20 @@ phenoServer <- function(id, set_par, win_par, peak_df, analyses_tbl, cov_df,
     output$analyses_tbl <- DT::renderDataTable({
       collapse_covar(analyses_plot())
     }, options = list(scrollX = TRUE, pageLength = 5))
+    
+    ## Return.
+    pheno_names
   })
+}
+#' @export
+#' @rdname phenoApp
+phenoInput <- function(id) {
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    shiny::uiOutput(ns("pheno_names_input")),
+    shiny::uiOutput(ns("radio_input")),
+    shiny::uiOutput(ns("filter"))
+  )
 }
 #' @export
 #' @rdname phenoApp

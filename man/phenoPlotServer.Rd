@@ -5,14 +5,14 @@
 \alias{phenoPlotUI}
 \title{Shiny Phenotype Plot module}
 \usage{
-phenoPlotServer(id, set_par, phe_mx, cov_df)
+phenoPlotServer(id, pheno_names, phe_mx, cov_df)
 
 phenoPlotUI(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{set_par, phe_mx, cov_df}{reactive arguments}
+\item{pheno_names, phe_mx, cov_df}{reactive arguments}
 }
 \value{
 2-element vector of scan window
