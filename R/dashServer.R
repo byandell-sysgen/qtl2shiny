@@ -3,7 +3,7 @@
 #' Shiny module for phenotype selection.
 #'
 #' @param id shiny identifier
-#' @param projects_info reactive arguments
+#' @param projects_df static data frame with project information
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -16,37 +16,37 @@
 #' @importFrom shiny moduleServer NS reactive req 
 #' @importFrom rlang .data
 #' 
-dashServer <- function(id, projects_info) {
+dashServer <- function(id, projects_df) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
   
   ## Data Setup
   peak_df <- shiny::reactive({
-    shiny::req(project_info())
-    read_project(project_info(), "peaks")
+    shiny::req(project_df())
+    read_project(project_df(), "peaks")
   })
   analyses_tbl <- shiny::reactive({
-    shiny::req(project_info())
+    shiny::req(project_df())
     ## The analyses_tbl should only have one row per pheno.
-    read_project(project_info(), "analyses")
+    read_project(project_df(), "analyses")
   })
   covar <- shiny::reactive({
-    shiny::req(project_info())
-    read_project(project_info(), "covar")
+    shiny::req(project_df())
+    read_project(project_df(), "covar")
   })
   
   pmap_obj <- shiny::reactive({
-    shiny::req(project_info())
-    read_project(project_info(), "pmap")
+    shiny::req(project_df())
+    read_project(project_df(), "pmap")
   })
   kinship <- shiny::reactive({
-    shiny::req(project_info())
-    read_project(project_info(), "kinship")
+    shiny::req(project_df())
+    read_project(project_df(), "kinship")
   })
   
-  project_info <- projectServer("project", projects_info)
+  project_df <- projectServer("project", projects_df)
   set_par <- setupServer("setup", peak_df, pmap_obj, analyses_tbl, cov_df,
-                         project_info)
+                         project_df)
   
   ## Continue with Plots and Analysis.
   
@@ -59,8 +59,8 @@ dashServer <- function(id, projects_info) {
   phe_mx <- shiny::reactive({
     analyses <- analyses_df() 
     if(is.null(analyses)) return(NULL)
-    shiny::req(project_info())
-    pheno_read(project_info(), analyses)
+    shiny::req(project_df())
+    pheno_read(project_df(), analyses)
   })
   cov_df <- shiny::reactive({
     analyses <- analyses_df() 
@@ -75,17 +75,17 @@ dashServer <- function(id, projects_info) {
   
   ## Allele names.
   allele_info <- shiny::reactive({
-    shiny::req(project_info())
-    read_project(project_info(), "allele_info")
+    shiny::req(project_df())
+    read_project(project_df(), "allele_info")
   })
   
   ## Haplotype Analysis.
   haploServer("hap_scan", set_par$win_par, pmap_obj, phe_mx, cov_df, K_chr,
-             analyses_df, covar, analyses_tbl, peak_df, project_info, allele_info)
+             analyses_df, covar, analyses_tbl, peak_df, project_df, allele_info)
   
   ## Diplotype Analysis.
   diploServer("dip_scan", set_par$win_par, phe_mx, cov_df, K_chr, analyses_df,
-             project_info, allele_info)
+             project_df, allele_info)
 })
 }
 

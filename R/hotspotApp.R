@@ -22,7 +22,7 @@
 #' @importFrom rlang .data
 #' @importFrom bslib page_sidebar sidebar
 hotspotApp <- function() {
-  projects <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Hotspot",
     sidebar = bslib::sidebar(
@@ -33,8 +33,6 @@ hotspotApp <- function() {
     hotspotOutput("hotspot")
   )
   server <- function(input, output, session) {
-    projects_info <- shiny::reactive({projects})
-    
     peak_df <- shiny::reactive({
       shiny::req(project_info())
       read_project(project_info(), "peaks")
@@ -43,57 +41,9 @@ hotspotApp <- function() {
       shiny::req(project_info())
       read_project(project_info(), "pmap")
     })
-    analyses_tbl <- shiny::reactive({
-      shiny::req(project_info())
-      ## The analyses_tbl should only have one row per pheno.
-      read_project(project_info(), "analyses")
-    })
-    
-    # Input `set_par$pheno_type`
-    pheno_group <- shiny::reactive({
-      shiny::req(project_info())
-      sort(unique(shiny::req(analyses_tbl())$pheno_group))
-    }, label = "pheno_group")
-    output$pheno_group_input <- shiny::renderUI({
-      shiny::req(choices <- pheno_group())
-      if(is.null(selected <- input$pheno_group)) {
-        selected <- choices[1]
-      }
-      shiny::selectInput("pheno_group", "",
-                         choices = as.list(choices),
-                         selected = selected,
-                         multiple = TRUE)
-    })
-    
-    # Input `set_par$dataset`.
-    pheno_type <- shiny::reactive({
-      shiny::req(project_info())
-      phe_gp <- shiny::req(input$pheno_group)
-      analyses_group <- 
-        dplyr::filter(
-          shiny::req(analyses_tbl()),
-          pheno_group %in% phe_gp)
-      sort(unique(analyses_group$pheno_type))
-    })
-    
-    # Input `set_par$dataset`.
-    output$dataset_input <- shiny::renderUI({
-      shiny::req(project_info())
-      choices <- c("all", shiny::req(pheno_type()))
-      if(is.null(selected <- input$dataset))
-        selected <- NULL
-      shiny::selectInput("dataset", "Phenotype Set",
-                         choices = as.list(choices),
-                         selected = selected,
-                         multiple = TRUE)
-    })
-    
-    project_info <- projectServer("project", projects_info)
-    # Need `pheno_type` from `setupServer`.
-    # Need `set_par$pheno_group` and `set_par$dataset` from `setupServer`.
-    # May all change with new data organization.
-    # Probably don't have all we need yet.
-    scan_tbl <- hotspotServer("hotspot", input, peak_df, pmap_obj, project_info)
+
+    project_df <- projectServer("project", projects_df)
+    scan_tbl <- hotspotServer("hotspot", input, peak_df, pmap_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }

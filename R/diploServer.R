@@ -3,7 +3,7 @@
 #' Shiny diplotype SNP/Gene action analysis, with interface \code{diploUI}.
 #' 
 #' @param id identifier for shiny reactive
-#' @param win_par,phe_mx,cov_df,K_chr,analyses_df,project_info,allele_info reactive arguments
+#' @param win_par,phe_mx,cov_df,K_chr,analyses_df,project_df,allele_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -15,7 +15,7 @@
 #'             renderUI req selectInput sidebarPanel strong tagList textOutput
 #'             uiOutput
 diploServer <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
-                       project_info, allele_info) {
+                       project_df, allele_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -26,16 +26,16 @@ diploServer <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
     })
     
     ## Probs object for allele pair diplotypes.
-    pairprobs_obj <- pairProbsServer("pairprobs", win_par, project_info)
+    pairprobs_obj <- pairProbsServer("pairprobs", win_par, project_df)
     
     snp_action <- shiny::reactive({input$snp_action})
     
     ## SNP Association
     patterns <- snpSetupServer("snp_setup", input, win_par, phe_mx, cov_df, K_chr,
-                              analyses_df, project_info, allele_info, snp_action)
+                              analyses_df, project_df, allele_info, snp_action)
     
     patternServer("dip_pat", input, chr_pos, win_par, phe_mx, cov_df, pairprobs_obj, K_chr,
-                 analyses_df, patterns, project_info, allele_info, snp_action)
+                 analyses_df, patterns, project_df, allele_info, snp_action)
     
     output$allele_names <- shiny::renderText({
       shiny::req(allele_info())
@@ -76,7 +76,7 @@ diploServer <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
     })
     output$project <- shiny::renderUI({
       shiny::strong(shiny::req(paste("Project:",
-                                     project_info()$project,
+                                     project_df()$project,
                                      "\n")))
     })
   })

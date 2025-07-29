@@ -3,7 +3,7 @@
 #' Shiny module for selection of project, with interface \code{projectUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param projects_info reactive project info data frame
+#' @param projects_df static project info data frame
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -18,15 +18,14 @@
 #' @importFrom bslib page
 #' @importFrom DT dataTableOutput renderDataTable
 projectApp <- function() {
-  projects <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page(
     title =  "Test Project",
     projectUI("project"),
     shiny::tableOutput("table")
   )
   server <- function(input, output, session) {
-    projects_info <- shiny::reactive({projects})
-    project_info <- projectServer("project", projects_info)
+    project_info <- projectServer("project", projects_df)
     message("project_info ", 
             paste(shiny::isolate(names(project_info())), collapse = ", "))
     output$table <- shiny::renderTable(project_info())
@@ -35,31 +34,30 @@ projectApp <- function() {
 }
 #' @export
 #' @rdname projectApp
-projectServer <- function(id, projects_info) {
+projectServer <- function(id, projects_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     output$project_input <- shiny::renderUI({
-      shiny::req(projects_info())
-      choices <- unique(projects_info()$project)
+      choices <- unique(projects_info$project)
       if(is.null(selected <- input$project)) {
         selected <- choices[1]
       }
       shiny::selectInput(ns("project"), "Project", choices, selected)
     })
     
+    # Return `project_df()`.
     shiny::reactive({
-      shiny::req(projects_info())
       project_id <- NULL
       if(shiny::isTruthy(input$project)) {
         project_id <- input$project
       }
       if(is.null(project_id)) {
-        project_id <- projects_info()$project[1]
+        project_id <- projects_df$project[1]
       }
       dplyr::distinct(
         dplyr::filter(
-          projects_info(),
+          projects_df,
           .data$project == project_id),
         .data$project, .keep_all = TRUE)
     })

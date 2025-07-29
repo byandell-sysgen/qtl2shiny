@@ -3,7 +3,7 @@
 #' Shiny module for analysis based on haplotype alleles, with interface \code{haploUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param win_par,pmap_obj,phe_mx,cov_df,K_chr,analyses_df,covar,analyses_tbl,peak_df,project_info,allele_info reactive arguments
+#' @param win_par,pmap_obj,phe_mx,cov_df,K_chr,analyses_df,covar,analyses_tbl,peak_df,project_df,allele_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -16,24 +16,24 @@
 haploServer <- function(id, win_par, pmap_obj, 
                        phe_mx, cov_df, K_chr, analyses_df, 
                        covar, analyses_tbl, peak_df,
-                       project_info, allele_info) {
+                       project_df, allele_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     ## Genotype Probabilities.
-    probs_obj <- probsServer("probs", win_par, project_info)
+    probs_obj <- probsServer("probs", win_par, project_df)
     
     ## Genome Scan.
     scanServer("hap_scan", input, win_par, phe_mx, cov_df, probs_obj, K_chr,
-                  analyses_df, project_info, allele_info)
+                  analyses_df, project_df, allele_info)
     
     ## SNP Association
     patterns <- snpSetupServer("snp_setup", input, win_par, phe_mx, cov_df, K_chr,
-                              analyses_df, project_info, allele_info)
+                              analyses_df, project_df, allele_info)
     
     ## Mediation
     mediateServer("mediate", input, win_par, patterns, phe_mx, cov_df, probs_obj, K_chr,
-                 analyses_df, pmap_obj, covar, analyses_tbl, peak_df, project_info, allele_info)
+                 analyses_df, pmap_obj, covar, analyses_tbl, peak_df, project_df, allele_info)
     
     output$allele_names <- shiny::renderText({
       shiny::req(allele_info())
@@ -70,7 +70,7 @@ haploServer <- function(id, win_par, pmap_obj,
     })
     output$project <- shiny::renderUI({
       shiny::strong(shiny::req(paste("Project:",
-                                     project_info()$project,
+                                     project_df()$project,
                                      "\n")))
     })
   })

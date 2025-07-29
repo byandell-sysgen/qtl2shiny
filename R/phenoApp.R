@@ -3,7 +3,7 @@
 #' Shiny module for phenotype selection, with interfaces \code{phenoUI} and  \code{phenoOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param set_par,win_par,peak_df,analyses_tbl,cov_df,project_info reactive arguments
+#' @param set_par,win_par,peak_df,analyses_tbl,cov_df,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -14,7 +14,7 @@
 #' @importFrom shiny moduleServer NS radioButtons reactive req tagList uiOutput
 #' @importFrom rlang .data
 phenoApp <- function() {
-  projects <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Pheno",
     sidebar = bslib::sidebar(
@@ -31,23 +31,23 @@ phenoApp <- function() {
     projects_info <- shiny::reactive({projects})
     
     peak_df <- shiny::reactive({
-      shiny::req(project_info())
-      read_project(project_info(), "peaks")
+      shiny::req(project_df())
+      read_project(project_df(), "peaks")
     })
     pmap_obj <- shiny::reactive({
-      shiny::req(project_info())
-      read_project(project_info(), "pmap")
+      shiny::req(project_df())
+      read_project(project_df(), "pmap")
     })
     analyses_tbl <- shiny::reactive({
-      shiny::req(project_info())
+      shiny::req(project_df())
       ## The analyses_tbl should only have one row per pheno.
-      read_project(project_info(), "analyses")
+      read_project(project_df(), "analyses")
     })
     
     ## Covariates.
     covar <- shiny::reactive({
-      shiny::req(project_info())
-      read_project(project_info(), "covar")
+      shiny::req(project_df())
+      read_project(project_df(), "covar")
     })
     analyses_df <- shiny::reactive({
       phename <- input$pheno_names()
@@ -63,7 +63,7 @@ phenoApp <- function() {
     
     # Input `set_par$pheno_group`.
     pheno_group <- shiny::reactive({
-      shiny::req(project_info())
+      shiny::req(project_df())
       sort(unique(shiny::req(analyses_tbl())$pheno_group))
     }, label = "pheno_group")
     output$pheno_group_input <- shiny::renderUI({
@@ -79,7 +79,7 @@ phenoApp <- function() {
 
     # Reactive `pheno_type()`.
     pheno_type <- shiny::reactive({
-      shiny::req(project_info())
+      shiny::req(project_df())
       phe_gp <- shiny::req(input$pheno_group)
       analyses_group <- 
         dplyr::filter(
@@ -90,7 +90,7 @@ phenoApp <- function() {
     
     # Input `set_par$dataset`.
     output$dataset_input <- shiny::renderUI({
-      shiny::req(project_info())
+      shiny::req(project_df())
       choices <- c("all", shiny::req(pheno_type()))
       if(is.null(selected <- input$dataset))
         selected <- NULL
@@ -102,12 +102,12 @@ phenoApp <- function() {
     
     ## Set up analyses data frame.
     analyses_set <- shiny::reactive({
-      shiny::req(project_info(), analyses_tbl())
+      shiny::req(project_df(), analyses_tbl())
       set_analyses(input$dataset, input$pheno_group, analyses_tbl())
     })
     # Restrict peaks to region.
     peak_dataset_df <- shiny::reactive({
-      shiny::req(project_info(), analyses_set(), peak_df())
+      shiny::req(project_df(), analyses_set(), peak_df())
       chr_id <- shiny::req(win_par$chr_id)
       peak_Mbp <- shiny::req(win_par$peak_Mbp)
       window_Mbp <- shiny::req(win_par$window_Mbp)
@@ -125,7 +125,7 @@ phenoApp <- function() {
     
     # Input `set_par$pheno_names`.
     output$pheno_names_input <- shiny::renderUI({
-      shiny::req(project_info(), win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
+      shiny::req(project_df(), win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
       out <- select_phenames(input$pheno_names, peak_dataset_df(), win_par$local,
                              win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
       shiny::selectInput("pheno_names", out$label,
@@ -133,7 +133,7 @@ phenoApp <- function() {
                          selected = out$selected,
                          multiple = TRUE)
     })
-    shiny::observeEvent(project_info(), {
+    shiny::observeEvent(project_df(), {
       output$num_pheno <- shiny::renderText({
         num_pheno(input$pheno_names, analyses_tbl())
       })
@@ -144,17 +144,17 @@ phenoApp <- function() {
                         choices = out$choices, selected = "none")
     })
     
-    project_info <- projectServer("project", projects_info)
-    win_par <- peakServer("peak", input, peak_df, pmap_obj, project_info)
+    project_df <- projectServer("project", projects_df)
+    win_par <- peakServer("peak", input, peak_df, pmap_obj, project_df)
     phenoServer("pheno", input, win_par, peak_dataset_df, analyses_tbl, cov_df,
-                project_info)
+                project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname phenoApp
 phenoServer <- function(id, set_par, win_par, peak_df, analyses_tbl, cov_df,
-                        project_info) {
+                        project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     # Output the peaks table
@@ -173,10 +173,10 @@ phenoServer <- function(id, set_par, win_par, peak_df, analyses_tbl, cov_df,
       dplyr::filter(analyses_tbl(), .data$pheno %in% phename)
     })
     phe_mx <- shiny::reactive({
-      pheno_read(project_info(), analyses_plot())
+      pheno_read(project_df(), analyses_plot())
     })
     raw_phe_mx <- shiny::reactive({
-      pheno_read(project_info(), analyses_plot(), FALSE)
+      pheno_read(project_df(), analyses_plot(), FALSE)
     })
     phenoPlotServer("PhenoPlotRaw", set_par, raw_phe_mx, cov_df)
     phenoPlotServer("PhenoPlotTrans", set_par, phe_mx, cov_df)

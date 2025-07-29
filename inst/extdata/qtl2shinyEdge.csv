@@ -14,9 +14,9 @@ dash,haplo,server
 dash,setup,server
 mediate,triad,server
 pattern,allele,server
-peaks,hotspot,server
+peak,hotspot,server
 pheno,phenoPlot,server
-setup,peaks,server
+setup,peak,server
 setup,pheno,server
 setup,project,server
 snpGene,geneExon,server
@@ -81,8 +81,7 @@ peak,haplo,argument
 project_info,haplo,argument
 allele_info,haplo,argument
 set_par,hotspot,argument
-pheno_type,hotspot,argument
-peaks_tbl,hotspot,argument
+peak_df,hotspot,argument
 pmap_obj,hotspot,argument
 project_info,hotspot,argument
 projects,main,argument
@@ -97,7 +96,7 @@ analyses_df,mediate,argument
 pmap_obj,mediate,argument
 covar,mediate,argument
 analyses_tbl,mediate,argument
-peaks,mediate,argument
+peak,mediate,argument
 project_info,mediate,argument
 allele_info,mediate,argument
 win_par,pairProbs,argument
@@ -114,14 +113,13 @@ patterns,pattern,argument
 project_info,pattern,argument
 allele_info,pattern,argument
 snp_action,pattern,argument
-set_par,peaks,argument
-pheno_type,peaks,argument
-peaks_tbl,peaks,argument
-pmap_obj,peaks,argument
-project_info,peaks,argument
+set_par,peak,argument
+peak_df,peak,argument
+pmap_obj,peak,argument
+project_info,peak,argument
 set_par,pheno,argument
 win_par,pheno,argument
-peaks_df,pheno,argument
+peak_dataset_df,pheno,argument
 analyses_tbl,pheno,argument
 cov_df,pheno,argument
 project_info,pheno,argument
@@ -140,7 +138,7 @@ K_chr,scan,argument
 analyses_df,scan,argument
 project_info,scan,argument
 allele_info,scan,argument
-peaks_tbl,setup,argument
+peak_df,setup,argument
 pmap_obj,setup,argument
 analyses_tbl,setup,argument
 cov_df,setup,argument
@@ -222,9 +220,9 @@ haploUI,snpSetupOutput,ui
 haploUI,snpSetupUI,ui
 haploUI,mediateOutput,ui
 haploUI,mediateUI,ui
-setupUI,peaksInput,ui
-setupUI,peaksOutput,ui
-setupUI,peaksUI,ui
+setupUI,peakInput,ui
+setupUI,peakOutput,ui
+setupUI,peakUI,ui
 setupUI,phenoOutput,ui
 snpGeneInput,geneExonInput,ui
 snpGeneInput,geneRegionInput,ui
@@ -247,8 +245,8 @@ mediateOutput,triadOutput,ui
 mediateUI,triadUI,ui
 patternOutput,alleleOutput,ui
 patternUI,alleleUI,ui
-peaksOutput,hotspotOutput,ui
-peaksUI,hotspotInput,ui
+peakOutput,hotspotOutput,ui
+peakUI,hotspotInput,ui
 phenoOutput,phenoPlotUI
 snpPatternOutput,snpFeatureOutput,ui
 ## outputs
@@ -264,7 +262,7 @@ mediateOutput,medPlot,output
 mediateOutput,medSummary,output
 patternOutput,scan_pat_type,output
 patternOutput,scanSummary,output
-phenoOutput,peaks,output
+phenoOutput,peak,output
 scanOutput,effPlot,output
 scanOutput,effSummary,output
 scanOutput,lod_effPlot,output

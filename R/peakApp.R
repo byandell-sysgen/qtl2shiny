@@ -1,11 +1,11 @@
-#' Shiny peaks module
+#' Shiny Peak App
 #'
-#' Shiny module for peaks selection, with interfaces \code{peakInput}, \code{peakUI} and  \code{peakOutput}.
+#' Shiny module for peak selection.
 #'
 #' @param id identifier for shiny reactive
-#' @param set_par,peak_df,pmap_obj,project_info reactive arguments
+#' @param set_par,peak_df,pmap_obj,project_df reactive arguments
 #'
-#' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
+#' @author Brian S Yandell, \email{brian.yandell@wisc.edu}
 #' @keywords utilities
 #'
 #' @return list of inputs and scan summary
@@ -18,7 +18,7 @@
 #'             uiOutput updateNumericInput updateSelectInput
 #' @importFrom rlang .data
 peakApp <- function() {
-  projects <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Peak",
     sidebar = bslib::sidebar(
@@ -31,25 +31,23 @@ peakApp <- function() {
     peakOutput("peak")
   )
   server <- function(input, output, session) {
-    projects_info <- shiny::reactive({projects})
-
     peak_df <- shiny::reactive({
-      shiny::req(project_info())
-      read_project(project_info(), "peaks")
+      shiny::req(project_df())
+      read_project(project_df(), "peaks")
     })
     pmap_obj <- shiny::reactive({
-      shiny::req(project_info())
-      read_project(project_info(), "pmap")
+      shiny::req(project_df())
+      read_project(project_df(), "pmap")
     })
     analyses_tbl <- shiny::reactive({
-      shiny::req(project_info())
+      shiny::req(project_df())
       ## The analyses_tbl should only have one row per pheno.
-      read_project(project_info(), "analyses")
+      read_project(project_df(), "analyses")
     })
     
     # Input `set_par$pheno_group`.
     pheno_group <- shiny::reactive({
-      shiny::req(project_info())
+      shiny::req(project_df())
       sort(unique(shiny::req(analyses_tbl())$pheno_group))
     }, label = "pheno_group")
     output$pheno_group_input <- shiny::renderUI({
@@ -65,7 +63,7 @@ peakApp <- function() {
     
     ## Reactive `pheno_type()`.
     pheno_type <- shiny::reactive({
-      shiny::req(project_info())
+      shiny::req(project_df())
       phe_gp <- shiny::req(input$pheno_group)
       analyses_group <- 
         dplyr::filter(
@@ -76,7 +74,7 @@ peakApp <- function() {
     
     # Input `set_par$dataset`.
     output$dataset_input <- shiny::renderUI({
-      shiny::req(project_info())
+      shiny::req(project_df())
       choices <- c("all", shiny::req(pheno_type()))
       if(is.null(selected <- input$dataset))
         selected <- NULL
@@ -86,8 +84,8 @@ peakApp <- function() {
                          multiple = TRUE)
     })
     
-    project_info <- projectServer("project", projects_info)
-    win_par <- peakServer("peak", input, peak_df, pmap_obj, project_info)
+    project_df <- projectServer("project", projects_df)
+    win_par <- peakServer("peak", input, peak_df, pmap_obj, project_df)
     
     output$win_par <- shiny::renderUI({
       paste("win_par: chr=", win_par$chr_id,
@@ -99,11 +97,11 @@ peakApp <- function() {
 }
 #' @export
 #' @rdname peakApp
-peakServer <- function(id, set_par, peak_df, pmap_obj, project_info) {
+peakServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    shiny::observeEvent(project_info(), {
+    shiny::observeEvent(project_df(), {
       choices <- names(pmap_obj())
       shiny::updateSelectInput(session, "chr_id", shiny::strong("chr"),
                                choices = choices,
@@ -114,7 +112,7 @@ peakServer <- function(id, set_par, peak_df, pmap_obj, project_info) {
     
     # Select chromosome. Defaults to blank.
     output$chr_id_input <- shiny::renderUI({
-      shiny::req(project_info())
+      shiny::req(project_df())
       choices <- names(pmap_obj())
       selected <- input$chr_id
       if(!isTruthy(selected))
@@ -126,7 +124,7 @@ peakServer <- function(id, set_par, peak_df, pmap_obj, project_info) {
     
     ## Window numeric
     output$window_Mbp_input <- shiny::renderUI({
-      shiny::req(project_info())
+      shiny::req(project_df())
       if(is.null(win <- input$window_Mbp))
         win <- 1
       shiny::numericInput(ns("window_Mbp"), "width",
@@ -135,7 +133,7 @@ peakServer <- function(id, set_par, peak_df, pmap_obj, project_info) {
     
     # Peak position slider.
     output$peak_Mbp_input <- shiny::renderUI({
-      shiny::req(project_info(), pmap_obj())
+      shiny::req(project_df(), pmap_obj())
       chr_id <- shiny::req(input$chr_id)
       rng <- round(range(pmap_obj()[[chr_id]]), 2)
       pos <- input$peak_Mbp
@@ -151,11 +149,11 @@ peakServer <- function(id, set_par, peak_df, pmap_obj, project_info) {
     
     ## shorthand 
     output$chr_pos <- shiny::renderUI({
-      shiny::req(project_info())
+      shiny::req(project_df())
       shiny::textInput(ns("chr_pos"), "pos", input$chr_pos)
     })
     
-    scan_tbl <- hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_info)
+    scan_tbl <- hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
     
     shiny::observeEvent(scan_tbl(), {
       update_chr()

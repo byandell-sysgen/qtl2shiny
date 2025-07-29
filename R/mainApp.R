@@ -11,13 +11,13 @@
 #' See qtl2shinyData vignette for data setup.
 #' 
 #' @param id identifier for shiny module
-#' @param projects static data frame with project information
+#' @param projects_df static data frame with project information
 #' @importFrom shiny icon includeMarkdown moduleServer NS reactive shinyApp tags
 #' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar
 #'             dashboardBody menuItem sidebarMenu tabItem tabItems
 #' @export
 mainApp <- function() {
-  projects <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   
   ui <-   shinydashboard::dashboardPage(skin="red",
     shinydashboard::dashboardHeader(title = "qtl2shiny"),
@@ -25,17 +25,16 @@ mainApp <- function() {
     shinydashboard::dashboardBody(mainOutput("main"))
   )
   server <- function(input, output, session) {
-    mainServer("main", projects)
+    mainServer("main", projects_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @rdname mainApp
 #' @export
-mainServer <- function(id, projects) {
+mainServer <- function(id, projects_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    projects_info <- shiny::reactive({projects})
-    dashServer("dash", projects_info)
+    dashServer("dash", projects_df)
   })
 }
 #' @rdname mainApp
