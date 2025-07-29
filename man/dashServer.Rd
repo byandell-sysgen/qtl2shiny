@@ -8,7 +8,7 @@
 \alias{dashOutput2}
 \title{Shiny dash module for qtl2}
 \usage{
-dashServer(id, projects_info)
+dashServer(id, projects_df)
 
 dashInput(id)
 
@@ -21,7 +21,7 @@ dashOutput2(id)
 \arguments{
 \item{id}{shiny identifier}
 
-\item{projects_info}{reactive arguments}
+\item{projects_df}{static data frame with project information}
 }
 \value{
 No return value; called for side effects.

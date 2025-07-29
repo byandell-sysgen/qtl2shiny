@@ -3,7 +3,7 @@
 #' Shiny module to view hotspots for peak selection, with interfaces \code{hotspotInput} and  \code{hotspotOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param set_par,peak_df,pmap_obj,project_info reactive arguments
+#' @param set_par,peak_df,pmap_obj,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -34,14 +34,58 @@ hotspotApp <- function() {
   )
   server <- function(input, output, session) {
     peak_df <- shiny::reactive({
-      shiny::req(project_info())
-      read_project(project_info(), "peaks")
+      shiny::req(project_df())
+      read_project(project_df(), "peaks")
     })
     pmap_obj <- shiny::reactive({
-      shiny::req(project_info())
-      read_project(project_info(), "pmap")
+      shiny::req(project_df())
+      read_project(project_df(), "pmap")
     })
-
+    analyses_tbl <- shiny::reactive({
+      shiny::req(project_df())
+      ## The analyses_tbl should only have one row per pheno.
+      read_project(project_df(), "analyses")
+    })
+    
+    # Input `set_par$pheno_group`.
+    pheno_group <- shiny::reactive({
+      shiny::req(project_df())
+      sort(unique(shiny::req(analyses_tbl())$pheno_group))
+    }, label = "pheno_group")
+    output$pheno_group_input <- shiny::renderUI({
+      shiny::req(choices <- pheno_group())
+      if(is.null(selected <- input$pheno_group)) {
+        selected <- choices[1]
+      }
+      shiny::selectInput("pheno_group", "",
+                         choices = as.list(choices),
+                         selected = selected,
+                         multiple = TRUE)
+    })
+    
+    ## Reactive `pheno_type()`.
+    pheno_type <- shiny::reactive({
+      shiny::req(project_df())
+      phe_gp <- shiny::req(input$pheno_group)
+      analyses_group <- 
+        dplyr::filter(
+          shiny::req(analyses_tbl()),
+          pheno_group %in% phe_gp)
+      sort(unique(analyses_group$pheno_type))
+    })
+    
+    # Input `set_par$dataset`.
+    output$dataset_input <- shiny::renderUI({
+      shiny::req(project_df())
+      choices <- c("all", shiny::req(pheno_type()))
+      if(is.null(selected <- input$dataset))
+        selected <- NULL
+      shiny::selectInput("dataset", "Phenotype Set",
+                         choices = as.list(choices),
+                         selected = selected,
+                         multiple = TRUE)
+    })
+    
     project_df <- projectServer("project", projects_df)
     scan_tbl <- hotspotServer("hotspot", input, peak_df, pmap_obj, project_df)
   }
@@ -49,11 +93,11 @@ hotspotApp <- function() {
 }
 #' @export
 #' @rdname hotspotApp
-hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_info) {
+hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    shiny::observeEvent(project_info(), {
+    shiny::observeEvent(project_df(), {
       choices <- chr_names()
       shiny::updateSelectInput(session, "chr_ct", shiny::strong("chrs"),
                                choices = c("all", choices),
@@ -66,7 +110,7 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_info) {
       }
     })
     chr_names <- shiny::reactive({
-      shiny::req(project_info())
+      shiny::req(project_df())
       names(shiny::req(pmap_obj()))
     })
     # Hotspot Search (if desired--not used)
@@ -75,7 +119,7 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_info) {
     })
     # Select chromosome.
     output$chr_ct_input <- shiny::renderUI({
-      shiny::req(project_info())
+      shiny::req(project_df())
       choices <- chr_names()
       if(is.null(selected <- input$chr_ct))
         selected <- "all"
@@ -99,7 +143,7 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_info) {
     
     ## Window numeric
     output$window_Mbp_input <- shiny::renderUI({
-      shiny::req(project_info())
+      shiny::req(project_df())
       if(is.null(win <- input$window_Mbp))
         win <- 1
       shiny::numericInput(ns("window_Mbp"), "width",
@@ -107,11 +151,11 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_info) {
     })
     
     scan_obj_all <- shiny::reactive({
-      shiny::req(project_info(), input$window_Mbp, input$minLOD)
+      shiny::req(project_df(), input$window_Mbp, input$minLOD)
       shiny::withProgress(message = 'Hotspot scan ...', value = 0, {
         shiny::setProgress(1)
         hotspot_wrap(pmap_obj(), peak_df(), input$window_Mbp, input$minLOD,
-                     project_info())
+                     project_df())
         })
     })
     

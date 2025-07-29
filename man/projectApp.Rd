@@ -8,14 +8,14 @@
 \usage{
 projectApp()
 
-projectServer(id, projects_info)
+projectServer(id, projects_df)
 
 projectUI(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{projects_info}{reactive project info data frame}
+\item{projects_df}{static project info data frame}
 }
 \value{
 No return value; called for side effects.

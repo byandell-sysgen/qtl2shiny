@@ -9,7 +9,7 @@
 \usage{
 mainApp()
 
-mainServer(id, projects)
+mainServer(id, projects_df)
 
 mainInput(id)
 
@@ -18,7 +18,7 @@ mainOutput(id)
 \arguments{
 \item{id}{identifier for shiny module}
 
-\item{projects}{static data frame with project information}
+\item{projects_df}{static data frame with project information}
 }
 \value{
 No return value; called for side effects.

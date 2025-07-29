@@ -12,7 +12,7 @@ diploServer(
   cov_df,
   K_chr,
   analyses_df,
-  project_info,
+  project_df,
   allele_info
 )
 
@@ -21,7 +21,7 @@ diploUI(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{win_par, phe_mx, cov_df, K_chr, analyses_df, project_info, allele_info}{reactive arguments}
+\item{win_par, phe_mx, cov_df, K_chr, analyses_df, project_df, allele_info}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

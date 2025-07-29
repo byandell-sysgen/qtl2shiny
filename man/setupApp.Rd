@@ -10,7 +10,7 @@
 \usage{
 setupApp()
 
-setupServer(id, peak_df, pmap_obj, analyses_tbl, cov_df, project_info)
+setupServer(id, peak_df, pmap_obj, analyses_tbl, cov_df, project_df)
 
 setupInput(id)
 

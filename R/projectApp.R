@@ -39,7 +39,7 @@ projectServer <- function(id, projects_df) {
     ns <- session$ns
     
     output$project_input <- shiny::renderUI({
-      choices <- unique(projects_info$project)
+      choices <- unique(projects_df$project)
       if(is.null(selected <- input$project)) {
         selected <- choices[1]
       }

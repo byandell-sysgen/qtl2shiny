@@ -6,11 +6,11 @@
 \alias{peakInput}
 \alias{peakUI}
 \alias{peakOutput}
-\title{Shiny peaks module}
+\title{Shiny Peak App}
 \usage{
 peakApp()
 
-peakServer(id, set_par, peak_df, pmap_obj, project_info)
+peakServer(id, set_par, peak_df, pmap_obj, project_df)
 
 peakInput(id)
 
@@ -21,13 +21,13 @@ peakOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{set_par, peak_df, pmap_obj, project_info}{reactive arguments}
+\item{set_par, peak_df, pmap_obj, project_df}{reactive arguments}
 }
 \value{
 list of inputs and scan summary
 }
 \description{
-Shiny module for peaks selection, with interfaces \code{peakInput}, \code{peakUI} and  \code{peakOutput}.
+Shiny module for peak selection.
 }
 \author{
 Brian S Yandell, \email{brian.yandell@wisc.edu}
