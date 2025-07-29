@@ -133,10 +133,12 @@ hotspot <- function(map, peaks, peak_window = 1, minLOD = 5.5) {
   out
 }
 #' @export
+#' @method summary hotspot
 summary.hotspot <- function(object, ...) {
   summary(object$scan, object$map, ...)
 }
 #' @export
+#' @method subset hotspot
 subset.hotspot <- function(x, chr = NULL, nonzero = NULL, ...) {
   if(!is.null(chr)) {
     x <- list(scan = subset(x$scan, x$map, chr),

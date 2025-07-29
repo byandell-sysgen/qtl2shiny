@@ -295,4 +295,4 @@ snpPattern,Data,download
 snpPattern,Plot,download
 snpPlot,Plot,download
 snpSum,Data,download
-triadServer.R:  output$downloadData,download
+triad,Data,download

@@ -47,6 +47,11 @@ setupApp <- function() {
       shiny::req(project_info())
       read_project(project_info(), "covar")
     })
+    analyses_df <- shiny::reactive({
+      phename <- set_par$pheno_names()
+      if(is.null(phename)) return(NULL)
+      dplyr::filter(analyses_tbl(), .data$pheno %in% phename)
+    })
     cov_df <- shiny::reactive({
       analyses <- analyses_df() 
       if(is.null(analyses)) return(NULL)
@@ -70,20 +75,11 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl,
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # Select `pheno_type`.
+    # Input `input$pheno_group`.
     pheno_group <- shiny::reactive({
       shiny::req(project_info())
       sort(unique(shiny::req(analyses_tbl())$pheno_group))
     }, label = "pheno_group")
-    pheno_type <- shiny::reactive({
-      shiny::req(project_info())
-      phe_gp <- shiny::req(input$pheno_group)
-      analyses_group <- 
-        dplyr::filter(
-          shiny::req(analyses_tbl()),
-          pheno_group %in% phe_gp)
-      sort(unique(analyses_group$pheno_type))
-    })
     output$pheno_group_input <- shiny::renderUI({
       shiny::req(choices <- pheno_group())
       if(is.null(selected <- input$pheno_group)) {
@@ -94,7 +90,19 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl,
                          selected = selected,
                          multiple = TRUE)
     })
-    # Select `dataset`.
+    
+    ## Reactive `pheno_type()`.
+    pheno_type <- shiny::reactive({
+      shiny::req(project_info())
+      phe_gp <- shiny::req(input$pheno_group)
+      analyses_group <- 
+        dplyr::filter(
+          shiny::req(analyses_tbl()),
+          pheno_group %in% phe_gp)
+      sort(unique(analyses_group$pheno_type))
+    })
+    
+    # Input `input$dataset`.
     output$dataset_input <- shiny::renderUI({
       shiny::req(project_info())
       choices <- c("all", shiny::req(pheno_type()))
@@ -141,7 +149,7 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl,
     })
     
     ## Locate Peak.
-    win_par <- peakServer("peak", input, pheno_type, peak_df, pmap_obj, 
+    win_par <- peakServer("peak", input, peak_df, pmap_obj, 
                           project_info)
     
     chr_pos <- shiny::reactive({

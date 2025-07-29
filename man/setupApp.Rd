@@ -10,7 +10,7 @@
 \usage{
 setupApp()
 
-setupServer(id, peaks_tbl, pmap_obj, analyses_tbl, cov_df, project_info)
+setupServer(id, peak_df, pmap_obj, analyses_tbl, cov_df, project_info)
 
 setupInput(id)
 
@@ -21,7 +21,7 @@ setupOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{peaks_tbl, pmap_obj, analyses_tbl, cov_df, projects_info}{reactive arguments}
+\item{peak_df, pmap_obj, analyses_tbl, cov_df, projects_info}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

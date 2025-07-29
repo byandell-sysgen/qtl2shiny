@@ -3,7 +3,7 @@
 #' Shiny module to view hotspots for peak selection, with interfaces \code{hotspotInput} and  \code{hotspotOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param set_par,pheno_type,peak_df,pmap_obj,project_info reactive arguments
+#' @param set_par,peak_df,pmap_obj,project_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -48,20 +48,12 @@ hotspotApp <- function() {
       ## The analyses_tbl should only have one row per pheno.
       read_project(project_info(), "analyses")
     })
-    # Select `pheno_type`
+    
+    # Input `set_par$pheno_type`
     pheno_group <- shiny::reactive({
       shiny::req(project_info())
       sort(unique(shiny::req(analyses_tbl())$pheno_group))
     }, label = "pheno_group")
-    pheno_type <- shiny::reactive({
-      shiny::req(project_info())
-      phe_gp <- shiny::req(input$pheno_group)
-      analyses_group <- 
-        dplyr::filter(
-          shiny::req(analyses_tbl()),
-          pheno_group %in% phe_gp)
-      sort(unique(analyses_group$pheno_type))
-    })
     output$pheno_group_input <- shiny::renderUI({
       shiny::req(choices <- pheno_group())
       if(is.null(selected <- input$pheno_group)) {
@@ -72,7 +64,19 @@ hotspotApp <- function() {
                          selected = selected,
                          multiple = TRUE)
     })
-    # Select `dataset`.
+    
+    # Input `set_par$dataset`.
+    pheno_type <- shiny::reactive({
+      shiny::req(project_info())
+      phe_gp <- shiny::req(input$pheno_group)
+      analyses_group <- 
+        dplyr::filter(
+          shiny::req(analyses_tbl()),
+          pheno_group %in% phe_gp)
+      sort(unique(analyses_group$pheno_type))
+    })
+    
+    # Input `set_par$dataset`.
     output$dataset_input <- shiny::renderUI({
       shiny::req(project_info())
       choices <- c("all", shiny::req(pheno_type()))
@@ -89,14 +93,13 @@ hotspotApp <- function() {
     # Need `set_par$pheno_group` and `set_par$dataset` from `setupServer`.
     # May all change with new data organization.
     # Probably don't have all we need yet.
-    scan_tbl <- hotspotServer("hotspot", input, pheno_type, peak_df,
-                              pmap_obj, project_info)
+    scan_tbl <- hotspotServer("hotspot", input, peak_df, pmap_obj, project_info)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname hotspotApp
-hotspotServer <- function(id, set_par, pheno_type, peak_df, pmap_obj, project_info) {
+hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     

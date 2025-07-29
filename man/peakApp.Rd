@@ -10,7 +10,7 @@
 \usage{
 peakApp()
 
-peakServer(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_info)
+peakServer(id, set_par, peak_df, pmap_obj, project_info)
 
 peakInput(id)
 
@@ -21,7 +21,7 @@ peakOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{set_par, pheno_type, peaks_tbl, pmap_obj, project_info}{reactive arguments}
+\item{set_par, peak_df, pmap_obj, project_info}{reactive arguments}
 }
 \value{
 list of inputs and scan summary

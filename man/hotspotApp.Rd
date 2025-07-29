@@ -9,7 +9,7 @@
 \usage{
 hotspotApp()
 
-hotspotServer(id, set_par, pheno_type, peaks_tbl, pmap_obj, project_info)
+hotspotServer(id, set_par, peak_df, pmap_obj, project_info)
 
 hotspotInput(id)
 
@@ -18,7 +18,7 @@ hotspotOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{set_par, pheno_type, peaks_tbl, pmap_obj, project_info}{reactive arguments}
+\item{set_par, peak_df, pmap_obj, project_info}{reactive arguments}
 }
 \value{
 list of inputs and scan summary

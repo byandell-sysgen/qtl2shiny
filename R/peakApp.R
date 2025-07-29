@@ -3,7 +3,7 @@
 #' Shiny module for peaks selection, with interfaces \code{peakInput}, \code{peakUI} and  \code{peakOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param set_par,pheno_type,peak_df,pmap_obj,project_info reactive arguments
+#' @param set_par,peak_df,pmap_obj,project_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -46,20 +46,12 @@ peakApp <- function() {
       ## The analyses_tbl should only have one row per pheno.
       read_project(project_info(), "analyses")
     })
-    # Select pheno_type.
+    
+    # Input `set_par$pheno_group`.
     pheno_group <- shiny::reactive({
       shiny::req(project_info())
       sort(unique(shiny::req(analyses_tbl())$pheno_group))
     }, label = "pheno_group")
-    pheno_type <- shiny::reactive({
-      shiny::req(project_info())
-      phe_gp <- shiny::req(input$pheno_group)
-      analyses_group <- 
-        dplyr::filter(
-          shiny::req(analyses_tbl()),
-          pheno_group %in% phe_gp)
-      sort(unique(analyses_group$pheno_type))
-    })
     output$pheno_group_input <- shiny::renderUI({
       shiny::req(choices <- pheno_group())
       if(is.null(selected <- input$pheno_group)) {
@@ -70,7 +62,19 @@ peakApp <- function() {
                          selected = selected,
                          multiple = TRUE)
     })
-    # Select `dataset`.
+    
+    ## Reactive `pheno_type()`.
+    pheno_type <- shiny::reactive({
+      shiny::req(project_info())
+      phe_gp <- shiny::req(input$pheno_group)
+      analyses_group <- 
+        dplyr::filter(
+          shiny::req(analyses_tbl()),
+          pheno_group %in% phe_gp)
+      sort(unique(analyses_group$pheno_type))
+    })
+    
+    # Input `set_par$dataset`.
     output$dataset_input <- shiny::renderUI({
       shiny::req(project_info())
       choices <- c("all", shiny::req(pheno_type()))
@@ -83,8 +87,7 @@ peakApp <- function() {
     })
     
     project_info <- projectServer("project", projects_info)
-    win_par <- peakServer("peak", input, pheno_type, peak_df, pmap_obj, 
-                          project_info)
+    win_par <- peakServer("peak", input, peak_df, pmap_obj, project_info)
     
     output$win_par <- shiny::renderUI({
       paste("win_par: chr=", win_par$chr_id,
@@ -96,8 +99,7 @@ peakApp <- function() {
 }
 #' @export
 #' @rdname peakApp
-peakServer <- function(id, set_par, pheno_type, peak_df, pmap_obj, 
-                       project_info) {
+peakServer <- function(id, set_par, peak_df, pmap_obj, project_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -153,7 +155,7 @@ peakServer <- function(id, set_par, pheno_type, peak_df, pmap_obj,
       shiny::textInput(ns("chr_pos"), "pos", input$chr_pos)
     })
     
-    scan_tbl <- hotspotServer("hotspot", set_par, pheno_type, peak_df, pmap_obj, project_info)
+    scan_tbl <- hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_info)
     
     shiny::observeEvent(scan_tbl(), {
       update_chr()
