@@ -59,7 +59,7 @@ alleleServer <- function(id, win_par, phe_mx, cov_df, probs_obj, K_chr,
                     patterns(), scan_pat(), blups)
       })
     })
-    output$allele1Plot <- shiny::renderPlot({
+    output$allelePlot <- shiny::renderPlot({
       shiny::req(allele_obj(), input$pos_Mbp)
       shiny::withProgress(message = 'Allele plots ...', value = 0, {
         shiny::setProgress(1)
@@ -71,7 +71,7 @@ alleleServer <- function(id, win_par, phe_mx, cov_df, probs_obj, K_chr,
         }
       })
     })
-    output$allele1Sum <- DT::renderDataTable({
+    output$alleleSum <- DT::renderDataTable({
       shiny::req(allele_obj(), input$pos_Mbp)
       shiny::withProgress(message = 'Effect summary ...', value = 0, {
         shiny::setProgress(1)
@@ -123,6 +123,6 @@ alleleUI <- function(id) {
 alleleOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::plotOutput(ns("allele1Plot")),
-    DT::dataTableOutput(ns("allele1Sum")))
+    shiny::plotOutput(ns("allelePlot")),
+    DT::dataTableOutput(ns("alleleSum")))
 }

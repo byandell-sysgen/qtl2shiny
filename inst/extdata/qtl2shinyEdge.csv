@@ -1,8 +1,8 @@
 source,target,assign
 ## Server functions
 server,main,server
-diplo,Pattern,server
-diplo,PairProbs,server
+diplo,pairProbs,server
+diplo,pattern,server
 diplo,snpSetup,server
 haplo,mediate,server
 haplo,probs,server
@@ -247,11 +247,11 @@ patternOutput,alleleOutput,ui
 patternUI,alleleUI,ui
 peakOutput,hotspotOutput,ui
 peakUI,hotspotInput,ui
-phenoOutput,phenoPlotUI
+phenoOutput,phenoPlotUI,ui
 snpPatternOutput,snpFeatureOutput,ui
 ## outputs
-alleleOutput,allele1Plot,ouput
-alleleOutput,allele1Sum,ouput
+alleleOutput,allelePlot,output
+alleleOutput,alleleSum,output
 geneExonOutput,gene_plot,output
 geneExonOutput,gene_sum,output
 geneRegionOutput,gene_plot,output

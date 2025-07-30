@@ -1,8 +1,12 @@
 ```{r message=FALSE}
 nodes <- 
-   readr::read_csv(system.file("extdata/qtl2shinyNode.csv", package = "qtl2shiny"))
+   readr::read_csv(
+     system.file("extdata/qtl2shinyNode.csv", package = "qtl2shiny"),
+     comment = "#")
 links <- 
-   readr::read_csv(system.file("extdata/qtl2shinyEdge.csv", package = "qtl2shiny"))
+   readr::read_csv(
+     system.file("extdata/qtl2shinyEdge.csv", package = "qtl2shiny"),
+     comment = "#")
 ```
 
 ```{r}
@@ -20,20 +24,53 @@ igraph::E(net)$edge.color <- "gray80"
 ```
 
 ```{r}
-netModule <-
+dplyr::count(nodes,logic,shiny)
+```
+
+```{r}
+dplyr::count(links,assign)
+```
+
+```{r}
+net_server <-
   igraph::delete_vertices(
     igraph::delete_edges(
       net,
-      igraph::E(net)[assign == "output"]),
-    unclass(igraph::V(net)[shiny != "module"]))
+      igraph::E(net)[assign != "server"]),
+    unclass(igraph::V(net)[logic != "server"]))
+```
+
+```{r}
+igraph::tkplot(net_server)
 ```
 
 ```{r message=FALSE, warning=FALSE, fig.width=7, fig.height=7}
 #jpeg("net.jpg", width = 700, height = 700)
-plot(netModule, vertex.shape="none", 
-     vertex.label=igraph::V(netModule)$name, 
+plot(net_server, vertex.shape="none", 
+     vertex.label=igraph::V(netModule)$node, 
      vertex.label.font=2, vertex.label.color="black",
-     vertex.label.cex=0.5, edge.color="gray50",
+     vertex.label.cex=1, edge.color="gray50",
      layout = igraph::layout_as_tree)
 #invisible(dev.off())
+```
+
+```{r}
+net_ui <-
+  igraph::delete_vertices(
+    igraph::delete_edges(
+      net,
+      igraph::E(net)[assign != "ui"]),
+    unclass(igraph::V(net)[logic != "ui"]))
+```
+
+```{r}
+igraph::tkplot(net_ui)
+```
+
+```{r message=FALSE, warning=FALSE, fig.width=7, fig.height=7}
+plot(net_ui, vertex.shape="none", 
+     vertex.label=igraph::V(netModule)$node, 
+     vertex.label.font=2, vertex.label.color="black",
+     vertex.label.cex=1, edge.color="gray50",
+     layout = igraph::layout_as_tree)
 ```
