@@ -142,7 +142,7 @@ scan_table,dataTable,output,output,,
 snp_plot,Plot,output,output,,
 snp_pattern_plot,Plot,output,output,,
 snp_pattern_table,dataTable,output,output,,
-scatPlot,Plot,output,output,,
+triad_plot,Plot,output,output,,
 ## Downloads.
 Data,dataTable,download,download,,
 Plot,Plot,download,download,,

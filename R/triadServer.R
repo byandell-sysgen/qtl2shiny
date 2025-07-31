@@ -45,8 +45,7 @@ triadServer <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
                        choices = choices, input$med_name)
   })
   
-  
-  scat_dat <- reactive({
+  triad_df <- reactive({
     shiny::req(phe_mx(), med_ls(), cov_df(), probs_obj(), chr_id(),
                input$med_name, med_par$pos_Mbp, sdp())
     qtl2mediate::mediation_triad_qtl2(
@@ -74,17 +73,17 @@ triadServer <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
   })
 
   ## Triad plot
-  output$scatPlot <- shiny::renderPlot({
+  output$triad_plot <- shiny::renderPlot({
     if(!shiny::isTruthy(patterns())) {
       return(plot_null("first run\nAllele Patterns"))
     }
-    if(!shiny::isTruthy(scat_dat())) {
+    if(!shiny::isTruthy(triad_df())) {
       plot_null("too much\nmissing data\nin mediators\nreduce window width")
     } else {
       shiny::req(input$med_plot, input$med_name, phe_mx())
       shiny::withProgress(message = 'Triad Plot ...', value = 0, {
         shiny::setProgress(1)
-        p <- ggplot2::autoplot(scat_dat(), type = input$med_plot,
+        p <- ggplot2::autoplot(triad_df(), type = input$med_plot,
              dname = peak_mar(),
              mname = input$med_name,
              tname = colnames(phe_mx()),
@@ -108,13 +107,13 @@ triadServer <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
     filename = function() {
       file.path(paste0("scatter.pdf")) },
     content = function(file) {
-      shiny::req(phe_mx(), scat_dat(), input$med_plot)
+      shiny::req(phe_mx(), triad_df(), input$med_plot)
       grDevices::pdf(file, width=9,height=9)
       for(types in c("by_mediator", 
                      "by_target", 
                      "driver_offset", 
                      "driver")) {
-        print(ggplot2::autoplot(scat_dat(), type = types,
+        print(ggplot2::autoplot(triad_df(), type = types,
                    dname = peak_mar(),
                    mname = input$med_name,
                    tname = colnames(phe_mx()),
@@ -127,7 +126,7 @@ triadServer <- function(id, med_par, patterns, geno_max, peak_mar, med_ls,
 }
 #' @export
 #' @rdname triadServer
-triadUI <- function(id) {
+triadUI <- function(id) { # med_name, med_plot
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("triad_input")),
@@ -141,5 +140,5 @@ triadUI <- function(id) {
 #' @rdname triadServer
 triadOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::plotOutput(ns("scatPlot"))
+  shiny::plotOutput(ns("triad_plot")) # triad_plot
 }

@@ -275,7 +275,7 @@ snpPatternOutput,snp_pattern_plot,output
 snpPatternOutput,snp_pattern_table,output
 snpPlotOutput,snp_plot,output
 snpSumOutput,top_snps_tbl,output
-triadOutput,scatPlot,output
+triadOutput,triad_plot,output
 ## Download Edges.
 allele,Data,download
 allele,Plot,download
