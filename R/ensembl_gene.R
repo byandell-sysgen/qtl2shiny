@@ -1,5 +1,5 @@
-ensembl_gene <- function(best, project_info, href = FALSE) {
-  ensembl_species <- read_project(project_info, "taxa_info")
+ensembl_gene <- function(best, project_df, href = FALSE) {
+  ensembl_species <- read_project(project_df, "taxa_info")
   if(!is.null(ensembl_species)) {
     ensembl_URL <- file.path("http://www.ensembl.org",
                              ensembl_species,

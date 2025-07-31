@@ -1,7 +1,7 @@
-pheno_read <- function(project_info, analyses_df, transform = TRUE) {
+pheno_read <- function(project_df, analyses_df, transform = TRUE) {
   # Read the phenos we need.
   phenos <- analyses_df$pheno
-  pheno_data <- read_project(project_info, "pheno_data", phenos)
+  pheno_data <- read_project(project_df, "pheno_data", phenos)
   
   if(transform) {
     transform <- analyses_df$transf

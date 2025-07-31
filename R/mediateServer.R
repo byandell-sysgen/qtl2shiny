@@ -3,7 +3,7 @@
 #' Shiny module for scan1 coefficient plots, with interfaces \code{mediateUI} and  \code{mediateOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param job_par,win_par,patterns,phe_mx,cov_df,probs_obj,K_chr,analyses_df,pmap_obj,covar,analyses_tbl,peak_df,project_info,allele_info reactive arguments
+#' @param job_par,win_par,patterns,phe_mx,cov_df,probs_obj,K_chr,analyses_df,pmap_obj,covar,analyses_tbl,peak_df,project_df,allele_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -30,7 +30,7 @@
 mediateServer <- function(id,
   job_par, win_par, patterns, phe_mx, cov_df, probs_obj, K_chr,
   analyses_df, pmap_obj, covar, analyses_tbl, peak_df,
-  project_info, allele_info) {
+  project_df, allele_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -50,15 +50,15 @@ mediateServer <- function(id,
                                query_mrna = query_mrna())
     })
     query_mrna <- reactive({
-      read_query_rds(project_info(), "query_mrna.rds")
+      read_query_rds(project_df(), "query_mrna.rds")
     })
     pheno_data <- reactive({
-      pheno_read(project_info(), analyses_tbl())
+      pheno_read(project_df(), analyses_tbl())
     })
     
     ## Comediator data
     comed_ls <- reactive({
-      shiny::req(input$pheno_name, win_par, project_info())
+      shiny::req(input$pheno_name, win_par, project_df())
       qtl2mediate::comediator_region(
         input$pheno_name, chr_id(), scan_window(), covar(), analyses_tbl(),
         peak_df(), shiny::req(input$qtls), shiny::req(pmap_obj()), pheno_data())

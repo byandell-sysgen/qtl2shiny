@@ -3,7 +3,7 @@
 #' Shiny module to coordinate SNP and allele analyses and plots, with interfaces \code{snpSetupUI} and  \code{snpSetupOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param job_par,win_par,phe_mx,cov_df,K_chr,analyses_df,project_info,allele_info,snp_action reactive arguments
+#' @param job_par,win_par,phe_mx,cov_df,K_chr,analyses_df,project_df,allele_info,snp_action reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -17,7 +17,7 @@
 #' @importFrom rlang .data
 snpSetupServer <- function(id,
   job_par, win_par, phe_mx, cov_df, K_chr, analyses_df,
-  project_info, allele_info,
+  project_df, allele_info,
   snp_action = shiny::reactive({"basic"})) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -27,16 +27,16 @@ snpSetupServer <- function(id,
                    range = shiny::req(input$scan_window))
     })
     pheno_names <- shiny::reactive({
-      shiny::req(project_info(), phe_mx())
+      shiny::req(project_df(), phe_mx())
       colnames(phe_mx())
     })
     
     ## Reactives
     ## SNP Probabilities.
     snpprobs_obj <- snpProbsServer("snp_probs", win_par, pheno_names,
-                                   project_info)
+                                   project_df)
     snpinfo <- reactive({
-      shiny::req(project_info(), phe_mx())
+      shiny::req(project_df(), phe_mx())
       shiny::req(snpprobs_obj())$snpinfo
     })
     
@@ -86,7 +86,7 @@ snpSetupServer <- function(id,
       shiny::withProgress(message = 'Gene Exon Calc ...', value = 0, {
         shiny::setProgress(1)
         tops <- shiny::req(top_snps_tbl())
-        gene_exons(tops, project_info())
+        gene_exons(tops, project_df())
       })
     })
     
@@ -94,7 +94,7 @@ snpSetupServer <- function(id,
     ## SNP Association
     ass_par <- snpGeneServer("snp_gene", input, chr_pos, pheno_names,
                             snp_scan_obj, snpinfo, top_snps_tbl, 
-                            gene_exon_tbl, project_info, snp_action)
+                            gene_exon_tbl, project_df, snp_action)
     ## Allele Patterns
     pat_par <- snpPatternServer("snp_pattern", input, chr_pos, pheno_names,
                                snp_scan_obj, snpinfo, top_snps_tbl, 

@@ -25,10 +25,10 @@ projectApp <- function() {
     shiny::tableOutput("table")
   )
   server <- function(input, output, session) {
-    project_info <- projectServer("project", projects_df)
-    message("project_info ", 
-            paste(shiny::isolate(names(project_info())), collapse = ", "))
-    output$table <- shiny::renderTable(project_info())
+    project_df <- projectServer("project", projects_df)
+    message("project_df ", 
+            paste(shiny::isolate(names(project_df())), collapse = ", "))
+    output$table <- shiny::renderTable(project_df())
   }
   shiny::shinyApp(ui, server)
 }

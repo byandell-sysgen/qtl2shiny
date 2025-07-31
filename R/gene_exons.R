@@ -1,6 +1,6 @@
-gene_exons <- function(tops, project_info) {
+gene_exons <- function(tops, project_df) {
   
-  query_genes <- read_query_rds(project_info, "query_genes.rds")
+  query_genes <- read_query_rds(project_df, "query_genes.rds")
 
   chr_id <- as.character(unique(tops$chr))
   range_Mbp <- range(tops$pos) + c(-1,1) * 0.005

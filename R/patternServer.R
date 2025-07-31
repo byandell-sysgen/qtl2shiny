@@ -3,7 +3,7 @@
 #' Shiny module for SNP pattern plots, with interfaces \code{patternUI} and  \code{patternOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param job_par,chr_pos,win_par,phe_mx,cov_df,pairprobs_obj,K_chr,analyses_df,patterns,project_info,allele_info,snp_action reactive arguments
+#' @param job_par,chr_pos,win_par,phe_mx,cov_df,pairprobs_obj,K_chr,analyses_df,patterns,project_df,allele_info,snp_action reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -24,7 +24,7 @@
 #' @importFrom rlang .data
 patternServer <- function(id, job_par, chr_pos, win_par,
                          phe_mx, cov_df, pairprobs_obj, K_chr, analyses_df,
-                         patterns, project_info, allele_info, 
+                         patterns, project_df, allele_info, 
                          snp_action = shiny::reactive({NULL})) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -33,7 +33,7 @@ patternServer <- function(id, job_par, chr_pos, win_par,
       phe_mx()[, shiny::req(input$pheno_name), drop = FALSE]
     })
     alleleServer("allele", win_par,  phe1_mx, cov_df, pairprobs_obj, K_chr,
-                analyses_df, patterns, scan_pat, project_info, snp_action)
+                analyses_df, patterns, scan_pat, project_df, snp_action)
     
     ## Select phenotype for plots.
     output$pheno_name_input <- shiny::renderUI({

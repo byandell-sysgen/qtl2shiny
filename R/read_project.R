@@ -1,6 +1,6 @@
 #' Read Project Data
 #' 
-#' @param project_info table of project information
+#' @param project_df table of project information
 #' @param dataname name of data object to read
 #' @param columns columns to select from data object
 #' @param rownames row names to filter from data object (all if \code{TRUE})
@@ -12,17 +12,17 @@
 #' @importFrom qtl2pattern read_fast
 #' @importFrom utils read.csv
 #' 
-read_project <- function(project_info, dataname, columns, rownames = TRUE, filetype) {
+read_project <- function(project_df, dataname, columns, rownames = TRUE, filetype) {
   # Read data frame or matrix in some file format.
   
-  if(!nrow(project_info))
+  if(!nrow(project_df))
     return(NULL)
   
   # Taxa and project paths.
-  taxapath <- file.path(project_info$directory,
-                        project_info$taxa)
+  taxapath <- file.path(project_df$directory,
+                        project_df$taxa)
   projectpath <- file.path(taxapath,
-                           project_info$project)
+                           project_df$project)
   
   # Compare file roots in project path to dataname.
   match_filename <- function(dataname, filepath) {

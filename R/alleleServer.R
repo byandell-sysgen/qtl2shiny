@@ -3,7 +3,7 @@
 #' Shiny module for scan1 coefficient plots, with interfaces \code{alleleUI} and  \code{alleleOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param win_par,phe_mx,cov_df,probs_obj,K_chr,analyses_df,patterns,scan_pat,project_info,snp_action reactive arguments
+#' @param win_par,phe_mx,cov_df,probs_obj,K_chr,analyses_df,patterns,scan_pat,project_df,snp_action reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -22,14 +22,14 @@
 #' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
 alleleServer <- function(id, win_par, phe_mx, cov_df, probs_obj, K_chr,
-                        analyses_df, patterns, scan_pat, project_info,
+                        analyses_df, patterns, scan_pat, project_df,
                         snp_action) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     # Scan Window slider
     output$pos_Mbp <- shiny::renderUI({
-      shiny::req(project_info())
+      shiny::req(project_df())
       chr_id <- shiny::req(win_par$chr_id)
       map <- shiny::req(probs_obj())$map[[chr_id]]
       rng <- round(2 * range(map)) / 2
@@ -50,7 +50,7 @@ alleleServer <- function(id, win_par, phe_mx, cov_df, probs_obj, K_chr,
     
     ## Coefficient Effects.
     allele_obj <- shiny::reactive({
-      shiny::req(snp_action(), project_info())
+      shiny::req(snp_action(), project_df())
       shiny::req(phe_mx(), probs_obj(), K_chr(), cov_df())
       blups <- attr(scan_pat(), "blups")
       shiny::withProgress(message = 'Effect scans ...', value = 0, {

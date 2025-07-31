@@ -3,7 +3,7 @@
 #' Shiny module for scan1 analysis and plots, with interfaces \code{geneRegionInput}, \code{geneRegionUI} and  \code{geneRegionOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param snp_par,top_snps_tbl,project_info,snp_action reactive arguments
+#' @param snp_par,top_snps_tbl,project_df,snp_action reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -18,7 +18,7 @@
 #'             renderUI req setProgress tagList uiOutput withProgress
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
-geneRegionServer <- function(id, snp_par, top_snps_tbl, project_info,
+geneRegionServer <- function(id, snp_par, top_snps_tbl, project_df,
                             snp_action = shiny::reactive({"basic"})) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -34,7 +34,7 @@ geneRegionServer <- function(id, snp_par, top_snps_tbl, project_info,
       shiny::withProgress(message = 'Extract gene features ...',
                           value = 0, {
                             shiny::setProgress(1)
-                            gene_region(chr_id(), wrng, project_info())
+                            gene_region(chr_id(), wrng, project_df())
                           })
     })
     output$gene_table <- DT::renderDataTable({

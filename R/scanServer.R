@@ -3,7 +3,7 @@
 #' Shiny module for scan1 LOD and coefficient plots, with interfaces \code{scanUI} and  \code{scanOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param job_par,win_par,phe_mx,cov_df,probs_obj,K_chr,analyses_df,project_info,allele_info reactive arguments
+#' @param job_par,win_par,phe_mx,cov_df,probs_obj,K_chr,analyses_df,project_df,allele_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -23,7 +23,7 @@
 #' @importFrom grDevices dev.off pdf
 #' @importFrom qtl2mediate scan1covar
 scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
-                          analyses_df, project_info, allele_info) {
+                          analyses_df, project_df, allele_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -40,7 +40,7 @@ scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
     
     # Scan Window slider
     output$scan_window_input <- shiny::renderUI({
-      shiny::req(project_info(), phe_mx(), win_par$window_Mbp)
+      shiny::req(project_df(), phe_mx(), win_par$window_Mbp)
       chr_id <- shiny::req(win_par$chr_id)
       map <- shiny::req(probs_obj())$map[[chr_id]]
       rng <- round(2 * range(map)) / 2

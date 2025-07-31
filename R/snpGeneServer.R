@@ -3,7 +3,7 @@
 #' Shiny module for SNP association mapping, with interfaces \code{snpGeneInput}, \code{snpGeneUI} and  \code{snpGeneOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param snp_par,chr_pos,pheno_names,snp_scan_obj,snpinfo,top_snps_tbl,gene_exon_tbl,project_info,snp_action reactive arguments
+#' @param snp_par,chr_pos,pheno_names,snp_scan_obj,snpinfo,top_snps_tbl,gene_exon_tbl,project_df,snp_action reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -15,7 +15,7 @@
 #'             renderUI req tagList uiOutput
 snpGeneServer <- function(id, snp_par, chr_pos, pheno_names,
                          snp_scan_obj, snpinfo, top_snps_tbl, 
-                         gene_exon_tbl, project_info,
+                         gene_exon_tbl, project_df,
                          snp_action = shiny::reactive({"basic"})) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -25,9 +25,9 @@ snpGeneServer <- function(id, snp_par, chr_pos, pheno_names,
     snpPlotServer("snp_scan", snp_par, chr_pos, pheno_names,
                  snp_scan_obj, snpinfo, snp_action)
     ## SNP Summary
-    snpSumServer("best_snp", chr_pos, top_snps_tbl, project_info, snp_action)
+    snpSumServer("best_snp", chr_pos, top_snps_tbl, project_df, snp_action)
     ## Gene Region
-    geneRegionServer("gene_region", snp_par, top_snps_tbl, project_info, snp_action)
+    geneRegionServer("gene_region", snp_par, top_snps_tbl, project_df, snp_action)
     ## Genes and Exons
     geneExonServer("gene_exon", snp_par, chr_pos, top_snps_tbl, gene_exon_tbl, snp_action)
     

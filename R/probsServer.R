@@ -3,7 +3,7 @@
 #' Shiny genotype probability access.
 #' 
 #' @param id identifier for shiny reactive
-#' @param win_par,pheno_names,project_info reactive arguments
+#' @param win_par,pheno_names,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -13,12 +13,12 @@
 #' @export
 #' @importFrom qtl2mediate get_snpprobs
 #' @importFrom shiny isTruthy moduleServer reactive req setProgress withProgress
-probsServer <- function(id, win_par, project_info) {
+probsServer <- function(id, win_par, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
 
   probs_obj <- shiny::reactive({
-    shiny::req(project_info())
+    shiny::req(project_df())
     chr_id <- shiny::req(win_par$chr_id)
     shiny::withProgress(message = 'Read probs ...', value = 0, {
       shiny::setProgress(1)
@@ -32,7 +32,7 @@ probsServer <- function(id, win_par, project_info) {
       }
 
       # Define query_probs function
-      query_probs <- read_query_rds(project_info(), "query_probs.rds")
+      query_probs <- read_query_rds(project_df(), "query_probs.rds")
       # Note probs object keeps map with it
       query_probs(chr_id, start_val, end_val)
     })
@@ -43,13 +43,13 @@ probsServer <- function(id, win_par, project_info) {
 }
 #' @rdname probsServer
 #' @export
-pairProbsServer <- function(id, win_par, project_info) {
+pairProbsServer <- function(id, win_par, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
 
   ## Probs object for allele pair diplotypes.
   probs_obj <- shiny::reactive({
-    shiny::req(project_info())
+    shiny::req(project_df())
     chr_id <- shiny::req(win_par$chr_id)
     range_val <- shiny::req(win_par$peak_Mbp) + 
       c(-1,1) * shiny::req(win_par$window_Mbp)
@@ -57,7 +57,7 @@ pairProbsServer <- function(id, win_par, project_info) {
       shiny::setProgress(1)
       
       # Define query_probs function
-      query_probs <- read_query_rds(project_info(), "query_probs.rds")
+      query_probs <- read_query_rds(project_df(), "query_probs.rds")
       query_probs(chr_id, range_val[1], range_val[2],
                          allele = FALSE)
     })
@@ -67,12 +67,12 @@ pairProbsServer <- function(id, win_par, project_info) {
 }
 #' @rdname probsServer
 #' @export
-snpProbsServer <- function(id, win_par, pheno_names, project_info) {
+snpProbsServer <- function(id, win_par, pheno_names, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
   
   shiny::reactive({
-    shiny::req(project_info())
+    shiny::req(project_df())
     shiny::req(chr_id <- win_par$chr_id, 
                peak_Mbp <- win_par$peak_Mbp, 
                window_Mbp <- win_par$window_Mbp)
@@ -81,14 +81,14 @@ snpProbsServer <- function(id, win_par, pheno_names, project_info) {
       shiny::setProgress(1)
 
       # Define query_probs function
-      query_probs <- read_query_rds(project_info(), "query_probs.rds")
+      query_probs <- read_query_rds(project_df(), "query_probs.rds")
       probs_obj <- query_probs(chr_id,
                                peak_Mbp - window_Mbp,
                                peak_Mbp + window_Mbp,
                                allele = FALSE)
       
       # define the query_variants function
-      query_variants <- read_query_rds(project_info(), "query_variants.rds")
+      query_variants <- read_query_rds(project_df(), "query_variants.rds")
       snpinfo <- query_variants(chr_id,
                                 peak_Mbp - window_Mbp,
                                 peak_Mbp + window_Mbp)

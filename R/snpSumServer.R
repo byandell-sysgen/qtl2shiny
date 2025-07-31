@@ -3,7 +3,7 @@
 #' Shiny module for SNP summary, with interfaces \code{shinySNPInput}, \code{shinySNPUI} and  \code{shinySNPOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param chr_pos,top_snps_tbl,project_info,snp_action reactive arguments
+#' @param chr_pos,top_snps_tbl,project_df,snp_action reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -20,7 +20,7 @@
 #' @importFrom utils write.csv
 #' @importFrom rlang .data
 #' 
-snpSumServer <- function(id, chr_pos, top_snps_tbl, project_info,
+snpSumServer <- function(id, chr_pos, top_snps_tbl, project_df,
                         snp_action = shiny::reactive({"basic"})) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -31,11 +31,11 @@ snpSumServer <- function(id, chr_pos, top_snps_tbl, project_info,
     })
     best_href <- shiny::reactive({
       best <- shiny::req(best_snps())
-      ensembl_gene(best, project_info(), TRUE)
+      ensembl_gene(best, project_df(), TRUE)
     })
     best_http <- shiny::reactive({
       best <- shiny::req(best_snps())
-      ensembl_gene(best, project_info())
+      ensembl_gene(best, project_df())
     })
     
     output$top_snps_tbl <- DT::renderDataTable({
