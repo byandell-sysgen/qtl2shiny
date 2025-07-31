@@ -1,4 +1,4 @@
-#' Shiny haplotype analysis module
+#' Shiny Haplotype Analysis App
 #'
 #' Shiny module for analysis based on haplotype alleles, with interface \code{haploUI}.
 #'
@@ -13,6 +13,66 @@
 #' @export
 #' @importFrom shiny mainPanel moduleServer NS radioButtons renderText renderUI
 #'             req sidebarPanel strong tagList textOutput uiOutput
+#' @importFrom bslib page_sidebar sidebar
+haploApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_sidebar(
+    title =  "Test Haplo",
+    sidebar = bslib::sidebar(
+      setupInput("setup"),
+      projectUI("project"),
+      setupUI("setup")),
+    haploUI("haplo")
+  )
+  server <- function(input, output, session) {
+    peak_df <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "peaks")
+    })
+    pmap_obj <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "pmap")
+    })
+    analyses_df <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "analyses")
+    })
+    covar <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "covar")
+    })
+    ## Phenotypes and Covariates for Haplotype Analyses.
+    phe_mx <- shiny::reactive({
+      analyses <- analyses_df() 
+      if(is.null(analyses)) return(NULL)
+      shiny::req(project_df())
+      pheno_read(project_df(), analyses)
+    })
+    cov_df <- shiny::reactive({
+      analyses <- analyses_df() 
+      if(is.null(analyses)) return(NULL)
+      qtl2mediate::get_covar(covar(), analyses_df())
+    })
+    ## Allele names.
+    allele_info <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "allele_info")
+    })
+    
+    project_df <- projectServer("project", projects_df)
+    set_par <- setupServer("setup", peak_df, pmap_obj, analyses_df, covar,
+                           project_df)
+    haploServer("haplo", set_par$win_par, pmap_obj, phe_mx, cov_df, K_chr,
+      analyses_df, covar, analyses_tbl, peak_df, project_df, allele_info)
+    
+    output$set_par <- shiny::renderUI({
+      paste("pheno_names: ", paste(set_par$pheno_names(), collapse = ", "))
+    })
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname haploApp
 haploServer <- function(id, win_par, pmap_obj, 
                        phe_mx, cov_df, K_chr, analyses_df, 
                        covar, analyses_tbl, peak_df,
@@ -76,7 +136,7 @@ haploServer <- function(id, win_par, pmap_obj,
   })
 }
 #' @export
-#' @rdname haploServer
+#' @rdname haploApp
 haploUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
