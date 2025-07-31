@@ -93,7 +93,7 @@ patternServer <- function(id, job_par, chr_pos, win_par,
       })
     })
     
-    output$scan_pat_lod <- shiny::renderPlot({
+    output$pattern_plot_lod <- shiny::renderPlot({
       if(is.null(scan_pat()))
         return(plot_null())
       shiny::req(scan_pat(), pattern_choices(), input$pheno_name, pairprobs_obj())
@@ -103,7 +103,7 @@ patternServer <- function(id, job_par, chr_pos, win_par,
                       input$pheno_name, haplos())
       })
     })
-    output$scan_pat_coef <- shiny::renderPlot({
+    output$pattern_plot_coef <- shiny::renderPlot({
       if(is.null(scan_pat()))
         return(plot_null())
       shiny::req(scan_pat(), pattern_choices(), input$pheno_name, pairprobs_obj())
@@ -113,7 +113,7 @@ patternServer <- function(id, job_par, chr_pos, win_par,
                       input$pheno_name, haplos())
       })
     })
-    output$scanSummary <- DT::renderDataTable({
+    output$pattern_table <- DT::renderDataTable({
       shiny::req(scan_pat())
       withProgress(message = 'Pattern summary ...', value = 0, {
         setProgress(1)
@@ -122,7 +122,7 @@ patternServer <- function(id, job_par, chr_pos, win_par,
     }, escape = FALSE,
     options = list(scrollX = TRUE, pageLength = 5))
     
-    output$eff_lodPlot <- shiny::renderPlot({
+    output$pattern_plot_both <- shiny::renderPlot({
       if(is.null(scan_pat()))
         return(plot_null())
       shiny::req(scan_pat(), pattern_choices(), input$pheno_name, pairprobs_obj())
@@ -142,15 +142,15 @@ patternServer <- function(id, job_par, chr_pos, win_par,
     
     output$LOD <- shiny::renderUI({
       switch(shiny::req(input$button),
-             LOD             = shiny::plotOutput(ns("scan_pat_lod")))
+             LOD             = shiny::plotOutput(ns("pattern_plot_lod")))
     })
     output$Effects <- shiny::renderUI({
       switch(shiny::req(input$button),
-             Effects         = shiny::plotOutput(ns("scan_pat_coef")))
+             Effects         = shiny::plotOutput(ns("pattern_plot_coef")))
     })
     output$Both <- shiny::renderUI({
       switch(shiny::req(input$button),
-             "LOD & Effects" = shiny::plotOutput(ns("eff_lodPlot")))
+             "LOD & Effects" = shiny::plotOutput(ns("pattern_plot_both")))
     })
     output$Means <- shiny::renderUI({
       switch(shiny::req(input$button),
@@ -158,7 +158,7 @@ patternServer <- function(id, job_par, chr_pos, win_par,
     })
     output$Summary <- shiny::renderUI({
       switch(shiny::req(input$button),
-             Summary = DT::dataTableOutput(ns("scanSummary")))
+             Summary = DT::dataTableOutput(ns("pattern_table")))
     })
     
     ## Downloads

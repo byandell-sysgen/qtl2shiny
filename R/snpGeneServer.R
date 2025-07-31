@@ -55,8 +55,8 @@ snpGeneServer <- function(id, snp_par, chr_pos, pheno_names,
              Scan    = shiny::tagList(shiny::fluidRow(
                shiny::column(6, snpSumUI(ns("best_snp"))),
                shiny::column(6, snpPlotUI(ns("snp_scan"))))),
-             Genes   = geneRegionUI(ns("gene_region")),
-             Exons   = geneExonUI(ns("gene_exon")))
+             Genes   = geneRegionUI(ns("gene_region")), # gene_plot, gene_table
+             Exons   = geneExonUI(ns("gene_exon")))     # exon_plot, exon_table
     })
     output$button_input <- shiny::renderUI({
       shiny::radioButtons(ns("button"), "",

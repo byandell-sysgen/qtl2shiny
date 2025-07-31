@@ -145,7 +145,7 @@ phenoServer <- function(id, set_par, win_par, peak_df, analyses_tbl, covar,
     })
     
     # Output the peaks table
-    output$peaks <- DT::renderDataTable({
+    output$peak_table <- DT::renderDataTable({
       dplyr::arrange(
         dplyr::select(
           peak_df(), .data$pheno, .data$chr, .data$pos, .data$lod),
@@ -191,11 +191,11 @@ phenoServer <- function(id, set_par, win_par, peak_df, analyses_tbl, covar,
     output$show_data <- renderUI({
       shiny::tagList(
         switch(shiny::req(input$radio),
-               "Raw Data"   = phenoPlotUI(ns("PhenoPlotRaw")),
-               "Trans Data" = phenoPlotUI(ns("PhenoPlotTrans")),
+               "Raw Data"   = phenoPlotUI(ns("PhenoPlotRaw")), # pheno_plot, pheno_table
+               "Trans Data" = phenoPlotUI(ns("PhenoPlotTrans")), # pheno_plot, pheno_table
                "Covariates" = DT::dataTableOutput(ns("analyses_tbl"))),
         if(!(input$radio %in% c("Raw Data","Trans Data")))
-          DT::dataTableOutput(ns("peaks")))
+          DT::dataTableOutput(ns("peak_table"))) # peak_table
     })
     
     # Output the analyses table

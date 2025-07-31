@@ -37,7 +37,7 @@ geneRegionServer <- function(id, snp_par, top_snps_tbl, project_info,
                             gene_region(chr_id(), wrng, project_info())
                           })
     })
-    output$gene_sum <- DT::renderDataTable({
+    output$gene_table <- DT::renderDataTable({
       summary(gene_region_tbl())
     })
     chr_pos_all <- shiny::reactive({
@@ -107,8 +107,8 @@ geneRegionUI <- function(id) {
 #' @rdname geneRegionServer
 geneRegionOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
+  shiny::tagList(                         # gene_plot, gene_table
     shiny::plotOutput(ns("gene_plot")),
-    DT::dataTableOutput(ns("gene_sum"))
+    DT::dataTableOutput(ns("gene_table"))
   )
 }

@@ -32,19 +32,19 @@ snpFeatureServer <- function(id, snp_par, chr_pos, snp_scan_obj, snpinfo,
                                     snp_par$pheno_name)
                           })
     })
-    output$top_snp_type <- DT::renderDataTable({
+    output$feature_cons_table <- DT::renderDataTable({
       tops <- shiny::req(top_feature(), "SNP type")
       summary(tops)
     }, options = list(scrollX = TRUE, paging = FALSE, searching=FALSE))
-    output$top_pattern <- DT::renderDataTable({
+    output$feature_pattern_table <- DT::renderDataTable({
       summary(top_feature(), "pattern")
     }, options = list(scrollX = TRUE, paging = FALSE, searching=FALSE))
     phename <- shiny::reactive({dimnames(snp_scan_obj())[[2]]})
-    output$top_gene_by_snp <- shiny::renderPlot({
+    output$feature_pattern_plot <- shiny::renderPlot({
       shiny::req(top_feature(), snp_par$pheno_name)
       ggplot2::autoplot(top_feature(), snp_par$pheno_name, "consequence")
     })
-    output$top_gene_by_pattern <- shiny::renderPlot({
+    output$feature_cons_plot <- shiny::renderPlot({
       shiny::req(top_feature(), snp_par$pheno_name)
       ggplot2::autoplot(top_feature(), snp_par$pheno_name, "pattern")
     })
@@ -52,13 +52,13 @@ snpFeatureServer <- function(id, snp_par, chr_pos, snp_scan_obj, snpinfo,
       switch(input$by_choice,
              Pattern = {
                shiny::tagList(
-                 shiny::plotOutput(ns("top_gene_by_snp")),
-                 DT::dataTableOutput(ns("top_pattern")))
+                 shiny::plotOutput(ns("feature_pattern_plot")),
+                 DT::dataTableOutput(ns("feature_pattern_table")))
              },
              Consequence = {
                shiny::tagList(
-                 shiny::plotOutput(ns("top_gene_by_pattern")),
-                 DT::dataTableOutput(ns("top_snp_type")))
+                 shiny::plotOutput(ns("feature_cons_plot")),
+                 DT::dataTableOutput(ns("feature_cons_table")))
              })
     })
     

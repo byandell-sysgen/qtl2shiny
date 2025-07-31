@@ -19,7 +19,7 @@ phenoPlotServer <- function(id, pheno_names, phe_mx, cov_df) {
     ns <- session$ns
     
     ## Scatter plot or density
-    output$phe_sum <- DT::renderDataTable({
+    output$pheno_table <- DT::renderDataTable({
       shiny::req(phe_mx())
       shiny::withProgress(message = 'Pheno Summary ...', value = 0, {
         shiny::setProgress(1)
@@ -29,7 +29,7 @@ phenoPlotServer <- function(id, pheno_names, phe_mx, cov_df) {
     options = list(scrollX = TRUE, 
                    pageLength = 5,
                    lengthMenu = list(c(5,10,-1), c(5,10,"all"))))
-    output$phePlot <- shiny::renderPlot({
+    output$pheno_plot <- shiny::renderPlot({
       # If no df, gives blank area.
       # Better to either do nothing or do plot_null()
       # use uiOutput and renderUI?
@@ -40,10 +40,10 @@ phenoPlotServer <- function(id, pheno_names, phe_mx, cov_df) {
         plot_sex(phe_mx(), cov_df())
       })
     })
-    output$phePlotTable <- shiny::renderUI({
+    output$pheno_plot_table <- shiny::renderUI({
       shiny::tagList(
-        shiny::plotOutput(ns("phePlot")),
-        DT::dataTableOutput(ns("phe_sum")))
+        shiny::plotOutput(ns("pheno_plot")),
+        DT::dataTableOutput(ns("pheno_table")))
     })
   })
 }
@@ -51,5 +51,5 @@ phenoPlotServer <- function(id, pheno_names, phe_mx, cov_df) {
 #' @rdname phenoPlotServer
 phenoPlotUI <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("phePlotTable"))
+  shiny::uiOutput(ns("pheno_plot_table"))
 }

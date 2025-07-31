@@ -57,7 +57,7 @@ geneExonServer <- function(id, snp_par, chr_pos, top_snps_tbl, gene_exon_tbl,
       }
     })
     
-    output$gene_sum <- DT::renderDataTable({
+    output$exon_table <- DT::renderDataTable({
       shiny::withProgress(message = 'Gene Exon Table ...', value = 0, {
         shiny::setProgress(1)
         summary_gene_exon()
@@ -84,7 +84,7 @@ geneExonServer <- function(id, snp_par, chr_pos, top_snps_tbl, gene_exon_tbl,
                                selected = selected)
     })
     
-    output$gene_plot <- shiny::renderPlot({
+    output$exon_plot <- shiny::renderPlot({
       if(is.null(input$gene_name)) {
         plot_null()
       } else {
@@ -107,8 +107,8 @@ geneExonServer <- function(id, snp_par, chr_pos, top_snps_tbl, gene_exon_tbl,
     })
     output$exon_output <- shiny::renderUI({
       switch(shiny::req(input$button),
-             Plot    = shiny::plotOutput(ns("gene_plot")),
-             Summary = DT::dataTableOutput(ns("gene_sum")))
+             Plot    = shiny::plotOutput(ns("exon_plot")),
+             Summary = DT::dataTableOutput(ns("exon_table")))
     })
     
     ## Downloads.
@@ -160,5 +160,5 @@ geneExonUI <- function(id) {
 #' @rdname geneExonServer
 geneExonOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("exon_output"))
+  shiny::uiOutput(ns("exon_output")) # exon_plot, exon_table
 }

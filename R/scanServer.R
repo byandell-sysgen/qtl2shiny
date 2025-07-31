@@ -66,7 +66,7 @@ scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
     })
     
     ## Scan1 plot
-    output$scanPlot <- shiny::renderPlot({
+    output$scan_plot <- shiny::renderPlot({
       if(!shiny::isTruthy(win_par$chr_id) || !shiny::isTruthy(phe_mx()))
         return(plot_null("need to select\nRegion & Phenotype"))
       shiny::req(win_par$chr_id, input$scan_window, scan_obj(), probs_obj())
@@ -91,7 +91,7 @@ scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
                      job_par$sex_type, input$blups)
       })
     })
-    output$effPlot <- shiny::renderPlot({
+    output$coef_plot <- shiny::renderPlot({
       shiny::req(input$pheno_name, scan_obj(), eff_obj(), win_par$chr_id, allele_info())
       map <- shiny::req(probs_obj())$map
       shiny::withProgress(message = 'Effect plots ...', value = 0, {
@@ -100,7 +100,7 @@ scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
                  input$scan_window,, allele_info())
       })
     })
-    output$effSummary <- DT::renderDataTable({
+    output$scan_table <- DT::renderDataTable({
       shiny::req(eff_obj(), scan_obj(), probs_obj())
       shiny::withProgress(message = 'Effect summary ...', value = 0, {
         shiny::setProgress(1)
@@ -110,7 +110,7 @@ scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
     options = list(scrollX = TRUE, pageLength = 5))
     
     ## Effect and LOD Plot
-    output$lod_effPlot <- shiny::renderPlot({
+    output$scan_coef_plot <- shiny::renderPlot({
       shiny::req(input$pheno_name, input$scan_window, win_par$chr_id,
                  eff_obj(), scan_obj(), allele_info())
       map <- shiny::req(probs_obj())$map
@@ -134,16 +134,16 @@ scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
     })
     output$LOD <- shiny::renderUI({
       switch(shiny::req(input$button),
-             LOD             = shiny::plotOutput(ns("scanPlot")))
+             LOD             = shiny::plotOutput(ns("scan_plot")))
     })
     output$Effects <- shiny::renderUI({
       switch(shiny::req(input$button),
-             Effects         = shiny::plotOutput(ns("effPlot")),
-             "LOD & Effects" = shiny::plotOutput(ns("lod_effPlot")))
+             Effects         = shiny::plotOutput(ns("coef_plot")),
+             "LOD & Effects" = shiny::plotOutput(ns("scan_coef_plot")))
     })
     output$Summary <- shiny::renderUI({
       switch(shiny::req(input$button),
-             Summary = DT::dataTableOutput(ns("effSummary")))
+             Summary = DT::dataTableOutput(ns("scan_table")))
     })
     
     

@@ -163,12 +163,12 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl, covar,
     })
     output$sidebar_hot <- shiny::renderUI({
       switch(shiny::req(input$radio),
-             Region     = peakUI(ns("peak")))
+             Region     = peakUI(ns("peak"))) # hotspot_plot_checkbox, chr_ct, minLOD, window_Mbp
     })
     output$main_setup <- shiny::renderUI({
       switch(shiny::req(input$radio),
              Phenotypes = phenoOutput(ns("pheno")),
-             Region     = peakOutput(ns("peak")))
+             Region     = peakOutput(ns("peak"))) # peak_table, hotspot_plot, hotspot_table
     })
     
     output$radio_input <- shiny::renderUI({

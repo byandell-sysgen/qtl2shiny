@@ -240,11 +240,11 @@ peakInput <- function(id) {
 peakUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    hotspotInput(ns("hotspot"))) # Hotspot Info: peak_ck, chr_ct, minLOD, window_Mbp
+    hotspotInput(ns("hotspot"))) # hotspot_plot_checkbox, chr_ct, minLOD, window_Mbp
 }
 #' @export
 #' @rdname peakApp
 peakOutput <- function(id) {
   ns <- shiny::NS(id)
-  hotspotOutput(ns("hotspot"))    # Hotspot Output: peak_show, peak_table
+  hotspotOutput(ns("hotspot")) # peak_table, hotspot_plot, hotspot_table
 }

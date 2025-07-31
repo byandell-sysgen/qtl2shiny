@@ -39,7 +39,7 @@ snpPatternServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
       stringr::str_split(shiny::req(chr_pos()), "_")[[1]][1]
     })
     
-    output$snpPatternSum <- DT::renderDataTable({
+    output$snp_pattern_table <- DT::renderDataTable({
       sum_top_pat()
     }, escape = FALSE,
     options = list(scrollX = TRUE, pageLength = 5))
@@ -50,7 +50,7 @@ snpPatternServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
             shiny::req(snp_par$minLOD))
     })
     
-    output$snpPatternPlot <- shiny::renderPlot({
+    output$snp_pattern_plot <- shiny::renderPlot({
       if(is.null(snp_par$pheno_name) | is.null(snp_scan_obj()) |
          is.null(snp_par$scan_window) | is.null(snp_action()) |
          is.null(snpinfo()) | is.null(chr_id()))
@@ -67,7 +67,7 @@ snpPatternServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
       })
     })
     
-    output$snpPatternPlotly <- plotly::renderPlotly({
+    output$snp_pattern_plotly <- plotly::renderPlotly({
       if(is.null(snp_par$pheno_name) | is.null(snp_scan_obj()) |
          is.null(snp_par$scan_window) | is.null(snp_action()) |
          is.null(snpinfo()) | is.null(chr_id()))
@@ -149,10 +149,10 @@ snpPatternServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
     output$pat_output <- shiny::renderUI({
       switch(shiny::req(input$button),
              "Top SNPs"     = snpFeatureOutput(ns("top_feature")),
-             "By Pheno"     = shiny::plotOutput(ns("snpPatternPlot")),
+             "By Pheno"     = shiny::plotOutput(ns("snp_pattern_plot")),
              "All Phenos"   = shiny::plotOutput(ns("snp_phe_pat")),
              "All Patterns" = shiny::plotOutput(ns("snp_pat_phe")),
-             "Interactive"  = plotly::plotlyOutput(ns("snpPatternPlotly")))
+             "Interactive"  = plotly::plotlyOutput(ns("snp_pattern_plotly")))
     })
     output$title <- shiny::renderUI({
       if(snp_action() == "basic")
@@ -270,5 +270,5 @@ snpPatternOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("pat_output")),
-    DT::dataTableOutput(ns("snpPatternSum")))
+    DT::dataTableOutput(ns("snp_pattern_table")))
 }

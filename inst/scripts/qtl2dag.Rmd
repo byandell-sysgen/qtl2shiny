@@ -69,7 +69,7 @@ igraph::tkplot(net_ui)
 
 ```{r message=FALSE, warning=FALSE, fig.width=7, fig.height=7}
 plot(net_ui, vertex.shape="none", 
-     vertex.label=igraph::V(netModule)$node, 
+     vertex.label=igraph::V(net_ui)$node, 
      vertex.label.font=2, vertex.label.color="black",
      vertex.label.cex=1, edge.color="gray50",
      layout = igraph::layout_as_tree)

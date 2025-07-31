@@ -186,7 +186,7 @@ mediateServer <- function(id,
              "Mediator Effects" = "mediator")
     })
     ## Mediate1 plot
-    output$medPlot <- shiny::renderPlot({
+    output$mediate_plot <- shiny::renderPlot({
       if(!shiny::isTruthy(med_ls()) || !shiny::isTruthy(mediate_obj())) {
         plot_null("too much\nmissing data\nin mediators\nreduce window width")
       } else {
@@ -202,7 +202,7 @@ mediateServer <- function(id,
       }
     })
     ## Mediate1 plotly
-    output$medPlotly <- plotly::renderPlotly({
+    output$mediate_plotly <- plotly::renderPlotly({
       shiny::req(mediate_obj())
       shiny::withProgress(message = 'Mediation Plotly ...', value = 0, {
         shiny::setProgress(1)
@@ -213,7 +213,7 @@ mediateServer <- function(id,
       })
     })
     
-    output$medSummary <- DT::renderDataTable({
+    output$mediate_table <- DT::renderDataTable({
       shiny::req(mediate_obj())$best
     }, escape = FALSE,
     options = list(scrollX = TRUE, pageLength = 5))
@@ -238,8 +238,8 @@ mediateServer <- function(id,
     
     output$out_choice <- shiny::renderUI({
       switch(shiny::req(input$button),
-             Static      = shiny::plotOutput(ns("medPlot")),
-             Interactive = plotly::plotlyOutput(ns("medPlotly")))
+             Static      = shiny::plotOutput(ns("mediate_plot")),
+             Interactive = plotly::plotlyOutput(ns("mediate_plotly")))
     })
     output$qtls_input <- shiny::renderUI({
       if(is.null(selected <- input$qtls))
@@ -355,7 +355,7 @@ mediateServer <- function(id,
       else
         shiny::tagList(
           shiny::uiOutput(ns("out_choice")),
-          DT::dataTableOutput(ns("medSummary")))
+          DT::dataTableOutput(ns("mediate_table")))
     })
   })
 }

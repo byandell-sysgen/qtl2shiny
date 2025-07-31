@@ -18,7 +18,7 @@ snpPlotServer <- function(id, snp_par, chr_pos, pheno_names,
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    output$snpPlot <- shiny::renderPlot({
+    output$snp_plot <- shiny::renderPlot({
       if(!shiny::isTruthy(snp_par$scan_window) || !shiny::isTruthy(pheno_names()))
         return(plot_null("need to select\nRegion & Phenotype"))
       
@@ -59,5 +59,5 @@ snpPlotUI <- function(id) {
 #' @rdname snpPlotServer
 snpPlotOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::plotOutput(ns("snpPlot"))
+  shiny::plotOutput(ns("snp_plot"))
 }

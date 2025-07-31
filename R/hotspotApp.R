@@ -87,7 +87,7 @@ hotspotApp <- function() {
     })
     
     project_df <- projectServer("project", projects_df)
-    scan_tbl <- hotspotServer("hotspot", input, peak_df, pmap_obj, project_df)
+    hotspot_df <- hotspotServer("hotspot", input, peak_df, pmap_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }
@@ -171,15 +171,14 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
       out_peaks
     })
     
-    output$peak_show <- shiny::renderUI({
-      if(input$peak_ck) {
-        shiny::plotOutput(ns("peak_plot"))
+    output$hotspot_show <- shiny::renderUI({
+      if(input$hotspot_plot_checkbox) {
+        shiny::plotOutput(ns("hotspot_plot"))
       } else {
-        DT::dataTableOutput(ns("peak_tbl"))
+        DT::dataTableOutput(ns("hotspot_peak_table"))
       }
     })
-    # ** This is causing problems.**
-    output$peak_plot <- shiny::renderPlot({
+    output$hotspot_plot <- shiny::renderPlot({
       shiny::req(scan_obj())
       window_Mbp <- shiny::req(input$window_Mbp)
       peak_grp <- set_par$pheno_group
@@ -200,7 +199,7 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
                             plot_hot(peak_set, scan_obj(), window_Mbp)
                           })
     })
-    scan_tbl <- shiny::reactive({
+    hotspot_df <- shiny::reactive({
       shiny::req(scan_obj())
       if(shiny::isTruthy(set_par$dataset)) {
         peak_set <- set_par$dataset
@@ -212,14 +211,14 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
         summary_hot(peak_set, scan_obj())
       })
     })
-    output$peak_tbl <- DT::renderDataTable({
-      shiny::req(scan_tbl(), peak_df())
-      peakDataTable(scan_tbl(), peak_df())
+    output$hotspot_peak_table <- DT::renderDataTable({
+      shiny::req(hotspot_df(), peak_df())
+      peakDataTable(peak_df(), hotspot_df())
     }, escape = FALSE,
     options = list(lengthMenu = c(5,10,20,50), pageLength = 5))
-    output$peak_table <- DT::renderDataTable({
-      shiny::req(scan_tbl())
-      dplyr::arrange(scan_tbl(), desc(.data$count))
+    output$hotspot_table <- DT::renderDataTable({
+      shiny::req(hotspot_df())
+      dplyr::arrange(hotspot_df(), desc(.data$count))
     }, escape = FALSE,
     options = list(lengthMenu = c(5,10,20,50), pageLength = 5))
     
@@ -238,17 +237,17 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
     })
     
     ## Return.
-    scan_tbl
+    hotspot_df
   })
 }
 #' @export
 #' @rdname hotspotApp
-hotspotInput <- function(id) {
+hotspotInput <- function(id) { # Hotspot Info: 
   ns <- shiny::NS(id)
-  shiny::tagList(      # Hotspot Info: peak_ck, chr_ct, minLOD, window_Mbp
+  shiny::tagList(      # hotspot_plot_checkbox, chr_ct, minLOD, window_Mbp
     shiny::fluidRow(
       shiny::column(6, shiny::strong("Hotspot Info")),
-      shiny::column(6, shiny::checkboxInput(ns("peak_ck"), "plot?", FALSE))),
+      shiny::column(6, shiny::checkboxInput(ns("hotspot_plot_checkbox"), "plot?", FALSE))),
     shiny::fluidRow(
       shiny::column(4, shiny::uiOutput(ns("chr_ct_input"))),
       shiny::column(4, shiny::uiOutput(ns("minLOD_input"))),
@@ -256,11 +255,11 @@ hotspotInput <- function(id) {
 }
 #' @export
 #' @rdname hotspotApp
-hotspotOutput <- function(id) {
+hotspotOutput <- function(id) { # Hotspot Output: 
   ns <- shiny::NS(id)
-  shiny::tagList(       # Hotspot Output: peak_show, peak_table
+  shiny::tagList(       # hotspot_peak_table, hotspot_plot, hotspot_table
     shiny::strong("Hotspot Output"),
-    shiny::uiOutput(ns("peak_show")),
-    DT::dataTableOutput(ns("peak_table"))
+    shiny::uiOutput(ns("hotspot_show")),
+    DT::dataTableOutput(ns("hotspot_table"))
   )
 }
