@@ -38,7 +38,6 @@ setupApp <- function() {
     })
     analyses_tbl <- shiny::reactive({
       shiny::req(project_df())
-      ## The analyses_tbl should only have one row per pheno.
       read_project(project_df(), "analyses")
     })
     covar <- shiny::reactive({
@@ -64,42 +63,30 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl, covar,
     ns <- session$ns
     
     # Input `input$pheno_group`.
-    pheno_group <- shiny::reactive({
-      shiny::req(project_df())
-      sort(unique(shiny::req(analyses_tbl())$pheno_group))
-    }, label = "pheno_group")
     output$pheno_group_input <- shiny::renderUI({
-      shiny::req(choices <- pheno_group())
-      if(is.null(selected <- input$pheno_group)) {
+      shiny::req(analyses_tbl())
+      choices <- sort(unique(analyses_tbl()$pheno_group))
+      if(is.null(selected <- input$pheno_group))
         selected <- choices[1]
-      }
       shiny::selectInput(ns("pheno_group"), "",
-                         choices = as.list(choices),
-                         selected = selected,
-                         multiple = TRUE)
-    })
-    
-    ## Reactive `pheno_type()`.
-    pheno_type <- shiny::reactive({
-      shiny::req(project_df())
-      phe_gp <- shiny::req(input$pheno_group)
-      analyses_group <- 
-        dplyr::filter(
-          shiny::req(analyses_tbl()),
-          pheno_group %in% phe_gp)
-      sort(unique(analyses_group$pheno_type))
+        choices = as.list(choices), selected = selected, multiple = TRUE)
     })
     
     # Input `input$dataset`.
+    pheno_type <- shiny::reactive({
+      # Find `pheno_type`s for `dataset` choice.
+      phe_gp <- shiny::req(input$pheno_group)
+      shiny::req(analyses_tbl())
+      analyses_group <- dplyr::filter(analyses_tbl(), pheno_group %in% phe_gp)
+      sort(unique(analyses_group$pheno_type))
+    })
     output$dataset_input <- shiny::renderUI({
       shiny::req(project_df())
       choices <- c("all", shiny::req(pheno_type()))
       if(is.null(selected <- input$dataset))
         selected <- NULL
       shiny::selectInput(ns("dataset"), "Phenotype Set",
-                         choices = as.list(choices),
-                         selected = selected,
-                         multiple = TRUE)
+        choices = as.list(choices), selected = selected, multiple = TRUE)
     })
     
     ## Set up analyses data frame.
