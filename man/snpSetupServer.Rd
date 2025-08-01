@@ -14,7 +14,7 @@ snpSetupServer(
   cov_df,
   K_chr,
   analyses_df,
-  project_info,
+  project_df,
   allele_info,
   snp_action = shiny::reactive({
      "basic"
@@ -28,7 +28,7 @@ snpSetupOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{job_par, win_par, phe_mx, cov_df, K_chr, analyses_df, project_info, allele_info, snp_action}{reactive arguments}
+\item{job_par, win_par, phe_mx, cov_df, K_chr, analyses_df, project_df, allele_info, snp_action}{reactive arguments}
 }
 \description{
 Shiny module to coordinate SNP and allele analyses and plots, with interfaces \code{snpSetupUI} and  \code{snpSetupOutput}.

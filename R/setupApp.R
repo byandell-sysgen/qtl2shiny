@@ -3,7 +3,7 @@
 #' Shiny module for phenotype selection, with interfaces \code{setupInput} and  \code{setupUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param peak_df,pmap_obj,analyses_tbl,covar,projects_info reactive arguments
+#' @param peak_df,pmap_obj,analyses_df,covar,projects_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -36,7 +36,7 @@ setupApp <- function() {
       shiny::req(project_df())
       read_project(project_df(), "pmap")
     })
-    analyses_tbl <- shiny::reactive({
+    analyses_df <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "analyses")
     })
@@ -46,7 +46,7 @@ setupApp <- function() {
     })
 
     project_df <- projectServer("project", projects_df)
-    set_par <- setupServer("setup", peak_df, pmap_obj, analyses_tbl, covar,
+    set_par <- setupServer("setup", peak_df, pmap_obj, analyses_df, covar,
                            project_df)
 
     output$set_par <- shiny::renderUI({
@@ -57,15 +57,15 @@ setupApp <- function() {
 }
 #' @export
 #' @rdname setupApp
-setupServer <- function(id, peak_df, pmap_obj, analyses_tbl, covar,
+setupServer <- function(id, peak_df, pmap_obj, analyses_df, covar,
                         project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     # Input `input$pheno_group`.
     output$pheno_group_input <- shiny::renderUI({
-      shiny::req(analyses_tbl())
-      choices <- sort(unique(analyses_tbl()$pheno_group))
+      shiny::req(analyses_df())
+      choices <- sort(unique(analyses_df()$pheno_group))
       if(is.null(selected <- input$pheno_group))
         selected <- choices[1]
       shiny::selectInput(ns("pheno_group"), "",
@@ -76,8 +76,8 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl, covar,
     pheno_type <- shiny::reactive({
       # Find `pheno_type`s for `dataset` choice.
       phe_gp <- shiny::req(input$pheno_group)
-      shiny::req(analyses_tbl())
-      analyses_group <- dplyr::filter(analyses_tbl(), pheno_group %in% phe_gp)
+      shiny::req(analyses_df())
+      analyses_group <- dplyr::filter(analyses_df(), pheno_group %in% phe_gp)
       sort(unique(analyses_group$pheno_type))
     })
     output$dataset_input <- shiny::renderUI({
@@ -91,8 +91,8 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl, covar,
     
     ## Set up analyses data frame.
     analyses_set <- shiny::reactive({
-      shiny::req(project_df(), analyses_tbl())
-      set_analyses(input$dataset, input$pheno_group, analyses_tbl())
+      shiny::req(project_df(), analyses_df())
+      set_analyses(input$dataset, input$pheno_group, analyses_df())
     })
     # Restrict peaks to region.
     peak_dataset_df <- shiny::reactive({
@@ -111,10 +111,14 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl, covar,
                                         collapse = "-"), "?"),
                            TRUE)
     })
-    
+
+    ## Find Hotspots.    
+    hotspot_df <- hotspotServer("hotspot", input, peak_df, pmap_obj,
+                                project_df)
     ## Locate Peak.
-    win_par <- peakServer("peak", input, peak_df, pmap_obj, project_df)
-    
+    win_par <- peakServer("peak", input, peak_df, pmap_obj, hotspot_df,
+                          project_df)
+
     chr_pos <- shiny::reactive({
       shiny::req(project_df())
       make_chr_pos(win_par$chr_id, 
@@ -125,7 +129,7 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl, covar,
     })
     output$num_pheno <- shiny::renderText({
       shiny::req(project_df())
-      num_pheno(character(), analyses_tbl())
+      num_pheno(character(), analyses_df())
     })
     output$version <- shiny::renderText({
       versions()
@@ -133,7 +137,7 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl, covar,
     
     ## Use window as input to phenoServer.
     pheno_names <- phenoServer("pheno", input, win_par,
-      peak_df, analyses_tbl, cov_df, project_df)
+      peak_df, analyses_df, cov_df, project_df)
     
     ## Setup input logic.
     output$project_name <- renderUI({
@@ -145,17 +149,22 @@ setupServer <- function(id, peak_df, pmap_obj, analyses_tbl, covar,
       switch(shiny::req(input$radio),
              Phenotypes = shiny::tagList(
                shiny::uiOutput(ns("filter")),
+               phenoInput(ns("pheno")),
                phenoUI(ns("pheno"))),
-             Region     = peakInput(ns("peak"))) # Local Scan: local, chr_id, peak_Mbp, window_Mbp
+             Region     = peakInput(ns("peak"))) # local, chr_id, peak_Mbp, window_Mbp
     })
     output$sidebar_hot <- shiny::renderUI({
       switch(shiny::req(input$radio),
-             Region     = peakUI(ns("peak"))) # hotspot_plot_checkbox, chr_ct, minLOD, window_Mbp
+             Region     = hotspotInput(ns("hotspot"))) # chr_ct, minLOD, window_Mbp
     })
     output$main_setup <- shiny::renderUI({
       switch(shiny::req(input$radio),
              Phenotypes = phenoOutput(ns("pheno")),
-             Region     = peakOutput(ns("peak"))) # peak_table, hotspot_plot, hotspot_table
+             Region     = shiny::tagList(
+               peakOutput(ns("peak"))#,
+             #  hotspotOutput(ns("hotspot"))
+             )
+       ) # peak_table, hotspot_plot, hotspot_table
     })
     
     output$radio_input <- shiny::renderUI({

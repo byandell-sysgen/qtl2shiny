@@ -6,16 +6,16 @@
 \alias{snpProbsServer}
 \title{Shiny Probability modules}
 \usage{
-probsServer(id, win_par, project_info)
+probsServer(id, win_par, project_df)
 
-pairProbsServer(id, win_par, project_info)
+pairProbsServer(id, win_par, project_df)
 
-snpProbsServer(id, win_par, pheno_names, project_info)
+snpProbsServer(id, win_par, pheno_names, project_df)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{win_par, pheno_names, project_info}{reactive arguments}
+\item{win_par, pheno_names, project_df}{reactive arguments}
 }
 \value{
 Object of class \code{probs}.

@@ -4,17 +4,14 @@
 \alias{peakApp}
 \alias{peakServer}
 \alias{peakInput}
-\alias{peakUI}
 \alias{peakOutput}
 \title{Shiny Peak App}
 \usage{
 peakApp()
 
-peakServer(id, set_par, peak_df, pmap_obj, project_df)
+peakServer(id, set_par, peak_df, pmap_obj, hotspot_df, project_df)
 
 peakInput(id)
-
-peakUI(id)
 
 peakOutput(id)
 }

@@ -1,5 +1,8 @@
 plot_hot <- function(peak_set, scan_obj, window_Mbp) {
+  if(is.null(peak_set)) return(NULL)
   # reduce to chrs with positive counts
+  if(!any(peak_set %in% colnames(scan_obj$scan))) return(NULL)
+  peak_set <- peak_set[!is.na(match(peak_set, colnames(scan_obj$scan)))]
   scan_obj <- subset(scan_obj, nonzero = peak_set)
   
   # want to order max column of peak_set

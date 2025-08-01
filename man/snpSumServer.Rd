@@ -11,7 +11,7 @@ snpSumServer(
   id,
   chr_pos,
   top_snps_tbl,
-  project_info,
+  project_df,
   snp_action = shiny::reactive({
      "basic"
  })
@@ -26,7 +26,7 @@ snpSumOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{chr_pos, top_snps_tbl, project_info, snp_action}{reactive arguments}
+\item{chr_pos, top_snps_tbl, project_df, snp_action}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

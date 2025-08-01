@@ -14,7 +14,7 @@
 #'
 #' @export
 #' @importFrom dplyr arrange desc distinct filter
-#' @importFrom shiny checkboxInput column fluidRow isTruthy moduleServer
+#' @importFrom shiny column fluidRow isTruthy moduleServer
 #'             numericInput observeEvent reactive renderPlot renderTable
 #'             renderUI req selectInput setProgress strong tableOutput tagList
 #'             uiOutput updateNumericInput updateSelectInput withProgress
@@ -93,10 +93,6 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
       shiny::req(project_df())
       names(shiny::req(pmap_obj()))
     })
-    # Hotspot Search (if desired--not used)
-    output$hotspot_input <- shiny::renderUI({
-      shiny::checkboxInput(ns("hotspot"), "Search Hotspots?", input$hotspot)
-    })
     # Select chromosome.
     output$chr_ct_input <- shiny::renderUI({
       shiny::req(project_df())
@@ -152,11 +148,7 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
     })
     
     output$hotspot_show <- shiny::renderUI({
-      if(input$hotspot_plot_checkbox) {
-        shiny::plotOutput(ns("hotspot_plot"))
-      } else {
-        DT::dataTableOutput(ns("hotspot_peak_table"))
-      }
+      shiny::plotOutput(ns("hotspot_plot"))
     })
     output$hotspot_plot <- shiny::renderPlot({
       shiny::req(scan_obj())
@@ -224,10 +216,8 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
 #' @rdname hotspotApp
 hotspotInput <- function(id) { # Hotspot Info: 
   ns <- shiny::NS(id)
-  shiny::tagList(      # hotspot_plot_checkbox, chr_ct, minLOD, window_Mbp
-    shiny::fluidRow(
-      shiny::column(6, shiny::strong("Hotspot Info")),
-      shiny::column(6, shiny::checkboxInput(ns("hotspot_plot_checkbox"), "plot?", FALSE))),
+  shiny::tagList(      # chr_ct, minLOD, window_Mbp
+    shiny::strong("Hotspot Info"),
     shiny::fluidRow(
       shiny::column(4, shiny::uiOutput(ns("chr_ct_input"))),
       shiny::column(4, shiny::uiOutput(ns("minLOD_input"))),
@@ -237,7 +227,7 @@ hotspotInput <- function(id) { # Hotspot Info:
 #' @rdname hotspotApp
 hotspotOutput <- function(id) { # Hotspot Output: 
   ns <- shiny::NS(id)
-  shiny::tagList(       # hotspot_peak_table, hotspot_plot, hotspot_table
+  shiny::tagList(       # hotspot_plot, hotspot_table
     shiny::strong("Hotspot Output"),
     shiny::uiOutput(ns("hotspot_show")),
     DT::dataTableOutput(ns("hotspot_table"))

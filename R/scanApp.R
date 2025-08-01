@@ -14,7 +14,7 @@
 #' @importFrom qtl2mediate scan1covar
 #' @importFrom ggplot2 autoplot
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny checkboxInput column downloadButton downloadHandler
+#' @importFrom shiny checkboxInput column
 #'             fluidRow isTruthy moduleServer NS plotOutput radioButtons
 #'             reactive renderPlot renderUI req selectInput setProgress
 #'             sliderInput strong tagList uiOutput updateSliderInput
@@ -22,6 +22,80 @@
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #' @importFrom qtl2mediate scan1covar
+#' @importFrom bslib page_sidebar sidebar
+scanApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_sidebar(
+    title =  "Test Scan",
+    sidebar = bslib::sidebar(
+      projectUI("project"),
+      peakInput("peak"),
+      hotspotInput("hotspot"), # chr_ct, minLOD, window_Mbp
+      shiny::uiOutput("sex_type_input"),
+      scanUI("scan")),
+    scanOutput("scan")
+  )
+  server <- function(input, output, session) {
+    peak_df <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "peaks")
+    })
+    pmap_obj <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "pmap")
+    })
+    analyses_df <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "analyses")
+    })
+    covar <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "covar")
+    })
+    ## Phenotypes and Covariates for Haplotype Analyses.
+    phe_mx <- shiny::reactive({
+      analyses <- analyses_df() 
+      if(is.null(analyses)) return(NULL)
+      shiny::req(project_df())
+      pheno_read(project_df(), analyses)
+    })
+    cov_df <- shiny::reactive({
+      analyses <- analyses_df() 
+      if(is.null(analyses)) return(NULL)
+      qtl2mediate::get_covar(covar(), analyses_df())
+    })
+    kinship <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "kinship")
+    })
+    K_chr <- shiny::reactive({
+      kinship()[win_par$chr_id]
+    })
+    ## Allele names.
+    allele_info <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "allele_info")
+    })
+    output$sex_type_input <- shiny::renderUI({
+      choices <- c("A","I","F","M")
+      shiny::radioButtons("sex_type", "Sex:",
+                          choices,
+                          input$sex_type, inline = TRUE)
+    })
+    
+    project_df <- projectServer("project", projects_df)
+    hotspot_df <- hotspotServer("hotspot", input, peak_df, pmap_obj,
+                                project_df)
+    win_par <- peakServer("peak", input, peak_df, pmap_obj, hotspot_df,
+                          project_df)
+    probs_obj <- probsServer("probs", win_par, project_df)
+    scanServer("scan", input, win_par, phe_mx, cov_df, probs_obj,
+      K_chr, analyses_df, project_df, allele_info)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname scanApp
 scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
                           analyses_df, project_df, allele_info) {
   shiny::moduleServer(id, function(input, output, session) {
@@ -29,6 +103,7 @@ scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
     
     ## Genome scan 
     scan_obj <- shiny::reactive({
+      # ** Not getting to this step when phenotype selected. **
       shiny::req(phe_mx(), probs_obj(), K_chr(), cov_df(), win_par$window_Mbp,
                  job_par$sex_type)
       shiny::withProgress(message = "Genome Scan ...", value = 0, {
@@ -196,15 +271,14 @@ scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
           summary(eff_obj(), scan_obj(), probs_obj()$map)
         }))
     )
-    downloadServer(ns("download"), download_list,
-                   selected_item = shiny::reactive("scan"),
-                   plot_table = shiny::reactive(input$plot_table),
-                   title_download = shiny::reactive("Scan"))
-    browser()
+    # downloadServer(ns("download"), download_list,
+    #                selected_item = shiny::reactive("scan"),
+    #                plot_table = shiny::reactive(input$plot_table),
+    #                title_download = shiny::reactive("Scan"))
   })
 }
 #' @export
-#' @rdname scanServer
+#' @rdname scanApp
 scanUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -218,7 +292,7 @@ scanUI <- function(id) {
     downloadOutput(ns("download")))      # downloadButton, filename
 }
 #' @export
-#' @rdname scanServer
+#' @rdname scanApp
 scanOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(

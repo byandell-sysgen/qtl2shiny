@@ -16,7 +16,7 @@ snpGeneServer(
   snpinfo,
   top_snps_tbl,
   gene_exon_tbl,
-  project_info,
+  project_df,
   snp_action = shiny::reactive({
      "basic"
  })
@@ -31,7 +31,7 @@ snpGeneOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{snp_par, chr_pos, pheno_names, snp_scan_obj, snpinfo, top_snps_tbl, gene_exon_tbl, project_info, snp_action}{reactive arguments}
+\item{snp_par, chr_pos, pheno_names, snp_scan_obj, snpinfo, top_snps_tbl, gene_exon_tbl, project_df, snp_action}{reactive arguments}
 }
 \value{
 tbl with top SNPs

@@ -16,7 +16,7 @@ alleleServer(
   analyses_df,
   patterns,
   scan_pat,
-  project_info,
+  project_df,
   snp_action
 )
 
@@ -27,7 +27,7 @@ alleleOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{win_par, phe_mx, cov_df, probs_obj, K_chr, analyses_df, patterns, scan_pat, project_info, snp_action}{reactive arguments}
+\item{win_par, phe_mx, cov_df, probs_obj, K_chr, analyses_df, patterns, scan_pat, project_df, snp_action}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

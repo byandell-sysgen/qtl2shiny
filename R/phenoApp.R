@@ -22,7 +22,7 @@ phenoApp <- function() {
       shiny::uiOutput("pheno_group_input"),
       shiny::uiOutput("dataset_input"),
       peakInput("peak"),
-      peakUI("peak"),
+      hotspotInput("hotspot"), # chr_ct, minLOD, window_Mbp
       phenoInput("pheno"),
       phenoUI("pheno")),
     phenoOutput("pheno")
@@ -68,7 +68,10 @@ phenoApp <- function() {
     })
 
     project_df <- projectServer("project", projects_df)
-    win_par <- peakServer("peak", input, peak_df, pmap_obj, project_df)
+    hotspot_df <- hotspotServer("hotspot", input, peak_df, pmap_obj,
+                                project_df)
+    win_par <- peakServer("peak", input, peak_df, pmap_obj, hotspot_df,
+                          project_df)
     pheno_names <- phenoServer("pheno", input, win_par, peak_df, analyses_tbl,
                                covar, project_df)
   }
@@ -124,15 +127,6 @@ phenoServer <- function(id, set_par, win_par, peak_df, analyses_tbl, covar,
                         choices = out$choices, selected = "none")
     })
     
-    # Output the peaks table
-    output$peak_table <- DT::renderDataTable({
-      dplyr::arrange(
-        dplyr::select(
-          peak_df(), .data$pheno, .data$chr, .data$pos, .data$lod),
-        dplyr::desc(.data$lod))
-    }, options = list(scrollX = TRUE, pageLength = 5,
-                      lengthMenu = c(5,10,25)))
-    
     ## Density or scatter plot of phenotypes.
     analyses_plot <- shiny::reactive({
       shiny::req(analyses_tbl())
@@ -164,18 +158,14 @@ phenoServer <- function(id, set_par, win_par, peak_df, analyses_tbl, covar,
     # Show data.
     output$radio_input <- renderUI({
       shiny::radioButtons(ns("radio"), NULL,
-                          c("LOD Peaks","Covariates",
-                            "Trans Data","Raw Data"),
+                          c("Covariates","Trans Data","Raw Data"),
                           input$radio)
     })
     output$show_data <- renderUI({
-      shiny::tagList(
-        switch(shiny::req(input$radio),
-               "Raw Data"   = phenoPlotUI(ns("PhenoPlotRaw")), # pheno_plot, pheno_table
-               "Trans Data" = phenoPlotUI(ns("PhenoPlotTrans")), # pheno_plot, pheno_table
-               "Covariates" = DT::dataTableOutput(ns("analyses_tbl"))),
-        if(!(input$radio %in% c("Raw Data","Trans Data")))
-          DT::dataTableOutput(ns("peak_table"))) # peak_table
+      switch(shiny::req(input$radio),
+        "Raw Data"   = phenoPlotUI(ns("PhenoPlotRaw")), # pheno_plot, pheno_table
+        "Trans Data" = phenoPlotUI(ns("PhenoPlotTrans")), # pheno_plot, pheno_table
+        "Covariates" = DT::dataTableOutput(ns("analyses_tbl"))) # analyses_table
     })
     
     # Output the analyses table

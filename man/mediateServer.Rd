@@ -20,7 +20,7 @@ mediateServer(
   covar,
   analyses_tbl,
   peak_df,
-  project_info,
+  project_df,
   allele_info
 )
 
@@ -31,7 +31,7 @@ mediateOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{job_par, win_par, patterns, phe_mx, cov_df, probs_obj, K_chr, analyses_df, pmap_obj, covar, analyses_tbl, peak_df, project_info, allele_info}{reactive arguments}
+\item{job_par, win_par, patterns, phe_mx, cov_df, probs_obj, K_chr, analyses_df, pmap_obj, covar, analyses_tbl, peak_df, project_df, allele_info}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

@@ -4,10 +4,10 @@
 \alias{read_query_rds}
 \title{Read Query for RDS Object}
 \usage{
-read_query_rds(project_info, filename)
+read_query_rds(project_df, filename)
 }
 \arguments{
-\item{project_info}{table of project information}
+\item{project_df}{table of project information}
 
 \item{filename}{name of RDS file}
 }

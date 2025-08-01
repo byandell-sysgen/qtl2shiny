@@ -4,10 +4,10 @@
 \alias{read_project}
 \title{Read Project Data}
 \usage{
-read_project(project_info, dataname, columns, rownames = TRUE, filetype)
+read_project(project_df, dataname, columns, rownames = TRUE, filetype)
 }
 \arguments{
-\item{project_info}{table of project information}
+\item{project_df}{table of project information}
 
 \item{dataname}{name of data object to read}
 

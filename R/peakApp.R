@@ -26,8 +26,7 @@ peakApp <- function() {
       shiny::uiOutput("pheno_group_input"),
       shiny::uiOutput("dataset_input"),
       peakInput("peak"),
-      peakUI("peak")),
-    shiny::uiOutput("win_par"),
+      hotspotInput("hotspot")), # chr_ct, minLOD, window_Mbp
     peakOutput("peak")
   )
   server <- function(input, output, session) {
@@ -65,19 +64,16 @@ peakApp <- function() {
     })
 
     project_df <- projectServer("project", projects_df)
-    win_par <- peakServer("peak", input, peak_df, pmap_obj, project_df)
-    
-    output$win_par <- shiny::renderUI({
-      paste("win_par: chr=", win_par$chr_id,
-            ", peak=", win_par$peak_Mbp,
-            ", window=", win_par$window_Mbp)
-    })
+    hotspot_df <- hotspotServer("hotspot", input, peak_df, pmap_obj,
+                                project_df)
+    win_par <- peakServer("peak", input, peak_df, pmap_obj, hotspot_df,
+                          project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname peakApp
-peakServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
+peakServer <- function(id, set_par, peak_df, pmap_obj, hotspot_df, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -133,15 +129,15 @@ peakServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
       shiny::textInput(ns("chr_pos"), "pos", input$chr_pos)
     })
     
-    scan_tbl <- hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
+    hotspot_df <- hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
     
-    shiny::observeEvent(scan_tbl(), {
+    shiny::observeEvent(hotspot_df(), {
       update_chr()
       update_peak()
     })
     shiny::observeEvent(input$chr_id, update_peak())
     update_chr <- function() {
-      scan_in <- shiny::req(scan_tbl())
+      scan_in <- shiny::req(hotspot_df())
       choices <- scan_in$chr[scan_in$count > 0]
       scan_in <- dplyr::filter(scan_in, .data$count == max(.data$count))
       
@@ -153,7 +149,7 @@ peakServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
       }
     }
     update_peak <- function() {
-      scan_in <- shiny::req(scan_tbl())
+      scan_in <- shiny::req(hotspot_df())
       chr_ct <- shiny::req(input$chr_id)
       scan_in <- dplyr::filter(scan_in, 
                                .data$chr == chr_ct)
@@ -199,15 +195,24 @@ peakServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
       }
     })
     
+    # Output Peak Table.
+    output$peak_table <- DT::renderDataTable({
+      dplyr::arrange(
+        dplyr::select(
+          peak_df(), .data$pheno, .data$chr, .data$pos, .data$lod),
+        dplyr::desc(.data$lod))
+    }, options = list(scrollX = TRUE, pageLength = 5,
+                      lengthMenu = c(5,10,25)))
+    
     ## Return.
     input
   })
 }
 #' @export
 #' @rdname peakApp
-peakInput <- function(id) {
+peakInput <- function(id) { # local, chr_id, peak_Mbp, window_Mbp
   ns <- shiny::NS(id)
-  shiny::tagList(  # Local Scan: local, chr_id, peak_Mbp, window_Mbp
+  shiny::tagList(
     shiny::checkboxInput(ns("local"), "Local Scan in Window?", TRUE),
     shiny::fluidRow(
       shiny::column(4, shiny::uiOutput(ns("chr_id_input"))),
@@ -217,14 +222,7 @@ peakInput <- function(id) {
 }
 #' @export
 #' @rdname peakApp
-peakUI <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::tagList(
-    hotspotInput(ns("hotspot"))) # hotspot_plot_checkbox, chr_ct, minLOD, window_Mbp
-}
-#' @export
-#' @rdname peakApp
 peakOutput <- function(id) {
   ns <- shiny::NS(id)
-  hotspotOutput(ns("hotspot")) # peak_table, hotspot_plot, hotspot_table
+  DT::dataTableOutput(ns("peak_table")) # peak_table
 }
