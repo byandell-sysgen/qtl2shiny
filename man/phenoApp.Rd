@@ -10,7 +10,7 @@
 \usage{
 phenoApp()
 
-phenoServer(id, set_par, win_par, peak_df, analyses_tbl, covar, project_df)
+phenoServer(id, set_par, win_par, peak_df, analyses_df, covar, project_df)
 
 phenoInput(id)
 
@@ -21,7 +21,7 @@ phenoOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{set_par, win_par, peak_df, analyses_tbl, covar, project_df}{reactive arguments}
+\item{set_par, win_par, peak_df, analyses_df, covar, project_df}{reactive arguments}
 }
 \description{
 Shiny module for phenotype selection.

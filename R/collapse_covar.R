@@ -12,7 +12,7 @@ collapse_covar <- function(analyses_tbl) {
                                                     names(analyses_tbl)))]
   dplyr::select(
     dplyr::mutate(
-      tidyr::unite(analyses_tbl, .data$covar, 
+      tidyr::unite(analyses_tbl, "covar", 
                    dplyr::one_of(covar_names)), 
       covar = sapply(strsplit(.data$covar,"_"),
                      function(x) paste(covar_names[as.logical(x)],

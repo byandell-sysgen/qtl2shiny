@@ -5,8 +5,10 @@
 # dplyr::select(pheno, pheno_type, chr, pos, lod)
 #' @importFrom rlang .data
 #' 
-peakDataTable <- function(peak_df, hotspot_df) {
+peakDataTable <- function(peak_df, hotspot_df, local = TRUE, chr_id) {
     chrs <- unique(hotspot_df$chr)
+    if(local & !is.null(chr_id))
+      chrs <- chr_id
     pheno_types <- unique(hotspot_df$pheno)
     peak_df <- dplyr::filter(peak_df, .data$chr %in% chrs)
     pheno_groups <- unique(peak_df$pheno_group)

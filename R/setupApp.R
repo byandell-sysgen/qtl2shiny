@@ -46,71 +46,22 @@ setupApp <- function() {
     })
 
     project_df <- projectServer("project", projects_df)
-    set_par <- setupServer("setup", peak_df, pmap_obj, analyses_df, covar,
+    set_par <- setParServer("set_par", analyses_df, project_df)
+    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, analyses_df, covar,
                            project_df)
 
     output$set_par <- shiny::renderUI({
-      paste("pheno_names: ", paste(set_par$pheno_names(), collapse = ", "))
+      paste("pheno_names: ", paste(set_list$pheno_names(), collapse = ", "))
     })
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname setupApp
-setupServer <- function(id, peak_df, pmap_obj, analyses_df, covar,
+setupServer <- function(id, set_par, peak_df, pmap_obj, analyses_df, covar,
                         project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
-    # Input `input$pheno_group`.
-    output$pheno_group_input <- shiny::renderUI({
-      shiny::req(analyses_df())
-      choices <- sort(unique(analyses_df()$pheno_group))
-      if(is.null(selected <- input$pheno_group))
-        selected <- choices[1]
-      shiny::selectInput(ns("pheno_group"), "",
-        choices = as.list(choices), selected = selected, multiple = TRUE)
-    })
-    
-    # Input `input$dataset`.
-    pheno_type <- shiny::reactive({
-      # Find `pheno_type`s for `dataset` choice.
-      phe_gp <- shiny::req(input$pheno_group)
-      shiny::req(analyses_df())
-      analyses_group <- dplyr::filter(analyses_df(), pheno_group %in% phe_gp)
-      sort(unique(analyses_group$pheno_type))
-    })
-    output$dataset_input <- shiny::renderUI({
-      shiny::req(project_df())
-      choices <- c("all", shiny::req(pheno_type()))
-      if(is.null(selected <- input$dataset))
-        selected <- NULL
-      shiny::selectInput(ns("dataset"), "Phenotype Set",
-        choices = as.list(choices), selected = selected, multiple = TRUE)
-    })
-    
-    ## Set up analyses data frame.
-    analyses_set <- shiny::reactive({
-      shiny::req(project_df(), analyses_df())
-      set_analyses(input$dataset, input$pheno_group, analyses_df())
-    })
-    # Restrict peaks to region.
-    peak_dataset_df <- shiny::reactive({
-      shiny::req(project_df(), analyses_set(), peak_df())
-      chr_id <- shiny::req(win_par$chr_id)
-      peak_Mbp <- shiny::req(win_par$peak_Mbp)
-      window_Mbp <- shiny::req(win_par$window_Mbp)
-      peaks_in_pos(analyses_set(), peak_df(),
-                   shiny::isTruthy(input$filter),
-                   chr_id, peak_Mbp, window_Mbp)
-    })
-    output$filter <- shiny::renderUI({
-      shiny::checkboxInput(ns("filter"),
-                           paste0("Peak on chr ", win_par$chr_id, " in ",
-                                  paste(win_par$peak_Mbp + c(-1,1) * win_par$window_Mbp,
-                                        collapse = "-"), "?"),
-                           TRUE)
-    })
 
     ## Find Hotspots.    
     hotspot_df <- hotspotServer("hotspot", input, peak_df, pmap_obj,

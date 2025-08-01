@@ -23,50 +23,22 @@ peakApp <- function() {
     title =  "Test Peak",
     sidebar = bslib::sidebar(
       projectUI("project"),
-      shiny::uiOutput("pheno_group_input"),
-      shiny::uiOutput("dataset_input"),
+      setParInput("set_par"),
       peakInput("peak"),
       hotspotInput("hotspot")), # chr_ct, minLOD, window_Mbp
     peakOutput("peak")
   )
   server <- function(input, output, session) {
-    peak_df <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "peaks")
-    })
-    pmap_obj <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "pmap")
-    })
-    
-    # `analyses_tbl` has `pheno_group`, `pheno_type`
-    analyses_tbl <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "analyses")
-    })
-    # Input `set_par$pheno_group`.
-    output$pheno_group_input <- shiny::renderUI({
-      shiny::req(analyses_tbl())
-      choices <- sort(unique(analyses_tbl()$pheno_group))
-      if(is.null(selected <- input$pheno_group))
-        selected <- choices[1]
-      shiny::selectInput("pheno_group", "",
-        choices = as.list(choices), selected = selected, multiple = TRUE)
-    })
-    # Input `set_par$dataset`.
-    output$dataset_input <- shiny::renderUI({
-      shiny::req(analyses_tbl())
-      choices <- c("all", sort(unique(analyses_tbl()$pheno_type)))
-      if(is.null(selected <- input$dataset))
-        selected <- NULL
-      shiny::selectInput("dataset", "Phenotype Set",
-        choices = as.list(choices), selected = selected, multiple = TRUE)
-    })
+    peak_df <- shiny::reactive(read_project(shiny::req(project_df()), "peaks"))
+    pmap_obj <- shiny::reactive(read_project(shiny::req(project_df()), "pmap"))
+    analyses_df <- shiny::reactive(read_project(shiny::req(project_df()),
+                                                "analyses"))
 
     project_df <- projectServer("project", projects_df)
-    hotspot_df <- hotspotServer("hotspot", input, peak_df, pmap_obj,
+    set_par <- setParServer("set_par", analyses_df, project_df)
+    hotspot_df <- hotspotServer("hotspot", set_par, peak_df, pmap_obj,
                                 project_df)
-    win_par <- peakServer("peak", input, peak_df, pmap_obj, hotspot_df,
+    win_par <- peakServer("peak", set_par, peak_df, pmap_obj, hotspot_df,
                           project_df)
   }
   shiny::shinyApp(ui, server)
@@ -128,8 +100,6 @@ peakServer <- function(id, set_par, peak_df, pmap_obj, hotspot_df, project_df) {
       shiny::req(project_df())
       shiny::textInput(ns("chr_pos"), "pos", input$chr_pos)
     })
-    
-    hotspot_df <- hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
     
     shiny::observeEvent(hotspot_df(), {
       update_chr()
@@ -197,10 +167,11 @@ peakServer <- function(id, set_par, peak_df, pmap_obj, hotspot_df, project_df) {
     
     # Output Peak Table.
     output$peak_table <- DT::renderDataTable({
-      dplyr::arrange(
-        dplyr::select(
-          peak_df(), .data$pheno, .data$chr, .data$pos, .data$lod),
-        dplyr::desc(.data$lod))
+      chr_id <- input$chr_id
+      if(!shiny::isTruthy(chr_id))
+        chr_id <- NULL
+      peakDataTable(peak_df(), hotspot_df(),
+                    shiny::isTruthy(input$local), chr_id)
     }, options = list(scrollX = TRUE, pageLength = 5,
                       lengthMenu = c(5,10,25)))
     
