@@ -3,7 +3,7 @@
 #' Count hotspots by pheno_group and pheno_type.
 #'
 #' @param map list of genetic maps
-#' @param peaks data frame of peak information
+#' @param peaks_df data frame of peak information
 #' @param peak_window half-width of peak window in Mbp
 #' @param minLOD minimum LOD to include in count
 #'
@@ -24,15 +24,15 @@
 #' 
 #' # Summary of coefficients at scan peak
 #' scan_pr <- qtl2::scan1(pr, DOex$pheno)
-#' peaks <- summary(scan_pr, DOex$pmap)
+#' peaks_df <- summary(scan_pr, DOex$pmap)
 #' 
-#' hotspot(DOex$pmap, peaks)
+#' hotspot(DOex$pmap, peaks_df)
 #' 
 #' # Select Sex and Cohort columns of covariates
 #' analyses_tbl <- data.frame(pheno = "OF_immobile_pct", Sex = TRUE, Cohort = TRUE)
 #' 
 #' # Get hotspot (only one phenotype here).
-#' out <- hotspot(DOex$pmap, peaks)
+#' out <- hotspot(DOex$pmap, peaks_df)
 #' summary(out)
 #'
 #' @export
@@ -41,8 +41,14 @@
 #' @importFrom dplyr bind_cols bind_rows distinct everything filter one_of select
 #' @importFrom rlang .data
 #'
-hotspot <- function(map, peaks, peak_window = 1, minLOD = 5.5) {
-  # Set up list by chr of postions and peaks.
+hotspot <- function(map, peaks_df, peak_window = 1, minLOD = 5.5) {
+  peaks_df <- dplyr::filter(peaks_df, .data$qtl_lod >= minLOD)
+  if(!nrow(peaks_df))
+    return(NULL)
+  
+  # Set up list by chr of positions and peaks.
+  
+  # Rounded off sequence of map positions by chr.
   round_pos <- function(x) {
     rng <- round(range(x))
     out <- seq(rng[1],rng[2])
@@ -50,61 +56,33 @@ hotspot <- function(map, peaks, peak_window = 1, minLOD = 5.5) {
     out
   }
   chr_pos <- purrr::map(map, round_pos)
-  # Kludge
   for(chr in names(chr_pos)) {
     names(chr_pos[[chr]]) <- paste(chr, names(chr_pos[[chr]]), sep = ":")
   }
 
-  peaks <- dplyr::filter(peaks,
-                         .data$lod >= minLOD)
-  if(!nrow(peaks))
-    return(NULL)
   out_chr <- purrr::transpose(list(pos = chr_pos,
-                                   peaks = split(peaks, peaks$chr)))
+                                   peaks = split(peaks_df, peaks_df$qtl_chr)))
 
-  peaks_type <- function(posi, peaks, peak_window=1) {
-    if(is.null(peaks))
+  peaks_class <- function(posi, peaks_df, peak_window=1) {
+    if(is.null(peaks_df))
       return(NULL)
-    # count peaks at position by type
-    if(!("pheno_type" %in% names(peaks))) {
-      peaks$pheno_type <- "type"
-    }
-    if(!("pheno_group" %in% names(peaks))) {
-      peaks$pheno_group <- "group"
-    }
-    peaks_by_type <- split(peaks, peaks$pheno_type)
-    out <- data.frame(purrr::map(peaks_by_type,
+    # count peaks at position by class
+    peaks_by_class <- split(peaks_df, peaks_df$phenotype_class)
+    out <- data.frame(purrr::map(peaks_by_class,
                                  outer_window,
                                  posi, peak_window),
                       check.names = FALSE)
     if(!nrow(out))
       return(NULL)
-    # count peaks by group. But should check to make sure group has unique name.
-    # and if pheno_group = pheno_type, then only need one?
-    groups <- dplyr::distinct(peaks, .data$pheno_group, .data$pheno_type)
-    groups <- split(groups$pheno_type, groups$pheno_group)
-    grps <- data.frame(
-      purrr::map(groups,
-                 function(x, out) {
-                   apply(out[, x, drop = FALSE], 1, sum)
-                   },
-                 out),
-      check.names = FALSE)
     out$all <- apply(out, 1, sum)
     # This is adding extra column sometimes. Fix.
-    m <- match(colnames(grps), colnames(out), nomatch = 0)
-    if(any(m > 0))
-      colnames(grps) <- paste0(colnames(grps), "G")
-    out <- dplyr::bind_cols(out, grps)
     if(max(out) == 0)
       return(NULL)
     rownames(out) <- posi
-    dplyr::select(out, all,
-                  dplyr::one_of(names(groups)),
-                  dplyr::everything())
+    dplyr::select(out, all, dplyr::everything())
   }
   outer_window <- function(peaksi, posi, peak_window = 1) {
-    peaksi <- dplyr::filter(peaksi)$pos
+    peaksi <- dplyr::filter(peaksi)$qtl_pos
     apply(outer(peaksi, posi,
                 function(x,y,z) abs(x-y) <= z,
                 peak_window),
@@ -113,7 +91,7 @@ hotspot <- function(map, peaks, peak_window = 1, minLOD = 5.5) {
 
   # Want to identify what purrr::map are NULL and adjust map
   out_peaks <- purrr::map(out_chr,
-                          function(x, peak_window) peaks_type(x$pos, x$peaks, peak_window),
+                          function(x, peak_window) peaks_class(x$pos, x$peaks, peak_window),
                           peak_window)
   chr_pos <- chr_pos[!sapply(out_peaks, is.null)]
   if(!length(chr_pos))
@@ -147,6 +125,8 @@ subset.hotspot <- function(x, chr = NULL, nonzero = NULL, ...) {
   }
   # drop chr with all zeroes
   if(!is.null(nonzero)) {
+    # Ignore if `nonzero` does not match a column of `x$scan`.
+    if(!(nonzero %in% names(x$scan))) return(x)
     cts <- apply(x$scan[, nonzero, drop = FALSE], 1, sum)
     chrs <- unlist(tapply(cts,
                           ordered(rep(names(x$map), sapply(x$map, length)),

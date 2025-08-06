@@ -9,7 +9,7 @@
 \alias{setupOutput}
 \title{Shiny setup module}
 \usage{
-setParServer(id, analyses_df, project_df)
+setParServer(id, project_df)
 
 setupApp()
 

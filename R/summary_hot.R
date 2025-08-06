@@ -2,16 +2,14 @@
 #' @importFrom rlang .data
 #' @importFrom qtl2ggplot summary_scan1
 #' 
-summary_hot <- function(peak_set, scan_obj) {
+summary_hot <- function(hotspot_obj, class = 1) {
   # Used chosen datasets, or all if not chosen.
 
-  map <- scan_obj$map
-  scan <- scan_obj$scan
+  map <- hotspot_obj$map
+  scan <- hotspot_obj$scan
   
   # Match lod columns to those present.
-  lodcol <- match(peak_set, colnames(scan))
-  if(any(is.na(lodcol))) return(NULL)
-  lodcol <- lodcol[!is.na(lodcol)]
+  lodcol <- colnames(scan)[class]
 
   if(length(lodcol) & (nrow(scan) == length(unlist(map)))) {
     chr_id <- names(map)

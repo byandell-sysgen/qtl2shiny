@@ -5,15 +5,18 @@
 #' @param columns columns to select from data object
 #' @param rownames row names to filter from data object (all if \code{TRUE})
 #' @param filetype type of file (one of c("fst","rds","csv"))
+#' @param class name of subdirectory if not `NULL`
+#' @param ... additional parameters
 #' 
 #' @return data frame with \code{columns} and \code{rownames}.
 #' 
 #' @importFrom tools file_ext file_path_sans_ext
 #' @importFrom qtl2pattern read_fast
 #' @importFrom utils read.csv
-#' 
-read_project <- function(project_df, dataname, columns, rownames = TRUE, filetype) {
-  # Read data frame or matrix in some file format.
+#' @export
+read_project <- function(project_df, dataname, columns, rownames = TRUE,
+                         filetype, class = NULL, ...) {
+  # Read project data frame or matrix in some file format.
   
   if(!nrow(project_df))
     return(NULL)
@@ -23,6 +26,19 @@ read_project <- function(project_df, dataname, columns, rownames = TRUE, filetyp
                         project_df$taxa)
   projectpath <- file.path(taxapath,
                            project_df$project)
+  # Optional `class`.
+  if(!is.null(class)) {
+    switch(dataname,
+      peaks = {
+        # Data in folder `peaks` in file `<project>_<class>_*peaks.rds`.
+        projectpath <- file.path(projectpath, dataname)
+        dataname <- peak_class(project_df, class, ...)
+      },
+      pheno = {
+        # Data in file `pheno_<class>.rds`.
+        dataname <- paste0("pheno_", class)
+      })
+  }
   
   # Compare file roots in project path to dataname.
   match_filename <- function(dataname, filepath) {
@@ -31,10 +47,8 @@ read_project <- function(project_df, dataname, columns, rownames = TRUE, filetyp
     if(!length(m)) {
       fileroots <- tools::file_path_sans_ext(filenames)
       m <- grep(tools::file_path_sans_ext(dataname), fileroots)
-      if(length(m) > 1) {
-        cat(paste("multiple", dataname, "matches"),
-            file = stderr())
-      }
+      if(length(m) > 1)
+        message("multiple ", dataname, " matches")
     }
     if(length(m))
       file.path(filepath, filenames[m])
@@ -88,3 +102,23 @@ read_project <- function(project_df, dataname, columns, rownames = TRUE, filetyp
   }
   out
 }
+#' Project Classes
+#'
+#' Find names of project classes using phenotype files.
+#' 
+#' @param project_df 
+#'
+#' @returns character list of classes
+#' @export
+#' @importFrom stringr str_remove
+project_classes <- function(project_df) {
+  classes <- stringr::str_remove(
+    stringr::str_remove(
+      list.files(
+        paste0(rev(project_df), collapse="/"),
+        pattern = "^pheno_.*.rds$"),
+      "^pheno_"),
+    ".rds$")
+  classes[!(classes %in% c("data","type"))]
+}
+

@@ -32,13 +32,18 @@ hotspotApp <- function() {
     hotspotOutput("hotspot")
   )
   server <- function(input, output, session) {
-    peak_df <- shiny::reactive(read_project(shiny::req(project_df()), "peaks"))
-    pmap_obj <- shiny::reactive(read_project(shiny::req(project_df()), "pmap"))
-    analyses_df <- shiny::reactive(read_project(shiny::req(project_df()),
-                                                "analyses"))
-
     project_df <- projectServer("project", projects_df)
-    set_par <- setParServer("set_par", analyses_df, project_df)
+    set_par <- setParServer("set_par", project_df)
+    
+    peak_df <- shiny::reactive({
+      shiny::req(project_df(), set_par$class)
+      read_project(project_df(), "peaks", class = set_par$class)
+    })
+    pmap_obj <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "pmap")
+    })
+    
     hotspot_df <- hotspotServer("hotspot", set_par, peak_df, pmap_obj,
                                 project_df)
   }
@@ -99,61 +104,32 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
                           win, 0.1, 100)
     })
     
-    scan_obj_all <- shiny::reactive({
+    hotspot_obj <- shiny::reactive({
       shiny::req(project_df(), input$window_Mbp, input$minLOD)
       shiny::withProgress(message = 'Hotspot scan ...', value = 0, {
         shiny::setProgress(1)
-        hotspot_wrap(pmap_obj(), peak_df(), input$window_Mbp, input$minLOD,
-                     project_df())
+        hotspot(pmap_obj(), peak_df(), input$window_Mbp, input$minLOD)
         })
-    })
-    
-    scan_obj <- shiny::reactive({
-      out_peaks <- scan_obj_all()
-      shiny::withProgress(message = 'Hotspot search ...', value = 0, {
-        shiny::setProgress(1)
-        chr_ct <- input$chr_ct
-        if(!("all" %in% chr_ct)) {
-          out_peaks <- subset(out_peaks, chr_ct)
-          }
-        })
-      out_peaks
     })
     
     output$hotspot_show <- shiny::renderUI({
       shiny::plotOutput(ns("hotspot_plot"))
     })
     output$hotspot_plot <- shiny::renderPlot({
-      shiny::req(scan_obj())
+      shiny::req(hotspot_obj())
       window_Mbp <- shiny::req(input$window_Mbp)
-      peak_grp <- set_par$pheno_group
-      if(shiny::isTruthy(set_par$dataset)) {
-        peak_set <- set_par$dataset
-        dat_sets <- dplyr::distinct(peak_df(), 
-                                    .data$pheno_type, .data$pheno_group)
-        dat_groups <- unique(dplyr::filter(dat_sets,
-          .data$pheno_type %in% peak_set)$pheno_group)
-        peak_set <- c(peak_grp[!(peak_grp %in% dat_groups)], peak_set)
-      } else {
-        peak_set <- peak_grp
-      }
-      
+      class <- shiny::req(set_par$class)
       shiny::withProgress(message = 'Hotspot show ...',
                           value = 0, {
                             shiny::setProgress(1)
-                            plot_hot(peak_set, scan_obj(), window_Mbp)
+                            plot_hot(hotspot_obj(), class, window_Mbp)
                           })
     })
     hotspot_df <- shiny::reactive({
-      shiny::req(scan_obj())
-      if(shiny::isTruthy(set_par$dataset)) {
-        peak_set <- set_par$dataset
-      } else {
-        peak_set <- set_par$pheno_group
-      }
+      shiny::req(hotspot_obj())
       shiny::withProgress(message = 'Hotspot summary ...', value = 0, {
         shiny::setProgress(1)
-        summary_hot(peak_set, scan_obj())
+        summary_hot(hotspot_obj())
       })
     })
     output$hotspot_peak_table <- DT::renderDataTable({
@@ -172,7 +148,7 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
       if(shiny::isTruthy(value)) {
         value
       } else {
-        max(5.5, round(min(peak_df$lod), 1))
+        max(5.5, round(min(peak_df$qtl_lod), 1))
       }
     }
     output$minLOD_input <- shiny::renderUI({

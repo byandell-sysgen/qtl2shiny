@@ -4,7 +4,15 @@
 \alias{read_project}
 \title{Read Project Data}
 \usage{
-read_project(project_df, dataname, columns, rownames = TRUE, filetype)
+read_project(
+  project_df,
+  dataname,
+  columns,
+  rownames = TRUE,
+  filetype,
+  class = NULL,
+  ...
+)
 }
 \arguments{
 \item{project_df}{table of project information}
@@ -16,6 +24,10 @@ read_project(project_df, dataname, columns, rownames = TRUE, filetype)
 \item{rownames}{row names to filter from data object (all if \code{TRUE})}
 
 \item{filetype}{type of file (one of c("fst","rds","csv"))}
+
+\item{class}{name of subdirectory if not `NULL`}
+
+\item{...}{additional parameters}
 }
 \value{
 data frame with \code{columns} and \code{rownames}.

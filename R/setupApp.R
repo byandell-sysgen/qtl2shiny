@@ -28,25 +28,22 @@ setupApp <- function() {
     setupOutput("setup")
   )
   server <- function(input, output, session) {
+    project_df <- projectServer("project", projects_df)
+    set_par <- setParServer("set_par", analyses_df, project_df)
+    
     peak_df <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "peaks")
+      shiny::req(project_df(), set_par$class)
+      read_project(project_df(), "peaks", class = set_par$class)
     })
     pmap_obj <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "pmap")
-    })
-    analyses_df <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "analyses")
     })
     covar <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "covar")
     })
 
-    project_df <- projectServer("project", projects_df)
-    set_par <- setParServer("set_par", analyses_df, project_df)
     set_list <- setupServer("setup", set_par, peak_df, pmap_obj, analyses_df, covar,
                            project_df)
 

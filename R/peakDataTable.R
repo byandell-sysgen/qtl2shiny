@@ -6,21 +6,21 @@
 #' @importFrom rlang .data
 #' 
 peakDataTable <- function(peak_df, hotspot_df, local = TRUE, chr_id) {
-    chrs <- unique(hotspot_df$chr)
-    if(local & !is.null(chr_id))
-      chrs <- chr_id
-    pheno_types <- unique(hotspot_df$pheno)
-    peak_df <- dplyr::filter(peak_df, .data$chr %in% chrs)
-    pheno_groups <- unique(peak_df$pheno_group)
-    if(all(pheno_types %in% pheno_groups)) {
-      pheno_types <- dplyr::filter(
-        dplyr::distinct(peak_df, .data$pheno_type, .data$pheno_group),
-        .data$pheno_group %in% pheno_types)$pheno_type
-    }
-    dplyr::arrange(
-      dplyr::select(
-        dplyr::filter(peak_df,
-                      .data$pheno_type %in% pheno_types),
-        .data$pheno, .data$pheno_type, .data$chr, .data$pos, .data$lod),
-      desc(.data$lod))
+  # Filter to selected `chr_id`
+  chrs <- unique(hotspot_df$chr)
+  if(local & !is.null(chr_id))
+    chrs <- chr_id
+  peak_df <- dplyr::filter(peak_df, .data$qtl_chr %in% chrs)
+  
+  # If not `all` then filter peaks to the selected `classes`.
+  classes <- unique(hotspot_df$pheno)
+  if(!("all" %in% classes)) {
+    peak_df <- dplyr::filter(peak_df, .data$phenotype_class %in% classes)
+    if(!nrow(peak_df)) return(NULL)
+  }
+  dplyr::arrange(
+    dplyr::select(
+      peak_df,
+      .data$phenotype, .data$phenotype_class, .data$qtl_chr, .data$qtl_pos, .data$qtl_lod),
+    desc(.data$qtl_lod))
 }

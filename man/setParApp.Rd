@@ -15,7 +15,7 @@ setParOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{peak_df, pmap_obj, analyses_df, covar, projects_info}{reactive arguments}
+\item{peak_df, pmap_obj, covar, projects_info}{reactive arguments}
 }
 \value{
 No return value; called for side effects.
