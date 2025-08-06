@@ -3,7 +3,7 @@
 #' Shiny module for phenotype selection, with interfaces \code{setupInput} and  \code{setupUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param peak_df,pmap_obj,analyses_df,covar,projects_info reactive arguments
+#' @param peak_df,pmap_obj,covar,projects_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -24,12 +24,12 @@ setupApp <- function() {
       setupInput("setup"),
       projectUI("project"),
       setupUI("setup")),
-    shiny::uiOutput("set_par"),
+    shiny::uiOutput("pheno_names"),
     setupOutput("setup")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
-    set_par <- setParServer("set_par", analyses_df, project_df)
+    set_par <- setParServer("set_par", project_df)
     
     peak_df <- shiny::reactive({
       shiny::req(project_df(), set_par$class)
@@ -39,15 +39,15 @@ setupApp <- function() {
       shiny::req(project_df())
       read_project(project_df(), "pmap")
     })
-    covar <- shiny::reactive({
+    covar_df <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "covar")
     })
 
-    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, analyses_df, covar,
-                           project_df)
+    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, covar_df,
+                            project_df)
 
-    output$set_par <- shiny::renderUI({
+    output$pheno_names <- shiny::renderUI({
       paste("pheno_names: ", paste(set_list$pheno_names(), collapse = ", "))
     })
   }
@@ -55,7 +55,7 @@ setupApp <- function() {
 }
 #' @export
 #' @rdname setupApp
-setupServer <- function(id, set_par, peak_df, pmap_obj, analyses_df, covar,
+setupServer <- function(id, set_par, peak_df, pmap_obj, covar_df,
                         project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -75,17 +75,17 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, analyses_df, covar,
     output$chr_pos <- shiny::renderText({
       paste0("Region: ", chr_pos(), "Mbp")
     })
-    output$num_pheno <- shiny::renderText({
-      shiny::req(project_df())
-      num_pheno(character(), analyses_df())
-    })
+    # output$num_pheno <- shiny::renderText({
+    #   shiny::req(project_df())
+    #   num_pheno(character(), analyses_df())
+    # })
     output$version <- shiny::renderText({
       versions()
     })
     
     ## Use window as input to phenoServer.
-    pheno_names <- phenoServer("pheno", input, win_par,
-      peak_df, analyses_df, cov_df, project_df)
+    pheno_names <- phenoServer("pheno", input, win_par, peak_df, covar_df,
+                               project_df)
     
     ## Setup input logic.
     output$project_name <- renderUI({
@@ -97,8 +97,7 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, analyses_df, covar,
       switch(shiny::req(input$radio),
              Phenotypes = shiny::tagList(
                shiny::uiOutput(ns("filter")),
-               phenoInput(ns("pheno")),
-               phenoUI(ns("pheno"))),
+               phenoInput(ns("pheno"))),
              Region     = peakInput(ns("peak"))) # local, chr_id, peak_Mbp, window_Mbp
     })
     output$sidebar_hot <- shiny::renderUI({
@@ -134,7 +133,7 @@ setupInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("project_name")),
-    shiny::textOutput(ns("num_pheno")),
+    #shiny::textOutput(ns("num_pheno")),
     shiny::uiOutput(ns("chr_pos"))
   )
 }

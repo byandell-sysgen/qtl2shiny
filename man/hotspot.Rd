@@ -2,9 +2,15 @@
 % Please edit documentation in R/hotspot.R
 \name{hotspot}
 \alias{hotspot}
+\alias{summary.hotspot}
+\alias{subset.hotspot}
 \title{Hotspots for phenotypes}
 \usage{
 hotspot(map, peaks_df, peak_window = 1, minLOD = 5.5)
+
+\method{summary}{hotspot}(object, ...)
+
+\method{subset}{hotspot}(x, chr = NULL, nonzero = NULL, ...)
 }
 \arguments{
 \item{map}{list of genetic maps}

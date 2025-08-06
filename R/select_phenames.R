@@ -6,17 +6,17 @@ select_phenames <- function(phenames, peak_df, local,
   selected <- phenames
   if(shiny::isTruthy(peak_df) && nrow(peak_df)) {
     peak_df <- dplyr::filter(peak_df, 
-                              .data$chr == chr_id)
+                              .data$qtl_chr == chr_id)
     if(shiny::isTruthy(local)) {
       peak_df <- dplyr::filter(peak_df, 
-                                .data$pos >= peak_Mbp - window_Mbp,
-                                .data$pos <= peak_Mbp + window_Mbp)
+                                .data$qtl_pos >= peak_Mbp - window_Mbp,
+                                .data$qtl_pos <= peak_Mbp + window_Mbp)
     }
     phenames <- dplyr::distinct(
       dplyr::arrange(
         peak_df,
-        dplyr::desc(.data$lod)),
-      .data$pheno)$pheno
+        dplyr::desc(.data$qtl_lod)),
+      .data$phenotype)$phenotype
   }
 
   if("all" %in% selected)

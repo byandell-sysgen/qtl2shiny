@@ -22,8 +22,7 @@ phenoApp <- function() {
       setParInput("set_par"),
       peakInput("peak"),
       hotspotInput("hotspot"), # chr_ct, minLOD, window_Mbp
-      phenoInput("pheno"),
-      phenoUI("pheno")),
+      phenoInput("pheno")),
     phenoOutput("pheno")
   )
   server <- function(input, output, session) {
@@ -38,7 +37,7 @@ phenoApp <- function() {
       shiny::req(project_df())
       read_project(project_df(), "pmap")
     })
-    covar <- shiny::reactive({
+    covar_df <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "covar")
     })
@@ -47,23 +46,21 @@ phenoApp <- function() {
                                 project_df)
     win_par <- peakServer("peak", set_par, peak_df, pmap_obj, hotspot_df,
                           project_df)
-    pheno_names <- phenoServer("pheno", set_par, win_par, peak_df, analyses_df,
-                               covar, project_df)
+    pheno_names <- phenoServer("pheno", set_par, win_par, peak_df, covar_df,
+                               project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname phenoApp
-phenoServer <- function(id, set_par, win_par, peak_df, analyses_df, covar,
+phenoServer <- function(id, set_par, win_par, peak_df, covar_df,
                         project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    # Restrict peaks to region.
-    analyses_set <- shiny::reactive({
-      shiny::req(project_df(), analyses_df())
-      set_analyses(set_par$dataset, set_par$pheno_group, analyses_df())
-    })
+    pheno_names <- shiny::reactive(input$pheno_names)
+    
+    # Filter peaks to region.
     output$filter <- shiny::renderUI({
       shiny::checkboxInput(ns("filter"),
         paste0("Peak on chr ", win_par$chr_id, " in ",
@@ -71,82 +68,36 @@ phenoServer <- function(id, set_par, win_par, peak_df, analyses_df, covar,
                      collapse = "-"), "?"),
         TRUE)
     })
-    # ** This should be ordered by LOD and restricted to selected `chr_id`.
-    # ** See peakApp.R.
-    peak_dataset_df <- shiny::reactive({
-      shiny::req(project_df(), analyses_set(), peak_df())
+    peak_filter_df <- shiny::reactive({
+      shiny::req(project_df(), peak_df())
       chr_id <- shiny::req(win_par$chr_id)
       peak_Mbp <- shiny::req(win_par$peak_Mbp)
       window_Mbp <- shiny::req(win_par$window_Mbp)
-      peaks_in_pos(analyses_set(), peak_df(),
-                   shiny::isTruthy(input$filter),
+      peaks_in_pos(peak_df(), shiny::isTruthy(input$filter),
                    chr_id, peak_Mbp, window_Mbp)
     })
 
     # Input `input$pheno_names`.
     output$pheno_names_input <- shiny::renderUI({
-      shiny::req(project_df(), win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
-      out <- select_phenames(input$pheno_names, peak_dataset_df(), win_par$local,
-                             win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
+      shiny::req(project_df(), win_par$chr_id, win_par$peak_Mbp,
+                 win_par$window_Mbp)
+      out <- select_phenames(input$pheno_names, peak_filter_df(),
+        win_par$local, win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
       shiny::selectInput(ns("pheno_names"), out$label,
                          choices = out$choices,
                          selected = out$selected,
                          multiple = TRUE)
     })
-    shiny::observeEvent(project_df(), {
-      output$num_pheno <- shiny::renderText({
-        num_pheno(input$pheno_names, analyses_df())
-      })
-      shiny::req(win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
-      out <- select_phenames("none", peak_dataset_df(), win_par$local,
-        win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
-      updateSelectInput(session, "pheno_names", out$label,
-                        choices = out$choices, selected = "none")
-    })
-    
+
     ## Density or scatter plot of phenotypes.
     phe_mx <- shiny::reactive({
-      pheno_read(project_df(), analyses_pheno())
+      shiny::req(project_df(), set_par$class, pheno_names())
+      read_project(project_df(), "pheno", class = set_par$class,
+                   columns = pheno_names())
     })
-    raw_phe_mx <- shiny::reactive({
-      pheno_read(project_df(), analyses_pheno(), FALSE)
-    })
-    
-    pheno_names <- shiny::reactive(input$pheno_names)
-    analyses_pheno <- shiny::reactive({
-      phename <- shiny::req(pheno_names())
-      if(is.null(phename)) return(NULL)
-      shiny::req(analyses_df())
-      out <- dplyr::filter(analyses_df(), .data$pheno %in% phename)
-      if(!nrow(out)) return(NULL)
-      out
-    })
-    cov_df <- shiny::reactive({
-      if(is.null(analyses_pheno())) return(NULL)
-      qtl2mediate::get_covar(covar(), analyses_pheno())
-    })
-    
-    phenoPlotServer("PhenoPlotRaw", pheno_names, raw_phe_mx, cov_df)
-    phenoPlotServer("PhenoPlotTrans", pheno_names, phe_mx, cov_df)
-    
-    # Show data.
-    output$radio_input <- renderUI({
-      shiny::radioButtons(ns("radio"), NULL,
-                          c("Covariates","Trans Data","Raw Data"),
-                          input$radio)
-    })
-    output$show_data <- renderUI({
-      switch(shiny::req(input$radio),
-        "Raw Data"   = phenoPlotUI(ns("PhenoPlotRaw")), # pheno_plot, pheno_table
-        "Trans Data" = phenoPlotUI(ns("PhenoPlotTrans")), # pheno_plot, pheno_table
-        "Covariates" = DT::dataTableOutput(ns("analyses_table"))) # analyses_table
-    })
-    
-    # Output the analyses table
-    output$analyses_table <- DT::renderDataTable({
-      collapse_covar(analyses_pheno())
-    }, options = list(scrollX = TRUE, pageLength = 5))
-    
+
+    phenoPlotServer("pheno_plot", pheno_names, phe_mx, covar_df)
+
     ## Return.
     pheno_names
   })
@@ -162,13 +113,7 @@ phenoInput <- function(id) {
 }
 #' @export
 #' @rdname phenoApp
-phenoUI <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::uiOutput(ns("radio_input"))
-}
-#' @export
-#' @rdname phenoApp
 phenoOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("show_data"))
+  phenoPlotUI(ns("pheno_plot"))
 }

@@ -4,17 +4,14 @@
 \alias{phenoApp}
 \alias{phenoServer}
 \alias{phenoInput}
-\alias{phenoUI}
 \alias{phenoOutput}
 \title{Shiny phenotype selection}
 \usage{
 phenoApp()
 
-phenoServer(id, set_par, win_par, peak_df, analyses_df, covar, project_df)
+phenoServer(id, set_par, win_par, peak_df, covar_df, project_df)
 
 phenoInput(id)
-
-phenoUI(id)
 
 phenoOutput(id)
 }
