@@ -90,13 +90,13 @@ phenoServer <- function(id, set_par, win_par, peak_df, covar_df,
     })
 
     ## Density or scatter plot of phenotypes.
-    phe_mx <- shiny::reactive({
+    pheno_mx <- shiny::reactive({
       shiny::req(project_df(), set_par$class, pheno_names())
       read_project(project_df(), "pheno", class = set_par$class,
                    columns = pheno_names())
     })
 
-    phenoPlotServer("pheno_plot", pheno_names, phe_mx, covar_df)
+    phenoPlotServer("pheno_plot", pheno_names, pheno_mx, covar_df)
 
     ## Return.
     pheno_names

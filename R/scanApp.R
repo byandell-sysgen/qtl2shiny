@@ -36,22 +36,22 @@ scanApp <- function() {
     scanOutput("scan")
   )
   server <- function(input, output, session) {
+    project_df <- projectServer("project", projects_df)
+    set_par <- setParServer("set_par", project_df)
+    
     peak_df <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "peaks")
+      class <- shiny::req(set_par$class)
+      read_project(shiny::req(project_df()), "peaks", class = class)
     })
     pmap_obj <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "pmap")
     })
-    analyses_df <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "analyses")
-    })
-    covar <- shiny::reactive({
+    covar_df <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "covar")
     })
+
     ## Phenotypes and Covariates for Haplotype Analyses.
     phe_mx <- shiny::reactive({
       analyses <- analyses_df() 

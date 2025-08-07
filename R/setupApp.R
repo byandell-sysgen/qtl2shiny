@@ -21,8 +21,9 @@ setupApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Setup",
     sidebar = bslib::sidebar(
-      setupInput("setup"),
       projectUI("project"),
+      setParInput("set_par"),
+      setupInput("setup"),
       setupUI("setup")),
     shiny::uiOutput("pheno_names"),
     setupOutput("setup")
@@ -61,10 +62,10 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, covar_df,
     ns <- session$ns
 
     ## Find Hotspots.    
-    hotspot_df <- hotspotServer("hotspot", input, peak_df, pmap_obj,
+    hotspot_df <- hotspotServer("hotspot", set_par, peak_df, pmap_obj,
                                 project_df)
     ## Locate Peak.
-    win_par <- peakServer("peak", input, peak_df, pmap_obj, hotspot_df,
+    win_par <- peakServer("peak", set_par, peak_df, pmap_obj, hotspot_df,
                           project_df)
 
     chr_pos <- shiny::reactive({
@@ -75,24 +76,15 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, covar_df,
     output$chr_pos <- shiny::renderText({
       paste0("Region: ", chr_pos(), "Mbp")
     })
-    # output$num_pheno <- shiny::renderText({
-    #   shiny::req(project_df())
-    #   num_pheno(character(), analyses_df())
-    # })
     output$version <- shiny::renderText({
       versions()
     })
     
     ## Use window as input to phenoServer.
-    pheno_names <- phenoServer("pheno", input, win_par, peak_df, covar_df,
+    pheno_names <- phenoServer("pheno", set_par, win_par, peak_df, covar_df,
                                project_df)
     
     ## Setup input logic.
-    output$project_name <- renderUI({
-      shiny::strong(paste("Project:", 
-                          shiny::req(project_df()$project),
-                          "\n"))
-    })
     output$sidebar_setup <- shiny::renderUI({
       switch(shiny::req(input$radio),
              Phenotypes = shiny::tagList(
@@ -131,11 +123,7 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, covar_df,
 #' @rdname setupApp
 setupInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::uiOutput(ns("project_name")),
-    #shiny::textOutput(ns("num_pheno")),
-    shiny::uiOutput(ns("chr_pos"))
-  )
+  shiny::uiOutput(ns("chr_pos"))
 }
 #' @export
 #' @rdname setupApp
