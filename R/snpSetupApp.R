@@ -15,6 +15,71 @@
 #' @importFrom shiny isTruthy moduleServer NS numericInput reactive renderUI req
 #'             selectInput setProgress sliderInput tagList uiOutput withProgress
 #' @importFrom rlang .data
+snpSetupApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_sidebar(
+    title =  "Test Scan",
+    sidebar = bslib::sidebar(
+      projectUI("project"),
+      projectUI("project"),
+      setParInput("set_par"),
+      setupInput("setup"),
+      setupUI("setup"),
+      shiny::uiOutput("sex_type_input"),
+      scanUI("scan")),
+    scanOutput("scan")
+  )
+  server <- function(input, output, session) {
+    project_df <- projectServer("project", projects_df)
+    set_par <- setParServer("set_par", project_df)
+    
+    pmap_obj <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "pmap")
+    })
+    peak_df <- shiny::reactive({
+      shiny::req(project_df(), set_par$class)
+      read_project(project_df(), "peaks", class = set_par$class)
+    })
+    
+    # set_list returns pheno_names(), win_par.
+    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, project_df)
+    
+    pheno_mx <- shiny::reactive({
+      shiny::req(project_df(), set_par$class)
+      pheno_names <- shiny::req(set_list$pheno_names())
+      read_project(project_df(), "pheno", class = set_par$class,
+                   columns = pheno_names)
+    })
+    covar_df <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "covar")
+    })
+    K_chr <- shiny::reactive({
+      shiny::req(project_df())
+      chr_id <- shiny::req(set_list$win_par$chr_id)
+      read_project(project_df(), "kinship")[chr_id]
+    })
+    ## Allele names.
+    allele_info <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "allele_info")
+    })
+    output$sex_type_input <- shiny::renderUI({
+      choices <- c("A","I","F","M")
+      shiny::radioButtons("sex_type", "Sex:",
+                          choices,
+                          input$sex_type, inline = TRUE)
+    })
+    
+    probs_obj <- probsServer("probs", set_list$win_par, project_df)
+    scanServer("scan", input, set_list$win_par, peak_df, pheno_mx, covar_df,
+               K_chr, probs_obj, allele_info, project_df)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname snpSetupApp
 snpSetupServer <- function(id,
   job_par, win_par, phe_mx, cov_df, K_chr, analyses_df,
   project_df, allele_info,
@@ -200,7 +265,7 @@ snpSetupServer <- function(id,
   })
 }
 #' @export
-#' @rdname snpSetupServer
+#' @rdname snpSetupApp
 snpSetupUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -212,7 +277,7 @@ snpSetupUI <- function(id) {
     shiny::uiOutput(ns("download_csv_plot")))
 }
 #' @export
-#' @rdname snpSetupServer
+#' @rdname snpSetupApp
 snpSetupOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("snp_output"))
