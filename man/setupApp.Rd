@@ -13,7 +13,7 @@ setParServer(id, project_df)
 
 setupApp()
 
-setupServer(id, set_par, peak_df, pmap_obj, covar_df, project_df)
+setupServer(id, set_par, peak_df, pmap_obj, project_df)
 
 setupInput(id)
 
@@ -24,7 +24,7 @@ setupOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{peak_df, pmap_obj, covar, projects_info}{reactive arguments}
+\item{set_par, peak_df, pmap_obj, project_df}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

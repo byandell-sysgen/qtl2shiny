@@ -9,7 +9,7 @@
 \usage{
 phenoApp()
 
-phenoServer(id, set_par, win_par, peak_df, covar_df, project_df)
+phenoServer(id, set_par, win_par, peak_df, project_df)
 
 phenoInput(id)
 
