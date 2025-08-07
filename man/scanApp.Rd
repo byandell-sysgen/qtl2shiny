@@ -11,15 +11,15 @@ scanApp()
 
 scanServer(
   id,
-  job_par,
+  hap_par,
   win_par,
-  phe_mx,
-  cov_df,
-  probs_obj,
+  peak_df,
+  pheno_mx,
+  covar_df,
   K_chr,
-  analyses_df,
-  project_df,
-  allele_info
+  probs_obj,
+  allele_info,
+  project_df
 )
 
 scanUI(id)
@@ -29,7 +29,7 @@ scanOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{job_par, win_par, phe_mx, cov_df, probs_obj, K_chr, analyses_df, project_df, allele_info}{reactive arguments}
+\item{hap_par, set_list$, pheno_mx, covar_df, probs_obj, K_chr, project_df, allele_info}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

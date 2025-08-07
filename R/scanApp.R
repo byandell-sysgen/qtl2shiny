@@ -3,7 +3,7 @@
 #' Shiny module for scan1 LOD and coefficient plots, with interfaces \code{scanUI} and  \code{scanOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param job_par,win_par,phe_mx,cov_df,probs_obj,K_chr,analyses_df,project_df,allele_info reactive arguments
+#' @param hap_par,set_list$,pheno_mx,covar_df,probs_obj,K_chr,project_df,allele_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -29,9 +29,11 @@ scanApp <- function() {
     title =  "Test Scan",
     sidebar = bslib::sidebar(
       projectUI("project"),
-      peakInput("peak"),
-      hotspotInput("hotspot"), # chr_ct, minLOD, window_Mbp
-      shiny::uiOutput("sex_type_input"),
+      projectUI("project"),
+      setParInput("set_par"),
+      setupInput("setup"),
+      setupUI("setup"),
+      hapParInput("hap_par"),
       scanUI("scan")),
     scanOutput("scan")
   )
@@ -39,83 +41,67 @@ scanApp <- function() {
     project_df <- projectServer("project", projects_df)
     set_par <- setParServer("set_par", project_df)
     
-    peak_df <- shiny::reactive({
-      class <- shiny::req(set_par$class)
-      read_project(shiny::req(project_df()), "peaks", class = class)
-    })
     pmap_obj <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "pmap")
+    })
+    peak_df <- shiny::reactive({
+      shiny::req(project_df(), set_par$class)
+      read_project(project_df(), "peaks", class = set_par$class)
+    })
+    
+    # set_list returns pheno_names(), win_par.
+    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, project_df)
+
+    pheno_mx <- shiny::reactive({
+      shiny::req(project_df(), set_par$class)
+      pheno_names <- shiny::req(set_list$pheno_names())
+      read_project(project_df(), "pheno", class = set_par$class,
+                   columns = pheno_names)
     })
     covar_df <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "covar")
     })
-
-    ## Phenotypes and Covariates for Haplotype Analyses.
-    phe_mx <- shiny::reactive({
-      analyses <- analyses_df() 
-      if(is.null(analyses)) return(NULL)
-      shiny::req(project_df())
-      pheno_read(project_df(), analyses)
-    })
-    cov_df <- shiny::reactive({
-      analyses <- analyses_df() 
-      if(is.null(analyses)) return(NULL)
-      qtl2mediate::get_covar(covar(), analyses_df())
-    })
-    kinship <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "kinship")
-    })
     K_chr <- shiny::reactive({
-      kinship()[win_par$chr_id]
+      shiny::req(project_df())
+      chr_id <- shiny::req(set_list$win_par$chr_id)
+      read_project(project_df(), "kinship")[chr_id]
     })
     ## Allele names.
     allele_info <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "allele_info")
     })
-    output$sex_type_input <- shiny::renderUI({
-      choices <- c("A","I","F","M")
-      shiny::radioButtons("sex_type", "Sex:",
-                          choices,
-                          input$sex_type, inline = TRUE)
-    })
-    
-    project_df <- projectServer("project", projects_df)
-    hotspot_df <- hotspotServer("hotspot", input, peak_df, pmap_obj,
-                                project_df)
-    win_par <- peakServer("peak", input, peak_df, pmap_obj, hotspot_df,
-                          project_df)
-    probs_obj <- probsServer("probs", win_par, project_df)
-    scanServer("scan", input, win_par, phe_mx, cov_df, probs_obj,
-      K_chr, analyses_df, project_df, allele_info)
+
+    hap_par <- hapParServer("hap_par")
+    probs_obj <- probsServer("probs", set_list$win_par, project_df)
+    scanServer("scan", hap_par, set_list$win_par, peak_df, pheno_mx, covar_df,
+               K_chr, probs_obj, allele_info, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname scanApp
-scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
-                          analyses_df, project_df, allele_info) {
+scanServer <- function(id, hap_par, win_par,
+  peak_df, pheno_mx, covar_df, K_chr, probs_obj, allele_info, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     ## Genome scan 
     scan_obj <- shiny::reactive({
-      # ** Not getting to this step when phenotype selected. **
-      shiny::req(phe_mx(), probs_obj(), K_chr(), cov_df(), win_par$window_Mbp,
-                 job_par$sex_type)
+      shiny::req(pheno_mx(), probs_obj(), K_chr(), covar_df(), peak_df(),
+                 hap_par$sex_type)
       shiny::withProgress(message = "Genome Scan ...", value = 0, {
         shiny::setProgress(1)
-        qtl2mediate::scan1covar(phe_mx(), cov_df(), probs_obj()$probs, K_chr(), analyses_df(),
-                                sex_type = job_par$sex_type)
+        scan1covar(pheno_mx(), covar_df(), probs_obj()$probs, K_chr(),
+                   peak_df())
       })
     })
     
     # Scan Window slider
     output$scan_window_input <- shiny::renderUI({
-      shiny::req(project_df(), phe_mx(), win_par$window_Mbp)
+      shiny::req(project_df(), pheno_mx(), win_par$window_Mbp)
       chr_id <- shiny::req(win_par$chr_id)
       map <- shiny::req(probs_obj())$map[[chr_id]]
       rng <- round(2 * range(map)) / 2
@@ -135,14 +121,14 @@ scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
     
     ## Select phenotype for plots.
     output$pheno_name_input <- shiny::renderUI({
-      shiny::req(phe_mx())
+      shiny::req(pheno_mx())
       shiny::selectInput(ns("pheno_name"), NULL,
-                         choices = colnames(phe_mx()))
+                         choices = colnames(pheno_mx()))
     })
     
     ## Scan1 plot
     output$scan_plot <- shiny::renderPlot({
-      if(!shiny::isTruthy(win_par$chr_id) || !shiny::isTruthy(phe_mx()))
+      if(!shiny::isTruthy(win_par$chr_id) || !shiny::isTruthy(pheno_mx()))
         return(plot_null("need to select\nRegion & Phenotype"))
       shiny::req(win_par$chr_id, input$scan_window, scan_obj(), probs_obj())
       shiny::withProgress(message = 'Genome LOD Plot ...', value = 0, {
@@ -152,18 +138,18 @@ scanServer <- function(id, job_par, win_par, phe_mx, cov_df, probs_obj, K_chr,
                   seq(ncol(scan_obj())), 
                   win_par$chr_id, 
                   input$scan_window, 
-                  phe_mx())
+                  pheno_mx())
       })
     })
     
     ## Coefficient Effects.
     eff_obj <- shiny::reactive({
-      shiny::req(phe_mx(), probs_obj(), K_chr(), cov_df(),
-                 job_par$sex_type)
+      shiny::req(pheno_mx(), probs_obj(), K_chr(), covar_df(),
+                 hap_par$sex_type)
       shiny::withProgress(message = 'Effect scans ...', value = 0, {
         shiny::setProgress(1)
-        scan1_effect(probs_obj()$probs, phe_mx(), K_chr(), cov_df(),
-                     job_par$sex_type, input$blups)
+        scan1_effect(probs_obj()$probs, pheno_mx(), K_chr(), covar_df(),
+                     hap_par$sex_type, input$blups)
       })
     })
     output$coef_plot <- shiny::renderPlot({

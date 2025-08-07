@@ -55,7 +55,15 @@ create_peak_class <- function(project_df, force = FALSE) {
     warning("Directory peaks already exists")
     return(dir(peaksdir))
   }
+  
+  # Get old `analyses` to extract `pheno` and `addcovar` information.
   analyses_old <- read_project(project_df, "analyses")
+  wh <- grep("sex", names(analyses_old))
+  (covar_cols <- names(analyses_old)[- seq_len(wh - 1)])
+  addcovar_ch <- apply(analyses_old[,covar_cols], 1,
+    function(x) paste0("~", paste0(covar_cols[x], collapse = "+")))
+
+  # Rename peaks columns and set up `addcovar` and `intcovar`.
   peaks_old <- read_project(project_df, "peaks")
   peaks_ref <- peaks_old |>
     dplyr::select(pheno_group, pheno, lod, chr, pos) |>
@@ -64,7 +72,7 @@ create_peak_class <- function(project_df, force = FALSE) {
                   qtl_lod = "lod",
                   qtl_chr = "chr",
                   qtl_pos = "pos") |>
-    dplyr::mutate(addcovar = addcovar[match(phenotype, analyses_old$pheno)],
+    dplyr::mutate(addcovar = addcovar_ch[match(phenotype, analyses_old$pheno)],
                   intcovar = "none")
   peaks_ref <- split(peaks_ref, peaks_ref$phenotype_class)
   # Create and populate peaks directory.

@@ -46,7 +46,7 @@ diploServer <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
       switch(shiny::req(input$button),
              "Genome Scans"    = patternUI(ns("dip_pat")),
              "SNP Association" =,
-             "Allele Pattern"  = snpSetupUI(ns("snp_setup")))
+             "Allele Pattern"  = snpSetupInput(ns("snp_setup")))
     })
     output$dip_output <- shiny::renderUI({
       switch(shiny::req(input$button),

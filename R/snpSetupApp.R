@@ -1,9 +1,9 @@
-#' Shiny SNP and Allele analysis and plot module
+#' Shiny SNP and Allele analysis and plot App
 #'
-#' Shiny module to coordinate SNP and allele analyses and plots, with interfaces \code{snpSetupUI} and  \code{snpSetupOutput}.
+#' Shiny module to coordinate SNP and allele analyses and plots.
 #'
 #' @param id identifier for shiny reactive
-#' @param job_par,win_par,phe_mx,cov_df,K_chr,analyses_df,project_df,allele_info,snp_action reactive arguments
+#' @param hap_par,win_par,peak_df,pheno_mx,covar_df,K_chr,allele_info,project_df,snp_action reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -14,20 +14,24 @@
 #' @importFrom qtl2mediate scan1covar covar_matrix which_covar
 #' @importFrom shiny isTruthy moduleServer NS numericInput reactive renderUI req
 #'             selectInput setProgress sliderInput tagList uiOutput withProgress
+#' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom rlang .data
+#' @importFrom bslib card page_sidebar sidebar
 snpSetupApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
-    title =  "Test Scan",
+    title =  "Test SNP Setup",
     sidebar = bslib::sidebar(
       projectUI("project"),
       projectUI("project"),
       setParInput("set_par"),
       setupInput("setup"),
       setupUI("setup"),
-      shiny::uiOutput("sex_type_input"),
-      scanUI("scan")),
-    scanOutput("scan")
+      hapParUI("hap_par"),
+      hapParInput("hap_par"),
+      snpSetupInput("snp_setup")),
+    bslib::card(snpSetupUI("snp_setup")),
+    bslib::card(snpSetupOutput("snp_setup"))
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
@@ -65,24 +69,19 @@ snpSetupApp <- function() {
       shiny::req(project_df())
       read_project(project_df(), "allele_info")
     })
-    output$sex_type_input <- shiny::renderUI({
-      choices <- c("A","I","F","M")
-      shiny::radioButtons("sex_type", "Sex:",
-                          choices,
-                          input$sex_type, inline = TRUE)
-    })
-    
+
+    hap_par <- hapParServer("hap_par")
     probs_obj <- probsServer("probs", set_list$win_par, project_df)
-    scanServer("scan", input, set_list$win_par, peak_df, pheno_mx, covar_df,
-               K_chr, probs_obj, allele_info, project_df)
+    # ** Allele Pattern snpPattern not working. **
+    snpSetupServer("snp_setup", hap_par, set_list$win_par,
+      peak_df, pheno_mx, covar_df, K_chr, allele_info, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname snpSetupApp
-snpSetupServer <- function(id,
-  job_par, win_par, phe_mx, cov_df, K_chr, analyses_df,
-  project_df, allele_info,
+snpSetupServer <- function(id, hap_par, win_par,
+  peak_df, pheno_mx, covar_df, K_chr, allele_info, project_df,
   snp_action = shiny::reactive({"basic"})) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -92,8 +91,8 @@ snpSetupServer <- function(id,
                    range = shiny::req(input$scan_window))
     })
     pheno_names <- shiny::reactive({
-      shiny::req(project_df(), phe_mx())
-      colnames(phe_mx())
+      shiny::req(project_df(), pheno_mx())
+      colnames(pheno_mx())
     })
     
     ## Reactives
@@ -101,21 +100,20 @@ snpSetupServer <- function(id,
     snpprobs_obj <- snpProbsServer("snp_probs", win_par, pheno_names,
                                    project_df)
     snpinfo <- reactive({
-      shiny::req(project_df(), phe_mx())
+      shiny::req(project_df(), pheno_mx())
       shiny::req(snpprobs_obj())$snpinfo
     })
     
     ## SNP Scan.
     snp_scan_obj <- shiny::reactive({
-      shiny::req(snpprobs_obj(), phe_mx())
-      shiny::req(K_chr(), cov_df(), job_par$sex_type)
+      shiny::req(snpprobs_obj(), pheno_mx(), peak_df())
+      shiny::req(K_chr(), covar_df(), hap_par$sex_type)
       snpprobs <- snpprobs_obj()$snpprobs
       shiny::withProgress(message = "SNP Scan ...", value = 0, {
         shiny::setProgress(1)
         snpprobs_act <- 
           qtl2pattern::snpprob_collapse(snpprobs, snp_action())
-        qtl2mediate::scan1covar(phe_mx(), cov_df(), snpprobs_act, K_chr(),
-                                analyses_df(), sex_type = job_par$sex_type)
+        scan1covar(pheno_mx(), covar_df(), snpprobs_act, K_chr(), peak_df())
       })
     })
     
@@ -189,7 +187,7 @@ snpSetupServer <- function(id,
     output$phe_choice <- shiny::renderUI({
       ## Show Phenotype Choice for Scan, Pattern, Top SNPs
       pheno_choice <- FALSE
-      switch(shiny::req(job_par$button),
+      switch(shiny::req(hap_par$button),
              "SNP Association" = {
                if(!is.null(ass_par$button)) {
                  pheno_choice <- (ass_par$button %in% c("Genes","Exons"))
@@ -207,7 +205,7 @@ snpSetupServer <- function(id,
     output$win_choice <- shiny::renderUI({
       ## Show Window for Scan, Genes, By Pheno, Alls
       win_choice <- FALSE
-      switch(shiny::req(job_par$button),
+      switch(shiny::req(hap_par$button),
              "SNP Association" = {
                if(!is.null(ass_par$button)) {
                  win_choice <- (ass_par$button %in% c("Scan","Genes"))
@@ -228,28 +226,27 @@ snpSetupServer <- function(id,
     ## UI Logic
     output$title <- shiny::renderUI({
       if(snp_action() == "basic")
-        strong(shiny::req(job_par$button))
+        strong(shiny::req(hap_par$button))
     })
     output$snp_input <- shiny::renderUI({
-      switch(shiny::req(job_par$button),
+      switch(shiny::req(hap_par$button),
              "SNP Association" = snpGeneInput(ns("snp_gene")),
              "Allele Pattern"  = snpPatternInput(ns("snp_pattern")))
     })
     output$snp_output <- shiny::renderUI({
-      switch(shiny::req(job_par$button),
+      switch(shiny::req(hap_par$button),
              "SNP Association" = snpGeneOutput(ns("snp_gene")),
              "Allele Pattern"  = snpPatternOutput(ns("snp_pattern")))
     })
     
     ## Downloads
     output$download_csv_plot <- shiny::renderUI({
-      switch(shiny::req(job_par$button),
+      switch(shiny::req(hap_par$button),
              "SNP Association" = snpGeneUI(ns("snp_gene")),
              "Allele Pattern"  = snpPatternUI(ns("snp_pattern")))
     })
     
-    ## Return patterns
-    shiny::reactive({ # patterns
+    patterns <- shiny::reactive({
       if(shiny::isTruthy(snp_action()) && shiny::isTruthy(top_snps_tbl())) {
         dplyr::arrange(
           dplyr::mutate(
@@ -262,11 +259,16 @@ snpSetupServer <- function(id,
         NULL
       }
     })
+    output$patterns <- DT::renderDataTable({
+      patterns()
+      }, options = list(scrollX = TRUE, paging = FALSE, searching=FALSE))
+    ## Return
+    patterns
   })
 }
 #' @export
 #' @rdname snpSetupApp
-snpSetupUI <- function(id) {
+snpSetupInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("title")),
@@ -275,6 +277,12 @@ snpSetupUI <- function(id) {
     shiny::uiOutput(ns("phe_choice")),
     shiny::uiOutput(ns("win_choice")),
     shiny::uiOutput(ns("download_csv_plot")))
+}
+#' @export
+#' @rdname snpSetupApp
+snpSetupUI <- function(id) {
+  ns <- shiny::NS(id)
+  DT::dataTableOutput(ns("patterns"))
 }
 #' @export
 #' @rdname snpSetupApp

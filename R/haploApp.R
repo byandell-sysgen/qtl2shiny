@@ -3,7 +3,7 @@
 #' Shiny module for analysis based on haplotype alleles, with interface \code{haploUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param win_par,pmap_obj,phe_mx,cov_df,K_chr,analyses_df,covar,analyses_tbl,peak_df,project_df,allele_info reactive arguments
+#' @param win_par,pmap_obj,pheno_mx,covar_df,K_chr,analyses_df,covar,analyses_tbl,peak_df,project_df,allele_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -19,64 +19,61 @@ haploApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Haplo",
     sidebar = bslib::sidebar(
-      setupInput("setup"),
       projectUI("project"),
+      setParInput("set_par"),
+      setupInput("setup"),
       setupUI("setup")),
+    shiny::uiOutput("pheno_names"),
     haploUI("haplo")
   )
   server <- function(input, output, session) {
-    peak_df <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "peaks")
-    })
+    project_df <- projectServer("project", projects_df)
+    set_par <- setParServer("set_par", project_df)
+    
     pmap_obj <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "pmap")
     })
-    analyses_df <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "analyses")
+    peak_df <- shiny::reactive({
+      shiny::req(project_df(), set_par$class)
+      read_project(project_df(), "peaks", class = set_par$class)
     })
-    covar <- shiny::reactive({
+    
+    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, project_df)
+    
+    ## Phenotypes and Covariates for Haplotype Analyses.
+    pheno_mx <- shiny::reactive({
+      shiny::req(project_df(), set_par$class)
+      read_project(project_df(), "pheno", class = set_par$class,
+                   columns = set_list$pheno_names)
+    })
+    covar_df <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "covar")
     })
-    ## Phenotypes and Covariates for Haplotype Analyses.
-    phe_mx <- shiny::reactive({
-      analyses <- analyses_df() 
-      if(is.null(analyses)) return(NULL)
-      shiny::req(project_df())
-      pheno_read(project_df(), analyses)
+    ## Kinship and Alleles.
+    K_chr <- shiny::reactive({
+      shiny::req(project_df(), set_list$win_par$chr_id)
+      read_project(project_df(), "kinship")[set_list$win_par$chr_id]
     })
-    cov_df <- shiny::reactive({
-      analyses <- analyses_df() 
-      if(is.null(analyses)) return(NULL)
-      qtl2mediate::get_covar(covar(), analyses_df())
-    })
-    ## Allele names.
     allele_info <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "allele_info")
     })
+
+    haploServer("haplo", set_list$win_par, pmap_obj, pheno_mx, covar_df, K_chr,
+      peak_df, project_df, allele_info)
     
-    project_df <- projectServer("project", projects_df)
-    set_par <- setupServer("setup", peak_df, pmap_obj, analyses_df, covar,
-                           project_df)
-    haploServer("haplo", set_par$win_par, pmap_obj, phe_mx, cov_df, K_chr,
-      analyses_df, covar, analyses_tbl, peak_df, project_df, allele_info)
-    
-    output$set_par <- shiny::renderUI({
-      paste("pheno_names: ", paste(set_par$pheno_names(), collapse = ", "))
+    output$pheno_names <- shiny::renderUI({
+      paste("pheno_names: ", paste(set_list$pheno_names(), collapse = ", "))
     })
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname haploApp
-haploServer <- function(id, win_par, pmap_obj, 
-                       phe_mx, cov_df, K_chr, analyses_df, 
-                       covar, analyses_tbl, peak_df,
-                       project_df, allele_info) {
+haploServer <- function(id, win_par, pmap_obj, pheno_mx, covar_df, K_chr, 
+                        peak_df, project_df, allele_info) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -84,16 +81,16 @@ haploServer <- function(id, win_par, pmap_obj,
     probs_obj <- probsServer("probs", win_par, project_df)
     
     ## Genome Scan.
-    scanServer("hap_scan", input, win_par, phe_mx, cov_df, probs_obj, K_chr,
-                  analyses_df, project_df, allele_info)
+    scanServer("scan", input, win_par, peak_df, pheno_mx, covar_df,
+               K_chr, probs_obj, allele_info, project_df)
     
     ## SNP Association
-    patterns <- snpSetupServer("snp_setup", input, win_par, phe_mx, cov_df, K_chr,
+    patterns <- snpSetupServer("snp_setup", input, win_par, pheno_mx, covar_df, K_chr,
                               analyses_df, project_df, allele_info)
     
     ## Mediation
-    mediateServer("mediate", input, win_par, patterns, phe_mx, cov_df, probs_obj, K_chr,
-                 analyses_df, pmap_obj, covar, analyses_tbl, peak_df, project_df, allele_info)
+    mediateServer("mediate", input, win_par, patterns, pheno_mx, covar_df, probs_obj, K_chr,
+                 analyses_df, pmap_obj, covar_df, analyses_tbl, peak_df, project_df, allele_info)
     
     output$allele_names <- shiny::renderText({
       shiny::req(allele_info())
@@ -102,14 +99,14 @@ haploServer <- function(id, win_par, pmap_obj,
     
     output$hap_input <- shiny::renderUI({
       switch(shiny::req(input$button),
-             "Genome Scans"    = scanUI(ns("hap_scan")),
+             "Genome Scans"    = scanUI(ns("scan")),
              "SNP Association" =,
-             "Allele Pattern"  = snpSetupUI(ns("snp_setup")),
+             "Allele Pattern"  = snpSetupInput(ns("snp_setup")),
              "Mediation"       = mediateUI(ns("mediate")))
     })
     output$hap_output <- shiny::renderUI({
       switch(shiny::req(input$button),
-             "Genome Scans"    = scanOutput(ns("hap_scan")),
+             "Genome Scans"    = scanOutput(ns("scan")),
              "SNP Association" = ,
              "Allele Pattern"  = snpSetupOutput(ns("snp_setup")),
              "Mediation"       = mediateOutput(ns("mediate")))
@@ -121,7 +118,7 @@ haploServer <- function(id, win_par, pmap_obj,
     })
     output$sex_type_input <- shiny::renderUI({
       choices <- c("A","I","F","M","all")
-      if(ncol(shiny::req(phe_mx())) > 1 & shiny::req(input$button) != "Mediation") {
+      if(ncol(shiny::req(pheno_mx())) > 1 & shiny::req(input$button) != "Mediation") {
         choices <- choices[1:4]
       }
       shiny::radioButtons(ns("sex_type"), "Sex:",

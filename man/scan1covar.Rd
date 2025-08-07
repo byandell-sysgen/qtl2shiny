@@ -2,41 +2,37 @@
 % Please edit documentation in R/scan1covar.R
 \name{scan1covar}
 \alias{scan1covar}
-\alias{covar_matrix}
-\alias{which_covar}
-\alias{sexcovar}
-\title{Scan1 for multiple traits with possibly different covariates, and some helper routines.}
+\title{Scan1 for traits with same covariates.}
 \usage{
-scan1covar(phe_mx, cov_df, probs_obj, kinship, analyses_df, ...)
-
-covar_matrix(addcovar)
-
-which_covar(analyses_df, wh, cov_df)
-
-sexcovar(addcovar, sex_type = "all")
+scan1covar(
+  pheno_mx,
+  covar_df,
+  genoprobs,
+  kinship,
+  peaks_df,
+  model = "normal",
+  ...
+)
 }
 \arguments{
-\item{phe_mx}{matrix of phenotypes}
+\item{pheno_mx}{matrix of phenotypes}
 
-\item{cov_df}{data frame of covariates}
+\item{covar_df}{data frame of covariates}
 
-\item{probs_obj}{object with genotype probabilities}
+\item{genoprobs}{object with genotype probabilities}
 
 \item{kinship}{kinship matrix or list of kinship matrices}
 
-\item{analyses_df}{data frame of analyses information}
+\item{peaks_df}{data frame of peaks information}
+
+\item{model}{model argument for \code{\link[qtl2]{scan1}}}
 
 \item{...}{additional arguments passed on}
-
-\item{addcovar}{Data frame of additive covariate.}
-
-\item{wh}{Index for which row of \code{analyses_df} to use.}
-
-\item{sex_type}{subset by sex if \code{"F"} or \code{"M"}.}
 }
 \value{
 object of class \code{\link[qtl2]{scan1}}.
 }
 \description{
 Modified from qtl2mediate version for newer data organization.
+Could build out a companion routine splitting on covariates.
 }
