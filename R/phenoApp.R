@@ -29,32 +29,26 @@ phenoApp <- function() {
     project_df <- projectServer("project", projects_df)
     set_par <- setParServer("set_par", project_df)
     
-    peak_df <- shiny::reactive({
-      class <- shiny::req(set_par$class)
-      read_project(shiny::req(project_df()), "peaks", class = class)
-    })
     pmap_obj <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "pmap")
     })
-    covar_df <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "covar")
+    peak_df <- shiny::reactive({
+      shiny::req(project_df(), set_par$class)
+      read_project(project_df(), "peaks", class = set_par$class)
     })
     
     hotspot_df <- hotspotServer("hotspot", set_par, peak_df, pmap_obj,
                                 project_df)
     win_par <- peakServer("peak", set_par, peak_df, pmap_obj, hotspot_df,
                           project_df)
-    pheno_names <- phenoServer("pheno", set_par, win_par, peak_df, covar_df,
-                               project_df)
+    pheno_names <- phenoServer("pheno", set_par, win_par, peak_df, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname phenoApp
-phenoServer <- function(id, set_par, win_par, peak_df, covar_df,
-                        project_df) {
+phenoServer <- function(id, set_par, win_par, peak_df, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -95,7 +89,11 @@ phenoServer <- function(id, set_par, win_par, peak_df, covar_df,
       read_project(project_df(), "pheno", class = set_par$class,
                    columns = pheno_names())
     })
-
+    # Use `sex` column from `covar_df()` for `pheno_plot`.
+    covar_df <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "covar")
+    })
     phenoPlotServer("pheno_plot", pheno_names, pheno_mx, covar_df)
 
     ## Return.

@@ -3,7 +3,7 @@
 #' Shiny module for phenotype selection, with interfaces \code{setupInput} and  \code{setupUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param peak_df,pmap_obj,covar,projects_info reactive arguments
+#' @param set_par,peak_df,pmap_obj,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -32,21 +32,16 @@ setupApp <- function() {
     project_df <- projectServer("project", projects_df)
     set_par <- setParServer("set_par", project_df)
     
-    peak_df <- shiny::reactive({
-      shiny::req(project_df(), set_par$class)
-      read_project(project_df(), "peaks", class = set_par$class)
-    })
     pmap_obj <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "pmap")
     })
-    covar_df <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "covar")
+    peak_df <- shiny::reactive({
+      shiny::req(project_df(), set_par$class)
+      read_project(project_df(), "peaks", class = set_par$class)
     })
 
-    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, covar_df,
-                            project_df)
+    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, project_df)
 
     output$pheno_names <- shiny::renderUI({
       paste("pheno_names: ", paste(set_list$pheno_names(), collapse = ", "))
@@ -56,8 +51,7 @@ setupApp <- function() {
 }
 #' @export
 #' @rdname setupApp
-setupServer <- function(id, set_par, peak_df, pmap_obj, covar_df,
-                        project_df) {
+setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -81,7 +75,7 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, covar_df,
     })
     
     ## Use window as input to phenoServer.
-    pheno_names <- phenoServer("pheno", set_par, win_par, peak_df, covar_df,
+    pheno_names <- phenoServer("pheno", set_par, win_par, peak_df,
                                project_df)
     
     ## Setup input logic.
