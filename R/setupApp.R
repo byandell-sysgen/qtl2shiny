@@ -81,9 +81,7 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
     ## Setup input logic.
     output$sidebar_setup <- shiny::renderUI({
       switch(shiny::req(input$radio),
-             Phenotypes = shiny::tagList(
-               shiny::uiOutput(ns("filter")),
-               phenoInput(ns("pheno"))),
+             Phenotypes = shiny::uiOutput(ns("filter")),
              Region     = peakInput(ns("peak"))) # local, chr_id, peak_Mbp, window_Mbp
     })
     output$sidebar_hot <- shiny::renderUI({
@@ -117,7 +115,10 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
 #' @rdname setupApp
 setupInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("chr_pos"))
+  shiny::tagList(
+    phenoInput(ns("pheno")),
+    shiny::uiOutput(ns("chr_pos"))
+  )
 }
 #' @export
 #' @rdname setupApp

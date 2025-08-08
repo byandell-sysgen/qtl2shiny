@@ -18,8 +18,8 @@ hapParApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Haplo Parameters",
     sidebar = bslib::sidebar(
-      hapParInput("hap_par"),
-      hapParUI("hap_par")),
+      hapParInput("hap_par"), # sex_type
+      hapParUI("hap_par")),   # button
     hapParOutput("hap_par")
   )
   server <- function(input, output, session) {

@@ -17,11 +17,8 @@ setParOutput(id)
 
 \item{peak_df, pmap_obj, covar, projects_info}{reactive arguments}
 }
-\value{
-No return value; called for side effects.
-}
 \description{
-Shiny module for phenotype selection, with interfaces \code{setupInput} and  \code{setupUI}.
+Shiny Setup Parameters App
 }
 \author{
 Brian S Yandell, \email{brian.yandell@wisc.edu}

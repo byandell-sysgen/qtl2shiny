@@ -6,7 +6,7 @@
 \alias{subset.hotspot}
 \title{Hotspots for phenotypes}
 \usage{
-hotspot(map, peaks_df, peak_window = 1, minLOD = 5.5)
+hotspot(map, peak_df, peak_window = 1, minLOD = 5.5, chrs = NULL)
 
 \method{summary}{hotspot}(object, ...)
 
@@ -15,11 +15,13 @@ hotspot(map, peaks_df, peak_window = 1, minLOD = 5.5)
 \arguments{
 \item{map}{list of genetic maps}
 
-\item{peaks_df}{data frame of peak information}
+\item{peak_df}{data frame of peak information}
 
 \item{peak_window}{half-width of peak window in Mbp}
 
 \item{minLOD}{minimum LOD to include in count}
+
+\item{chrs}{chromosomes to subset if not `NULL`}
 }
 \value{
 object of class hotspot as list of \code{\link[qtl2]{scan1}} and \code{map} objects.
@@ -39,15 +41,15 @@ pr <- qtl2::calc_genoprob(DOex, error_prob=0.002)
 
 # Summary of coefficients at scan peak
 scan_pr <- qtl2::scan1(pr, DOex$pheno)
-peaks_df <- summary(scan_pr, DOex$pmap)
+peak_df <- summary(scan_pr, DOex$pmap)
 
-hotspot(DOex$pmap, peaks_df)
+hotspot(DOex$pmap, peak_df)
 
 # Select Sex and Cohort columns of covariates
 analyses_tbl <- data.frame(pheno = "OF_immobile_pct", Sex = TRUE, Cohort = TRUE)
 
 # Get hotspot (only one phenotype here).
-out <- hotspot(DOex$pmap, peaks_df)
+out <- hotspot(DOex$pmap, peak_df)
 summary(out)
 
 }

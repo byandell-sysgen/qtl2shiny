@@ -189,7 +189,7 @@ peakServer <- function(id, set_par, peak_df, pmap_obj, hotspot_df, project_df) {
 peakInput <- function(id) { # local, chr_id, peak_Mbp, window_Mbp
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::checkboxInput(ns("local"), "Local Scan in Window?", TRUE),
+    shiny::checkboxInput(ns("local"), "Local Peaks in Window?", TRUE),
     shiny::fluidRow(
       shiny::column(4, shiny::uiOutput(ns("chr_id_input"))),
       shiny::column(4, shiny::uiOutput(ns("peak_Mbp_input"))),

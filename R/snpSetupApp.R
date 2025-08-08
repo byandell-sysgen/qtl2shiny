@@ -71,7 +71,6 @@ snpSetupApp <- function() {
 
     hap_par <- hapParServer("hap_par")
     probs_obj <- probsServer("probs", set_list$win_par, project_df)
-    # ** Allele Pattern snpPattern not working. **
     snpSetupServer("snp_setup", hap_par, set_list$win_par,
       peak_df, pheno_mx, covar_df, K_chr, allele_info, project_df)
   }

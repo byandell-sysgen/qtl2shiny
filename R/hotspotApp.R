@@ -106,9 +106,11 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
     
     hotspot_obj <- shiny::reactive({
       shiny::req(project_df(), input$window_Mbp, input$minLOD)
+      chrs <- input$chr_ct
+      if(!shiny::isTruthy(chrs) || "all" %in% chrs) chrs <- NULL
       shiny::withProgress(message = 'Hotspot scan ...', value = 0, {
         shiny::setProgress(1)
-        hotspot(pmap_obj(), peak_df(), input$window_Mbp, input$minLOD)
+        hotspot(pmap_obj(), peak_df(), input$window_Mbp, input$minLOD, chrs)
         })
     })
     

@@ -35,6 +35,8 @@ select_phenames <- function(phenames, peak_df, local,
   # Limit to first 1000
   nphe <- length(phenames)
   phenames <- phenames[seq_len(min(1000, nphe))]
+  if(is.null(selected))
+    selected <- phenames[1]
   
   choices <- c("all","none", phenames)
   label = ifelse(nphe <= 1000,

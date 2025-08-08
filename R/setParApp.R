@@ -1,15 +1,11 @@
 #' Shiny Setup Parameters App
 #'
-#' Shiny module for phenotype selection, with interfaces \code{setupInput} and  \code{setupUI}.
-#'
 #' @param id identifier for shiny reactive
 #' @param peak_df,pmap_obj,covar,projects_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
 #' 
-#' @return No return value; called for side effects.
-#'
 #' @export
 #' @importFrom dplyr filter 
 #' @importFrom shiny checkboxInput moduleServer NS reactive
@@ -41,7 +37,7 @@ setParServer <- function(id, project_df) {
       shiny::req(project_df())
       choices <- project_classes(project_df())
       if(is.null(selected <- input$class))
-        selected <- NULL
+        selected <- choices[1]
       shiny::selectInput(ns("class"), "Phenotype Class",
         choices = as.list(choices), selected = selected, multiple = TRUE)
     })

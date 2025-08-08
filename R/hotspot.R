@@ -3,9 +3,10 @@
 #' Count hotspots by pheno_group and pheno_type.
 #'
 #' @param map list of genetic maps
-#' @param peaks_df data frame of peak information
+#' @param peak_df data frame of peak information
 #' @param peak_window half-width of peak window in Mbp
 #' @param minLOD minimum LOD to include in count
+#' @param chrs chromosomes to subset if not `NULL`
 #'
 #' @return object of class hotspot as list of \code{\link[qtl2]{scan1}} and \code{map} objects.
 #'
@@ -24,15 +25,15 @@
 #' 
 #' # Summary of coefficients at scan peak
 #' scan_pr <- qtl2::scan1(pr, DOex$pheno)
-#' peaks_df <- summary(scan_pr, DOex$pmap)
+#' peak_df <- summary(scan_pr, DOex$pmap)
 #' 
-#' hotspot(DOex$pmap, peaks_df)
+#' hotspot(DOex$pmap, peak_df)
 #' 
 #' # Select Sex and Cohort columns of covariates
 #' analyses_tbl <- data.frame(pheno = "OF_immobile_pct", Sex = TRUE, Cohort = TRUE)
 #' 
 #' # Get hotspot (only one phenotype here).
-#' out <- hotspot(DOex$pmap, peaks_df)
+#' out <- hotspot(DOex$pmap, peak_df)
 #' summary(out)
 #'
 #' @export
@@ -41,9 +42,12 @@
 #' @importFrom dplyr bind_cols bind_rows distinct everything filter one_of select
 #' @importFrom rlang .data
 #'
-hotspot <- function(map, peaks_df, peak_window = 1, minLOD = 5.5) {
-  peaks_df <- dplyr::filter(peaks_df, .data$qtl_lod >= minLOD)
-  if(!nrow(peaks_df))
+hotspot <- function(map, peak_df, peak_window = 1, minLOD = 5.5,
+                    chrs = NULL) {
+  peak_df <- dplyr::filter(peak_df, .data$qtl_lod >= minLOD)
+  if(!is.null(chrs))
+    peak_df <- dplyr::filter(peak_df, .data$qtl_chr %in% chrs)
+  if(!nrow(peak_df))
     return(NULL)
   
   # Set up list by chr of positions and peaks.
@@ -61,13 +65,13 @@ hotspot <- function(map, peaks_df, peak_window = 1, minLOD = 5.5) {
   }
 
   out_chr <- purrr::transpose(list(pos = chr_pos,
-                                   peaks = split(peaks_df, peaks_df$qtl_chr)))
+                                   peaks = split(peak_df, peak_df$qtl_chr)))
 
-  peaks_class <- function(posi, peaks_df, peak_window=1) {
-    if(is.null(peaks_df))
+  peaks_class <- function(posi, peak_df, peak_window=1) {
+    if(is.null(peak_df))
       return(NULL)
     # count peaks at position by class
-    peaks_by_class <- split(peaks_df, peaks_df$phenotype_class)
+    peaks_by_class <- split(peak_df, peak_df$phenotype_class)
     out <- data.frame(purrr::map(peaks_by_class,
                                  outer_window,
                                  posi, peak_window),

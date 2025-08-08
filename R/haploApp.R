@@ -77,19 +77,20 @@ haploServer <- function(id, win_par, pmap_obj, pheno_mx, covar_df, K_chr,
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    hap_par <- hapParServer("hap_par")
     ## Genotype Probabilities.
     probs_obj <- probsServer("probs", win_par, project_df)
     
     ## Genome Scan.
-    scanServer("scan", input, win_par, peak_df, pheno_mx, covar_df,
+    scanServer("scan", hap_par, win_par, peak_df, pheno_mx, covar_df,
                K_chr, probs_obj, allele_info, project_df)
     
     ## SNP Association
-    patterns <- snpSetupServer("snp_setup", input, win_par, pheno_mx, covar_df, K_chr,
-                              analyses_df, project_df, allele_info)
+    patterns <- snpSetupServer("snp_setup", hap_par, win_par,
+      peak_df, pheno_mx, covar_df, K_chr, allele_info, project_df)
     
     ## Mediation
-    mediateServer("mediate", input, win_par, patterns, pheno_mx, covar_df, probs_obj, K_chr,
+    mediateServer("mediate", hap_par, win_par, patterns, pheno_mx, covar_df, probs_obj, K_chr,
                  analyses_df, pmap_obj, covar_df, analyses_tbl, peak_df, project_df, allele_info)
     
     output$allele_names <- shiny::renderText({
@@ -111,20 +112,6 @@ haploServer <- function(id, win_par, pmap_obj, pheno_mx, covar_df, K_chr,
              "Allele Pattern"  = snpSetupOutput(ns("snp_setup")),
              "Mediation"       = mediateOutput(ns("mediate")))
     })
-    output$button_input <- shiny::renderUI({
-      shiny::radioButtons(ns("button"), "",
-                          c("Genome Scans","SNP Association","Allele Pattern","Mediation"),
-                          input$button)
-    })
-    output$sex_type_input <- shiny::renderUI({
-      choices <- c("A","I","F","M","all")
-      if(ncol(shiny::req(pheno_mx())) > 1 & shiny::req(input$button) != "Mediation") {
-        choices <- choices[1:4]
-      }
-      shiny::radioButtons(ns("sex_type"), "Sex:",
-                          choices,
-                          input$sex_type, inline = TRUE)
-    })
     output$project <- shiny::renderUI({
       shiny::strong(shiny::req(paste("Project:",
                                      project_df()$project,
@@ -140,8 +127,8 @@ haploUI <- function(id) {
     shiny::sidebarPanel(
       shiny::uiOutput(ns("project")),
       shiny::strong("SNP/Gene Additive"),
-      shiny::uiOutput(ns("button_input")),
-      shiny::uiOutput(ns("sex_type_input")),
+      hapParUI(ns("hap_par")),   # button
+      hapParInput(ns("hap_par")), # sex_type
       shiny::uiOutput(ns("hap_input")),
       shiny::textOutput(ns("allele_names"))),
     shiny::mainPanel(

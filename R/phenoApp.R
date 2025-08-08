@@ -11,7 +11,8 @@
 #' @export
 #' @importFrom dplyr arrange desc filter select
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny moduleServer NS radioButtons reactive req tagList uiOutput
+#' @importFrom shiny moduleServer NS radioButtons reactive req selectInput
+#'             tagList uiOutput updateSelectInput
 #' @importFrom rlang .data
 phenoApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
@@ -20,9 +21,10 @@ phenoApp <- function() {
     sidebar = bslib::sidebar(
       projectUI("project"),
       setParInput("set_par"),
+      phenoInput("pheno"),    # pheno_names
       peakInput("peak"),
-      hotspotInput("hotspot"), # chr_ct, minLOD, window_Mbp
-      phenoInput("pheno")),
+      hotspotInput("hotspot") # chr_ct, minLOD, window_Mbp
+    ),
     phenoOutput("pheno")
   )
   server <- function(input, output, session) {
@@ -57,9 +59,7 @@ phenoServer <- function(id, set_par, win_par, peak_df, project_df) {
     # Filter peaks to region.
     output$filter <- shiny::renderUI({
       shiny::checkboxInput(ns("filter"),
-        paste0("Peak on chr ", win_par$chr_id, " in ",
-               paste(win_par$peak_Mbp + c(-1,1) * win_par$window_Mbp,
-                     collapse = "-"), "?"),
+        paste0("Filter by hotspot chr ", win_par$chr_id, " hotspot", "?"),
         TRUE)
     })
     peak_filter_df <- shiny::reactive({
@@ -74,13 +74,20 @@ phenoServer <- function(id, set_par, win_par, peak_df, project_df) {
     # Input `input$pheno_names`.
     output$pheno_names_input <- shiny::renderUI({
       shiny::req(project_df(), win_par$chr_id, win_par$peak_Mbp,
-                 win_par$window_Mbp)
+                 win_par$window_Mbp,  peak_filter_df())
       out <- select_phenames(input$pheno_names, peak_filter_df(),
         win_par$local, win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
       shiny::selectInput(ns("pheno_names"), out$label,
                          choices = out$choices,
                          selected = out$selected,
                          multiple = TRUE)
+    })
+    shiny::observeEvent(peak_filter_df(), {
+      out <- select_phenames(NULL, peak_filter_df(),
+        win_par$local, win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
+      shiny::updateSelectInput(session, "pheno_names",
+                               choices = out$choices,
+                               selected = out$selected)
     })
 
     ## Density or scatter plot of phenotypes.
