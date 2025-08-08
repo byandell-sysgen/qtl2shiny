@@ -124,12 +124,10 @@ setupInput <- function(id) {
 setupUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::uiOutput(ns("radio_input")),
-    shiny::uiOutput(ns("sidebar_setup")),
-    shiny::uiOutput(ns("pheno_group_input")),
-    shiny::uiOutput(ns("dataset_input")),
-    shiny::uiOutput(ns("sidebar_hot")),
-    shiny::uiOutput(ns("version"))
+    shiny::uiOutput(ns("radio_input")),   # radio
+    shiny::uiOutput(ns("sidebar_setup")), # local, chr_id, peak_Mbp, window_Mbp
+    shiny::uiOutput(ns("sidebar_hot"))#,  # chr_ct, minLOD, window_Mbp
+    #shiny::uiOutput(ns("version"))
   )
 }
 #' @export

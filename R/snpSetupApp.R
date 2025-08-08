@@ -22,13 +22,12 @@ snpSetupApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test SNP Setup",
     sidebar = bslib::sidebar(
-      projectUI("project"),
-      projectUI("project"),
-      setParInput("set_par"),
-      setupInput("setup"),
-      setupUI("setup"),
-      hapParUI("hap_par"),
-      hapParInput("hap_par"),
+      projectUI("project"),            # project
+      setParInput("set_par"),          # class
+      setupInput("setup"),             # 
+      setupUI("setup"),                # <various>
+      hapParUI("hap_par"),             # button
+      hapParInput("hap_par"),          # sex_type
       snpSetupInput("snp_setup")),
     bslib::card(snpSetupUI("snp_setup")),
     bslib::card(snpSetupOutput("snp_setup"))
@@ -86,102 +85,15 @@ snpSetupServer <- function(id, hap_par, win_par,
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    chr_pos <- shiny::reactive({
-      make_chr_pos(shiny::req(win_par$chr_id), 
-                   range = shiny::req(input$scan_window))
-    })
-    pheno_names <- shiny::reactive({
-      shiny::req(project_df(), pheno_mx())
-      colnames(pheno_mx())
-    })
-    
-    ## Reactives
-    ## SNP Probabilities.
-    snpprobs_obj <- snpProbsServer("snp_probs", win_par, pheno_names,
-                                   project_df)
-    snpinfo <- reactive({
-      shiny::req(project_df(), pheno_mx())
-      shiny::req(snpprobs_obj())$snpinfo
-    })
-    
-    ## SNP Scan.
-    snp_scan_obj <- shiny::reactive({
-      shiny::req(snpprobs_obj(), pheno_mx(), peak_df())
-      shiny::req(K_chr(), covar_df(), hap_par$sex_type)
-      snpprobs <- snpprobs_obj()$snpprobs
-      shiny::withProgress(message = "SNP Scan ...", value = 0, {
-        shiny::setProgress(1)
-        snpprobs_act <- 
-          qtl2pattern::snpprob_collapse(snpprobs, snp_action())
-        scan1covar(pheno_mx(), covar_df(), snpprobs_act, K_chr(), peak_df())
-      })
-    })
-    
-    # Minimum LOD for SNP top values.
-    minLOD <- reactive({
-      if(shiny::isTruthy(input$minLOD)) {
-        input$minLOD
-      } else {
-        max(3, round(max(unclass(shiny::req(snp_scan_obj()))), 1) - 1.5)
-      }
-    })
-    output$minLOD_input <- shiny::renderUI({
-      value <- minLOD()
-      shiny::numericInput(ns("minLOD"), "LOD threshold", value,
-                          min = 0, step = 0.5)
-    })
-    
-    ## Top SNPs table.
-    top_snps_tbl <- shiny::reactive({
-      shiny::req(snp_action(), snpinfo())
-      drop_hilit <- max(unclass(shiny::req(snp_scan_obj()))) - 
-        minLOD() 
-      shiny::withProgress(message = 'Get Top SNPs ...', value = 0, {
-        shiny::setProgress(1)
-        qtl2pattern::top_snps_pattern(snp_scan_obj(),
-                                      snpinfo(),
-                                      drop_hilit)
-      })
-    })
-    ## Genes and Exons.
-    gene_exon_tbl <- shiny::reactive({
-      shiny::req(snp_action())
-      shiny::withProgress(message = 'Gene Exon Calc ...', value = 0, {
-        shiny::setProgress(1)
-        tops <- shiny::req(top_snps_tbl())
-        gene_exons(tops, project_df())
-      })
-    })
-    
     ## Shiny Modules
+    snp_list <- snpListServer("snp_list", hap_par, win_par,
+                              peak_df, pheno_mx, covar_df, K_chr, project_df)
     ## SNP Association
-    ass_par <- snpGeneServer("snp_gene", input, chr_pos, pheno_names,
-                            snp_scan_obj, snpinfo, top_snps_tbl, 
-                            gene_exon_tbl, project_df, snp_action)
+    ass_par <- snpGeneServer("snp_gene", snp_list$snp_par, snp_list$chr_pos, snp_list$pheno_names,
+                             snp_list$snp_scan_obj, snp_list$snpinfo, snp_list$top_snps_tbl, 
+                             snp_list$gene_exon_tbl, project_df, snp_list$snp_action)
     ## Allele Patterns
-    pat_par <- snpPatternServer("snp_pattern", input, chr_pos, pheno_names,
-                               snp_scan_obj, snpinfo, top_snps_tbl, 
-                               gene_exon_tbl, allele_info, snp_action)
-    
-    # Scan Window slider
-    output$scan_window_input <- shiny::renderUI({
-      shiny::req(pheno_names())
-      rng <- round(shiny::req(win_par$peak_Mbp) + 
-                     c(-1,1) * shiny::req(win_par$window_Mbp), 
-                   1)
-      selected <- select_range(input$scan_window, rng)
-      
-      shiny::sliderInput(ns("scan_window"), NULL, rng[1], rng[2],
-                         selected, step=.1)
-    })
-    
-    ## Select phenotype for plots.
-    output$pheno_name_input <- shiny::renderUI({
-      shiny::req(pheno_names())
-      shiny::selectInput(ns("pheno_name"), NULL,
-                         choices = shiny::req(pheno_names()),
-                         selected = input$pheno_name)
-    })
+    pat_par <- snpPatternServer("snp_pattern", snp_list, allele_info)
     
     ## Button Options.
     output$phe_choice <- shiny::renderUI({
@@ -199,7 +111,7 @@ snpSetupServer <- function(id, hap_par, win_par,
                }
              })
       if(pheno_choice) {
-        shiny::uiOutput(ns("pheno_name_input"))
+        snpListUI(ns("snp_list")) # pheno_name
       }
     })
     output$win_choice <- shiny::renderUI({
@@ -219,7 +131,7 @@ snpSetupServer <- function(id, hap_par, win_par,
                }
              })
       if(win_choice) {
-        shiny::uiOutput(ns("scan_window_input"))
+        snpListInput(ns("snp_list")) # scan_window
       }
     })
     
@@ -230,7 +142,7 @@ snpSetupServer <- function(id, hap_par, win_par,
     })
     output$snp_input <- shiny::renderUI({
       switch(shiny::req(hap_par$button),
-             "SNP Association" = snpGeneInput(ns("snp_gene")),
+             "SNP Association" = snpGeneInput(ns("snp_gene")),       # button, snp_check
              "Allele Pattern"  = snpPatternInput(ns("snp_pattern")))
     })
     output$snp_output <- shiny::renderUI({
@@ -247,13 +159,14 @@ snpSetupServer <- function(id, hap_par, win_par,
     })
     
     patterns <- shiny::reactive({
-      if(shiny::isTruthy(snp_action()) && shiny::isTruthy(top_snps_tbl())) {
+      if(shiny::isTruthy(snp_list$snp_action()) &&
+         shiny::isTruthy(snp_list$top_snps_tbl())) {
         dplyr::arrange(
           dplyr::mutate(
             dplyr::filter(
-              summary(top_snps_tbl()), 
+              summary(snp_list$top_snps_tbl()), 
               .data$max_lod >= 3), 
-            contrast = snp_action()), 
+            contrast = snp_list$snp_action()), 
           dplyr::desc(.data$max_lod))
       } else {
         NULL
@@ -273,7 +186,7 @@ snpSetupInput <- function(id) {
   shiny::tagList(
     shiny::uiOutput(ns("title")),
     shiny::uiOutput(ns("snp_input")),
-    shiny::uiOutput(ns("minLOD_input")),
+    snpListInput2(ns("snp_list")),            # minLOD
     shiny::uiOutput(ns("phe_choice")),
     shiny::uiOutput(ns("win_choice")),
     shiny::uiOutput(ns("download_csv_plot")))

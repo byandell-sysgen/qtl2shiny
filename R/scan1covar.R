@@ -24,7 +24,7 @@ scan1covar <- function(pheno_mx, covar_df, genoprobs, kinship, peaks_df,
             paste(colnames(pheno_mx)[is.na(phenos)], collapse = ", "))
   }
   if(all(is.na(phenos))) return(NULL)
-  pheno_mx <- pheno_mx[, !is.na(phenos)]
+  pheno_mx <- pheno_mx[, !is.na(phenos), drop = FALSE]
   
   # Check for multiple addcovars or intcovars.
   addcovar <- covar_model_matrix(peaks_df$addcovar, covar_df)

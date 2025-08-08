@@ -33,7 +33,7 @@ snpGeneServer <- function(id, snp_par, chr_pos, pheno_names,
     
     output$snp_check <- shiny::renderUI({
       switch(shiny::req(input$button),
-             Genes   = geneRegionInput(ns("gene_region")))
+             Genes   = geneRegionInput(ns("gene_region"))) # SNP
     })
     output$snp_input <- shiny::renderUI({
       switch(shiny::req(input$button),

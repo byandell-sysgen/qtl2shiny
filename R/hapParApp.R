@@ -58,13 +58,13 @@ hapParServer <- function(id) {
 #' @rdname hapParApp
 hapParInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("sex_type_input"))
+  shiny::uiOutput(ns("sex_type_input")) # sex_type
 }
 #' @export
 #' @rdname hapParApp
 hapParUI <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("button_input"))
+  shiny::uiOutput(ns("button_input"))   # button
 }
 #' @export
 #' @rdname hapParApp

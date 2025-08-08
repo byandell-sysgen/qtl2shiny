@@ -21,7 +21,7 @@ setParApp <- function() {
     title =  "Test Setup Parameters",
     sidebar = bslib::sidebar(
       projectUI("project"),
-      setParInput("set_par")),
+      setParInput("set_par")), # class
     setParOutput("set_par")
   )
   server <- function(input, output, session) {
@@ -57,7 +57,7 @@ setParServer <- function(id, project_df) {
 #' @rdname setParApp
 setParInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("class_input"))
+  shiny::uiOutput(ns("class_input")) # class
 }
 #' @export
 #' @rdname setParApp
