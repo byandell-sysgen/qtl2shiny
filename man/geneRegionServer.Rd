@@ -7,15 +7,7 @@
 \alias{geneRegionOutput}
 \title{Shiny Genes in SNP Region module}
 \usage{
-geneRegionServer(
-  id,
-  snp_par,
-  top_snps_tbl,
-  project_df,
-  snp_action = shiny::reactive({
-     "basic"
- })
-)
+geneRegionServer(id, snp_list, project_df)
 
 geneRegionInput(id)
 
@@ -26,7 +18,7 @@ geneRegionOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{snp_par, top_snps_tbl, project_df, snp_action}{reactive arguments}
+\item{snp_list, project_df}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

@@ -3,7 +3,7 @@
 #' Shiny module for scan1 analysis and plots, with interfaces \code{geneRegionInput}, \code{geneRegionUI} and  \code{geneRegionOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param snp_par,top_snps_tbl,project_df,snp_action reactive arguments
+#' @param snp_list,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -18,16 +18,15 @@
 #'             renderUI req setProgress tagList uiOutput withProgress
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
-geneRegionServer <- function(id, snp_par, top_snps_tbl, project_df,
-                            snp_action = shiny::reactive({"basic"})) {
+geneRegionServer <- function(id, snp_list, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     rng <- shiny::reactive({
-      range(shiny::req(top_snps_tbl())$pos)
+      range(shiny::req(snp_list$top_snps_tbl())$pos)
     })
     chr_id <- shiny::reactive({
-      unique(top_snps_tbl()$chr)[1]
+      unique(snp_list$top_snps_tbl()$chr)[1]
     })
     gene_region_tbl <- shiny::reactive({
       wrng <- rng()
@@ -47,7 +46,7 @@ geneRegionServer <- function(id, snp_par, top_snps_tbl, project_df,
     })
     chr_pos <- shiny::reactive({
       chr <- shiny::req(chr_id())
-      scan_w <- shiny::req(snp_par$scan_window)
+      scan_w <- shiny::req(snp_list$snp_par$scan_window)
       scan_w <- round(scan_w, 2)
       paste(chr, scan_w[1], scan_w[2], sep = "_")
     })
@@ -56,33 +55,36 @@ geneRegionServer <- function(id, snp_par, top_snps_tbl, project_df,
       shiny::checkboxInput(ns("SNP"), "Add SNPs?", input$SNP)
     })
     output$gene_plot <- shiny::renderPlot({
-      shiny::req(gene_region_tbl(), top_snps_tbl())
-      wrng <- shiny::req(snp_par$scan_window)
-      phename <- shiny::req(snp_par$pheno_name)
+      shiny::req(gene_region_tbl(), snp_list$top_snps_tbl())
+      wrng <- shiny::req(snp_list$snp_par$scan_window)
+      phename <- shiny::req(snp_list$snp_par$pheno_name)
       use_snp <- shiny::isTruthy(input$SNP)
-      plot_gene_region(phename, gene_region_tbl(), top_snps_tbl(), 
-                       wrng, use_snp, snp_action())
+      plot_gene_region(phename, gene_region_tbl(), snp_list$top_snps_tbl(), 
+                       wrng, use_snp, snp_list$snp_action())
     })
     output$downloadData <- shiny::downloadHandler(
       filename = function() {
-        file.path(paste0("gene_region_", chr_pos_all(), "_", snp_action(), ".csv")) },
+        file.path(paste0("gene_region_", chr_pos_all(), "_",
+                         snp_list$snp_action(), ".csv")) },
       content = function(file) {
         utils::write.csv(shiny::req(gene_region_tbl()), file)
       }
     )
     output$downloadPlot <- shiny::downloadHandler(
       filename = function() {
-        file.path(paste0("gene_region_", chr_pos(), "_", snp_action(), ".pdf")) },
+        file.path(paste0("gene_region_", chr_pos(), "_",
+                         snp_list$snp_action(), ".pdf")) },
       content = function(file) {
-        shiny::req(gene_region_tbl(), top_snps_tbl())
-        wrng <- shiny::req(snp_par$scan_window)
-        phename <- shiny::req(snp_par$pheno_name)
+        shiny::req(gene_region_tbl(), snp_list$top_snps_tbl())
+        wrng <- shiny::req(snp_list$snp_par$scan_window)
+        phename <- shiny::req(snp_list$snp_par$pheno_name)
         use_snp <- shiny::isTruthy(input$SNP)
-        pheno_names <- unique(shiny::req(top_snps_tbl())$pheno)
+        pheno_names <- unique(shiny::req(snp_list$top_snps_tbl())$pheno)
         grDevices::pdf(file, width = 9)
         for(pheno in pheno_names)
-          print(plot_gene_region(pheno, gene_region_tbl(), top_snps_tbl(), 
-                                 wrng, use_snp, snp_action()))
+          print(plot_gene_region(pheno, gene_region_tbl(), 
+                                 snp_list$top_snps_tbl(), 
+                                 wrng, use_snp, snp_list$snp_action()))
         grDevices::dev.off()
       }
     )

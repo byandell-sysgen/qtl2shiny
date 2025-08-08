@@ -7,18 +7,7 @@
 \alias{snpFeatureOutput}
 \title{Shiny SNP Features in SNP Region module}
 \usage{
-snpFeatureServer(
-  id,
-  snp_par,
-  chr_pos,
-  snp_scan_obj,
-  snpinfo,
-  top_snps_tbl,
-  gene_exon_tbl,
-  snp_action = shiny::reactive({
-     "basic"
- })
-)
+snpFeatureServer(id, snp_list)
 
 snpFeatureInput(id)
 
@@ -29,7 +18,7 @@ snpFeatureOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{snp_par, chr_pos, snp_scan_obj, top_snps_tbl, snpinfo, gene_exon_tbl, snp_action}{reactive arguments}
+\item{snp_list}{reactive arguments}
 }
 \description{
 Shiny module for scan1 analysis and plots, with interfaces \code{snpFeatureInput}, \code{snpFeatureUI} and  \code{snpFeatureOutput}.

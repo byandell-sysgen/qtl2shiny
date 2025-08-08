@@ -3,7 +3,7 @@
 #' Shiny module for scan1 analysis and plots, with interfaces \code{snpFeatureInput}, \code{snpFeatureUI} and  \code{snpFeatureOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param snp_par,chr_pos,snp_scan_obj,top_snps_tbl,snpinfo,gene_exon_tbl,snp_action reactive arguments
+#' @param snp_list reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -16,20 +16,19 @@
 #'             setProgress tagList uiOutput withProgress
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf   
-snpFeatureServer <- function(id, snp_par, chr_pos, snp_scan_obj, snpinfo,
-                            top_snps_tbl, gene_exon_tbl, 
-                            snp_action = shiny::reactive({"basic"})) {
+snpFeatureServer <- function(id, snp_list) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     top_feature <- shiny::reactive({
-      shiny::req(top_snps_tbl(), snp_scan_obj(), snpinfo(), gene_exon_tbl())
+      shiny::req(snp_list$top_snps_tbl(), snp_list$snp_scan_obj(),
+                 snp_list$snpinfo(), snp_list$gene_exon_tbl())
       shiny::withProgress(message = 'Merging gene info ...', value = 0,
                           {
                             shiny::setProgress(1)
-                            topSNPs(top_snps_tbl(), snpinfo(),
-                                    snp_scan_obj(), gene_exon_tbl(),
-                                    snp_par$pheno_name)
+                            topSNPs(snp_list$top_snps_tbl(), snp_list$snpinfo(),
+                                    snp_list$snp_scan_obj(), snp_list$gene_exon_tbl(),
+                                    snp_list$snp_par$pheno_name)
                           })
     })
     output$feature_cons_table <- DT::renderDataTable({
@@ -39,14 +38,14 @@ snpFeatureServer <- function(id, snp_par, chr_pos, snp_scan_obj, snpinfo,
     output$feature_pattern_table <- DT::renderDataTable({
       summary(top_feature(), "pattern")
     }, options = list(scrollX = TRUE, paging = FALSE, searching=FALSE))
-    phename <- shiny::reactive({dimnames(snp_scan_obj())[[2]]})
+    phename <- shiny::reactive({dimnames(snp_list$snp_scan_obj())[[2]]})
     output$feature_pattern_plot <- shiny::renderPlot({
-      shiny::req(top_feature(), snp_par$pheno_name)
-      ggplot2::autoplot(top_feature(), snp_par$pheno_name, "consequence")
+      shiny::req(top_feature(), snp_list$snp_par$pheno_name)
+      ggplot2::autoplot(top_feature(), snp_list$snp_par$pheno_name, "consequence")
     })
     output$feature_cons_plot <- shiny::renderPlot({
-      shiny::req(top_feature(), snp_par$pheno_name)
-      ggplot2::autoplot(top_feature(), snp_par$pheno_name, "pattern")
+      shiny::req(top_feature(), snp_list$snp_par$pheno_name)
+      ggplot2::autoplot(top_feature(), snp_list$snp_par$pheno_name, "pattern")
     })
     output$by_choice_input <- shiny::renderUI({
       switch(input$by_choice,
@@ -65,7 +64,7 @@ snpFeatureServer <- function(id, snp_par, chr_pos, snp_scan_obj, snpinfo,
     ## Downloads.
     output$downloadData <- shiny::downloadHandler(
       filename = function() {
-        file.path(paste0("top_feature_", chr_pos(), "_", snp_action(), ".csv")) },
+        file.path(paste0("top_feature_", snp_list$chr_pos(), "_", snp_list$snp_action(), ".csv")) },
       content = function(file) {
         utils::write.csv(shiny::req(top_feature()), file)
       }
@@ -73,7 +72,7 @@ snpFeatureServer <- function(id, snp_par, chr_pos, snp_scan_obj, snpinfo,
     ## This does not work as items below do not exist.
     output$downloadPlot <- shiny::downloadHandler(
       filename = function() {
-        file.path(paste0("top_feature_", chr_pos(), "_", snp_action(), ".pdf")) },
+        file.path(paste0("top_feature_", snp_list$chr_pos(), "_", snp_list$snp_action(), ".pdf")) },
       content = function(file) {
         shiny::req(top_feature())
         grDevices::pdf(file, width = 9)

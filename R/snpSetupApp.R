@@ -89,9 +89,7 @@ snpSetupServer <- function(id, hap_par, win_par,
     snp_list <- snpListServer("snp_list", hap_par, win_par,
                               peak_df, pheno_mx, covar_df, K_chr, project_df)
     ## SNP Association
-    ass_par <- snpGeneServer("snp_gene", snp_list$snp_par, snp_list$chr_pos, snp_list$pheno_names,
-                             snp_list$snp_scan_obj, snp_list$snpinfo, snp_list$top_snps_tbl, 
-                             snp_list$gene_exon_tbl, project_df, snp_list$snp_action)
+    ass_par <- snpGeneServer("snp_gene", snp_list, project_df)
     ## Allele Patterns
     pat_par <- snpPatternServer("snp_pattern", snp_list, allele_info)
     

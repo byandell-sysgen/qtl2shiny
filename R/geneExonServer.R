@@ -3,7 +3,7 @@
 #' Shiny module for scan1 analysis and plots, with interfaces \code{geneExonInput}, \code{geneExonUI} and  \code{geneExonOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param snp_par,chr_pos,top_snps_tbl,gene_exon_tbl,snp_action reactive arguments
+#' @param snp_list reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -20,20 +20,19 @@
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
-geneExonServer <- function(id, snp_par, chr_pos, top_snps_tbl, gene_exon_tbl,
-                          snp_action = shiny::reactive({"basic"})) {
+geneExonServer <- function(id, snp_list) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     pheno_names <- shiny::reactive({
-      sort(unique(shiny::req(top_snps_tbl()$pheno)))
+      sort(unique(shiny::req(snp_list$top_snps_tbl()$pheno)))
     })
     summary_gene_exon <- shiny::reactive({
-      summary(shiny::req(gene_exon_tbl()),
-              top_snps_tbl = shiny::req(top_snps_tbl()))
+      summary(shiny::req(snp_list$gene_exon_tbl()),
+              top_snps_tbl = shiny::req(snp_list$top_snps_tbl()))
     })
     gene_names <- shiny::reactive({
-      pheno_name <- shiny::req(snp_par$pheno_name)
+      pheno_name <- shiny::req(snp_list$snp_par$pheno_name)
       gene_in <- summary_gene_exon()
       if(nrow(gene_in)) {
         if(pheno_name %in% names(gene_in))
@@ -48,10 +47,10 @@ geneExonServer <- function(id, snp_par, chr_pos, top_snps_tbl, gene_exon_tbl,
         NULL
     })
     gene_exon_pheno <- shiny::reactive({
-      pheno_name <- shiny::req(snp_par$pheno_name)
+      pheno_name <- shiny::req(snp_list$snp_par$pheno_name)
       gene_in <- gene_names()
       if(length(gene_in)) {
-        subset(gene_exon_tbl(), gene_in)
+        subset(snp_list$gene_exon_tbl(), gene_in)
       } else {
         NULL
       }
@@ -88,14 +87,16 @@ geneExonServer <- function(id, snp_par, chr_pos, top_snps_tbl, gene_exon_tbl,
       if(is.null(input$gene_name)) {
         plot_null()
       } else {
-        shiny::req(top_snps_tbl(), gene_exon_tbl(), gene_names())
+        shiny::req(snp_list$top_snps_tbl(), snp_list$gene_exon_tbl(),
+                   gene_names())
         gene_name <- shiny::req(input$gene_name)
-        pheno_name <- shiny::req(snp_par$pheno_name)
+        pheno_name <- shiny::req(snp_list$snp_par$pheno_name)
         shiny::withProgress(message = 'Gene Exon Plot ...', value = 0, {
           shiny::setProgress(1)
           plot_gene_exons(gene_exon_pheno(), 
-                          dplyr::filter(top_snps_tbl(), .data$pheno == pheno_name),
-                          gene_name, paste(pheno_name, snp_action()))
+                          dplyr::filter(snp_list$top_snps_tbl(),
+                                        .data$pheno == pheno_name),
+                          gene_name, paste(pheno_name, snp_list$snp_action()))
         })
       }
     })
@@ -114,18 +115,21 @@ geneExonServer <- function(id, snp_par, chr_pos, top_snps_tbl, gene_exon_tbl,
     ## Downloads.
     output$downloadData <- shiny::downloadHandler(
       filename = function() {
-        file.path(paste0("gene_exon_", chr_pos(), "_", snp_action(), ".csv")) },
+        file.path(paste0("gene_exon_", snp_list$chr_pos(), "_",
+                         snp_list$snp_action(), ".csv")) },
       content = function(file) {
         utils::write.csv(shiny::req(summary_gene_exon()), file)
       }
     )
     output$downloadPlot <- shiny::downloadHandler(
       filename = function() {
-        file.path(paste0("gene_exon_", chr_pos(), "_", snp_action(), ".pdf")) },
+        file.path(paste0("gene_exon_", snp_list$chr_pos(), "_",
+                         snp_list$snp_action(), ".pdf")) },
       content = function(file) {
         gene_exon <- shiny::req(gene_exon_pheno())
-        pheno_name <- shiny::req(snp_par$pheno_name)
-        top_snps <- dplyr::filter(shiny::req(top_snps_tbl()), .data$pheno == pheno_name)
+        pheno_name <- shiny::req(snp_list$snp_par$pheno_name)
+        top_snps <- dplyr::filter(shiny::req(snp_list$top_snps_tbl()),
+                                  .data$pheno == pheno_name)
         grDevices::pdf(file, width = 9)
         for(gene_name in shiny::req(gene_names())) {
           print(plot_gene_exons(gene_exon, top_snps,

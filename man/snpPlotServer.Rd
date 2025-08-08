@@ -4,19 +4,9 @@
 \alias{snpPlotServer}
 \alias{snpPlotUI}
 \alias{snpPlotOutput}
-\title{Shiny scan1 SNP analysis and plot module}
+\title{Shiny SNP plot module}
 \usage{
-snpPlotServer(
-  id,
-  snp_par,
-  chr_pos,
-  pheno_names,
-  snp_scan_obj,
-  snpinfo,
-  snp_action = shiny::reactive({
-     "basic"
- })
-)
+snpPlotServer(id, snp_list)
 
 snpPlotUI(id)
 
@@ -25,10 +15,10 @@ snpPlotOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{snp_par, chr_pos, pheno_names, snp_scan_obj, snpinfo, snp_action}{reactive arguments}
+\item{snp_list}{reactive arguments}
 }
 \description{
-Shiny module for scan1 analysis and plots, with interfaces \code{snpPlotUI} and  \code{snpPlotOutput}.
+Shiny SNP plot module
 }
 \author{
 Brian S Yandell, \email{brian.yandell@wisc.edu}

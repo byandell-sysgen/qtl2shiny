@@ -7,16 +7,7 @@
 \alias{geneExonOutput}
 \title{Shiny Genes and Exons with nearby SNPs module}
 \usage{
-geneExonServer(
-  id,
-  snp_par,
-  chr_pos,
-  top_snps_tbl,
-  gene_exon_tbl,
-  snp_action = shiny::reactive({
-     "basic"
- })
-)
+geneExonServer(id, snp_list)
 
 geneExonInput(id)
 
@@ -27,7 +18,7 @@ geneExonOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{snp_par, chr_pos, top_snps_tbl, gene_exon_tbl, snp_action}{reactive arguments}
+\item{snp_list}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

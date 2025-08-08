@@ -89,10 +89,7 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     ns <- session$ns
     
     ## Shiny Module
-    snpFeatureServer("top_feature", snp_list$snp_par, snp_list$chr_pos,
-                     snp_list$snp_scan_obj, snp_list$snpinfo,
-                     snp_list$top_snps_tbl, snp_list$gene_exon_tbl,
-                     snp_list$snp_action)
+    snpFeatureServer("top_feature", snp_list)
     
     sum_top_pat <- shiny::reactive({
       summary(shiny::req(snp_list$top_snps_tbl()))

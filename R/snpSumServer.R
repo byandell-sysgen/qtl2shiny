@@ -3,7 +3,7 @@
 #' Shiny module for SNP summary, with interfaces \code{shinySNPInput}, \code{shinySNPUI} and  \code{shinySNPOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param chr_pos,top_snps_tbl,project_df,snp_action reactive arguments
+#' @param snp_list,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -20,14 +20,13 @@
 #' @importFrom utils write.csv
 #' @importFrom rlang .data
 #' 
-snpSumServer <- function(id, chr_pos, top_snps_tbl, project_df,
-                        snp_action = shiny::reactive({"basic"})) {
+snpSumServer <- function(id, snp_list, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     best_snps <- shiny::reactive({
-      shiny::req(top_snps_tbl())
-      summary(top_snps_tbl(),"best")
+      shiny::req(snp_list$top_snps_tbl())
+      summary(snp_list$top_snps_tbl(),"best")
     })
     best_href <- shiny::reactive({
       best <- shiny::req(best_snps())
@@ -39,11 +38,11 @@ snpSumServer <- function(id, chr_pos, top_snps_tbl, project_df,
     })
     
     output$top_snps_tbl <- DT::renderDataTable({
-      shiny::req(top_snps_tbl())
+      shiny::req(snp_list$top_snps_tbl())
       shiny::withProgress(message = "Top SNP Range ...", value = 0,
                           {
                             shiny::setProgress(1)
-                            summary(top_snps_tbl())
+                            summary(snp_list$top_snps_tbl())
                           })
     }, escape = FALSE,
     options = list(scrollX = TRUE, pageLength = 5))
@@ -56,20 +55,19 @@ snpSumServer <- function(id, chr_pos, top_snps_tbl, project_df,
     }, escape = FALSE,
     options = list(scrollX = TRUE, pageLength = 5))
     output$top_indels <- DT::renderDataTable({
-      shiny::withProgress(message = "Top InDels ...", value = 0,
-                          {
-                            shiny::setProgress(1)
-                            # This might change from .data$type to .data$variant_type someday
-                            dplyr::filter(shiny::req(best_href()), .data$type != "SNP")
-                          })
+      shiny::withProgress(message = "Top InDels ...", value = 0, {
+        shiny::setProgress(1)
+        # This might change from .data$type to .data$variant_type someday
+        dplyr::filter(shiny::req(best_href()), .data$type != "SNP")
+      })
     }, escape = FALSE,
     options = list(scrollX = TRUE, pageLength = 5))
     output$top_snps_peak <- DT::renderDataTable({
-      shiny::req(top_snps_tbl())
+      shiny::req(snp_list$top_snps_tbl())
       shiny::withProgress(message = "Top SNP Peaks ...", value = 0,
                           {
                             shiny::setProgress(1)
-                            summary(top_snps_tbl(),"peak")
+                            summary(snp_list$top_snps_tbl(),"peak")
                           })
     }, escape = FALSE,
     options = list(scrollX = TRUE, pageLength = 5))
@@ -84,7 +82,8 @@ snpSumServer <- function(id, chr_pos, top_snps_tbl, project_df,
     ## Downloads.
     output$downloadData <- shiny::downloadHandler(
       filename = function() {
-        file.path(paste0("top_snps_", chr_pos(), "_", snp_action(), ".csv")) },
+        file.path(paste0("top_snps_", snp_list$chr_pos(), "_",
+                         snp_list$snp_action(), ".csv")) },
       content = function(file) {
         utils::write.csv(best_http(), file)
       }
@@ -96,7 +95,8 @@ snpSumServer <- function(id, chr_pos, top_snps_tbl, project_df,
 snpSumInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::selectInput(ns("snp_sum"), "Summary", c("best","indels","peaks","range"))
+    shiny::selectInput(ns("snp_sum"), "Summary",
+                       c("best","indels","peaks","range"))
   )
 }
 #' @export
