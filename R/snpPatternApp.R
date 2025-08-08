@@ -1,6 +1,4 @@
-#' Shiny top SNP analysis and plot module
-#'
-#' Shiny module for top SNP analysis and plots, with interfaces \code{snpPatternInput}, \code{snpPatternUI} and  \code{snpPatternOutput}.
+#' Shiny SNP Pattern App
 #'
 #' @param id identifier for shiny reactive
 #' @param snp_par,chr_pos,pheno_names,snp_scan_obj,snpinfo,top_snps_tbl,gene_exon_tbl,allele_info,snp_action reactive arguments
@@ -21,6 +19,69 @@
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
+snpPatternApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_sidebar(
+    title =  "Test SNP Setup",
+    sidebar = bslib::sidebar(
+      projectUI("project"),
+      projectUI("project"),
+      setParInput("set_par"),
+      setupInput("setup"),
+      setupUI("setup"),
+      hapParUI("hap_par"),
+      hapParInput("hap_par"),
+      snpSetupInput("snp_setup")),
+    bslib::card(snpSetupUI("snp_setup")),
+    bslib::card(snpSetupOutput("snp_setup"))
+  )
+  server <- function(input, output, session) {
+    project_df <- projectServer("project", projects_df)
+    set_par <- setParServer("set_par", project_df)
+    
+    pmap_obj <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "pmap")
+    })
+    peak_df <- shiny::reactive({
+      shiny::req(project_df(), set_par$class)
+      read_project(project_df(), "peaks", class = set_par$class)
+    })
+    
+    # set_list returns pheno_names(), win_par.
+    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, project_df)
+    
+    pheno_mx <- shiny::reactive({
+      shiny::req(project_df(), set_par$class)
+      pheno_names <- shiny::req(set_list$pheno_names())
+      read_project(project_df(), "pheno", class = set_par$class,
+                   columns = pheno_names)
+    })
+    covar_df <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "covar")
+    })
+    K_chr <- shiny::reactive({
+      shiny::req(project_df())
+      chr_id <- shiny::req(set_list$win_par$chr_id)
+      read_project(project_df(), "kinship")[chr_id]
+    })
+    ## Allele names.
+    allele_info <- shiny::reactive({
+      shiny::req(project_df())
+      read_project(project_df(), "allele_info")
+    })
+    
+    hap_par <- hapParServer("hap_par")
+    probs_obj <- probsServer("probs", set_list$win_par, project_df)
+    # ** Allele Pattern snpPattern not working. **
+    snpPatternServer("snp_pattern", snp_par, chr_pos, pheno_names, snp_scan_obj,
+                     snpinfo, top_snps_tbl, gene_exon_tbl, allele_info)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname snpPatternApp
 snpPatternServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
                             snpinfo, top_snps_tbl, gene_exon_tbl, allele_info, 
                             snp_action = shiny::reactive({"basic"})) {
@@ -250,7 +311,7 @@ snpPatternServer <- function(id, snp_par, chr_pos, pheno_names, snp_scan_obj,
   })
 }
 #' @export
-#' @rdname snpPatternServer
+#' @rdname snpPatternApp
 snpPatternInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -259,13 +320,13 @@ snpPatternInput <- function(id) {
   )
 }
 #' @export
-#' @rdname snpPatternServer
+#' @rdname snpPatternApp
 snpPatternUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("download_csv_plot"))
 }
 #' @export
-#' @rdname snpPatternServer
+#' @rdname snpPatternApp
 snpPatternOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
