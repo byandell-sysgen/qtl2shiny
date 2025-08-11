@@ -113,12 +113,33 @@ read_project <- function(project_df, dataname, columns, rownames = TRUE,
 #' @importFrom stringr str_remove
 project_classes <- function(project_df) {
   classes <- stringr::str_remove(
-    stringr::str_remove(
-      list.files(
-        paste0(rev(project_df), collapse="/"),
-        pattern = "^pheno_.*.rds$"),
-      "^pheno_"),
+    stringr::str_remove(project_phenos(project_df), "^pheno_"),
     ".rds$")
   classes[!(classes %in% c("data","type"))]
+}
+project_phenos <- function(project_df) {
+  list.files(
+    paste0(rev(project_df), collapse="/"),
+    pattern = "^pheno_.*.rds$")
+}
+project_peaks <- function(project_df) {
+  out <- data.frame(filename =
+    list.files(file.path(paste0(rev(project_df), collapse="/"), "peaks")))
+  subjects <- c("all_mice", "HC_mice", "HF_mice", "male_mice", "female_mice")
+  covars <- c("additive", "diet_interactive", "sex_interactive")
+  
+  out <- dplyr::mutate(out,
+    # Remove `project` and file MIME.
+    class = stringr::str_remove(
+      stringr::str_remove(.data$filename,
+                          paste0(project_df$project, "_")),
+      "_peaks.rds$"),
+    subject = stringr::str_extract(.data$class, paste(subjects, collapse ="|")),
+    covar = stringr::str_extract(.data$class, paste(covars, collapse ="|")),
+    class = stringr::str_remove(
+      .data$class,
+      paste0("_", .data$subject, "_", .data$covar)),
+    filename = file.path("peaks", filename))
+  out
 }
 

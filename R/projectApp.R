@@ -12,7 +12,7 @@
 #'
 #' @export
 #' @importFrom shiny isTruthy moduleServer NS renderTable renderUI selectInput
-#'             tableOutput uiOutput
+#'             tableOutput tagList uiOutput
 #' @importFrom dplyr distinct filter
 #' @importFrom rlang .data
 #' @importFrom bslib page
@@ -22,13 +22,10 @@ projectApp <- function() {
   ui <- bslib::page(
     title =  "Test Project",
     projectUI("project"),
-    shiny::tableOutput("table")
+    projectOutput("project")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
-    message("project_df ", 
-            paste(shiny::isolate(names(project_df())), collapse = ", "))
-    output$table <- shiny::renderTable(project_df())
   }
   shiny::shinyApp(ui, server)
 }
@@ -46,8 +43,25 @@ projectServer <- function(id, projects_df) {
       shiny::selectInput(ns("project"), "Project", choices, selected)
     })
     
-    # Return `project_df()`.
-    shiny::reactive({
+    output$project_table <- shiny::renderTable(project_df())
+    output$pheno_table <- shiny::renderTable({
+      data.frame(phenotype_class = project_classes(project_df()),
+                 filename = project_phenos(project_df()))
+    })
+    output$peak_table <- shiny::renderTable({
+      project_peaks(project_df())
+    })
+    output$project_output <- shiny::renderUI({
+      shiny::tagList(
+        shiny::tableOutput(ns("project_table")),
+        shiny::strong("Phenotype Classes"),
+        shiny::tableOutput(ns("pheno_table")),
+        shiny::strong("Peak Phenotype Classes"),
+        shiny::tableOutput(ns("peak_table"))
+      )
+    })
+    
+    project_df <- shiny::reactive({
       project_id <- NULL
       if(shiny::isTruthy(input$project)) {
         project_id <- input$project
@@ -61,6 +75,9 @@ projectServer <- function(id, projects_df) {
           .data$project == project_id),
         .data$project, .keep_all = TRUE)
     })
+    
+    ## Return.
+    project_df
   })
 }
 #' @export
@@ -69,3 +86,10 @@ projectUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("project_input"))
 }
+#' @export
+#' @rdname projectApp
+projectOutput <- function(id) {
+  ns <- shiny::NS(id)
+  shiny::uiOutput(ns("project_output"))
+}
+

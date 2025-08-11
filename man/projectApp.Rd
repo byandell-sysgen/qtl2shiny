@@ -4,6 +4,7 @@
 \alias{projectApp}
 \alias{projectServer}
 \alias{projectUI}
+\alias{projectOutput}
 \title{Shiny Project App}
 \usage{
 projectApp()
@@ -11,6 +12,8 @@ projectApp()
 projectServer(id, projects_df)
 
 projectUI(id)
+
+projectOutput(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}
