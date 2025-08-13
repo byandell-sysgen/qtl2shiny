@@ -2,7 +2,10 @@
 #
 # Plot of density and pairwise scatterplots.
 plot_sex <- function(phe, cov) {
+  if(is.null(phe) | is.null(cov)) return(plot_null())
   phename <- colnames(phe)
+  if(!length(phename)) return(plot_null())
+  if(!length(qtl2::get_common_ids(phe, cov))) return(plot_null("phe-cov mismatch"))
   if(length(phename) > 10) {
     cat(file=stderr(), "\nOnly first 10 phenotypes used\n")
     phename <- phename[seq_len(10)]

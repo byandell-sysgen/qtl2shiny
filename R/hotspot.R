@@ -44,6 +44,8 @@
 #'
 hotspot <- function(map, peak_df, peak_window = 1, minLOD = 5.5,
                     chrs = NULL) {
+  if(is.null(peak_df)) 
+    return(NULL)
   peak_df <- dplyr::filter(peak_df, .data$qtl_lod >= minLOD)
   if(!is.null(chrs))
     peak_df <- dplyr::filter(peak_df, .data$qtl_chr %in% chrs)
@@ -132,7 +134,7 @@ subset.hotspot <- function(x, chr = NULL, nonzero = NULL, ...) {
   # drop chr with all zeroes
   if(!is.null(nonzero)) {
     # Ignore if `nonzero` does not match a column of `x$scan`.
-    if(!(nonzero %in% names(x$scan))) return(x)
+    if(!all(nonzero %in% colnames(x$scan))) return(x)
     cts <- apply(x$scan[, nonzero, drop = FALSE], 1, sum)
     chrs <- unlist(tapply(cts,
                           ordered(rep(names(x$map), sapply(x$map, length)),

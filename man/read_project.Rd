@@ -7,11 +7,11 @@
 read_project(
   project_df,
   dataname,
-  columns,
+  columns = NULL,
   rownames = TRUE,
+  ...,
   filetype,
-  class = NULL,
-  ...
+  legacy = FALSE
 )
 }
 \arguments{
@@ -23,11 +23,11 @@ read_project(
 
 \item{rownames}{row names to filter from data object (all if \code{TRUE})}
 
+\item{...}{additional parameters}
+
 \item{filetype}{type of file (one of c("fst","rds","csv"))}
 
-\item{class}{name of subdirectory if not `NULL`}
-
-\item{...}{additional parameters}
+\item{legacy}{look in `legacy` folder for old data if `TRUE`}
 }
 \value{
 data frame with \code{columns} and \code{rownames}.

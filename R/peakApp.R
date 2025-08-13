@@ -34,7 +34,11 @@ peakApp <- function() {
     
     peak_df <- shiny::reactive({
       class <- shiny::req(set_par$class)
-      read_project(shiny::req(project_df()), "peaks", class = class)
+      subject_covar <- set_par$subject_covar
+      if(!shiny::isTruthy(subject_covar)) subject_covar <- NULL
+      out <- read_project(shiny::req(project_df()), "peaks", class = class,
+                   subject_covar = subject_covar)
+      out
     })
     pmap_obj <- shiny::reactive({
       shiny::req(project_df())

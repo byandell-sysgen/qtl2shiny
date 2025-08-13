@@ -98,7 +98,7 @@ phenoServer <- function(id, set_par, win_par, peak_df, project_df) {
     })
     # Use `sex` column from `covar_df()` for `pheno_plot`.
     covar_df <- shiny::reactive({
-      shiny::req(project_df())
+      shiny::req(project_df(), pheno_mx())
       read_project(project_df(), "covar")
     })
     phenoPlotServer("pheno_plot", pheno_names, pheno_mx, covar_df)

@@ -48,7 +48,7 @@ projectServer <- function(id, projects_df) {
       data.frame(phenotype_class = project_classes(project_df()),
                  filename = project_phenos(project_df()))
     })
-    output$peak_table <- shiny::renderTable({
+    output$peak_table <- DT::renderDataTable({
       project_peaks(project_df())
     })
     output$project_output <- shiny::renderUI({
@@ -57,7 +57,7 @@ projectServer <- function(id, projects_df) {
         shiny::strong("Phenotype Classes"),
         shiny::tableOutput(ns("pheno_table")),
         shiny::strong("Peak Phenotype Classes"),
-        shiny::tableOutput(ns("peak_table"))
+        DT::dataTableOutput(ns("peak_table"))
       )
     })
     

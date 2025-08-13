@@ -30,11 +30,9 @@ phenoPlotServer <- function(id, pheno_names, phe_mx, cov_df) {
                    pageLength = 5,
                    lengthMenu = list(c(5,10,-1), c(5,10,"all"))))
     output$pheno_plot <- shiny::renderPlot({
-      # If no df, gives blank area.
-      # Better to either do nothing or do plot_null()
-      # use uiOutput and renderUI?
       if(!shiny::isTruthy(pheno_names()))
         return(plot_null("need to\nChoose phenotype"))
+      shiny::req(phe_mx(), cov_df())
       shiny::withProgress(message = 'Pheno Plot ...', value = 0, {
         shiny::setProgress(1)
         plot_sex(phe_mx(), cov_df())

@@ -13,7 +13,7 @@
 #' 
 #' @return object of class \code{\link[qtl2]{scan1}}.
 #' 
-#' @importFrom qtl2 scan1
+#' @importFrom qtl2 get_common_ids scan1
 #' @export
 scan1covar <- function(pheno_mx, covar_df, genoprobs, kinship, peaks_df, 
                        model = "normal", ...) {
