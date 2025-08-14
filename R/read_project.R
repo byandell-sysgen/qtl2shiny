@@ -2,6 +2,7 @@
 #' 
 #' @param project_df table of project information
 #' @param dataname name of data object to read
+#' @param folder folder containing data if not `NULL`
 #' @param columns columns to select from data object
 #' @param rownames row names to filter from data object (all if \code{TRUE})
 #' @param ... additional parameters
@@ -14,7 +15,8 @@
 #' @importFrom qtl2pattern read_fast
 #' @importFrom utils read.csv
 #' @export
-read_project <- function(project_df, dataname, columns = NULL, rownames = TRUE,
+read_project <- function(project_df, dataname, folder = NULL,
+                         columns = NULL, rownames = TRUE,
                          ...,
                          filetype, legacy = FALSE) {
   # Read project data frame or matrix in some file format.
@@ -30,10 +32,9 @@ read_project <- function(project_df, dataname, columns = NULL, rownames = TRUE,
   if(legacy)
     projectpath <- file.path(projectpath, "legacy")
   
-  # Peaks uses `columns` to get file from `peaks` folder.
-  if(!is.null(columns) & dataname == "peaks") {
-    projectpath <- file.path(projectpath, "peaks")
-    dataname <- columns
+  # The `peaks` and `pheno` data are in folders.
+  if(!is.null(folder)) {
+    projectpath <- file.path(projectpath, folder)
   }
   
   # Compare file roots in project path to dataname.

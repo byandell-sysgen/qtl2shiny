@@ -7,6 +7,7 @@
 read_project(
   project_df,
   dataname,
+  folder = NULL,
   columns = NULL,
   rownames = TRUE,
   ...,
@@ -18,6 +19,8 @@ read_project(
 \item{project_df}{table of project information}
 
 \item{dataname}{name of data object to read}
+
+\item{folder}{folder containing data if not `NULL`}
 
 \item{columns}{columns to select from data object}
 

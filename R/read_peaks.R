@@ -12,8 +12,8 @@ read_peaks <- function(project_df, class = NULL, legacy = FALSE, ...) {
   if(length(class) > 1) {
     message("only using first class of ", length(class))
   }
-  class <- peak_class(project_df, class[1], ...)
-  read_project(project_df, "peaks", class, legacy = legacy)
+  dataname <- peak_class(project_df, class[1], ...)
+  read_project(project_df, dataname, "peaks", legacy = legacy)
   ## Here add code for multiple classes
 }
 peak_class <- function(project_df, 

@@ -12,8 +12,9 @@ read_pheno <- function(project_df, class, columns = NULL, legacy = FALSE) {
     message("only using first class of ", length(class))
   }
   # Read phenotype data from project.
-  out <- read_project(project_df, paste0("pheno_", class[1]), columns,
-                             legacy = legacy)
+  dataname <- paste0("pheno_", class[1])
+  out <- read_project(project_df, dataname, "pheno",
+                      columns = columns, legacy = legacy)
   if(!is.null(columns)) {
     if(!all(columns %in% colnames(out))) return(NULL)
     # Pick columns post hoc.
