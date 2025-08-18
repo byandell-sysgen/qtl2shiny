@@ -54,19 +54,19 @@ setParServer <- function(id, project_df) {
           dplyr::filter(project_peaks(project_df()),
                         .data$class %in% input$class),
           subjects, covars),
-        subject_covar)
+        subject_model)
     })
-    output$subject_covar_input <- shiny::renderUI({
+    output$subject_model_input <- shiny::renderUI({
       shiny::req(project_class_df())
-      choices <- project_class_df()$subject_covar
-      if(is.null(selected <- input$subject_covar))
+      choices <- project_class_df()$subject_model
+      if(is.null(selected <- input$subject_model))
         selected <- choices[1]
-      shiny::selectInput(ns("subject_covar"), "Subjects & Model",
+      shiny::selectInput(ns("subject_model"), "Subjects & Model",
         choices = choices, selected = selected, multiple = TRUE)
     })
     shiny::observeEvent(shiny::req(project_class_df()), {
-      choices <- project_class_df()$subject_covar
-      shiny::updateSelectInput(session, "subject_covar",
+      choices <- project_class_df()$subject_model
+      shiny::updateSelectInput(session, "subject_model",
         choices = choices, selected = choices[1])
     })
     
@@ -75,7 +75,7 @@ setParServer <- function(id, project_df) {
         shiny::renderText(paste("phenotype class: ",
                                 paste(input$class, collapse = ", "))),
         shiny::renderText(paste("subjects & model: ",
-                                paste(input$subject_covar, collapse = ", ")))
+                                paste(input$subject_model, collapse = ", ")))
       )
     })
     ## Return.
@@ -88,7 +88,7 @@ setParInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("class_input")),        # class
-    shiny::uiOutput(ns("subject_covar_input")) # subject_covar
+    shiny::uiOutput(ns("subject_model_input")) # subject_model
   )
 }
 #' @export

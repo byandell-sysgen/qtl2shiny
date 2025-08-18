@@ -18,7 +18,7 @@ read_peaks <- function(project_df, class = NULL, legacy = FALSE, ...) {
 }
 peak_class <- function(project_df, 
   class_name = NULL,
-  subject_covar = NULL,
+  subject_model = NULL,
   ...) {
   
   if(is.null(class_name)) {
@@ -31,9 +31,9 @@ peak_class <- function(project_df,
     class_name[match(c("plasma_metabolites_13C", "plasma_metabolites_2H"),
                          class_name, nomatch = 0)] <- "plasma_metabolites"
   
-  if(is.null(subject_covar)) subject_covar <- "all_mice_additive"
+  if(is.null(subject_model)) subject_model <- "all_mice_additive"
 
-  paste(project_df$project, class_name, subject_covar, "peaks", sep = "_")
+  paste(project_df$project, class_name, subject_model, "peaks", sep = "_")
 }
 # deprecated
 read_peak_class <- function(project_df, 

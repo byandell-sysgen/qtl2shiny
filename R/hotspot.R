@@ -145,3 +145,22 @@ subset.hotspot <- function(x, chr = NULL, nonzero = NULL, ...) {
   }
   x
 }
+#' @export
+#' @method cbind hotspot
+#' @rdname hotspot
+cbind.hotspot <- function(..., scannames = colnames(scan)) {
+  objects <- list(...)
+  if(length(objects) <= 1) return(objects[[1]])
+  scan <- objects[[1]]$scan
+  for(i in 2:length(objects)) {
+    scan2 <- objects[[i]]$scan
+    # Sum up the "all" (first) column
+    scan[,1] <- scan[,1] + scan2[,1]
+    # cbind of scan1 objects.
+    scan <- cbind(scan, scan2[,-1, drop = FALSE])
+  }
+  colnames(scan) <- scannames
+  out <- objects[[1]]
+  out$scan <- scan
+  out
+}

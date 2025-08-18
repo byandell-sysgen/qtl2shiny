@@ -10,13 +10,14 @@
 #' @param peaks_df data frame of peaks information
 #' @param model model argument for \code{\link[qtl2]{scan1}}
 #' @param ... additional arguments passed on
+#' @param force force pheno names to be in peaks
 #' 
 #' @return object of class \code{\link[qtl2]{scan1}}.
 #' 
 #' @importFrom qtl2 get_common_ids scan1
 #' @export
 scan1covar <- function(pheno_mx, covar_df, genoprobs, kinship, peaks_df, 
-                       model = "normal", ...) {
+                       model = "normal", ..., force = FALSE) {
   # Match phenotypes between data and peaks.
   phenos <- match(colnames(pheno_mx), peaks_df$phenotype)
   if(any(is.na(phenos))) {
@@ -24,7 +25,8 @@ scan1covar <- function(pheno_mx, covar_df, genoprobs, kinship, peaks_df,
             paste(colnames(pheno_mx)[is.na(phenos)], collapse = ", "))
   }
   if(all(is.na(phenos))) return(NULL)
-  pheno_mx <- pheno_mx[, !is.na(phenos), drop = FALSE]
+  if(force)
+    pheno_mx <- pheno_mx[, !is.na(phenos), drop = FALSE]
   
   # Check for multiple addcovars or intcovars.
   addcovar <- covar_model_matrix(peaks_df$addcovar, covar_df)

@@ -21,8 +21,10 @@ peaks_in_pos <- function(peaks_df, use_pos = TRUE,
           peaks_df,
           dplyr::desc(.data$qtl_lod)),
         .data$phenotype, .data$phenotype_class,
-        .data$qtl_lod, .data$qtl_chr, .data$qtl_pos),
-      phenotype, phenotype_class, qtl_lod, qtl_chr, qtl_pos),
+        .data$qtl_lod, .data$qtl_chr, .data$qtl_pos,
+        .data$addcovar, .data$intcovar),
+      phenotype, phenotype_class, qtl_lod, qtl_chr, qtl_pos,
+      .data$addcovar, .data$intcovar),
     qtl_lod = round(.data$qtl_lod, 1),
     qtl_pos = round(.data$qtl_pos, 2))
 }

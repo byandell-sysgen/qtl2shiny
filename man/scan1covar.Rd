@@ -11,7 +11,8 @@ scan1covar(
   kinship,
   peaks_df,
   model = "normal",
-  ...
+  ...,
+  force = FALSE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ scan1covar(
 \item{model}{model argument for \code{\link[qtl2]{scan1}}}
 
 \item{...}{additional arguments passed on}
+
+\item{force}{force pheno names to be in peaks}
 }
 \value{
 object of class \code{\link[qtl2]{scan1}}.

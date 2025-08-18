@@ -4,6 +4,7 @@
 \alias{hotspot}
 \alias{summary.hotspot}
 \alias{subset.hotspot}
+\alias{cbind.hotspot}
 \title{Hotspots for phenotypes}
 \usage{
 hotspot(map, peak_df, peak_window = 1, minLOD = 5.5, chrs = NULL)
@@ -11,6 +12,8 @@ hotspot(map, peak_df, peak_window = 1, minLOD = 5.5, chrs = NULL)
 \method{summary}{hotspot}(object, ...)
 
 \method{subset}{hotspot}(x, chr = NULL, nonzero = NULL, ...)
+
+\method{cbind}{hotspot}(..., scannames = colnames(scan))
 }
 \arguments{
 \item{map}{list of genetic maps}

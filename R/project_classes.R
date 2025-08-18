@@ -15,6 +15,6 @@ project_classes <- function(project_df) {
 }
 project_phenos <- function(project_df) {
   list.files(
-    paste0(rev(project_df), collapse="/"),
+    file.path(paste0(rev(project_df), collapse="/"), "pheno"),
     pattern = "^pheno_.*.rds$")
 }
