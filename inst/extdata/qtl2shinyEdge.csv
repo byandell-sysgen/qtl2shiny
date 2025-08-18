@@ -4,6 +4,7 @@ server,main,server
 diplo,pairProbs,server
 diplo,pattern,server
 diplo,snpSetup,server
+haplo,hapPar,server
 haplo,mediate,server
 haplo,probs,server
 haplo,scan,server
@@ -15,36 +16,52 @@ dash,project,server
 dash,setup,server
 mediate,triad,server
 pattern,allele,server
-peak,hotspot,server
 pheno,phenoPlot,server
+setup,hotspot,server
 setup,peak,server
 setup,pheno,server
 snpGene,geneExon,server
 snpGene,geneRegion,server
 snpGene,snpPlot,server
 snpGene,snpSum,server
+snpList,snpProbs,server
 snpPattern,snpFeature,server
 snpSetup,snpPattern,server
 snpSetup,snpGene,server
-snpSetup,snpProbs,server
+snpSetup,snpList,server
 ## Results returned by moduleServer calls
 hotspot,hotspot_df,result
 pairProbs,pairprobs_obj,result
+peakRead,peak_df,result
+pheno,pheno_names,result
 probs,probs_obj,result
 project,project_df,result
+setup,set_list,result
+set_list,pheno_names,result
+set_list,win_par,result
+snpList,snp_list,result
+snp_list,chr_pos,result
+snp_list,gene_exon_tbl,result
+snp_list,pheno_names,result
+snp_list,snp_action,result
+snp_list,snp_par,result
+snp_list,snp_scan_obj,result
+snp_list,snpinfo,result
+snp_list,top_snps_tbl,result
 snpProbs,snpprobs_obj,result
 snpSetup,patterns,result
 ## Input parameters from user
-snpGene,ass_par,input
-haplo,job_par,input
+hapPar,hap_par,input
 mediate,med_par,input
+snpGene,ass_par,input
+setPar,set_par,input
 snpPattern,pat_par,input
-setup,set_par,input
 peak,win_par,input
 ## moduleServer arguments
+### allele
 win_par,allele,argument
-phe_mx,allele,argument
-cov_df,allele,argument
+pheno_mx,allele,argument
+covar_df,allele,argument
 probs_obj,allele,argument
 K_chr,allele,argument
 analyses_df,allele,argument
@@ -52,60 +69,63 @@ patterns,allele,argument
 scan_pat,allele,argument
 project_df,allele,argument
 snp_action,allele,argument
+### dash
 project_df,dash,argument
+### diplo
 win_par,diplo,argument
-phe_mx,diplo,argument
-cov_df,diplo,argument
+pheno_mx,diplo,argument
+covar_df,diplo,argument
 K_chr,diplo,argument
 analyses_df,diplo,argument
 project_df,diplo,argument
 allele_info,diplo,argument
-snp_par,geneExon,argument
-chr_pos,geneExon,argument
-top_snps_tbl,geneExon,argument
-gene_exon_tbl,geneExon,argument
-snp_action,geneExon,argument
-snp_par,geneRegion,argument
-top_snps_tbl,geneRegion,argument
+### geneExon
+snp_list,geneExon,argument
+### geneRegion
 project_df,geneRegion,argument
-snp_action,geneRegion,argument
+snp_list,geneRegion,argument
+### haplo
 win_par,haplo,argument
 pmap_obj,haplo,argument
-phe_mx,haplo,argument
-cov_df,haplo,argument
+pheno_mx,haplo,argument
+covar_df,haplo,argument
 K_chr,haplo,argument
 analyses_df,haplo,argument
-covar,haplo,argument
+covar_df,haplo,argument
 analyses_tbl,haplo,argument
 peak,haplo,argument
 project_df,haplo,argument
 allele_info,haplo,argument
-set_par,hotspot,argument
+### hotspot
 peak_df,hotspot,argument
 pmap_obj,hotspot,argument
 project_df,hotspot,argument
+set_par,hotspot,argument
+### main
 projects_df,main,argument
-job_par,mediate,argument
-win_par,mediate,argument
-patterns,mediate,argument
-phe_mx,mediate,argument
-cov_df,mediate,argument
-probs_obj,mediate,argument
-K_chr,mediate,argument
-analyses_df,mediate,argument
-pmap_obj,mediate,argument
-covar,mediate,argument
-analyses_tbl,mediate,argument
-peak,mediate,argument
-project_df,mediate,argument
+### mediate
 allele_info,mediate,argument
+analyses_df,mediate,argument
+analyses_tbl,mediate,argument
+covar_df,mediate,argument
+hap_par,mediate,argument
+K_chr,mediate,argument
+patterns,mediate,argument
+peak_df,mediate,argument
+pheno_mx,mediate,argument
+pmap_obj,mediate,argument
+probs_obj,mediate,argument
+project_df,mediate,argument
+win_par,mediate,argument
+### pairProbs
 win_par,pairProbs,argument
 project_df,pairProbs,argument
-job_par,pattern,argument
+### pattern
+hap_par,pattern,argument
 chr_pos,pattern,argument
 win_par,pattern,argument
-phe_mx,pattern,argument
-cov_df,pattern,argument
+pheno_mx,pattern,argument
+covar_df,pattern,argument
 pairprobs_obj,pattern,argument
 K_chr,pattern,argument
 analyses_df,pattern,argument
@@ -113,90 +133,88 @@ patterns,pattern,argument
 project_df,pattern,argument
 allele_info,pattern,argument
 snp_action,pattern,argument
-set_par,peak,argument
+### peak
+hotspot_df,peak,argument
 peak_df,peak,argument
 pmap_obj,peak,argument
 project_df,peak,argument
+set_par,peak,argument
+### peakRead
+project_df,peakRead,argument
+set_par,peakRead,argument
+### pheno
+peak_df,pheno,argument
+project_df,pheno,argument
 set_par,pheno,argument
 win_par,pheno,argument
-peak_df,pheno,argument
-analyses_tbl,pheno,argument
-covar,pheno,argument
-project_df,pheno,argument
+### phenoPlot
 set_par,phenoPlot,argument
-phe_mx,phenoPlot,argument
-cov_df,phenoPlot,argument
+pheno_mx,phenoPlot,argument
+covar_df,phenoPlot,argument
+### probs
 win_par,probs,argument
 project_df,probs,argument
+### project
 projects_df,project,argument
-job_par,scan,argument
-win_par,scan,argument
-phe_mx,scan,argument
-cov_df,scan,argument
-probs_obj,scan,argument
-K_chr,scan,argument
-analyses_df,scan,argument
-project_df,scan,argument
+### scan
 allele_info,scan,argument
+covar_df,scan,argument
+hap_par,scan,argument
+K_chr,scan,argument
+pheno_mx,scan,argument
+probs_obj,scan,argument
+project_df,scan,argument
+win_par,scan,argument
+### setPar
+project_df,setPar,argument
+### setup
 peak_df,setup,argument
 pmap_obj,setup,argument
-analyses_tbl,setup,argument
-covar,setup,argument
 project_df,setup,argument
-snp_par,snpFeature,argument
-chr_pos,snpFeature,argument
-snp_scan_obj,snpFeature,argument
-snpinfo,snpFeature,argument
-top_snps_tbl,snpFeature,argument
-gene_exon_tbl,snpFeature,argument
-snp_action,snpFeature,argument
-snp_par,snpGene,argument
-chr_pos,snpGene,argument
-pheno_names,snpGene,argument
-snp_scan_obj,snpGene,argument
-snpinfo,snpGene,argument
-top_snps_tbl,snpGene,argument
-gene_exon_tbl,snpGene,argument
+set_par,setup,argument
+### snpFeature
+snp_list,snpFeature,argument
+### snpGene
 project_df,snpGene,argument
-snp_action,snpGene,argument
-snp_par,snpPattern,argument
-chr_pos,snpPattern,argument
-pheno_names,snpPattern,argument
-snp_scan_obj,snpPattern,argument
-snpinfo,snpPattern,argument
-top_snps_tbl,snpPattern,argument
-gene_exon_tbl,snpPattern,argument
+snp_list,snpGene,argument
+### snpList
+covar_df,snpList,argument
+hap_par,snpList,argument
+K_chr,snpList,argument
+peak_df,snpList,argument
+pheno_mx,snpList,argument
+project_df,snpList,argument
+win_par,snpList,argument
+### snpPattern
 allele_info,snpPattern,argument
-snp_action,snpPattern,argument
-snp_par,snpPlot,argument
-chr_pos,snpPlot,argument
-pheno_names,snpPlot,argument
-snp_scan_obj,snpPlot,argument
-snpinfo,snpPlot,argument
-snp_action,snpPlot,argument
+snp_list,snpPattern,argument
+### snpPlot
+snp_list,snpPlot,argument
+### snpProbs
 win_par,snpProbs,argument
 project_df,snpProbs,argument
-job_par,snpSetup,argument
-win_par,snpSetup,argument
-phe_mx,snpSetup,argument
-cov_df,snpSetup,argument
-K_chr,snpSetup,argument
-analyses_df,snpSetup,argument
-project_df,snpSetup,argument
+### snpSetup
 allele_info,snpSetup,argument
+covar_df,snpSetup,argument
+hap_par,snpSetup,argument
+K_chr,snpSetup,argument
+peak_df,snpSetup,argument
+pheno_mx,snpSetup,argument
+project_df,snpSetup,argument
 snp_action,snpSetup,argument
-chr_pos,snpSum,argument
-top_snps_tbl,snpSum,argument
+win_par,snpSetup,argument
+### snpSum
 project_df,snpSum,argument
-snp_action,snpSum,argument
+snp_list,snpSum,argument
+### triad
 med_par,triad,argument
 patterns,triad,argument
 geno_max,triad,argument
 peak_mar,triad,argument
 med_ls,triad,argument
 mediate_obj,triad,argument
-phe_mx,triad,argument
-cov_df,triad,argument
+pheno_mx,triad,argument
+covar_df,triad,argument
 K_chr,triad,argument
 probs_obj,triad,argument
 chr_id,triad,argument

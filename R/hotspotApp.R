@@ -26,19 +26,16 @@ hotspotApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Hotspot",
     sidebar = bslib::sidebar(
-      projectUI("project"),
+      projectUI("project"),     # project
       setParInput("set_par"),
-      hotspotInput("hotspot")),
+      hotspotInput("hotspot")), # chr_ct, minLOD, window_Mbp
     hotspotOutput("hotspot")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
     set_par <- setParServer("set_par", project_df)
-    
-    peak_df <- shiny::reactive({
-      shiny::req(project_df(), set_par$class)
-      read_project(project_df(), "peaks", class = set_par$class)
-    })
+    peak_df <- peakReadServer("peak_df", set_par, project_df)
+
     pmap_obj <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "pmap")
@@ -165,14 +162,14 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
 }
 #' @export
 #' @rdname hotspotApp
-hotspotInput <- function(id) { # Hotspot Info: 
+hotspotInput <- function(id) {                      # chr_ct, minLOD, window_Mbp 
   ns <- shiny::NS(id)
-  shiny::tagList(      # chr_ct, minLOD, window_Mbp
+  shiny::tagList(      
     shiny::strong("Hotspot Info"),
     shiny::fluidRow(
-      shiny::column(4, shiny::uiOutput(ns("chr_ct_input"))),
-      shiny::column(4, shiny::uiOutput(ns("minLOD_input"))),
-      shiny::column(4, shiny::uiOutput(ns("window_Mbp_input")))))
+      shiny::column(4, shiny::uiOutput(ns("chr_ct_input"))),      # chr_ct
+      shiny::column(4, shiny::uiOutput(ns("minLOD_input"))),      # minLOD
+      shiny::column(4, shiny::uiOutput(ns("window_Mbp_input"))))) # window_Mpb
 }
 #' @export
 #' @rdname hotspotApp

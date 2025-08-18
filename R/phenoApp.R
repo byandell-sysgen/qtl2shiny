@@ -19,10 +19,10 @@ phenoApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Pheno",
     sidebar = bslib::sidebar(
-      projectUI("project"),
-      setParInput("set_par"),
+      projectUI("project"),   # project
+      setParInput("set_par"), # class, subject_model 
       phenoInput("pheno"),    # pheno_names
-      peakInput("peak"),
+      winParInput("win_par"), # local, chr_id, peak_Mbp, window_Mbp
       hotspotInput("hotspot") # chr_ct, minLOD, window_Mbp
     ),
     phenoOutput("pheno")
@@ -30,19 +30,16 @@ phenoApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
     set_par <- setParServer("set_par", project_df)
+    peak_df <- peakReadServer("peak_df", set_par, project_df)
     
     pmap_obj <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "pmap")
     })
-    peak_df <- shiny::reactive({
-      shiny::req(project_df(), set_par$class)
-      read_project(project_df(), "peaks", class = set_par$class)
-    })
-    
+
     hotspot_df <- hotspotServer("hotspot", set_par, peak_df, pmap_obj,
                                 project_df)
-    win_par <- peakServer("peak", set_par, peak_df, pmap_obj, hotspot_df,
+    win_par <- winParServer("win_par", set_par, peak_df, pmap_obj, hotspot_df,
                           project_df)
     pheno_names <- phenoServer("pheno", set_par, win_par, peak_df, project_df)
   }

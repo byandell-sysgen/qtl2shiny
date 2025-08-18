@@ -34,16 +34,13 @@ snpListApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
     set_par <- setParServer("set_par", project_df)
+    peak_df <- peakReadServer("peak_df", set_par, project_df)
     
     pmap_obj <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "pmap")
     })
-    peak_df <- shiny::reactive({
-      shiny::req(project_df(), set_par$class)
-      read_project(project_df(), "peaks", class = set_par$class)
-    })
-    
+
     # set_list returns pheno_names(), win_par.
     set_list <- setupServer("setup", set_par, peak_df, pmap_obj, project_df)
     

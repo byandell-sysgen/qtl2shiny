@@ -21,24 +21,21 @@ setupApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Setup",
     sidebar = bslib::sidebar(
-      projectUI("project"),
-      setParInput("set_par"),
-      setupInput("setup"),
-      setupUI("setup")),
+      projectUI("project"),   # project
+      setParInput("set_par"), # class, subject_model
+      setupInput("setup"),    # pheno_names, chr_pos
+      setupUI("setup")),      # radio, local, win_par, chr_ct, minLOD
     shiny::uiOutput("pheno_names"),
     setupOutput("setup")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
     set_par <- setParServer("set_par", project_df)
+    peak_df <- peakReadServer("peak_df", set_par, project_df)
     
     pmap_obj <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "pmap")
-    })
-    peak_df <- shiny::reactive({
-      shiny::req(project_df(), set_par$class)
-      read_project(project_df(), "peaks", class = set_par$class)
     })
 
     set_list <- setupServer("setup", set_par, peak_df, pmap_obj, project_df)
@@ -59,7 +56,7 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
     hotspot_df <- hotspotServer("hotspot", set_par, peak_df, pmap_obj,
                                 project_df)
     ## Locate Peak.
-    win_par <- peakServer("peak", set_par, peak_df, pmap_obj, hotspot_df,
+    win_par <- winParServer("win_par", set_par, peak_df, pmap_obj, hotspot_df,
                           project_df)
 
     chr_pos <- shiny::reactive({
@@ -75,34 +72,27 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
     })
     
     ## Use window as input to phenoServer.
-    pheno_names <- phenoServer("pheno", set_par, win_par, peak_df,
-                               project_df)
+    pheno_names <- phenoServer("pheno", set_par, win_par, peak_df, project_df)
     
     ## Setup input logic.
     output$sidebar_setup <- shiny::renderUI({
       switch(shiny::req(input$radio),
              Phenotypes = shiny::uiOutput(ns("filter")),
-             Region     = peakInput(ns("peak"))) # local, chr_id, peak_Mbp, window_Mbp
+             Region     = winParInput(ns("win_par"))) # local, chr_id, peak_Mbp, window_Mbp
     })
     output$sidebar_hot <- shiny::renderUI({
       switch(shiny::req(input$radio),
              Region     = hotspotInput(ns("hotspot"))) # chr_ct, minLOD, window_Mbp
     })
     output$main_setup <- shiny::renderUI({
-      switch(shiny::req(input$radio),
+      switch(shiny::req(input$radio), # peak_table, hotspot_plot, hotspot_table
              Phenotypes = phenoOutput(ns("pheno")),
-             Region     = shiny::tagList(
-               peakOutput(ns("peak"))#,
-             #  hotspotOutput(ns("hotspot"))
-             )
-       ) # peak_table, hotspot_plot, hotspot_table
+             Region     = winParOutput(ns("win_par")))
     })
     
     output$radio_input <- shiny::renderUI({
       shiny::radioButtons(ns("radio"), NULL,
-                          c("Region", "Phenotypes"),
-                          input$radio,
-                          inline=TRUE)
+                          c("Region", "Phenotypes"), input$radio, inline=TRUE)
     })
     
     ## Return.
@@ -113,16 +103,16 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
 }
 #' @export
 #' @rdname setupApp
-setupInput <- function(id) {
+setupInput <- function(id) {             # pheno_names, chr_pos
   ns <- shiny::NS(id)
   shiny::tagList(
-    phenoInput(ns("pheno")),
-    shiny::uiOutput(ns("chr_pos"))
+    phenoInput(ns("pheno")),             # pheno_names
+    shiny::uiOutput(ns("chr_pos"))       # chr_pos
   )
 }
 #' @export
 #' @rdname setupApp
-setupUI <- function(id) {
+setupUI <- function(id) {                # radio, local, chr_id, peak_Mbp, window_Mbp, chr_ct, minLOD, window_Mbp
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("radio_input")),   # radio

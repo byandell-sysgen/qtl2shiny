@@ -84,7 +84,7 @@ setParServer <- function(id, project_df) {
 }
 #' @export
 #' @rdname setParApp
-setParInput <- function(id) {
+setParInput <- function(id) {                  # class, subject_model
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("class_input")),        # class

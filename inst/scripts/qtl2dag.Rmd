@@ -3,14 +3,14 @@ nodes <-
    readr::read_csv(
      system.file("extdata/qtl2shinyNode.csv", package = "qtl2shiny"),
      comment = "#")
-links <- 
+edges <- 
    readr::read_csv(
      system.file("extdata/qtl2shinyEdge.csv", package = "qtl2shiny"),
      comment = "#")
 ```
 
 ```{r}
-net <- igraph::graph_from_data_frame(d=links, vertices=nodes, directed=TRUE)
+net <- igraph::graph_from_data_frame(d=edges, vertices=nodes, directed=TRUE)
 ```
 
 ```{r}
@@ -28,7 +28,7 @@ dplyr::count(nodes,logic,shiny)
 ```
 
 ```{r}
-dplyr::count(links,assign)
+dplyr::count(edges,assign)
 ```
 
 ```{r}
@@ -36,7 +36,7 @@ net_server <-
   igraph::delete_vertices(
     igraph::delete_edges(
       net,
-      igraph::E(net)[assign != "server"]),
+      igraph::E(net)[!(assign %in% c("server","serverin"))]),
     unclass(igraph::V(net)[logic != "server"]))
 ```
 

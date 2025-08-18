@@ -1,4 +1,4 @@
-#' Shiny Peak App
+#' Shiny Window Parameters App
 #'
 #' Shiny module for peak selection.
 #'
@@ -16,30 +16,24 @@
 #' @importFrom shiny checkboxInput column fluidRow observeEvent moduleServer NS
 #'             numericInput renderUI req selectInput strong tagList textInput
 #'             uiOutput updateNumericInput updateSelectInput
+#' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom rlang .data
-peakApp <- function() {
+winParApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
-    title =  "Test Peak",
+    title =  "Test Window Parameters",
     sidebar = bslib::sidebar(
-      projectUI("project"),
-      setParInput("set_par"),
-      peakInput("peak"),
+      projectUI("project"),     # project
+      setParInput("set_par"),   # class, subject_model 
+      winParInput("win_par"),   # local, chr_id, peak_Mbp, window_Mbp
       hotspotInput("hotspot")), # chr_ct, minLOD, window_Mbp
-    peakOutput("peak")
+    winParOutput("win_par")     # peak_table
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
     set_par <- setParServer("set_par", project_df)
+    peak_df <- peakReadServer("peak_df", set_par, project_df)
     
-    peak_df <- shiny::reactive({
-      class <- shiny::req(set_par$class)
-      subject_model <- set_par$subject_model
-      if(!shiny::isTruthy(subject_model)) subject_model <- NULL
-      out <- read_project(shiny::req(project_df()), "peaks", class = class,
-                   subject_model = subject_model)
-      out
-    })
     pmap_obj <- shiny::reactive({
       shiny::req(project_df())
       read_project(project_df(), "pmap")
@@ -47,14 +41,14 @@ peakApp <- function() {
 
     hotspot_df <- hotspotServer("hotspot", set_par, peak_df, pmap_obj,
                                 project_df)
-    win_par <- peakServer("peak", set_par, peak_df, pmap_obj, hotspot_df,
+    win_par <- winParServer("win_par", set_par, peak_df, pmap_obj, hotspot_df,
                           project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname peakApp
-peakServer <- function(id, set_par, peak_df, pmap_obj, hotspot_df, project_df) {
+#' @rdname winParApp
+winParServer <- function(id, set_par, peak_df, pmap_obj, hotspot_df, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -189,8 +183,8 @@ peakServer <- function(id, set_par, peak_df, pmap_obj, hotspot_df, project_df) {
   })
 }
 #' @export
-#' @rdname peakApp
-peakInput <- function(id) { # local, chr_id, peak_Mbp, window_Mbp
+#' @rdname winParApp
+winParInput <- function(id) { # local, chr_id, peak_Mbp, window_Mbp
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::checkboxInput(ns("local"), "Local Peaks in Window?", TRUE),
@@ -201,8 +195,8 @@ peakInput <- function(id) { # local, chr_id, peak_Mbp, window_Mbp
     ))
 }
 #' @export
-#' @rdname peakApp
-peakOutput <- function(id) {
+#' @rdname winParApp
+winParOutput <- function(id) {
   ns <- shiny::NS(id)
   DT::dataTableOutput(ns("peak_table")) # peak_table
 }
