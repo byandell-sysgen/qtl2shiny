@@ -1,4 +1,4 @@
-#' Shiny Peak Read App
+#' Shiny Peak App
 #'
 #' Shiny module for peak selection.
 #'
@@ -12,25 +12,25 @@
 #' @importFrom shiny  column moduleServer NS reactive req
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom bslib page_sidebar sidebar
-peakReadApp <- function() {
+peakApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Peak Read",
     sidebar = bslib::sidebar(
       projectUI("project"),
       setParInput("set_par")),
-    peakReadOutput("peak_df")
+    peakOutput("peak_df")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
     set_par <- setParServer("set_par", project_df)
-    peak_df <- peakReadServer("peak_df", set_par, project_df)
+    peak_df <- peakServer("peak_df", set_par, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname peakReadApp
-peakReadServer <- function(id, set_par, project_df) {
+#' @rdname peakApp
+peakServer <- function(id, set_par, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -55,8 +55,8 @@ peakReadServer <- function(id, set_par, project_df) {
   })
 }
 #' @export
-#' @rdname peakReadApp
-peakReadOutput <- function(id) {
+#' @rdname peakApp
+peakOutput <- function(id) {
   ns <- shiny::NS(id)
   DT::dataTableOutput(ns("peak_table")) # peak_table
 }

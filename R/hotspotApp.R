@@ -34,7 +34,7 @@ hotspotApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
     set_par <- setParServer("set_par", project_df)
-    peak_df <- peakReadServer("peak_df", set_par, project_df)
+    peak_df <- peakServer("peak_df", set_par, project_df)
 
     pmap_obj <- shiny::reactive({
       shiny::req(project_df())
