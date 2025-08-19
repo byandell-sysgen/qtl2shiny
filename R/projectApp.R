@@ -21,11 +21,11 @@ projectApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page(
     title =  "Test Project",
-    projectUI("project"),
-    projectOutput("project")
+    projectUI("project_df"),
+    projectOutput("project_df")
   )
   server <- function(input, output, session) {
-    project_df <- projectServer("project", projects_df)
+    project_df <- projectServer("project_df", projects_df)
   }
   shiny::shinyApp(ui, server)
 }

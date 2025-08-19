@@ -3,25 +3,22 @@
 \name{phenoApp}
 \alias{phenoApp}
 \alias{phenoServer}
-\alias{phenoInput}
 \alias{phenoOutput}
-\title{Shiny phenotype selection}
+\title{Shiny Phenotype App}
 \usage{
 phenoApp()
 
-phenoServer(id, set_par, win_par, peak_df, project_df)
-
-phenoInput(id)
+phenoServer(id, set_par, pheno_names, project_df)
 
 phenoOutput(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{set_par, win_par, peak_df, analyses_df, covar, project_df}{reactive arguments}
+\item{set_par, peak_df, pmap_obj, project_df}{reactive arguments}
 }
 \description{
-Shiny module for phenotype selection.
+Shiny module for peak selection.
 }
 \author{
 Brian S Yandell, \email{brian.yandell@wisc.edu}

@@ -10,6 +10,20 @@ edges <-
 ```
 
 ```{r}
+m <- match(edges$source, nodes$node)
+edges$source[is.na(m)]
+```
+
+```{r}
+m <- match(edges$target, nodes$node)
+edges$target[is.na(m)]
+```
+
+```{r}
+table(table(nodes$node))
+```
+
+```{r}
 net <- igraph::graph_from_data_frame(d=edges, vertices=nodes, directed=TRUE)
 ```
 

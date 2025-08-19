@@ -19,35 +19,22 @@ haploApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Haplo",
     sidebar = bslib::sidebar(
-      projectUI("project"),
-      setParInput("set_par"),
-      setupInput("setup"),
-      setupUI("setup")),
+      projectUI("project_df"), # project
+      setParInput("set_par"),  # class, subject_model
+      setupInput("set_list"),  # pheno_names, chr_pos
+      setupUI("set_list")),    # radio, local, win_par, chr_ct, minLOD
     shiny::uiOutput("pheno_names"),
     haploUI("haplo")
   )
   server <- function(input, output, session) {
-    project_df <- projectServer("project", projects_df)
+    project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
-    
-    pmap_obj <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "pmap")
-    })
-
-    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, project_df)
-    
-    ## Phenotypes and Covariates for Haplotype Analyses.
-    pheno_mx <- shiny::reactive({
-      shiny::req(project_df(), set_par$class)
-      read_project(project_df(), "pheno", class = set_par$class,
-                   columns = set_list$pheno_names)
-    })
-    covar_df <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "covar")
-    })
+    pmap_obj <- pmapServer("pmap_obj", project_df)
+    set_list <- setupServer("set_list", set_par, peak_df, pmap_obj, project_df)
+    pheno_names <- 
+      phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
+    covar_df <- covarServer("covar_df", pheno_mx, project_df)
     ## Kinship and Alleles.
     K_chr <- shiny::reactive({
       shiny::req(project_df(), set_list$win_par$chr_id)

@@ -26,23 +26,18 @@ hotspotApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Hotspot",
     sidebar = bslib::sidebar(
-      projectUI("project"),     # project
-      setParInput("set_par"),
-      hotspotInput("hotspot")), # chr_ct, minLOD, window_Mbp
-    hotspotOutput("hotspot")
+      projectUI("project_df"),     # project
+      setParInput("set_par"),      # class, subject_model 
+      hotspotInput("hotspot_df")), # chr_ct, minLOD, window_Mbp
+    hotspotOutput("hotspot_df")
   )
   server <- function(input, output, session) {
-    project_df <- projectServer("project", projects_df)
+    project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
-
-    pmap_obj <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "pmap")
-    })
-    
-    hotspot_df <- hotspotServer("hotspot", set_par, peak_df, pmap_obj,
-                                project_df)
+    pmap_obj <- pmapServer("pmap_obj", project_df)
+    hotspot_df <- 
+      hotspotServer("hotspot_df", set_par, peak_df, pmap_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }

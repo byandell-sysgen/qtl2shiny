@@ -1,6 +1,4 @@
-#' Shiny setup module
-#'
-#' Shiny module for phenotype selection, with interfaces \code{setupInput} and  \code{setupUI}.
+#' Shiny Setup App
 #'
 #' @param id identifier for shiny reactive
 #' @param set_par,peak_df,pmap_obj,project_df reactive arguments
@@ -21,28 +19,18 @@ setupApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Setup",
     sidebar = bslib::sidebar(
-      projectUI("project"),   # project
-      setParInput("set_par"), # class, subject_model
-      setupInput("setup"),    # pheno_names, chr_pos
-      setupUI("setup")),      # radio, local, win_par, chr_ct, minLOD
-    shiny::uiOutput("pheno_names"),
-    setupOutput("setup")
+      projectUI("project_df"), # project
+      setParInput("set_par"),  # class, subject_model
+      setupInput("set_list"),  # pheno_names, chr_pos
+      setupUI("set_list")),    # radio, local, win_par, chr_ct, minLOD
+    setupOutput("set_list")
   )
   server <- function(input, output, session) {
-    project_df <- projectServer("project", projects_df)
+    project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
-    
-    pmap_obj <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "pmap")
-    })
-
-    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, project_df)
-
-    output$pheno_names <- shiny::renderUI({
-      paste("pheno_names: ", paste(set_list$pheno_names(), collapse = ", "))
-    })
+    pmap_obj <- pmapServer("pmap_obj", project_df)
+    set_list <- setupServer("set_list", set_par, peak_df, pmap_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }
@@ -52,13 +40,20 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    ## Find Hotspots.    
-    hotspot_df <- hotspotServer("hotspot", set_par, peak_df, pmap_obj,
-                                project_df)
-    ## Locate Peak.
-    win_par <- winParServer("win_par", set_par, peak_df, pmap_obj, hotspot_df,
-                          project_df)
-
+    ## Modules.    
+    hotspot_df <- 
+      hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
+    win_par <-
+      winParServer("win_par", set_par, peak_df, pmap_obj, hotspot_df, project_df)
+    pheno_names <-
+      phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
+    pheno_mx <- phenoServer("pheno_mx", set_par, pheno_names, project_df)
+    covar_df <- shiny::reactive({
+      shiny::req(project_df(), pheno_mx())
+      read_project(project_df(), "covar")
+    })
+    phenoPlotServer("pheno_plot", pheno_names, pheno_mx, covar_df)
+    
     chr_pos <- shiny::reactive({
       shiny::req(project_df())
       make_chr_pos(win_par$chr_id, 
@@ -70,9 +65,6 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
     output$version <- shiny::renderText({
       versions()
     })
-    
-    ## Use window as input to phenoServer.
-    pheno_names <- phenoServer("pheno", set_par, win_par, peak_df, project_df)
     
     ## Setup input logic.
     output$sidebar_setup <- shiny::renderUI({
@@ -86,7 +78,11 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
     })
     output$main_setup <- shiny::renderUI({
       switch(shiny::req(input$radio), # peak_table, hotspot_plot, hotspot_table
-             Phenotypes = phenoOutput(ns("pheno")),
+             Phenotypes = {
+               shiny::tagList(
+                 phenoNamesOutput(ns("pheno_names")),
+                 phenoPlotOutput(ns("pheno_plot")))
+             },
              Region     = winParOutput(ns("win_par")))
     })
     
@@ -106,7 +102,7 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
 setupInput <- function(id) {             # pheno_names, chr_pos
   ns <- shiny::NS(id)
   shiny::tagList(
-    phenoInput(ns("pheno")),             # pheno_names
+    phenoNamesInput(ns("pheno_names")),  # pheno_names
     shiny::uiOutput(ns("chr_pos"))       # chr_pos
   )
 }

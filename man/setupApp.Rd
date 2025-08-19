@@ -7,7 +7,7 @@
 \alias{setupInput}
 \alias{setupUI}
 \alias{setupOutput}
-\title{Shiny setup module}
+\title{Shiny Setup App}
 \usage{
 setParServer(id, project_df)
 
@@ -30,7 +30,7 @@ setupOutput(id)
 No return value; called for side effects.
 }
 \description{
-Shiny module for phenotype selection, with interfaces \code{setupInput} and  \code{setupUI}.
+Shiny Setup App
 }
 \author{
 Brian S Yandell, \email{brian.yandell@wisc.edu}

@@ -17,12 +17,12 @@ peakApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Peak Read",
     sidebar = bslib::sidebar(
-      projectUI("project"),
+      projectUI("project_df"),
       setParInput("set_par")),
     peakOutput("peak_df")
   )
   server <- function(input, output, session) {
-    project_df <- projectServer("project", projects_df)
+    project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
   }

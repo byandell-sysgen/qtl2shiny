@@ -1,6 +1,10 @@
 source,target,assign
 ## Server functions
 server,main,server
+dash,diplo,server
+dash,haplo,server
+dash,project,server
+dash,setup,server
 diplo,pairProbs,server
 diplo,pattern,server
 diplo,snpSetup,server
@@ -10,16 +14,14 @@ haplo,probs,server
 haplo,scan,server
 haplo,snpSetup,server
 main,dash,server
-dash,diplo,server
-dash,haplo,server
-dash,project,server
-dash,setup,server
 mediate,triad,server
 pattern,allele,server
-pheno,phenoPlot,server
 setup,hotspot,server
 setup,peak,server
 setup,pheno,server
+setup,phenoNames,server
+setup,phenoPlot,server
+setup,winPar,server
 snpGene,geneExon,server
 snpGene,geneRegion,server
 snpGene,snpPlot,server
@@ -30,10 +32,13 @@ snpSetup,snpPattern,server
 snpSetup,snpGene,server
 snpSetup,snpList,server
 ## Results returned by moduleServer calls
+covar,covar_df,result
 hotspot,hotspot_df,result
 pairProbs,pairprobs_obj,result
-peakRead,peak_df,result
-pheno,pheno_names,result
+peak,peak_df,result
+pheno,pheno_df,result
+phenoNames,pheno_names,result
+pmap,pmap_obj,result
 probs,probs_obj,result
 project,project_df,result
 setup,set_list,result
@@ -56,7 +61,7 @@ mediate,med_par,input
 snpGene,ass_par,input
 setPar,set_par,input
 snpPattern,pat_par,input
-peak,win_par,input
+winPar,win_par,input
 ## moduleServer arguments
 ### allele
 win_par,allele,argument
@@ -93,7 +98,7 @@ K_chr,haplo,argument
 analyses_df,haplo,argument
 covar_df,haplo,argument
 analyses_tbl,haplo,argument
-peak,haplo,argument
+peak_df,haplo,argument
 project_df,haplo,argument
 allele_info,haplo,argument
 ### hotspot
@@ -134,14 +139,8 @@ project_df,pattern,argument
 allele_info,pattern,argument
 snp_action,pattern,argument
 ### peak
-hotspot_df,peak,argument
-peak_df,peak,argument
-pmap_obj,peak,argument
 project_df,peak,argument
 set_par,peak,argument
-### peakRead
-project_df,peakRead,argument
-set_par,peakRead,argument
 ### pheno
 peak_df,pheno,argument
 project_df,pheno,argument
@@ -219,6 +218,12 @@ K_chr,triad,argument
 probs_obj,triad,argument
 chr_id,triad,argument
 sdp,triad,argument
+### winPar
+hotspot_df,winPar,argument
+peak_df,winPar,argument
+pmap_obj,winPar,argument
+project_df,winPar,argument
+set_par,winPar,argument
 ## UI components
 mainInput,dashInput,ui
 mainOutput,dashUI,ui
@@ -242,13 +247,11 @@ mediateOutput,triadOutput,ui
 mediateUI,triadUI,ui
 patternOutput,alleleOutput,ui
 patternUI,alleleUI,ui
-peakOutput,hotspotOutput,ui
-peakUI,hotspotInput,ui
-phenoOutput,phenoPlotUI,ui
-setupUI,peakInput,ui
-setupUI,peakOutput,ui
-setupUI,peakUI,ui
-setupUI,phenoOutput,ui
+setupOutput,phenoNamesOutput,ui
+setupOutput,phenoPlotUI,ui
+setupOutput,winParOutput,ui
+setupUI,hotspotInput,ui
+setupUI,winParInput,ui
 snpGeneInput,geneExonInput,ui
 snpGeneInput,geneRegionInput,ui
 snpGeneInput,snpSumInput,ui
