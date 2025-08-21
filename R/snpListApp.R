@@ -35,34 +35,15 @@ snpListApp <- function() {
     project_df <- projectServer("project", projects_df)
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
-    
-    pmap_obj <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "pmap")
-    })
-
-    # set_list returns pheno_names(), win_par.
+    pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     set_list <- setupServer("setup", set_par, peak_df, pmap_obj, project_df)
-    
-    pheno_mx <- shiny::reactive({
-      shiny::req(project_df(), set_par$class)
-      pheno_names <- shiny::req(set_list$pheno_names())
-      read_project(project_df(), "pheno", class = set_par$class,
-                   columns = pheno_names)
-    })
-    covar_df <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "covar")
-    })
-    K_chr <- shiny::reactive({
-      shiny::req(project_df())
-      chr_id <- shiny::req(set_list$win_par$chr_id)
-      read_project(project_df(), "kinship")[chr_id]
-    })
-
+    pheno_mx <-
+      phenoServer("pheno_mx", set_par, set_list$pheno_names, project_df)
+    covar_df <- covarServer("covar_df", pheno_mx, project_df)
+    kinship_list <- kinshipServer("kinship_list", set_list$win_par, project_df)
     hap_par <- hapParServer("hap_par")
     snp_list <- snpListServer("snp_list", hap_par, set_list$win_par,
-      peak_df, pheno_mx, covar_df, K_chr, project_df)
+      peak_df, pheno_mx, covar_df, kinship_list, project_df)
   }
   shiny::shinyApp(ui, server)
 }

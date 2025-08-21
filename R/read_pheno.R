@@ -9,18 +9,40 @@
 #' @export
 read_pheno <- function(project_df, class, columns = NULL, legacy = FALSE) {
   if(length(class) > 1) {
-    message("only using first class of ", length(class))
+    message("testing multiple classes for ", length(class))
   }
-  # Read phenotype data from project.
-  dataname <- paste0("pheno_", class[1])
-  out <- read_project(project_df, dataname, "pheno",
-                      columns = columns, legacy = legacy)
   if(!is.null(columns)) {
-    if(!all(columns %in% colnames(out))) return(NULL)
-    # Pick columns post hoc.
-    if(is.data.frame(out) | is.matrix(out))
-      out <- out[, columns, drop = FALSE]
+    # assume columns is list, or make it so.
+    columns <- as.list(columns)
+    if(length(columns) != length(class)) {
+      message("columns must be list same length as class",
+              length(class), length(columns))
+      return(NULL)
+    }
+    names(columns) <- classi
+  }
+  out <- list()
+  for(classi in class) {
+    # Code for multiple classes. Watch out for columns.
+    # Read phenotype data from project.
+    dataname <- paste0("pheno_", classi)
+    out[[classi]] <- read_project(project_df, dataname, "pheno",
+                        columns = columns, legacy = legacy)
+    if(!is.null(columns[[classi]])) {
+      if(!all(columns[[classi]] %in% colnames(out[[classi]]))) return(NULL)
+      # Pick columns post hoc.
+      out[[classi]] <- out[[classi]][, columns[[classi]], drop = FALSE]
+    }
+  }
+  if(length(out) > 1) {
+    # Need to check if colnames collide. If so, use `class`.
+    outs <- as.data.frame(out[[1]])
+    for(i in seq(2, length(out))) {
+      outs <- merge(outs, as.data.frame(out[[i]]), by = "row.names")
+    }
+    out <- as.matrix(outs)
+  } else {
+    out <- out[[1]]
   }
   out
-  # Code for multiple classes. Watch out for columns.
 }

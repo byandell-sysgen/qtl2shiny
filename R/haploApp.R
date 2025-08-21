@@ -30,7 +30,7 @@ haploApp <- function() {
     project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
-    pmap_obj <- pmapServer("pmap_obj", project_df)
+    pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     set_list <- setupServer("set_list", set_par, peak_df, pmap_obj, project_df)
     pheno_names <- 
       phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
@@ -40,10 +40,7 @@ haploApp <- function() {
       shiny::req(project_df(), set_list$win_par$chr_id)
       read_project(project_df(), "kinship")[set_list$win_par$chr_id]
     })
-    allele_info <- shiny::reactive({
-      shiny::req(project_df())
-      read_project(project_df(), "allele_info")
-    })
+    allele_info <- shiny::reactive(read_project(project_df(), "allele_info"))
 
     haploServer("haplo", set_list$win_par, pmap_obj, pheno_mx, covar_df, K_chr,
       peak_df, project_df, allele_info)

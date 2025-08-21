@@ -29,7 +29,7 @@ setupApp <- function() {
     project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
-    pmap_obj <- pmapServer("pmap_obj", project_df)
+    pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     set_list <- setupServer("set_list", set_par, peak_df, pmap_obj, project_df)
   }
   shiny::shinyApp(ui, server)
