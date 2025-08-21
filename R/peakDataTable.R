@@ -25,7 +25,7 @@ peakDataTable <- function(peak_df, hotspot_df = NULL, local = TRUE,
   dplyr::arrange(
     dplyr::select(
       peak_df,
-      .data$phenotype, .data$phenotype_class,
+      .data$phenotype, .data$phenotype_class, .data$subject_model,
       .data$qtl_chr, .data$qtl_pos, .data$qtl_lod),
     desc(.data$qtl_lod))
 }

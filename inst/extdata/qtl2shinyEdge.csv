@@ -34,11 +34,11 @@ snpSetup,snpList,server
 ## Results returned by moduleServer calls
 covar,covar_df,result
 hotspot,hotspot_df,result
+kinship,kinship_list,result
 pairProbs,pairprobs_obj,result
 peak,peak_df,result
 pheno,pheno_df,result
 phenoNames,pheno_names,result
-pmap,pmap_obj,result
 probs,probs_obj,result
 project,project_df,result
 setup,set_list,result
@@ -68,7 +68,7 @@ win_par,allele,argument
 pheno_mx,allele,argument
 covar_df,allele,argument
 probs_obj,allele,argument
-K_chr,allele,argument
+kinship_list,allele,argument
 analyses_df,allele,argument
 patterns,allele,argument
 scan_pat,allele,argument
@@ -80,7 +80,7 @@ project_df,dash,argument
 win_par,diplo,argument
 pheno_mx,diplo,argument
 covar_df,diplo,argument
-K_chr,diplo,argument
+kinship_list,diplo,argument
 analyses_df,diplo,argument
 project_df,diplo,argument
 allele_info,diplo,argument
@@ -94,7 +94,7 @@ win_par,haplo,argument
 pmap_obj,haplo,argument
 pheno_mx,haplo,argument
 covar_df,haplo,argument
-K_chr,haplo,argument
+kinship_list,haplo,argument
 analyses_df,haplo,argument
 covar_df,haplo,argument
 analyses_tbl,haplo,argument
@@ -114,7 +114,7 @@ analyses_df,mediate,argument
 analyses_tbl,mediate,argument
 covar_df,mediate,argument
 hap_par,mediate,argument
-K_chr,mediate,argument
+kinship_list,mediate,argument
 patterns,mediate,argument
 peak_df,mediate,argument
 pheno_mx,mediate,argument
@@ -132,7 +132,7 @@ win_par,pattern,argument
 pheno_mx,pattern,argument
 covar_df,pattern,argument
 pairprobs_obj,pattern,argument
-K_chr,pattern,argument
+kinship_list,pattern,argument
 analyses_df,pattern,argument
 patterns,pattern,argument
 project_df,pattern,argument
@@ -159,7 +159,7 @@ projects_df,project,argument
 allele_info,scan,argument
 covar_df,scan,argument
 hap_par,scan,argument
-K_chr,scan,argument
+kinship_list,scan,argument
 pheno_mx,scan,argument
 probs_obj,scan,argument
 project_df,scan,argument
@@ -179,7 +179,7 @@ snp_list,snpGene,argument
 ### snpList
 covar_df,snpList,argument
 hap_par,snpList,argument
-K_chr,snpList,argument
+kinship_list,snpList,argument
 peak_df,snpList,argument
 pheno_mx,snpList,argument
 project_df,snpList,argument
@@ -196,7 +196,7 @@ project_df,snpProbs,argument
 allele_info,snpSetup,argument
 covar_df,snpSetup,argument
 hap_par,snpSetup,argument
-K_chr,snpSetup,argument
+kinship_list,snpSetup,argument
 peak_df,snpSetup,argument
 pheno_mx,snpSetup,argument
 project_df,snpSetup,argument
@@ -214,7 +214,7 @@ med_ls,triad,argument
 mediate_obj,triad,argument
 pheno_mx,triad,argument
 covar_df,triad,argument
-K_chr,triad,argument
+kinship_list,triad,argument
 probs_obj,triad,argument
 chr_id,triad,argument
 sdp,triad,argument

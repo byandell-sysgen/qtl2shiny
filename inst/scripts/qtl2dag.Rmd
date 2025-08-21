@@ -24,6 +24,10 @@ table(table(nodes$node))
 ```
 
 ```{r}
+nodes$node[which(duplicated(nodes$node))]
+```
+
+```{r}
 net <- igraph::graph_from_data_frame(d=edges, vertices=nodes, directed=TRUE)
 ```
 

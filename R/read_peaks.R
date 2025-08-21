@@ -7,32 +7,33 @@
 #'
 #' @returns dataframe of peaks
 #' @export
-#' @importFrom dplyr select
-read_peaks <- function(project_df, class = NULL, legacy = FALSE, ...) {
-  if(length(class) > 1) {
-    message("only using first class of ", length(class))
+#' @importFrom dplyr bind_rows mutate select
+read_peaks <- function(project_df, class = NULL, subject_model = NULL, legacy = FALSE) {
+  if(is.null(class)) return(NULL)
+  if(is.null(subject_model)) subject_model <- "all_mice_additive"
+  classes <- rep(class, rep(length(subject_model), length(class)))
+  subjmod <- rep(subject_model, length(class))
+  out <- list()
+  for(i in seq_along(classes)) {
+    dataname <- peak_class(project_df, classes[i], subjmod[i])
+    result <- read_project(project_df, dataname, "peaks", legacy = legacy)
+    if(is.null(result)) return(NULL)
+    # remove Which_mice column if present
+    if("Which_mice" %in% names(result)) result[["Which_mice"]] <- NULL
+    # `result$phenotype_class` should agree with `class` but often does not.
+    # Fix this here:
+    result$phenotype_class <- classes[i]
+    out[[i]] <- dplyr::mutate(result, subject_model = subjmod[i])
   }
-  dataname <- peak_class(project_df, class[1], ...)
-  read_project(project_df, dataname, "peaks", legacy = legacy)
-  ## Here add code for multiple classes
+  dplyr::bind_rows(out)
 }
 peak_class <- function(project_df, 
   class_name = NULL,
-  subject_model = NULL,
-  ...) {
+  subject_model = "all_mice_additive") {
   
-  if(is.null(class_name)) {
-    stop("must supply a valid class name")
+  if(is.null(class_name) | is.null(subject_model)) {
+    stop("must supply a valid class name and subject_model")
   }
-  # Some names changed between pheno and peaks databases for project.
-  if("liver_psi" %in% class_name) 
-    class_name[match("liver_psi", class_name)] <- "liver_splice_juncs"
-  if(any(c("plasma_metabolites_13C", "plasma_metabolites_2H") %in% class_name))
-    class_name[match(c("plasma_metabolites_13C", "plasma_metabolites_2H"),
-                         class_name, nomatch = 0)] <- "plasma_metabolites"
-  
-  if(is.null(subject_model)) subject_model <- "all_mice_additive"
-
   paste(project_df$project, class_name, subject_model, "peaks", sep = "_")
 }
 # deprecated

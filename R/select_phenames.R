@@ -3,6 +3,7 @@
 #' 
 select_phenames <- function(phenames, peak_df, local,
                             chr_id, peak_Mbp, window_Mbp) {
+  # See foundrHarmony/R/LivRna.R for compression of gene symbol, id and transcript id.
   selected <- phenames
   if(shiny::isTruthy(peak_df) && nrow(peak_df)) {
     peak_df <- dplyr::filter(peak_df, 
@@ -32,15 +33,10 @@ select_phenames <- function(phenames, peak_df, local,
   ## Update phenames to include selected (but not "")
   phenames <- unique(c(selected, phenames))
   phenames <- phenames[phenames != ""]
-  # Limit to first 1000
-  nphe <- length(phenames)
-  phenames <- phenames[seq_len(min(1000, nphe))]
   if(is.null(selected))
     selected <- phenames[1]
   
   choices <- c("all","none", phenames)
-  label = ifelse(nphe <= 1000,
-                 "Choose phenotypes",
-                 paste("Top 1000 of", nphe))
+  label <- "Choose phenotypes"
   list(label = label, choices = choices, selected = selected)
 }

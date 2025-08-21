@@ -5,7 +5,7 @@
 \alias{create_peak_class}
 \title{Read Peaks for Phenotypes by Class}
 \usage{
-read_peaks(project_df, class = NULL, legacy = FALSE, ...)
+read_peaks(project_df, class = NULL, subject_model = NULL, legacy = FALSE)
 
 create_peak_class(project_df, force = FALSE)
 }
@@ -16,9 +16,9 @@ create_peak_class(project_df, force = FALSE)
 
 \item{legacy}{use legacy data if `TRUE`}
 
-\item{...}{additional arguments}
-
 \item{force}{force creation if `TRUE`}
+
+\item{...}{additional arguments}
 }
 \value{
 dataframe of peaks

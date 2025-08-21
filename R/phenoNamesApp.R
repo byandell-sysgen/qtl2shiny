@@ -11,7 +11,7 @@
 #' @export
 #' @importFrom dplyr arrange desc filter select
 #' @importFrom shiny moduleServer NS observeEvent reactive renderText req
-#'             selectInput tagList uiOutput updateSelectInput
+#'             selectizeInput tagList uiOutput updateSelectizeInput
 #' @importFrom rlang .data
 phenoNamesApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
@@ -64,21 +64,15 @@ phenoNamesServer <- function(id, set_par, win_par, peak_df, project_df) {
 
     # Input `input$pheno_names`.
     output$pheno_names_input <- shiny::renderUI({
-      shiny::req(project_df(), win_par$chr_id, win_par$peak_Mbp,
-                 win_par$window_Mbp,  peak_filter_df())
-      out <- select_phenames(input$pheno_names, peak_filter_df(),
-        win_par$local, win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
-      shiny::selectInput(ns("pheno_names"), out$label,
-                         choices = out$choices,
-                         selected = out$selected,
-                         multiple = TRUE)
+      shiny::selectizeInput(ns("pheno_names"), "", choices = "", multiple = TRUE)
     })
-    shiny::observeEvent(peak_filter_df(), {
+    shiny::observeEvent(shiny::req(project_df(), win_par$chr_id,
+      win_par$peak_Mbp, win_par$window_Mbp, peak_filter_df()), {
       out <- select_phenames(NULL, peak_filter_df(),
         win_par$local, win_par$chr_id, win_par$peak_Mbp, win_par$window_Mbp)
-      shiny::updateSelectInput(session, "pheno_names",
+      shiny::updateSelectizeInput(session, "pheno_names", out$label,
                                choices = out$choices,
-                               selected = out$selected)
+                               selected = out$selected, server = TRUE)
     })
     output$pheno_names_output <- shiny::renderUI({
       shiny::renderText(paste("phenotype names: ",
