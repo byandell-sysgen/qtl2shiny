@@ -21,7 +21,8 @@ setupApp <- function() {
     sidebar = bslib::sidebar(
       projectUI("project_df"), # project
       setParInput("set_par"),  # class, subject_model
-      setupInput("set_list"),  # pheno_names, chr_pos
+      setupInput("set_list"),  # pheno_names, hotspot
+      setParUI("set_par"),     # window_Mbp
       setupUI("set_list")),    # radio, local, win_par, chr_ct, minLOD
     setupOutput("set_list")
   )
@@ -44,7 +45,7 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
     hotspot_df <- 
       hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
     win_par <-
-      winParServer("win_par", set_par, peak_df, pmap_obj, hotspot_df, project_df)
+      winParServer("win_par", hotspot_df, project_df)
     pheno_names <-
       phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
     pheno_mx <- phenoServer("pheno_mx", set_par, pheno_names, project_df)
@@ -54,13 +55,8 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
     })
     phenoPlotServer("pheno_plot", pheno_names, pheno_mx, covar_df)
     
-    chr_pos <- shiny::reactive({
-      shiny::req(project_df())
-      make_chr_pos(win_par$chr_id, 
-                   win_par$peak_Mbp, win_par$window_Mbp)
-    })
     output$chr_pos <- shiny::renderText({
-      paste0("Region: ", chr_pos(), "Mbp")
+      paste("Region", shiny::req(win_par$hotspot))
     })
     output$version <- shiny::renderText({
       versions()
@@ -70,7 +66,9 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
     output$sidebar_setup <- shiny::renderUI({
       switch(shiny::req(input$radio),
              Phenotypes = shiny::uiOutput(ns("filter")),
-             Region     = winParInput(ns("win_par"))) # local, chr_id, peak_Mbp, window_Mbp
+             Region     = shiny::tagList(
+               winParInput(ns("win_par")), # hotspot
+               winParUI(ns("win_par"))))   # local,
     })
     output$sidebar_hot <- shiny::renderUI({
       switch(shiny::req(input$radio),

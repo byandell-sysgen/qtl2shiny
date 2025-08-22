@@ -18,7 +18,8 @@ setParApp <- function() {
     title =  "Test Setup Parameters",
     sidebar = bslib::sidebar(
       projectUI("project"),
-      setParInput("set_par")), # class
+      setParInput("set_par"), # class, subject_model
+      setParUI("set_par")),   # window_Mbp
     setParOutput("set_par")
   )
   server <- function(input, output, session) {
@@ -70,12 +71,22 @@ setParServer <- function(id, project_df) {
         choices = choices, selected = choices[1])
     })
     
+    ## Window numeric
+    output$window_Mbp_input <- shiny::renderUI({
+      shiny::req(project_df())
+      if(is.null(win <- input$window_Mbp))
+        win <- 1
+      shiny::numericInput(ns("window_Mbp"), "width",
+                          win, 0.1, 100)
+    })
+    
     output$show_set_par <- shiny::renderUI({
       shiny::tagList(
         shiny::renderText(paste("phenotype class: ",
                                 paste(input$class, collapse = ", "))),
         shiny::renderText(paste("subjects & model: ",
-                                paste(input$subject_model, collapse = ", ")))
+                                paste(input$subject_model, collapse = ", "))),
+        shiny::renderText(paste("window width (Mbp):", input$window_Mbp))
       )
     })
     ## Return.
@@ -90,6 +101,12 @@ setParInput <- function(id) {                  # class, subject_model
     shiny::uiOutput(ns("class_input")),        # class
     shiny::uiOutput(ns("subject_model_input")) # subject_model
   )
+}
+#' @export
+#' @rdname setParApp
+setParUI <- function(id) {                     # window_Mbp
+  ns <- shiny::NS(id)
+  shiny::uiOutput(ns("window_Mbp_input"))      # window_Mbp
 }
 #' @export
 #' @rdname setParApp

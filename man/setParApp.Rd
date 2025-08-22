@@ -3,12 +3,15 @@
 \name{setParApp}
 \alias{setParApp}
 \alias{setParInput}
+\alias{setParUI}
 \alias{setParOutput}
 \title{Shiny Setup Parameters App}
 \usage{
 setParApp()
 
 setParInput(id)
+
+setParUI(id)
 
 setParOutput(id)
 }

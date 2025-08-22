@@ -28,7 +28,8 @@ hotspotApp <- function() {
     sidebar = bslib::sidebar(
       projectUI("project_df"),     # project
       setParInput("set_par"),      # class, subject_model 
-      hotspotInput("hotspot_df")), # chr_ct, minLOD, window_Mbp
+      setParUI("set_par"),         # class, window_Mbp 
+      hotspotInput("hotspot_df")), # chr_ct, minLOD
     hotspotOutput("hotspot_df")
   )
   server <- function(input, output, session) {
@@ -52,8 +53,6 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
       shiny::updateSelectInput(session, "chr_ct", shiny::strong("chrs"),
                                choices = c("all", choices),
                                selected = NULL)
-      shiny::updateNumericInput(session, "window_Mbp", "width",
-                                1, 0.1, 100)
       if(shiny::isTruthy(peak_df())) {
         value <- minLOD(NULL, peak_df())
         shiny::updateNumericInput(session, "minLOD", "min LOD", value, min = 0, step = 0.5)
@@ -86,24 +85,15 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
         }
       }
     })
-    
-    ## Window numeric
-    output$window_Mbp_input <- shiny::renderUI({
-      shiny::req(project_df())
-      if(is.null(win <- input$window_Mbp))
-        win <- 1
-      shiny::numericInput(ns("window_Mbp"), "width",
-                          win, 0.1, 100)
-    })
-    
+
     hotspot_obj <- shiny::reactive({
       shiny::req(pmap_obj(), peak_df(), project_df(),
-                 input$window_Mbp, input$minLOD)
+                 set_par$window_Mbp, input$minLOD)
       chrs <- input$chr_ct
       if(!shiny::isTruthy(chrs) || "all" %in% chrs) chrs <- NULL
       shiny::withProgress(message = 'Hotspot scan ...', value = 0, {
         shiny::setProgress(1)
-        hotspot(pmap_obj(), peak_df(), input$window_Mbp, input$minLOD, chrs)
+        hotspot(pmap_obj(), peak_df(), set_par$window_Mbp, input$minLOD, chrs)
         })
     })
     
@@ -112,7 +102,7 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
     })
     output$hotspot_plot <- shiny::renderPlot({
       shiny::req(hotspot_obj())
-      window_Mbp <- shiny::req(input$window_Mbp)
+      window_Mbp <- shiny::req(set_par$window_Mbp)
       class <- shiny::req(set_par$class)
       shiny::withProgress(message = 'Hotspot show ...',
                           value = 0, {
@@ -124,7 +114,7 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
       shiny::req(hotspot_obj())
       shiny::withProgress(message = 'Hotspot summary ...', value = 0, {
         shiny::setProgress(1)
-        summary_hot(hotspot_obj())
+        summary(hotspot_obj())
       })
     })
     output$hotspot_peak_table <- DT::renderDataTable({
@@ -158,14 +148,13 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
 }
 #' @export
 #' @rdname hotspotApp
-hotspotInput <- function(id) {                      # chr_ct, minLOD, window_Mbp 
+hotspotInput <- function(id) {                                # chr_ct, minLOD 
   ns <- shiny::NS(id)
   shiny::tagList(      
     shiny::strong("Hotspot Info"),
     shiny::fluidRow(
-      shiny::column(4, shiny::uiOutput(ns("chr_ct_input"))),      # chr_ct
-      shiny::column(4, shiny::uiOutput(ns("minLOD_input"))),      # minLOD
-      shiny::column(4, shiny::uiOutput(ns("window_Mbp_input"))))) # window_Mpb
+      shiny::column(6, shiny::uiOutput(ns("chr_ct_input"))),  # chr_ct
+      shiny::column(6, shiny::uiOutput(ns("minLOD_input"))))) # minLOD
 }
 #' @export
 #' @rdname hotspotApp

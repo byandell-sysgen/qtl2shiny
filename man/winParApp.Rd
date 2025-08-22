@@ -4,21 +4,24 @@
 \alias{winParApp}
 \alias{winParServer}
 \alias{winParInput}
+\alias{winParUI}
 \alias{winParOutput}
 \title{Shiny Window Parameters App}
 \usage{
 winParApp()
 
-winParServer(id, set_par, peak_df, pmap_obj, hotspot_df, project_df)
+winParServer(id, hotspot_df, project_df)
 
 winParInput(id)
+
+winParUI(id)
 
 winParOutput(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{set_par, peak_df, pmap_obj, project_df}{reactive arguments}
+\item{hotspot_df, project_df}{reactive arguments}
 }
 \value{
 list of inputs and scan summary

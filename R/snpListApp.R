@@ -55,6 +55,7 @@ snpListServer <- function(id, hap_par, win_par,
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    #** This is superceded by decode_chr_pos and win_par$hotspot.
     chr_pos <- shiny::reactive({
       make_chr_pos(shiny::req(win_par$chr_id), 
                    range = shiny::req(input$scan_window))

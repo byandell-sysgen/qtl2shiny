@@ -53,6 +53,9 @@ Minor issues
     + panel appears not to work at all
 * reset
     + reset buttons when new dataset (i.e. to Genome Scan)
+* winpar
+    + get `chr:pos` from winParApp for user selection
+    + better rationalize how this changes when classes change
 
 ### Contribution guidelines ###
 

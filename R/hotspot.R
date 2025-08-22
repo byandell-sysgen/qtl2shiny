@@ -39,9 +39,10 @@
 #' @export
 #'
 #' @importFrom purrr map transpose
-#' @importFrom dplyr bind_cols bind_rows distinct everything filter one_of select
+#' @importFrom dplyr arrange bind_cols bind_rows distinct everything filter
+#'             mutate one_of select
 #' @importFrom rlang .data
-#'
+#' @importFrom qtl2ggplot summary_scan1
 hotspot <- function(map, peak_df, peak_window = 1, minLOD = 5.5,
                     chrs = NULL) {
   if(is.null(peak_df)) 
@@ -120,7 +121,30 @@ hotspot <- function(map, peak_df, peak_window = 1, minLOD = 5.5,
 #' @method summary hotspot
 #' @rdname hotspot
 summary.hotspot <- function(object, ...) {
-  summary(object$scan, object$map, ...)
+  map <- object$map
+  scan <- object$scan
+  
+  # Use all columns except "all".
+  lodcol <- colnames(scan)[-1]
+  
+  if(length(lodcol) & (nrow(scan) == length(unlist(map)))) {
+    chr_id <- names(map)
+    dplyr::arrange(
+      dplyr::select(
+        dplyr::mutate(
+          dplyr::select(
+            dplyr::rename(
+              qtl2ggplot::summary_scan1(
+                subset(scan, lodcolumn = lodcol),
+                map, chr = chr_id),
+              count = .data$lod),
+            -.data$marker),
+          chr_pos = paste0(.data$chr, ":", .data$pos, " (", .data$count, ")")),
+        pheno, chr_pos, dplyr::everything()),
+      dplyr::desc(.data$count), .data$pheno, .data$chr, .data$pos)
+  } else {
+    NULL
+  }
 }
 #' @export
 #' @method subset hotspot

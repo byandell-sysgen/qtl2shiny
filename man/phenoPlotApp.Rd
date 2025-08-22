@@ -8,14 +8,14 @@
 \usage{
 phenoPlotApp()
 
-phenoPlotServer(id, pheno_names, phe_mx, cov_df)
+phenoPlotServer(id, pheno_names, pheno_mx, covar_df)
 
 phenoPlotOutput(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{pheno_names, phe_mx, cov_df}{reactive arguments}
+\item{pheno_names, pheno_mx, covar_df}{reactive arguments}
 }
 \value{
 2-element vector of scan window

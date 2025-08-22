@@ -11,7 +11,7 @@
 #' @export
 #' @importFrom shiny  column moduleServer NS reactive req
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom bslib page_sidebar sidebar
+#' @importFrom bslib layout_columns page_sidebar sidebar
 phenoApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
@@ -20,8 +20,13 @@ phenoApp <- function() {
       projectUI("project_df"),        # project
       setParInput("set_par"),         # class, subject_model
       phenoNamesInput("pheno_names"), # pheno_names
-      winParInput("win_par"),         # local, chr_id, peak_Mbp, window_Mbp
-      hotspotInput("hotspot")         # chr_ct, minLOD, window_Mbp
+      bslib::layout_columns(
+        col_widths = c(6, 4),
+        winParInput("win_par"),       # hotspot
+        setParUI("set_par")           # window_Mbp 
+      ),
+      winParUI("win_par"),            # local
+      hotspotInput("hotspot")         # chr_ct, minLOD
     ),
     phenoOutput("pheno_mx")
   )
@@ -33,7 +38,7 @@ phenoApp <- function() {
     hotspot_df <- 
       hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
     win_par <- 
-      winParServer("win_par", set_par, peak_df, pmap_obj, hotspot_df, project_df)
+      winParServer("win_par", hotspot_df, project_df)
     pheno_names <-
       phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
     pheno_mx <- phenoServer("pheno_mx", set_par, pheno_names, project_df)

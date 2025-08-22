@@ -3,7 +3,7 @@
 #' Shiny module to plot phenotypes.
 #'
 #' @param id identifier for shiny reactive
-#' @param pheno_names,phe_mx,cov_df reactive arguments
+#' @param pheno_names,pheno_mx,covar_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -14,6 +14,7 @@
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom shiny moduleServer NS plotOutput renderPlot renderUI req
 #'             setProgress tagList uiOutput withProgress
+#' @importFrom bslib layout_columns page_sidebar sidebar
 phenoPlotApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
@@ -22,8 +23,13 @@ phenoPlotApp <- function() {
       projectUI("project_df"),        # project
       setParInput("set_par"),         # class, subject_model 
       phenoNamesInput("pheno_names"), # pheno_names
-      winParInput("win_par"),         # local, chr_id, peak_Mbp, window_Mbp
-      hotspotInput("hotspot")         # chr_ct, minLOD, window_Mbp
+      bslib::layout_columns(
+        col_widths = c(6, 4),
+        winParInput("win_par"),       # hotspot
+        setParUI("set_par")           # window_Mbp 
+      ),
+      winParUI("win_par"),            # local
+      hotspotInput("hotspot")         # chr_ct, minLOD
     ),
     phenoPlotOutput("pheno_plot")
   )
@@ -35,7 +41,7 @@ phenoPlotApp <- function() {
     hotspot_df <- 
       hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
     win_par <- 
-      winParServer("win_par", set_par, peak_df, pmap_obj, hotspot_df, project_df)
+      winParServer("win_par", hotspot_df, project_df)
     pheno_names <-
       phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
     pheno_mx <- phenoServer("pheno_mx", set_par, pheno_names, project_df)
@@ -46,16 +52,16 @@ phenoPlotApp <- function() {
 }
 #' @export
 #' @rdname phenoPlotApp
-phenoPlotServer <- function(id, pheno_names, phe_mx, cov_df) {
+phenoPlotServer <- function(id, pheno_names, pheno_mx, covar_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     ## Scatter plot or density
     output$pheno_table <- DT::renderDataTable({
-      shiny::req(phe_mx())
+      shiny::req(pheno_mx())
       shiny::withProgress(message = 'Pheno Summary ...', value = 0, {
         shiny::setProgress(1)
-        summary_na(phe_mx())
+        summary_na(pheno_mx())
       })
     }, escape = FALSE, 
     options = list(scrollX = TRUE, 
@@ -64,10 +70,10 @@ phenoPlotServer <- function(id, pheno_names, phe_mx, cov_df) {
     output$pheno_plot <- shiny::renderPlot({
       if(!shiny::isTruthy(pheno_names()))
         return(plot_null("need to\nChoose phenotype"))
-      shiny::req(phe_mx(), cov_df())
+      shiny::req(pheno_mx(), covar_df())
       shiny::withProgress(message = 'Pheno Plot ...', value = 0, {
         shiny::setProgress(1)
-        plot_sex(phe_mx(), cov_df())
+        plot_sex(pheno_mx(), covar_df())
       })
     })
     output$pheno_plot_table <- shiny::renderUI({
