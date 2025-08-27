@@ -117,15 +117,9 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
         summary(hotspot_obj())
       })
     })
-    output$hotspot_peak_table <- DT::renderDataTable({
-      shiny::req(hotspot_df(), peak_df())
-      peakDataTable(peak_df(), hotspot_df())
-    }, escape = FALSE,
-    options = list(lengthMenu = c(5,10,20,50), pageLength = 5))
     output$hotspot_table <- DT::renderDataTable({
       shiny::req(hotspot_df())
-      dplyr::arrange(hotspot_df(), desc(.data$count))
-    }, escape = FALSE,
+     }, escape = FALSE,
     options = list(lengthMenu = c(5,10,20,50), pageLength = 5))
     
     # Minimum LOD for SNP top values.

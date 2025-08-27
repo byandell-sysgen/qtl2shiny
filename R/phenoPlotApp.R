@@ -29,7 +29,8 @@ phenoPlotApp <- function() {
         setParUI("set_par")           # window_Mbp 
       ),
       winParUI("win_par"),            # local
-      hotspotInput("hotspot")         # chr_ct, minLOD
+      hotspotInput("hotspot"),        # chr_ct, minLOD
+      phenoUI("pheno_mx")             # raw_data
     ),
     phenoPlotOutput("pheno_plot")
   )

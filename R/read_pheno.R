@@ -9,9 +9,6 @@
 #' @export
 #' @importFrom tibble column_to_rownames
 read_pheno <- function(project_df, class, columns = NULL, legacy = FALSE) {
-  if(length(class) > 1) {
-    message("testing multiple classes for ", length(class))
-  }
   out <- list()
   for(classi in class) {
     # Code for multiple classes. Watch out for columns.

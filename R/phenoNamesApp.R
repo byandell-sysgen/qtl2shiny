@@ -56,8 +56,7 @@ phenoNamesServer <- function(id, set_par, win_par, peak_df, project_df) {
     # Filter peaks to region.
     output$filter <- shiny::renderUI({
       shiny::checkboxInput(ns("filter"),
-        paste0("Filter by hotspot ", win_par$hotspot, "?"),
-        TRUE)
+        "Filter by hotspot(s)?", TRUE)
     })
     chr_pos <- shiny::reactive({
       decode_chr_pos(shiny::req(win_par$hotspot))

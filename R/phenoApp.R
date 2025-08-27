@@ -26,7 +26,8 @@ phenoApp <- function() {
         setParUI("set_par")           # window_Mbp 
       ),
       winParUI("win_par"),            # local
-      hotspotInput("hotspot")         # chr_ct, minLOD
+      hotspotInput("hotspot"),        # chr_ct, minLOD
+      phenoUI("pheno_mx")             # raw_data
     ),
     phenoOutput("pheno_mx")
   )
@@ -51,9 +52,18 @@ phenoServer <- function(id, set_par, pheno_names, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    pheno_mx <- shiny::reactive({
+    pheno_raw_mx <- shiny::reactive({
       shiny::req(project_df(), set_par$class, pheno_names())
       read_pheno(project_df(), set_par$class, columns = pheno_names())
+    })
+    pheno_mx <- shiny::reactive({
+      out <- shiny::req(pheno_raw_mx())
+      rout <- row.names(out)
+      if(!shiny::isTruthy(input$raw_data)) {
+        out <- apply(out, 2, rankZ)
+      }
+      row.names(out) <- rout
+      out
     })
 
     # Output Peak Table.
@@ -65,6 +75,12 @@ phenoServer <- function(id, set_par, pheno_names, project_df) {
     ## Return.
     pheno_mx
   })
+}
+#' @export
+#' @rdname phenoApp
+phenoUI <- function(id) {
+  ns <- shiny::NS(id)
+  shiny::checkboxInput(ns("raw_data"), "Raw Data?", FALSE)
 }
 #' @export
 #' @rdname phenoApp

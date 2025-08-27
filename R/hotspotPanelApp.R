@@ -1,4 +1,4 @@
-#' Shiny Setup App
+#' Shiny Hotspot Panel App
 #'
 #' @param id identifier for shiny reactive
 #' @param set_par,peak_df,pmap_obj,project_df reactive arguments
@@ -14,30 +14,31 @@
 #'             observeEvent radioButtons reactive renderText renderUI req
 #'             strong tagList textOutput uiOutput
 #' @importFrom bslib page_sidebar sidebar
-setupApp <- function() {
+hotspotPanelApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Setup",
     sidebar = bslib::sidebar(
       projectUI("project_df"), # project
       setParInput("set_par"),  # class, subject_model
-      setupInput("set_list"),  # pheno_names, hotspot
+      hotspotPanelInput("hotspot_list"),  # pheno_names, hotspot
       setParUI("set_par"),     # window_Mbp
-      setupUI("set_list")),    # radio, local, win_par, chr_ct, minLOD
-    setupOutput("set_list")
+      hotspotPanelUI("hotspot_list")),    # radio, local, win_par, chr_ct, minLOD
+    hotspotPanelOutput("hotspot_list")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    set_list <- setupServer("set_list", set_par, peak_df, pmap_obj, project_df)
+    hotspot_list <-
+      hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname setupApp
-setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
+#' @rdname hotspotPanelApp
+hotspotPanelServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -96,8 +97,8 @@ setupServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
   })
 }
 #' @export
-#' @rdname setupApp
-setupInput <- function(id) {             # pheno_names, chr_pos
+#' @rdname hotspotPanelApp
+hotspotPanelInput <- function(id) {             # pheno_names, chr_pos
   ns <- shiny::NS(id)
   shiny::tagList(
     phenoNamesInput(ns("pheno_names")),  # pheno_names
@@ -105,8 +106,8 @@ setupInput <- function(id) {             # pheno_names, chr_pos
   )
 }
 #' @export
-#' @rdname setupApp
-setupUI <- function(id) {                # radio, local, chr_id, peak_Mbp, window_Mbp, chr_ct, minLOD, window_Mbp
+#' @rdname hotspotPanelApp
+hotspotPanelUI <- function(id) {                # radio, local, chr_id, peak_Mbp, window_Mbp, chr_ct, minLOD, window_Mbp
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("radio_input")),   # radio
@@ -116,8 +117,8 @@ setupUI <- function(id) {                # radio, local, chr_id, peak_Mbp, windo
   )
 }
 #' @export
-#' @rdname setupApp
-setupOutput <- function(id) {
+#' @rdname hotspotPanelApp
+hotspotPanelOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("main_setup"))
 }

@@ -39,8 +39,8 @@
 #' @export
 #'
 #' @importFrom purrr map transpose
-#' @importFrom dplyr arrange bind_cols bind_rows distinct everything filter
-#'             mutate one_of select
+#' @importFrom dplyr arrange bind_rows bind_cols bind_rows distinct everything
+#'             filter group_by mutate one_of select summarize ungroup
 #' @importFrom rlang .data
 #' @importFrom qtl2ggplot summary_scan1
 hotspot <- function(map, peak_df, peak_window = 1, minLOD = 5.5,
@@ -56,13 +56,13 @@ hotspot <- function(map, peak_df, peak_window = 1, minLOD = 5.5,
   # Set up list by chr of positions and peaks.
   
   # Rounded off sequence of map positions by chr.
-  round_pos <- function(x) {
-    rng <- round(range(x))
-    out <- seq(rng[1],rng[2])
+  round_pos <- function(x, peak_window) {
+    rng <- round(range(x) / peak_window) * peak_window
+    out <- seq(rng[1], rng[2], by = peak_window)
     names(out) <- out
     out
   }
-  chr_pos <- purrr::map(map, round_pos)
+  chr_pos <- purrr::map(map, round_pos, peak_window)
   for(chr in names(chr_pos)) {
     names(chr_pos[[chr]]) <- paste(chr, names(chr_pos[[chr]]), sep = ":")
   }
@@ -81,12 +81,11 @@ hotspot <- function(map, peak_df, peak_window = 1, minLOD = 5.5,
                       check.names = FALSE)
     if(!nrow(out))
       return(NULL)
-    out$all <- apply(out, 1, sum)
     # This is adding extra column sometimes. Fix.
     if(max(out) == 0)
       return(NULL)
     rownames(out) <- posi
-    dplyr::select(out, all, dplyr::everything())
+    out
   }
   outer_window <- function(peaksi, posi, peak_window = 1) {
     peaksi <- dplyr::filter(peaksi)$qtl_pos
@@ -114,6 +113,7 @@ hotspot <- function(map, peak_df, peak_window = 1, minLOD = 5.5,
   class(out_peaks) <- c("scan1", "matrix")
 
   out <- list(scan = out_peaks, map = chr_pos)
+  attr(out, "window") <- peak_window
   class(out) <- c("hotspot", "list")
   out
 }
@@ -121,27 +121,50 @@ hotspot <- function(map, peak_df, peak_window = 1, minLOD = 5.5,
 #' @method summary hotspot
 #' @rdname hotspot
 summary.hotspot <- function(object, ...) {
+  if(is.null(object)) return(NULL)
+  
   map <- object$map
   scan <- object$scan
   
-  # Use all columns except "all".
-  lodcol <- colnames(scan)[-1]
+  # Combine hotspots that overlap but do not have same pos
+  # by selecting multiple hotspots in phenoNamesApp.
   
-  if(length(lodcol) & (nrow(scan) == length(unlist(map)))) {
+  # Use all columns except "all". 
+  if(nrow(scan) == length(unlist(map))) {
     chr_id <- names(map)
-    dplyr::arrange(
-      dplyr::select(
-        dplyr::mutate(
+    scan <-                 
+      # Rename `lod` column as `count`.
+      dplyr::rename(
+        # Scan1 summary
+        qtl2ggplot::summary_scan1(scan, map, chr = chr_id),
+        count = .data$lod)
+    # Sum by `chr` and `pos` across `pheno` into `all`.
+    scan_all <- dplyr::ungroup(
+      dplyr::summarize(
+        dplyr::group_by(scan, .data$chr, .data$pos, .data$marker),
+        pheno = "all",
+        count = sum(.data$count)))
+    # Bind rows and arrange.
+    scan <- dplyr::arrange(
+      dplyr::bind_rows(scan, scan_all),
+      .data$chr, .data$pos)
+    
+    dplyr::select(
+      dplyr::arrange(
+        dplyr::filter(
           dplyr::select(
-            dplyr::rename(
-              qtl2ggplot::summary_scan1(
-                subset(scan, lodcolumn = lodcol),
-                map, chr = chr_id),
-              count = .data$lod),
-            -.data$marker),
-          chr_pos = paste0(.data$chr, ":", .data$pos, " (", .data$count, ")")),
-        pheno, chr_pos, dplyr::everything()),
-      dplyr::desc(.data$count), .data$pheno, .data$chr, .data$pos)
+            dplyr::mutate(
+              # Drop `marker` column.
+              dplyr::select(
+                tidyr::pivot_wider(
+                  scan,
+                  names_from = "pheno", values_from = "count"),
+                -.data$marker),
+              hotspot = paste0(.data$chr, ":", .data$pos, " (", .data$all, ")")),
+            hotspot, dplyr::everything()),
+          .data$all > 0),
+        dplyr::desc(.data$all), .data$chr, .data$pos),
+      -all)
   } else {
     NULL
   }
