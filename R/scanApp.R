@@ -3,7 +3,7 @@
 #' Shiny module for scan1 LOD and coefficient plots, with interfaces \code{scanUI} and  \code{scanOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param hap_par,set_list$,pheno_mx,covar_df,probs_obj,K_chr,project_df,allele_info reactive arguments
+#' @param hap_par,hotspot_list,pheno_mx,covar_df,probs_obj,K_chr,project_df,allele_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -31,8 +31,8 @@ scanApp <- function() {
       projectUI("project"),
       projectUI("project"),
       setParInput("set_par"),
-      setupInput("setup"),
-      setupUI("setup"),
+      hotspotPanelInput("hotspot_list"),
+      hotspotPanelUI("hotspot_list"),
       hapParInput("hap_par"),
       scanUI("scan")),
     scanOutput("scan")
@@ -42,15 +42,16 @@ scanApp <- function() {
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, project_df)
+    hotspot_list <- 
+      hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
     pheno_mx <-
-      phenoServer("pheno_mx", set_par, set_list$pheno_names, project_df)
+      phenoServer("pheno_mx", set_par, hotspot_list$pheno_names, project_df)
     covar_df <- covarServer("covar_df", pheno_mx, project_df)
-    kinship_list <- kinshipServer("kinship_list", set_list$win_par, project_df)
+    kinship_list <- kinshipServer("kinship_list", hotspot_list$win_par, project_df)
     allele_info <- shiny::reactive(read_project(project_df(), "allele_info"))
     hap_par <- hapParServer("hap_par")
-    probs_obj <- probsServer("probs", set_list$win_par, project_df)
-    scanServer("scan", hap_par, set_list$win_par, peak_df, pheno_mx, covar_df,
+    probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
+    scanServer("scan", hap_par, hotspot_list$win_par, peak_df, pheno_mx, covar_df,
                kinship_list, probs_obj, allele_info, project_df)
   }
   shiny::shinyApp(ui, server)

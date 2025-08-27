@@ -45,7 +45,7 @@ dashServer <- function(id, projects_df) {
   })
   
   project_df <- projectServer("project", projects_df)
-  set_par <- setupServer("setup", peak_df, pmap_obj, analyses_tbl, cov_df,
+  set_par <- hotspotPanelServer("hotspot_list", peak_df, pmap_obj, analyses_tbl, cov_df,
                          project_df)
   
   ## Continue with Plots and Analysis.
@@ -93,13 +93,13 @@ dashServer <- function(id, projects_df) {
 #' @export
 dashInput <- function(id) {
   ns <- shiny::NS(id)
-  setupInput(ns("setup"))
+  hotspotPanelInput(ns("hotspot_list"))
 }
 #' @rdname dashServer
 #' @export
 dashUI <- function(id) {
   ns <- shiny::NS(id)
-  setupUI(ns("setup"))
+  hotspotPanelUI(ns("hotspot_list"))
 }
 #' @rdname dashServer
 #' @export

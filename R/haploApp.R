@@ -19,10 +19,10 @@ haploApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Haplo",
     sidebar = bslib::sidebar(
-      projectUI("project_df"), # project
-      setParInput("set_par"),  # class, subject_model
-      setupInput("set_list"),  # pheno_names, chr_pos
-      setupUI("set_list")),    # radio, local, win_par, chr_ct, minLOD
+      projectUI("project_df"),           # project
+      setParInput("set_par"),            # class, subject_model
+      hotspotPanelInput("hotspot_list"), # pheno_names, chr_pos
+      hotspotPanelUI("hotspot_list")),   # radio, local, win_par, chr_ct, minLOD
     shiny::uiOutput("pheno_names"),
     haploUI("haplo")
   )
@@ -31,22 +31,23 @@ haploApp <- function() {
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    set_list <- setupServer("set_list", set_par, peak_df, pmap_obj, project_df)
+    hotspot_list <- 
+      hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
     pheno_names <- 
       phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
     covar_df <- covarServer("covar_df", pheno_mx, project_df)
     ## Kinship and Alleles.
     K_chr <- shiny::reactive({
-      shiny::req(project_df(), set_list$win_par$chr_id)
-      read_project(project_df(), "kinship")[set_list$win_par$chr_id]
+      shiny::req(project_df(), hotspot_list$win_par$chr_id)
+      read_project(project_df(), "kinship")[hotspot_list$win_par$chr_id]
     })
     allele_info <- shiny::reactive(read_project(project_df(), "allele_info"))
 
-    haploServer("haplo", set_list$win_par, pmap_obj, pheno_mx, covar_df, K_chr,
+    haploServer("haplo", hotspot_list$win_par, pmap_obj, pheno_mx, covar_df, K_chr,
       peak_df, project_df, allele_info)
     
     output$pheno_names <- shiny::renderUI({
-      paste("pheno_names: ", paste(set_list$pheno_names(), collapse = ", "))
+      paste("pheno_names: ", paste(hotspot_list$pheno_names(), collapse = ", "))
     })
   }
   shiny::shinyApp(ui, server)

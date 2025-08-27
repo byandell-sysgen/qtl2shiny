@@ -29,7 +29,7 @@ scanOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{hap_par, set_list$, pheno_mx, covar_df, probs_obj, K_chr, project_df, allele_info}{reactive arguments}
+\item{hap_par, hotspot_list, pheno_mx, covar_df, probs_obj, K_chr, project_df, allele_info}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

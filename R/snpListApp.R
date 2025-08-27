@@ -24,8 +24,8 @@ snpListApp <- function() {
     sidebar = bslib::sidebar(
       projectUI("project"),
       setParInput("set_par"),
-      setupInput("setup"),
-      setupUI("setup"),
+      hotspotPanelInput("hotspot_list"),
+      hotspotPanelUI("hotspot_list"),
       snpListInput("snp_list"),
       snpListInput2("snp_list"),
       snpListUI("snp_list")),
@@ -36,7 +36,7 @@ snpListApp <- function() {
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, project_df)
+    set_list <- hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
     pheno_mx <-
       phenoServer("pheno_mx", set_par, set_list$pheno_names, project_df)
     covar_df <- covarServer("covar_df", pheno_mx, project_df)

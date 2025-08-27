@@ -24,8 +24,8 @@ snpSetupApp <- function() {
     sidebar = bslib::sidebar(
       projectUI("project"),            # project
       setParInput("set_par"),          # class
-      setupInput("setup"),             # 
-      setupUI("setup"),                # <various>
+      hotspotPanelInput("hotspot_list"),             # 
+      hotspotPanelUI("hotspot_list"),                # <various>
       hapParUI("hap_par"),             # button
       hapParInput("hap_par"),          # sex_type
       snpSetupInput("snp_setup")),
@@ -37,15 +37,16 @@ snpSetupApp <- function() {
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    set_list <- setupServer("setup", set_par, peak_df, pmap_obj, project_df)
+    hotspot_list <- 
+      hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
     pheno_mx <-
-      phenoServer("pheno_mx", set_par, set_list$pheno_names, project_df)
+      phenoServer("pheno_mx", set_par, hotspot_list$pheno_names, project_df)
     covar_df <- covarServer("covar_df", pheno_mx, project_df)
-    kinship_list <- kinshipServer("kinship_list", set_list$win_par, project_df)
+    kinship_list <- kinshipServer("kinship_list", hotspot_list$win_par, project_df)
     allele_info <- shiny::reactive(read_project(project_df(), "allele_info"))
     hap_par <- hapParServer("hap_par")
-    probs_obj <- probsServer("probs", set_list$win_par, project_df)
-    snpSetupServer("snp_setup", hap_par, set_list$win_par,
+    probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
+    snpSetupServer("snp_setup", hap_par, hotspot_list$win_par,
       peak_df, pheno_mx, covar_df, kinship_list, allele_info, project_df)
   }
   shiny::shinyApp(ui, server)
