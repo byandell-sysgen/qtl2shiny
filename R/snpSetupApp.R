@@ -3,7 +3,7 @@
 #' Shiny module to coordinate SNP and allele analyses and plots.
 #'
 #' @param id identifier for shiny reactive
-#' @param hap_par,win_par,peak_df,pheno_mx,covar_df,K_chr,allele_info,project_df,snp_action reactive arguments
+#' @param hotspot_list,hap_par,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -39,33 +39,24 @@ snpSetupApp <- function() {
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     hotspot_list <- 
       hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
-    pheno_mx <-
-      phenoServer("pheno_mx", set_par, hotspot_list$pheno_names, project_df)
-    covar_df <- covarServer("covar_df", pheno_mx, project_df)
-    kinship_list <- kinshipServer("kinship_list", hotspot_list$win_par, project_df)
-    allele_info <- shiny::reactive(read_project(project_df(), "allele_info"))
     hap_par <- hapParServer("hap_par")
-    probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
-    snpSetupServer("snp_setup", hap_par, hotspot_list$win_par,
-      peak_df, pheno_mx, covar_df, kinship_list, allele_info, project_df)
+    snpSetupServer("snp_setup", hotspot_list, hap_par, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname snpSetupApp
-snpSetupServer <- function(id, hap_par, win_par,
-  peak_df, pheno_mx, covar_df, K_chr, allele_info, project_df,
+snpSetupServer <- function(id, hotspot_list, hap_par, project_df,
   snp_action = shiny::reactive({"basic"})) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     ## Shiny Modules
-    snp_list <- snpListServer("snp_list", hap_par, win_par,
-                              peak_df, pheno_mx, covar_df, K_chr, project_df)
+    snp_list <- snpListServer("snp_list", hotspot_list, hap_par, project_df)
     ## SNP Association
     ass_par <- snpGeneServer("snp_gene", snp_list, project_df)
     ## Allele Patterns
-    pat_par <- snpPatternServer("snp_pattern", snp_list, allele_info)
+    pat_par <- snpPatternServer("snp_pattern", snp_list, hotspot_list$allele_info)
     
     ## Button Options.
     output$phe_choice <- shiny::renderUI({

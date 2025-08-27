@@ -3,7 +3,7 @@
 #' Shiny module to create list of SNP objects.
 #'
 #' @param id identifier for shiny reactive
-#' @param hap_par,win_par,peak_df,pheno_mx,covar_df,K_chr,project_df,snp_action reactive arguments
+#' @param hotspot_list,hap_par,project_df,snp_action reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -36,52 +36,47 @@ snpListApp <- function() {
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    set_list <- hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
-    pheno_mx <-
-      phenoServer("pheno_mx", set_par, set_list$pheno_names, project_df)
-    covar_df <- covarServer("covar_df", pheno_mx, project_df)
-    kinship_list <- kinshipServer("kinship_list", set_list$win_par, project_df)
+    hotspot_list <- 
+      hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
     hap_par <- hapParServer("hap_par")
-    snp_list <- snpListServer("snp_list", hap_par, set_list$win_par,
-      peak_df, pheno_mx, covar_df, kinship_list, project_df)
+    snp_list <- snpListServer("snp_list", hotspot_list, hap_par, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname snpListApp
-snpListServer <- function(id, hap_par, win_par,
-  peak_df, pheno_mx, covar_df, K_chr, project_df,
-  snp_action = shiny::reactive({"basic"})) {
+snpListServer <- function(id, hotspot_list, hap_par, project_df,
+                          snp_action = shiny::reactive({"basic"})) { 
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     #** This is superceded by decode_chr_pos and win_par$hotspot.
     chr_pos <- shiny::reactive({
-      make_chr_pos(shiny::req(win_par$chr_id), 
+      make_chr_pos(shiny::req(hotspot_list$win_par$chr_id), 
                    range = shiny::req(input$scan_window))
     })
     pheno_names <- shiny::reactive({
-      shiny::req(project_df(), pheno_mx())
-      colnames(pheno_mx())
+      shiny::req(project_df(), hotspot_list$pheno_mx())
+      colnames(hotspot_list$pheno_mx())
     })
     ## SNP Probabilities.
-    snpprobs_obj <- snpProbsServer("snp_probs", win_par, pheno_names,
+    snpprobs_obj <- snpProbsServer("snp_probs", hotspot_list$win_par, pheno_names,
                                    project_df)
     snpinfo <- reactive({
-      shiny::req(project_df(), pheno_mx())
+      shiny::req(project_df(), hotspot_list$pheno_mx())
       shiny::req(snpprobs_obj())$snpinfo
     })
     
     ## SNP Scan.
     snp_scan_obj <- shiny::reactive({
-      shiny::req(snpprobs_obj(), pheno_mx(), peak_df())
-      shiny::req(K_chr(), covar_df(), hap_par$sex_type)
+      shiny::req(snpprobs_obj(), hotspot_list$pheno_mx(), hotspot_list$peak_df())
+      shiny::req(hotspot_list$kinship_list(), hotspot_list$covar_df(), hap_par$sex_type)
       snpprobs <- snpprobs_obj()$snpprobs
       shiny::withProgress(message = "SNP Scan ...", value = 0, {
         shiny::setProgress(1)
         snpprobs_act <- 
           qtl2pattern::snpprob_collapse(snpprobs, snp_action())
-        scan1covar(pheno_mx(), covar_df(), snpprobs_act, K_chr(), peak_df())
+        scan1covar(hotspot_list$pheno_mx(), hotspot_list$covar_df(), snpprobs_act, hotspot_list$kinship_list(), hotspot_list$peak_df())
       })
     })
     ## Top SNPs table.
@@ -123,8 +118,8 @@ snpListServer <- function(id, hap_par, win_par,
     # Scan Window slider
     output$scan_window_input <- shiny::renderUI({
       shiny::req(pheno_names())
-      rng <- round(shiny::req(win_par$peak_Mbp) + 
-                     c(-1,1) * shiny::req(win_par$window_Mbp), 
+      rng <- round(shiny::req(hotspot_list$win_par$peak_Mbp) + 
+                     c(-1,1) * shiny::req(hotspot_list$win_par$window_Mbp), 
                    1)
       selected <- select_range(input$scan_window, rng)
       

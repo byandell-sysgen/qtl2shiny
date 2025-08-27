@@ -3,7 +3,7 @@
 #' Shiny module for analysis based on haplotype alleles, with interface \code{haploUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param win_par,pmap_obj,pheno_mx,covar_df,K_chr,analyses_df,covar,analyses_tbl,peak_df,project_df,allele_info reactive arguments
+#' @param hotspot_list,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -33,18 +33,8 @@ haploApp <- function() {
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     hotspot_list <- 
       hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
-    pheno_names <- 
-      phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
-    covar_df <- covarServer("covar_df", pheno_mx, project_df)
-    ## Kinship and Alleles.
-    K_chr <- shiny::reactive({
-      shiny::req(project_df(), hotspot_list$win_par$chr_id)
-      read_project(project_df(), "kinship")[hotspot_list$win_par$chr_id]
-    })
-    allele_info <- shiny::reactive(read_project(project_df(), "allele_info"))
 
-    haploServer("haplo", hotspot_list$win_par, pmap_obj, pheno_mx, covar_df, K_chr,
-      peak_df, project_df, allele_info)
+    haploServer("haplo", hotspot_list, project_df)
     
     output$pheno_names <- shiny::renderUI({
       paste("pheno_names: ", paste(hotspot_list$pheno_names(), collapse = ", "))
@@ -54,30 +44,27 @@ haploApp <- function() {
 }
 #' @export
 #' @rdname haploApp
-haploServer <- function(id, win_par, pmap_obj, pheno_mx, covar_df, K_chr, 
-                        peak_df, project_df, allele_info) {
+haploServer <- function(id, hotspot_list, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     hap_par <- hapParServer("hap_par")
     ## Genotype Probabilities.
-    probs_obj <- probsServer("probs", win_par, project_df)
+    probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     
     ## Genome Scan.
-    scanServer("scan", hap_par, win_par, peak_df, pheno_mx, covar_df,
-               K_chr, probs_obj, allele_info, project_df)
+    scanServer("scan", hotspot_list, hap_par, probs_obj, project_df)
     
     ## SNP Association
-    patterns <- snpSetupServer("snp_setup", hap_par, win_par,
-      peak_df, pheno_mx, covar_df, K_chr, allele_info, project_df)
+    patterns <- snpSetupServer("snp_setup", hotspot_list, hap_par, project_df)
     
     ## Mediation
-    mediateServer("mediate", hap_par, win_par, patterns, pheno_mx, covar_df, probs_obj, K_chr,
-                 analyses_df, pmap_obj, covar_df, analyses_tbl, peak_df, project_df, allele_info)
+    mediateServer("mediate", hap_par, hotspot_list$win_par, patterns, hotspot_list$pheno_mx, hotspot_list$covar_df, probs_obj, hotspot_list$kinship_list,
+                 analyses_df, hotspot_list$pmap_obj, hotspot_list$covar_df, analyses_tbl, hotspot_list$peak_df, project_df, hotspot_list$allele_info)
     
     output$allele_names <- shiny::renderText({
-      shiny::req(allele_info())
-      paste(allele_info()$code, allele_info()$shortname, sep = "=", collapse = ", ")
+      shiny::req(hotspot_list$allele_info())
+      paste(hotspot_list$allele_info()$code, hotspot_list$allele_info()$shortname, sep = "=", collapse = ", ")
     })
     
     output$hap_input <- shiny::renderUI({

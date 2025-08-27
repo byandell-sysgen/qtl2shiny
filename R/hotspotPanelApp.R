@@ -90,10 +90,20 @@ hotspotPanelServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
                           c("Region", "Phenotypes"), input$radio, inline=TRUE)
     })
     
+    ## Additional reactives not used yet.
+    kinship_list <- kinshipServer("kinship_list", hotspot_list$win_par, project_df)
+    allele_info <- shiny::reactive(read_project(project_df(), "allele_info"))
+    
     ## Return.
     shiny::reactiveValues(
       pheno_names = pheno_names,
-      win_par = win_par)
+      win_par = win_par,
+      peak_df = peak_df,
+      pmap_obj = pmap_obj,
+      pheno_mx = pheno_mx,
+      covar_df = covar_df,
+      kinship_list = kinship_list,
+      allele_info = allele_info)
   })
 }
 #' @export

@@ -3,7 +3,7 @@
 #' Shiny module for scan1 LOD and coefficient plots, with interfaces \code{scanUI} and  \code{scanOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param hap_par,hotspot_list,pheno_mx,covar_df,probs_obj,K_chr,project_df,allele_info reactive arguments
+#' @param hotspot_list,hap_par,probs_obj,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -44,40 +44,33 @@ scanApp <- function() {
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     hotspot_list <- 
       hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
-    pheno_mx <-
-      phenoServer("pheno_mx", set_par, hotspot_list$pheno_names, project_df)
-    covar_df <- covarServer("covar_df", pheno_mx, project_df)
-    kinship_list <- kinshipServer("kinship_list", hotspot_list$win_par, project_df)
-    allele_info <- shiny::reactive(read_project(project_df(), "allele_info"))
     hap_par <- hapParServer("hap_par")
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
-    scanServer("scan", hap_par, hotspot_list$win_par, peak_df, pheno_mx, covar_df,
-               kinship_list, probs_obj, allele_info, project_df)
+    scanServer("scan", hotspot_list, hap_par, probs_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname scanApp
-scanServer <- function(id, hap_par, win_par,
-  peak_df, pheno_mx, covar_df, K_chr, probs_obj, allele_info, project_df) {
+scanServer <- function(id, hotspot_list, hap_par, probs_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     ## Genome scan 
     scan_obj <- shiny::reactive({
-      shiny::req(pheno_mx(), probs_obj(), K_chr(), covar_df(), peak_df(),
+      shiny::req(hotspot_list$pheno_mx(), probs_obj(), hotspot_list$kinship_list(), hotspot_list$covar_df(), hotspot_list$peak_df(),
                  hap_par$sex_type)
       shiny::withProgress(message = "Genome Scan ...", value = 0, {
         shiny::setProgress(1)
-        scan1covar(pheno_mx(), covar_df(), probs_obj()$probs, K_chr(),
-                   peak_df())
+        scan1covar(hotspot_list$pheno_mx(), hotspot_list$covar_df(), probs_obj()$probs, hotspot_list$kinship_list(),
+                   hotspot_list$peak_df())
       })
     })
     
     # Scan Window slider
     output$scan_window_input <- shiny::renderUI({
-      shiny::req(project_df(), pheno_mx(), win_par$window_Mbp)
-      chr_id <- shiny::req(win_par$chr_id)
+      shiny::req(project_df(), hotspot_list$pheno_mx(), hotspot_list$win_par$window_Mbp)
+      chr_id <- shiny::req(hotspot_list$win_par$chr_id)
       map <- shiny::req(probs_obj())$map[[chr_id]]
       rng <- round(2 * range(map)) / 2
       selected <- select_range(input$scan_window, rng)
@@ -88,7 +81,7 @@ scanServer <- function(id, hap_par, win_par,
     ## Reset scan_window if chromosome changes.
     observeEvent(probs_obj()$map, {
       map <- shiny::req(probs_obj()$map)
-      chr <- shiny::req(win_par$chr_id)
+      chr <- shiny::req(hotspot_list$win_par$chr_id)
       rng <- round(2 * range(map[[chr]])) / 2
       shiny::updateSliderInput(session, "scan_window", NULL, rng, 
                                rng[1], rng[2], step=.5)
@@ -96,44 +89,44 @@ scanServer <- function(id, hap_par, win_par,
     
     ## Select phenotype for plots.
     output$pheno_name_input <- shiny::renderUI({
-      shiny::req(pheno_mx())
+      shiny::req(hotspot_list$pheno_mx())
       shiny::selectInput(ns("pheno_name"), NULL,
-                         choices = colnames(pheno_mx()))
+                         choices = colnames(hotspot_list$pheno_mx()))
     })
     
     ## Scan1 plot
     output$scan_plot <- shiny::renderPlot({
-      if(!shiny::isTruthy(win_par$chr_id) || !shiny::isTruthy(pheno_mx()))
+      if(!shiny::isTruthy(hotspot_list$win_par$chr_id) || !shiny::isTruthy(hotspot_list$pheno_mx()))
         return(plot_null("need to select\nRegion & Phenotype"))
-      shiny::req(win_par$chr_id, input$scan_window, scan_obj(), probs_obj())
+      shiny::req(hotspot_list$win_par$chr_id, input$scan_window, scan_obj(), probs_obj())
       shiny::withProgress(message = 'Genome LOD Plot ...', value = 0, {
         shiny::setProgress(1)
         plot_scan(scan_obj(), 
                   probs_obj()$map, 
                   seq(ncol(scan_obj())), 
-                  win_par$chr_id, 
+                  hotspot_list$win_par$chr_id, 
                   input$scan_window, 
-                  pheno_mx())
+                  hotspot_list$pheno_mx())
       })
     })
     
     ## Coefficient Effects.
     eff_obj <- shiny::reactive({
-      shiny::req(pheno_mx(), probs_obj(), K_chr(), covar_df(),
+      shiny::req(hotspot_list$pheno_mx(), probs_obj(), hotspot_list$kinship_list(), hotspot_list$covar_df(),
                  hap_par$sex_type)
       shiny::withProgress(message = 'Effect scans ...', value = 0, {
         shiny::setProgress(1)
-        scan1_effect(probs_obj()$probs, pheno_mx(), K_chr(), covar_df(),
+        scan1_effect(probs_obj()$probs, hotspot_list$pheno_mx(), hotspot_list$kinship_list(), hotspot_list$covar_df(),
                      hap_par$sex_type, input$blups)
       })
     })
     output$coef_plot <- shiny::renderPlot({
-      shiny::req(input$pheno_name, scan_obj(), eff_obj(), win_par$chr_id, allele_info())
+      shiny::req(input$pheno_name, scan_obj(), eff_obj(), hotspot_list$win_par$chr_id, hotspot_list$allele_info())
       map <- shiny::req(probs_obj())$map
       shiny::withProgress(message = 'Effect plots ...', value = 0, {
         shiny::setProgress(1)
         plot_eff(input$pheno_name, eff_obj(), map, scan_obj(), 
-                 input$scan_window,, allele_info())
+                 input$scan_window,, hotspot_list$allele_info())
       })
     })
     output$scan_table <- DT::renderDataTable({
@@ -147,13 +140,13 @@ scanServer <- function(id, hap_par, win_par,
     
     ## Effect and LOD Plot
     output$scan_coef_plot <- shiny::renderPlot({
-      shiny::req(input$pheno_name, input$scan_window, win_par$chr_id,
-                 eff_obj(), scan_obj(), allele_info())
+      shiny::req(input$pheno_name, input$scan_window, hotspot_list$win_par$chr_id,
+                 eff_obj(), scan_obj(), hotspot_list$allele_info())
       map <- shiny::req(probs_obj())$map
       shiny::withProgress(message = 'Effect & LOD plots ...', value = 0, {
         shiny::setProgress(1)
         plot_eff(input$pheno_name, eff_obj(), map, scan_obj(), input$scan_window,
-                 addlod = TRUE, allele_info())
+                 addlod = TRUE, hotspot_list$allele_info())
       })
     })
     
@@ -195,18 +188,18 @@ scanServer <- function(id, hap_par, win_par,
     ## Downloads.
     filepath <- shiny::reactive({
       # Catch if `chr_id` is not valid and return "".
-      tryCatch(file.path(paste0("scan_", shiny::req(win_par$chr_id))),
+      tryCatch(file.path(paste0("scan_", shiny::req(hotspot_list$win_par$chr_id))),
                error = function(e) return(""))
     })
     download_Plot <- shiny::reactiveValues()
     download_Plot$scan <- shiny::reactive({
-      shiny::req(win_par$chr_id, allele_info())
+      shiny::req(hotspot_list$win_par$chr_id, hotspot_list$allele_info())
       effs <- shiny::req(eff_obj())
       scans <- shiny::req(scan_obj())
       win <- shiny::req(input$scan_window)
       map <- shiny::req(probs_obj())$map
       ggplot2::autoplot(scans, map, lodcolumn = seq_along(names(effs)),
-                        chr = shiny::req(win_par$chr_id), xlim = win)
+                        chr = shiny::req(hotspot_list$win_par$chr_id), xlim = win)
     })
     # Trick to get Effect plots into `download_Plot` reactiveValues.
     plot_effs <- shiny::reactive({
@@ -214,11 +207,11 @@ scanServer <- function(id, hap_par, win_par,
       effs <- tryCatch(shiny::req(eff_obj()), error = function(e) return(NULL))
       for(pheno in names(effs)) {
         download_Plot[[pheno]] <- shiny::reactive({
-          shiny::req(win_par$chr_id, allele_info())
+          shiny::req(hotspot_list$win_par$chr_id, hotspot_list$allele_info())
           scans <- shiny::req(scan_obj())
           win <- shiny::req(input$scan_window)
           map <- shiny::req(probs_obj())$map
-          plot_eff(pheno, effs, map, scans, win, addlod = TRUE, allele_info())
+          plot_eff(pheno, effs, map, scans, win, addlod = TRUE, hotspot_list$allele_info())
         })
       }
     })
