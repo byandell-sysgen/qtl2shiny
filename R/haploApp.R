@@ -59,8 +59,7 @@ haploServer <- function(id, hotspot_list, project_df) {
     patterns <- snpSetupServer("snp_setup", hotspot_list, hap_par, project_df)
     
     ## Mediation
-    mediateServer("mediate", hap_par, hotspot_list$win_par, patterns, hotspot_list$pheno_mx, hotspot_list$covar_df, probs_obj, hotspot_list$kinship_list,
-                 analyses_df, hotspot_list$pmap_obj, hotspot_list$covar_df, analyses_tbl, hotspot_list$peak_df, project_df, hotspot_list$allele_info)
+    mediateServer("mediate", hotspot_list, probs_obj, patterns, project_df)
     
     output$allele_names <- shiny::renderText({
       shiny::req(hotspot_list$allele_info())
