@@ -9,18 +9,7 @@
 \usage{
 scanApp()
 
-scanServer(
-  id,
-  hap_par,
-  win_par,
-  peak_df,
-  pheno_mx,
-  covar_df,
-  K_chr,
-  probs_obj,
-  allele_info,
-  project_df
-)
+scanServer(id, hotspot_list, hap_par, probs_obj, project_df)
 
 scanUI(id)
 
@@ -29,7 +18,7 @@ scanOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{hap_par, hotspot_list, pheno_mx, covar_df, probs_obj, K_chr, project_df, allele_info}{reactive arguments}
+\item{hotspot_list, hap_par, probs_obj, project_df}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

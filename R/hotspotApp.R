@@ -30,7 +30,8 @@ hotspotApp <- function() {
       setParInput("set_par"),      # class, subject_model 
       setParUI("set_par"),         # class, window_Mbp 
       hotspotInput("hotspot_df")), # chr_ct, minLOD
-    hotspotOutput("hotspot_df")
+    hotspotOutput("hotspot_df"),   # hotspot_plot
+    hotspotUI("hotspot_df"),       # hotspot_table
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
@@ -97,14 +98,14 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
         })
     })
     
-    output$hotspot_show <- shiny::renderUI({
-      shiny::plotOutput(ns("hotspot_plot"))
+    output$hotspot_plot <- shiny::renderUI({
+      shiny::plotOutput(ns("hotspot_render_plot"))
     })
-    output$hotspot_plot <- shiny::renderPlot({
+    output$hotspot_render_plot <- shiny::renderPlot({
       shiny::req(hotspot_obj())
       window_Mbp <- shiny::req(set_par$window_Mbp)
       class <- shiny::req(set_par$class)
-      shiny::withProgress(message = 'Hotspot show ...',
+      shiny::withProgress(message = 'Hotspot render plot ...',
                           value = 0, {
                             shiny::setProgress(1)
                             plot_hot(hotspot_obj(), class, window_Mbp)
@@ -152,11 +153,13 @@ hotspotInput <- function(id) {                                # chr_ct, minLOD
 }
 #' @export
 #' @rdname hotspotApp
-hotspotOutput <- function(id) { # Hotspot Output: 
+hotspotUI <- function(id) { 
   ns <- shiny::NS(id)
-  shiny::tagList(       # hotspot_plot, hotspot_table
-    shiny::strong("Hotspot Output"),
-    shiny::uiOutput(ns("hotspot_show")),
-    DT::dataTableOutput(ns("hotspot_table"))
-  )
+  DT::dataTableOutput(ns("hotspot_table"))
+}
+#' @export
+#' @rdname hotspotApp
+hotspotOutput <- function(id) { 
+  ns <- shiny::NS(id)
+  shiny::uiOutput(ns("hotspot_plot"))
 }

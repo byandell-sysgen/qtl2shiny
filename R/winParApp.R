@@ -33,7 +33,7 @@ winParApp <- function() {
       ),
       winParUI("win_par"),      # local
       hotspotInput("hotspot")), # chr_ct, minLOD
-    winParOutput("win_par")     # peak_table
+    hotspotUI("hotspot")        # hotspot_table
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
@@ -91,10 +91,4 @@ winParInput <- function(id) { # local, chr_id, peak_Mbp
 winParUI <- function(id) { # local, chr_id, peak_Mbp
   ns <- shiny::NS(id)
   shiny::checkboxInput(ns("local"), "Local Peaks in Window?", TRUE)
-}
-#' @export
-#' @rdname winParApp
-winParOutput <- function(id) {
-  ns <- shiny::NS(id)
-  DT::dataTableOutput(ns("hot_table")) # peak_table
 }

@@ -10,7 +10,7 @@
 \usage{
 hotspotPanelApp()
 
-hotspotPanelServer(id, set_par, peak_df, pmap_obj, project_df)
+hotspotPanelServer(id, project_df)
 
 hotspotPanelInput(id)
 

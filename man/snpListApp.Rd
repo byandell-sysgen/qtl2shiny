@@ -13,12 +13,8 @@ snpListApp()
 
 snpListServer(
   id,
+  hotspot_list,
   hap_par,
-  win_par,
-  peak_df,
-  pheno_mx,
-  covar_df,
-  K_chr,
   project_df,
   snp_action = shiny::reactive({
      "basic"
@@ -36,7 +32,7 @@ snpListOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{hap_par, win_par, peak_df, pheno_mx, covar_df, K_chr, project_df, snp_action}{reactive arguments}
+\item{hotspot_list, hap_par, project_df, snp_action}{reactive arguments}
 }
 \description{
 Shiny module to create list of SNP objects.

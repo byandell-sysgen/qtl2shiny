@@ -28,22 +28,16 @@ scanApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Scan",
     sidebar = bslib::sidebar(
-      projectUI("project"),
-      projectUI("project"),
-      setParInput("set_par"),
-      hotspotPanelInput("hotspot_list"),
-      hotspotPanelUI("hotspot_list"),
+      projectUI("project"),              # project
+      hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
+      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, local, win_par, chr_ct, minLOD
       hapParInput("hap_par"),
       scanUI("scan")),
     scanOutput("scan")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
-    set_par <- setParServer("set_par", project_df)
-    peak_df <- peakServer("peak_df", set_par, project_df)
-    pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    hotspot_list <- 
-      hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
     hap_par <- hapParServer("hap_par")
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     scanServer("scan", hotspot_list, hap_par, probs_obj, project_df)

@@ -12,13 +12,8 @@ snpSetupApp()
 
 snpSetupServer(
   id,
+  hotspot_list,
   hap_par,
-  win_par,
-  peak_df,
-  pheno_mx,
-  covar_df,
-  K_chr,
-  allele_info,
   project_df,
   snp_action = shiny::reactive({
      "basic"
@@ -34,7 +29,7 @@ snpSetupOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{hap_par, win_par, peak_df, pheno_mx, covar_df, K_chr, allele_info, project_df, snp_action}{reactive arguments}
+\item{hotspot_list, hap_par, project_df}{reactive arguments}
 }
 \description{
 Shiny module to coordinate SNP and allele analyses and plots.

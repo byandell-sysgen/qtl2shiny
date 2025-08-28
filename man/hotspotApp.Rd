@@ -4,6 +4,7 @@
 \alias{hotspotApp}
 \alias{hotspotServer}
 \alias{hotspotInput}
+\alias{hotspotUI}
 \alias{hotspotOutput}
 \title{Shiny Hotspot App}
 \usage{
@@ -12,6 +13,8 @@ hotspotApp()
 hotspotServer(id, set_par, peak_df, pmap_obj, project_df)
 
 hotspotInput(id)
+
+hotspotUI(id)
 
 hotspotOutput(id)
 }

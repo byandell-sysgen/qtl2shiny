@@ -22,23 +22,18 @@ snpSetupApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test SNP Setup",
     sidebar = bslib::sidebar(
-      projectUI("project"),            # project
-      setParInput("set_par"),          # class
-      hotspotPanelInput("hotspot_list"),             # 
-      hotspotPanelUI("hotspot_list"),                # <various>
-      hapParUI("hap_par"),             # button
-      hapParInput("hap_par"),          # sex_type
+      projectUI("project"),              # project
+      hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
+      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, local, win_par, chr_ct, minLOD
+      hapParUI("hap_par"),               # button
+      hapParInput("hap_par"),            # sex_type
       snpSetupInput("snp_setup")),
     bslib::card(snpSetupUI("snp_setup")),
     bslib::card(snpSetupOutput("snp_setup"))
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
-    set_par <- setParServer("set_par", project_df)
-    peak_df <- peakServer("peak_df", set_par, project_df)
-    pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    hotspot_list <- 
-      hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
     hap_par <- hapParServer("hap_par")
     snpSetupServer("snp_setup", hotspot_list, hap_par, project_df)
   }

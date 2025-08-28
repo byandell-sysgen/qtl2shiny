@@ -30,7 +30,7 @@ setParApp <- function() {
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname setupApp
+#' @rdname setParApp
 setParServer <- function(id, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns

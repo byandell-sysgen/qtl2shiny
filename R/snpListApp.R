@@ -22,10 +22,9 @@ snpListApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test SNP Setup",
     sidebar = bslib::sidebar(
-      projectUI("project"),
-      setParInput("set_par"),
-      hotspotPanelInput("hotspot_list"),
-      hotspotPanelUI("hotspot_list"),
+      projectUI("project"),              # project
+      hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
+      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, local, win_par, chr_ct, minLOD
       snpListInput("snp_list"),
       snpListInput2("snp_list"),
       snpListUI("snp_list")),
@@ -33,11 +32,7 @@ snpListApp <- function() {
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
-    set_par <- setParServer("set_par", project_df)
-    peak_df <- peakServer("peak_df", set_par, project_df)
-    pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    hotspot_list <- 
-      hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
     hap_par <- hapParServer("hap_par")
     snp_list <- snpListServer("snp_list", hotspot_list, hap_par, project_df)
   }
@@ -50,10 +45,8 @@ snpListServer <- function(id, hotspot_list, hap_par, project_df,
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    #** This is superceded by decode_chr_pos and win_par$hotspot.
-    chr_pos <- shiny::reactive({
-      make_chr_pos(shiny::req(hotspot_list$win_par$chr_id), 
-                   range = shiny::req(input$scan_window))
+    hotspot <- shiny::reactive({
+      decode_hotspot(shiny::req(hotspot_list$win_par$hotspot))
     })
     pheno_names <- shiny::reactive({
       shiny::req(project_df(), hotspot_list$pheno_mx())
@@ -147,7 +140,7 @@ snpListServer <- function(id, hotspot_list, hap_par, project_df,
     shiny::reactiveValues(
       snp_par = input,
       pheno_names = pheno_names,
-      chr_pos = chr_pos,
+      hotspot = hotspot,
       snp_scan_obj = snp_scan_obj,
       snpinfo = snpinfo,
       top_snps_tbl = top_snps_tbl,

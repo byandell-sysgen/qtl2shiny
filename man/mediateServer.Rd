@@ -6,23 +6,7 @@
 \alias{mediateOutput}
 \title{Shiny coefficient analysis and plot module}
 \usage{
-mediateServer(
-  id,
-  job_par,
-  win_par,
-  patterns,
-  phe_mx,
-  cov_df,
-  probs_obj,
-  K_chr,
-  analyses_df,
-  pmap_obj,
-  covar,
-  analyses_tbl,
-  peak_df,
-  project_df,
-  allele_info
-)
+mediateServer(id, hotspot_list, probs_obj, patterns, project_df)
 
 mediateUI(id)
 
@@ -31,7 +15,7 @@ mediateOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{job_par, win_par, patterns, phe_mx, cov_df, probs_obj, K_chr, analyses_df, pmap_obj, covar, analyses_tbl, peak_df, project_df, allele_info}{reactive arguments}
+\item{hotspot_list, probs_obj, patterns, project_df}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

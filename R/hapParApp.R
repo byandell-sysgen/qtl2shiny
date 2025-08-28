@@ -3,7 +3,6 @@
 #' Shiny module for analysis based on haplotype alleles, with interface \code{haploUI}.
 #'
 #' @param id identifier for shiny reactive
-#' @param win_par,pmap_obj,pheno_mx,covar_df,K_chr,analyses_df,covar,analyses_tbl,peak_df,project_df,allele_info reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities

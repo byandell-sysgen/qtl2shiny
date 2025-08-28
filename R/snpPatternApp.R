@@ -24,35 +24,23 @@ snpPatternApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test SNP Pattern",
     sidebar = bslib::sidebar(
-      projectUI("project"),            # project
-      setParInput("set_par"),          # class
-      hotspotPanelInput("hotspot_list"),             # 
-      hotspotPanelUI("hotspot_list"),                # <various>
-      hapParUI("hap_par"),             # button
-      hapParInput("hap_par"),          # sex_type
-      snpListInput("snp_list"),        # scan_window
-      snpListInput2("snp_list"),       # minLOD
-      snpListUI("snp_list"),           # pheno_name
-      snpPatternInput("snp_pattern")), # button_input pat_input
+      projectUI("project"),              # project
+      hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
+      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, local, win_par, chr_ct, minLOD
+      hapParUI("hap_par"),               # button
+      hapParInput("hap_par"),            # sex_type
+      snpListInput("snp_list"),          # scan_window
+      snpListInput2("snp_list"),         # minLOD
+      snpListUI("snp_list"),             # pheno_name
+      snpPatternInput("snp_pattern")),   # button_input pat_input
     bslib::card(snpPatternUI("snp_pattern")),
     bslib::card(snpPatternOutput("snp_pattern"))
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
-    set_par <- setParServer("set_par", project_df)
-    peak_df <- peakServer("peak_df", set_par, project_df)
-    pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    hotspot_list <- 
-      hotspotPanelServer("hotspot_list", set_par, peak_df, pmap_obj, project_df)
-    pheno_mx <-
-      phenoServer("pheno_mx", set_par, hotspot_list$pheno_names, project_df)
-    covar_df <- covarServer("covar_df", pheno_mx, project_df)
-    kinship_list <- kinshipServer("kinship_list", hotspot_list$win_par, project_df)
-    allele_info <- shiny::reactive(read_project(project_df(), "allele_info"))
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
     hap_par <- hapParServer("hap_par")
-    # `snp_list` returns many objects in list.
-    snp_list <- snpListServer("snp_list", hap_par, hotspot_list$win_par,
-      peak_df, pheno_mx, covar_df, kinship_list, project_df)
+    snp_list <- snpListServer("snp_list", hotspot_list, hap_par, project_df)
     snpPatternServer("snp_pattern", snp_list, allele_info)
   }
   shiny::shinyApp(ui, server)
@@ -71,7 +59,7 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     })
     
     chr_id <- reactive({
-      stringr::str_split(shiny::req(snp_list$chr_pos()), "_")[[1]][1]
+      snp_list$hotspot()$chr
     })
     
     output$snp_pattern_table <- DT::renderDataTable({
@@ -204,14 +192,20 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     })
     output$downloadData <- shiny::downloadHandler(
       filename = function() {
-        file.path(paste0("pattern_", snp_list$chr_pos(), "_", snp_action(), ".csv")) },
+        file.path(paste0(paste0("pattern", snp_list$hotspot()$chr[1],
+                                snp_list$hotspot()$pos[1], snp_action(),
+                                sep = "_"),
+                         ".csv")) },
       content = function(file) {
         utils::write.csv(sum_top_pat(), file)
       }
     )
     output$downloadPlot <- shiny::downloadHandler(
       filename = function() {
-        file.path(paste0("pattern_", snp_list$chr_pos(), "_", snp_action(), ".pdf")) },
+        file.path(paste0(paste0("pattern", snp_list$hotspot()$chr[1],
+                                snp_list$hotspot()$pos[1], snp_action(),
+                                sep = "_"),
+                         ".pdf")) },
       content = function(file) {
         scans <- shiny::req(snp_list$snp_scan_obj())
         snp_w <- shiny::req(snp_list$snp_par$scan_window)

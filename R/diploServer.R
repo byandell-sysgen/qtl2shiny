@@ -19,6 +19,7 @@ diploServer <- function(id, win_par, phe_mx, cov_df, K_chr, analyses_df,
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    # Replace with decode_hotspot of win_par$hotspot
     chr_pos <- shiny::reactive({
       make_chr_pos(win_par$chr_id, 
                    win_par$peak_Mbp, 

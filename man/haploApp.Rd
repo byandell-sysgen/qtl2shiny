@@ -8,24 +8,14 @@
 \usage{
 haploApp()
 
-haploServer(
-  id,
-  win_par,
-  pmap_obj,
-  pheno_mx,
-  covar_df,
-  K_chr,
-  peak_df,
-  project_df,
-  allele_info
-)
+haploServer(id, hotspot_list, project_df)
 
 haploUI(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{win_par, pmap_obj, pheno_mx, covar_df, K_chr, analyses_df, covar, analyses_tbl, peak_df, project_df, allele_info}{reactive arguments}
+\item{hotspot_list, project_df}{reactive arguments}
 }
 \value{
 No return value; called for side effects.
