@@ -28,10 +28,9 @@ winParApp <- function() {
       setParInput("set_par"),   # class, subject_model
       bslib::layout_columns(
         col_widths = c(6, 4),
-        winParInput("win_par"),  # hotspot
-        setParUI("set_par")      # window_Mbp 
+        winParInput("win_par"), # hotspot
+        setParUI("set_par")     # window_Mbp 
       ),
-      winParUI("win_par"),      # local
       hotspotInput("hotspot")), # chr_ct, minLOD
     hotspotUI("hotspot")        # hotspot_table
   )
@@ -82,13 +81,7 @@ winParServer <- function(id, hotspot_df, project_df) {
 }
 #' @export
 #' @rdname winParApp
-winParInput <- function(id) { # local, chr_id, peak_Mbp
+winParInput <- function(id) { # chr_id, peak_Mbp
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("hotspot_input"))
-}
-#' @export
-#' @rdname winParApp
-winParUI <- function(id) { # local, chr_id, peak_Mbp
-  ns <- shiny::NS(id)
-  shiny::checkboxInput(ns("local"), "Local Peaks in Window?", TRUE)
 }

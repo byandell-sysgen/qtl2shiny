@@ -104,7 +104,7 @@ setParInput <- function(id) {                  # class, subject_model
 }
 #' @export
 #' @rdname setParApp
-setParUI <- function(id) {                     # window_Mbp
+setParUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("window_Mbp_input"))      # window_Mbp
 }

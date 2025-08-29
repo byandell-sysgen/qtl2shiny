@@ -18,8 +18,9 @@ covarApp <- function() {
       projectUI("project_df"),        # project  
       setParInput("set_par"),         # class, subject_model 
       phenoNamesInput("pheno_names"), # pheno_names
-      winParInput("win_par"),         # local, chr_id, peak_Mbp, window_Mbp
-      hotspotInput("hotspot_df")      # chr_ct, minLOD, window_Mbp
+      winParInput("win_par"),         # chr_id, peak_Mbp
+      setParUI("set_par"),            # window_Mbp
+      hotspotInput("hotspot_df")      # chr_ct, minLOD
     ),
     covarOutput("covar_df")
   )
@@ -30,8 +31,7 @@ covarApp <- function() {
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     hotspot_df <- 
       hotspotServer("hotspot_df", set_par, peak_df, pmap_obj, project_df)
-    win_par <- 
-      winParServer("win_par", set_par, peak_df, pmap_obj, hotspot_df, project_df)
+    win_par <- winParServer("win_par", hotspot_df, project_df)
     pheno_names <- 
       phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
     pheno_mx <- phenoServer("pheno_mx", set_par, pheno_names, project_df)

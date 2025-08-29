@@ -4,6 +4,7 @@
 \alias{phenoNamesApp}
 \alias{phenoNamesServer}
 \alias{phenoNamesInput}
+\alias{phenoNamesUI}
 \alias{phenoNamesOutput}
 \title{Shiny Phenotype Names App}
 \usage{
@@ -12,6 +13,8 @@ phenoNamesApp()
 phenoNamesServer(id, set_par, win_par, peak_df, project_df)
 
 phenoNamesInput(id)
+
+phenoNamesUI(id)
 
 phenoNamesOutput(id)
 }

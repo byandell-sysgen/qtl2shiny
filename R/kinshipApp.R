@@ -17,8 +17,8 @@ kinshipApp <- function() {
     sidebar = bslib::sidebar(
       projectUI("project_df"),  # project
       setParInput("set_par"),   # class, subject_model
-      winParInput("win_par"),   # local, chr_id, peak_Mbp, window_Mbp
-      hotspotInput("hotspot")), # chr_ct, minLOD, window_Mbp
+      winParInput("win_par"),   # chr_id, peak_Mbp
+      hotspotInput("hotspot")), # chr_ct, minLOD
     kinshipOutput("kinship_list")
   )
   server <- function(input, output, session) {

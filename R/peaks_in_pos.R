@@ -6,25 +6,26 @@ peaks_in_pos <- function(peaks_df, use_pos = TRUE,
   if(use_pos) {
     if(!(is.null(chr_id) | is.null(pos_Mbp) | is.null(win))) {
       if(win > 0) {
-        ## Filter peaks_df
-        peaks_df <- dplyr::filter(peaks_df, 
-                                  .data$qtl_chr == chr_id,
-                                  .data$qtl_pos >= pos_Mbp - win,
-                                  .data$qtl_pos <= pos_Mbp + win)
+        ## Filter peaks_df. Allow for more than one hotspot.
+        out <- list()
+        for(i in seq_along(chr_id)) {
+          out[[i]] <- dplyr::filter(peaks_df, 
+                                    .data$qtl_chr == chr_id[i],
+                                    .data$qtl_pos >= pos_Mbp[i] - win,
+                                    .data$qtl_pos <= pos_Mbp[i] + win)
+        }
+        peaks_df <- dplyr::bind_rows(out)
       }
     }
   }
   dplyr::mutate(
-    dplyr::select(
-      dplyr::distinct(
-        dplyr::arrange(
-          peaks_df,
-          dplyr::desc(.data$qtl_lod)),
-        .data$phenotype, .data$phenotype_class,
-        .data$qtl_lod, .data$qtl_chr, .data$qtl_pos,
-        .data$addcovar, .data$intcovar),
-      phenotype, phenotype_class, qtl_lod, qtl_chr, qtl_pos,
-      .data$addcovar, .data$intcovar),
+    dplyr::distinct(
+      dplyr::arrange(
+        peaks_df,
+        dplyr::desc(.data$qtl_lod)),
+      .data$phenotype, .data$phenotype_class,
+      .data$qtl_lod, .data$qtl_chr, .data$qtl_pos,
+      .data$addcovar, .data$intcovar, .data$subject_model),
     qtl_lod = round(.data$qtl_lod, 1),
     qtl_pos = round(.data$qtl_pos, 2))
 }

@@ -27,6 +27,34 @@
 #' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
 #' 
+mediateApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_sidebar(
+    title =  "Test SNP Setup",
+    sidebar = bslib::sidebar(
+      projectUI("project"),              # project
+      hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
+      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, local, win_par, chr_ct, minLOD
+      hapParUI("hap_par"),               # button
+      hapParInput("hap_par"),            # sex_type
+      snpSetupInput("snp_setup"),
+      mediateUI("mediate")),
+    bslib::card(snpSetupUI("snp_setup")),
+    bslib::card(snpSetupOutput("snp_setup")),
+    bslib::card(mediateOutput("mediate"))
+  )
+  server <- function(input, output, session) {
+    project_df <- projectServer("project", projects_df)
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    hap_par <- hapParServer("hap_par")
+    patterns <- snpSetupServer("snp_setup", hotspot_list, hap_par, project_df)
+    probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
+    mediateServer("mediate", hotspot_list, probs_obj, patterns, project_df)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname mediateApp
 mediateServer <- function(id, hotspot_list, probs_obj, patterns, project_df) {
   #** need to check; also eliminate `analyses_df`.
   shiny::moduleServer(id, function(input, output, session) {
@@ -358,7 +386,7 @@ mediateServer <- function(id, hotspot_list, probs_obj, patterns, project_df) {
   })
 }
 #' @export
-#' @rdname mediateServer
+#' @rdname mediateApp
 mediateUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -367,7 +395,7 @@ mediateUI <- function(id) {
     shiny::uiOutput(ns("medUI")))
 }
 #' @export
-#' @rdname mediateServer
+#' @rdname mediateApp
 mediateOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("medOutput"))

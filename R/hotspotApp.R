@@ -28,7 +28,7 @@ hotspotApp <- function() {
     sidebar = bslib::sidebar(
       projectUI("project_df"),     # project
       setParInput("set_par"),      # class, subject_model 
-      setParUI("set_par"),         # class, window_Mbp 
+      setParUI("set_par"),         # window_Mbp 
       hotspotInput("hotspot_df")), # chr_ct, minLOD
     hotspotOutput("hotspot_df"),   # hotspot_plot
     hotspotUI("hotspot_df"),       # hotspot_table

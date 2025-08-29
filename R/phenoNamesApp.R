@@ -27,9 +27,9 @@ phenoNamesApp <- function() {
         winParInput("win_par"),       # hotspot
         setParUI("set_par")           # window_Mbp 
       ),
-      winParUI("win_par"),            # local
       hotspotInput("hotspot")         # chr_ct, minLOD
     ),
+    phenoNamesUI("pheno_names"),
     phenoNamesOutput("pheno_names")
   )
   server <- function(input, output, session) {
@@ -69,15 +69,18 @@ phenoNamesServer <- function(id, set_par, win_par, peak_df, project_df) {
       peaks_in_pos(peak_df(), shiny::isTruthy(input$filter),
                    chr_id, peak_Mbp, window_Mbp)
     })
-
+    output$peak_table <- DT::renderDataTable({
+      peakDataTable(peak_filter_df())
+    }, options = list(scrollX = TRUE, pageLength = 5,
+                      lengthMenu = c(5,10,25)))
+    
     # Input `input$pheno_names`.
     output$pheno_names_input <- shiny::renderUI({
       shiny::selectizeInput(ns("pheno_names"), "", choices = "", multiple = TRUE)
     })
     shiny::observeEvent(shiny::req(project_df(), hotspot(),
       set_par$window_Mbp, peak_filter_df()), {
-      out <- select_phenames(NULL, peak_filter_df(),
-        win_par$local, hotspot()$chr, hotspot()$pos, set_par$window_Mbp)
+      out <- select_phenames(NULL, peak_filter_df())
       shiny::updateSelectizeInput(session, "pheno_names", out$label,
                                choices = out$choices,
                                selected = out$selected, server = TRUE)
@@ -101,7 +104,13 @@ phenoNamesInput <- function(id) {
 }
 #' @export
 #' @rdname phenoNamesApp
-phenoNamesOutput <- function(id) {
+phenoNamesUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("pheno_names_output")) # pheno_names
+}
+#' @export
+#' @rdname phenoNamesApp
+phenoNamesOutput <- function(id) {
+  ns <- shiny::NS(id)
+  DT::dataTableOutput(ns("peak_table")) # peak_table
 }

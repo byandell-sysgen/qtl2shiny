@@ -24,7 +24,7 @@ snpSetupApp <- function() {
     sidebar = bslib::sidebar(
       projectUI("project"),              # project
       hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
-      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, local, win_par, chr_ct, minLOD
+      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, win_par, chr_ct, minLOD
       hapParUI("hap_par"),               # button
       hapParInput("hap_par"),            # sex_type
       snpSetupInput("snp_setup")),
@@ -35,7 +35,7 @@ snpSetupApp <- function() {
     project_df <- projectServer("project", projects_df)
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
     hap_par <- hapParServer("hap_par")
-    snpSetupServer("snp_setup", hotspot_list, hap_par, project_df)
+    patterns <- snpSetupServer("snp_setup", hotspot_list, hap_par, project_df)
   }
   shiny::shinyApp(ui, server)
 }

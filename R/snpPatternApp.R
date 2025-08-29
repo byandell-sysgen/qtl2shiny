@@ -26,7 +26,7 @@ snpPatternApp <- function() {
     sidebar = bslib::sidebar(
       projectUI("project"),              # project
       hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
-      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, local, win_par, chr_ct, minLOD
+      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, win_par, chr_ct, minLOD
       hapParUI("hap_par"),               # button
       hapParInput("hap_par"),            # sex_type
       snpListInput("snp_list"),          # scan_window

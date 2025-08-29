@@ -1,18 +1,10 @@
 #' @importFrom dplyr arrange desc distinct filter
 #' @importFrom rlang .data
 #' 
-select_phenames <- function(phenames, peak_df, local,
-                            chr_id, peak_Mbp, window_Mbp) {
+select_phenames <- function(phenames, peak_df) {
   # See foundrHarmony/R/LivRna.R for compression of gene symbol, id and transcript id.
   selected <- phenames
   if(shiny::isTruthy(peak_df) && nrow(peak_df)) {
-    peak_df <- dplyr::filter(peak_df, 
-                              .data$qtl_chr == chr_id)
-    if(shiny::isTruthy(local)) {
-      peak_df <- dplyr::filter(peak_df, 
-                                .data$qtl_pos >= peak_Mbp - window_Mbp,
-                                .data$qtl_pos <= peak_Mbp + window_Mbp)
-    }
     phenames <- dplyr::distinct(
       dplyr::arrange(
         peak_df,

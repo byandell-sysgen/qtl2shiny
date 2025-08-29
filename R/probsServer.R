@@ -22,14 +22,10 @@ probsServer <- function(id, win_par, project_df) {
     chr_id <- shiny::req(win_par$chr_id)
     shiny::withProgress(message = 'Read probs ...', value = 0, {
       shiny::setProgress(1)
-      if(shiny::isTruthy(win_par$local)) {
-        mid <- req(win_par$peak_Mbp)
-        win <- req(win_par$window_Mbp)
-        start_val <- mid - win
-        end_val <- mid + win
-      } else {
-        start_val <- end_val <- NULL
-      }
+      mid <- req(win_par$peak_Mbp)
+      win <- req(win_par$window_Mbp)
+      start_val <- mid - win
+      end_val <- mid + win
 
       # Define query_probs function
       query_probs <- read_query_rds(project_df(), "query_probs.rds")

@@ -21,7 +21,7 @@ hotspotPanelApp <- function() {
     sidebar = bslib::sidebar(
       projectUI("project_df"),           # project
       hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
-      hotspotPanelUI("hotspot_list")),   # window_Mbp, radio, local, win_par, chr_ct, minLOD
+      hotspotPanelUI("hotspot_list")),   # window_Mbp, radio, win_par, chr_ct, minLOD
     hotspotPanelOutput("hotspot_list")
   )
   server <- function(input, output, session) {
@@ -56,14 +56,6 @@ hotspotPanelServer <- function(id, project_df) {
       versions()
     })
     
-    ## Setup input logic.
-    output$sidebar <- shiny::renderUI({
-      switch(shiny::req(input$radio),
-        #Phenotypes = shiny::uiOutput(ns("filter")), # filter
-        Hotspots   = shiny::tagList(
-          winParInput(ns("win_par")),                # hotspot
-          winParUI(ns("win_par"))))                  # local
-    })
     output$main <- shiny::renderUI({
       switch(shiny::req(input$radio),
         Phenotypes = shiny::tagList(
@@ -112,7 +104,7 @@ hotspotPanelUI <- function(id) {
   shiny::tagList(
     setParUI(ns("set_par")),              # window_Mbp
     shiny::uiOutput(ns("radio_input")),   # radio
-    shiny::uiOutput(ns("sidebar")),       # hotspot, local
+    winParInput(ns("win_par")),           # hotspot
     hotspotInput(ns("hotspot")))          # chr_ct, minLOD
     #shiny::uiOutput(ns("version"))
 }

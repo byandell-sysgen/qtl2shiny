@@ -24,7 +24,7 @@ snpListApp <- function() {
     sidebar = bslib::sidebar(
       projectUI("project"),              # project
       hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
-      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, local, win_par, chr_ct, minLOD
+      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, win_par, chr_ct, minLOD
       snpListInput("snp_list"),
       snpListInput2("snp_list"),
       snpListUI("snp_list")),
