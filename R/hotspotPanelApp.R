@@ -56,7 +56,7 @@ hotspotPanelServer <- function(id, project_df) {
       versions()
     })
     
-    output$main <- shiny::renderUI({
+    output$hotspot_output <- shiny::renderUI({
       switch(shiny::req(input$radio),
         Phenotypes = shiny::tagList(
           phenoNamesOutput(ns("pheno_names")), # pheno_names
@@ -112,5 +112,5 @@ hotspotPanelUI <- function(id) {
 #' @rdname hotspotPanelApp
 hotspotPanelOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("main"))
+  shiny::uiOutput(ns("hotspot_output"))
 }
