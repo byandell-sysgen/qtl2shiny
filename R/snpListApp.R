@@ -45,9 +45,6 @@ snpListServer <- function(id, hotspot_list, hap_par, project_df,
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    hotspot <- shiny::reactive({
-      decode_hotspot(shiny::req(hotspot_list$win_par$hotspot))
-    })
     pheno_names <- shiny::reactive({
       shiny::req(project_df(), hotspot_list$pheno_mx())
       colnames(hotspot_list$pheno_mx())
@@ -111,8 +108,8 @@ snpListServer <- function(id, hotspot_list, hap_par, project_df,
     # Scan Window slider
     output$scan_window_input <- shiny::renderUI({
       shiny::req(pheno_names())
-      rng <- round(shiny::req(hotspot_list$win_par$peak_Mbp) + 
-                     c(-1,1) * shiny::req(hotspot_list$win_par$window_Mbp), 
+      rng <- round(shiny::req(hotspot_list$win_par()$peak_Mbp) + 
+                     c(-1,1) * shiny::req(hotspot_list$win_par()$window_Mbp), 
                    1)
       selected <- select_range(input$scan_window, rng)
       

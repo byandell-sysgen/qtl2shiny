@@ -14,7 +14,7 @@
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom shiny moduleServer NS plotOutput renderPlot renderUI req
 #'             setProgress tagList uiOutput withProgress
-#' @importFrom bslib layout_columns page_sidebar sidebar
+#' @importFrom bslib card layout_columns page_sidebar sidebar
 phenoPlotApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
@@ -31,7 +31,8 @@ phenoPlotApp <- function() {
       hotspotInput("hotspot"),        # chr_ct, minLOD
       phenoUI("pheno_mx")             # raw_data
     ),
-    phenoPlotOutput("pheno_plot")
+    bslib::card(phenoPlotOutput("pheno_plot")),
+    bslib::card(phenoPlotUI("pheno_plot"))
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
@@ -76,16 +77,17 @@ phenoPlotServer <- function(id, pheno_names, pheno_mx, covar_df) {
         plot_sex(pheno_mx(), covar_df())
       })
     })
-    output$pheno_plot_table <- shiny::renderUI({
-      shiny::tagList(
-        shiny::plotOutput(ns("pheno_plot")),
-        DT::dataTableOutput(ns("pheno_table")))
-    })
   })
+}
+#' @export
+#' @rdname phenoPlotApp
+phenoPlotUI <- function(id) {
+  ns <- shiny::NS(id)
+  DT::dataTableOutput(ns("pheno_table"))
 }
 #' @export
 #' @rdname phenoPlotApp
 phenoPlotOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("pheno_plot_table"))
+  shiny::plotOutput(ns("pheno_plot"))
 }

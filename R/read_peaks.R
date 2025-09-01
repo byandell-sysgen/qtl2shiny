@@ -8,6 +8,7 @@
 #' @returns dataframe of peaks
 #' @export
 #' @importFrom dplyr bind_rows mutate select
+#' @importFrom tidyr separate_wider_delim
 read_peaks <- function(project_df, class = NULL, subject_model = NULL, legacy = FALSE) {
   if(is.null(class)) return(NULL)
   if(is.null(subject_model)) subject_model <- "all_mice_additive"
@@ -25,7 +26,9 @@ read_peaks <- function(project_df, class = NULL, subject_model = NULL, legacy = 
     result$phenotype_class <- classes[i]
     out[[i]] <- dplyr::mutate(result, subject_model = subjmod[i])
   }
-  dplyr::bind_rows(out)
+  out <- dplyr::bind_rows(out) |>
+    tidyr::separate_wider_delim(subject_model, "_mice_", 
+                                names = c("subject", "model"))
 }
 peak_class <- function(project_df, 
   class_name = NULL,

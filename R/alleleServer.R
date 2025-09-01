@@ -30,21 +30,21 @@ alleleServer <- function(id, win_par, phe_mx, cov_df, probs_obj, K_chr,
     # Scan Window slider
     output$pos_Mbp <- shiny::renderUI({
       shiny::req(project_df())
-      chr_id <- shiny::req(win_par$chr_id)
+      chr_id <- shiny::req(win_par())$chr_id
       map <- shiny::req(probs_obj())$map[[chr_id]]
       rng <- round(2 * range(map)) / 2
       if(is.null(selected <- input$pos_Mbp))
-        selected <- req(win_par$peak_Mbp)
+        selected <- req(win_par())$peak_Mbp
       shiny::sliderInput(ns("pos_Mbp"), NULL, rng[1], rng[2],
                          selected, step=.1)
     })
     ## Reset pos_Mbp if chromosome changes.
-    observeEvent(win_par$chr_id, {
+    observeEvent(shiny::req(win_par()), {
       map <- shiny::req(probs_obj()$map)
-      chr <- shiny::req(win_par$chr_id)
+      chr <- win_par()$chr_id
       rng <- round(2 * range(map[[chr]])) / 2
       shiny::updateSliderInput(session, "pos_Mbp", NULL, 
-                               req(win_par$peak_Mbp), 
+                               win_par()$peak_Mbp, 
                                rng[1], rng[2], step=.1)
     })
     
@@ -80,9 +80,8 @@ alleleServer <- function(id, win_par, phe_mx, cov_df, probs_obj, K_chr,
     })
     ## Downloads.
     filepath <- shiny::reactive({
-      file.path(paste0("allele1_",
-                       shiny::req(win_par$chr_id), "_",
-                       shiny::req(win_par$peak_Mbp)))
+      shiny::req(win_par())
+      file.path(paste0("allele1_", win_par()$chr_id, "_", win_par()$peak_Mbp))
     })
     download_list <- shiny::reactiveValues(
       filename = shiny::isolate(filepath()),

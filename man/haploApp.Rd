@@ -4,6 +4,7 @@
 \alias{haploApp}
 \alias{haploServer}
 \alias{haploUI}
+\alias{haploOutput}
 \title{Shiny Haplotype Analysis App}
 \usage{
 haploApp()
@@ -11,6 +12,8 @@ haploApp()
 haploServer(id, hotspot_list, project_df)
 
 haploUI(id)
+
+haploOutput(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}

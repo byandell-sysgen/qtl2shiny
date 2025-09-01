@@ -10,8 +10,8 @@
 #' @importFrom dplyr distinct filter 
 #' @importFrom tidyr unite
 #' @importFrom shiny moduleServer NS observeEvent reactive renderText
-#'             renderUI req selectInput uiOutput updateSelectInput
-#' @importFrom bslib page_sidebar sidebar
+#'             renderUI req selectInput tagList uiOutput updateSelectInput
+#' @importFrom bslib layout_columns page_sidebar sidebar
 setParApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
@@ -40,7 +40,7 @@ setParServer <- function(id, project_df) {
       choices <- project_classes(project_df())
       if(is.null(selected <- input$class))
         selected <- choices[1]
-      shiny::selectInput(ns("class"), "Phenotype Class",
+      shiny::selectInput(ns("class"), "Class",
         choices = as.list(choices), selected = selected, multiple = TRUE)
     })
     shiny::observeEvent(shiny::req(project_df()), {
@@ -62,7 +62,7 @@ setParServer <- function(id, project_df) {
       choices <- project_class_df()$subject_model
       if(is.null(selected <- input$subject_model))
         selected <- choices[1]
-      shiny::selectInput(ns("subject_model"), "Subjects & Model",
+      shiny::selectInput(ns("subject_model"), "Subject_Model",
         choices = choices, selected = selected, multiple = TRUE)
     })
     shiny::observeEvent(shiny::req(project_class_df()), {
@@ -97,7 +97,8 @@ setParServer <- function(id, project_df) {
 #' @rdname setParApp
 setParInput <- function(id) {                  # class, subject_model
   ns <- shiny::NS(id)
-  shiny::tagList(
+  bslib::layout_columns(
+    col_widths = c(5, 7),
     shiny::uiOutput(ns("class_input")),        # class
     shiny::uiOutput(ns("subject_model_input")) # subject_model
   )

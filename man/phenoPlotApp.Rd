@@ -3,12 +3,15 @@
 \name{phenoPlotApp}
 \alias{phenoPlotApp}
 \alias{phenoPlotServer}
+\alias{phenoPlotUI}
 \alias{phenoPlotOutput}
 \title{Shiny Phenotype Plot App}
 \usage{
 phenoPlotApp()
 
 phenoPlotServer(id, pheno_names, pheno_mx, covar_df)
+
+phenoPlotUI(id)
 
 phenoPlotOutput(id)
 }

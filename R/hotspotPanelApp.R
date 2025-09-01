@@ -13,15 +13,18 @@
 #' @importFrom shiny checkboxInput isTruthy moduleServer NS
 #'             observeEvent radioButtons reactive renderText renderUI req
 #'             strong tagList textOutput uiOutput
-#' @importFrom bslib page_sidebar sidebar
+#' @importFrom bslib card page_sidebar sidebar
 hotspotPanelApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Hotspot Panel",
     sidebar = bslib::sidebar(
-      projectUI("project_df"),           # project
-      hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
-      hotspotPanelUI("hotspot_list")),   # window_Mbp, radio, win_par, chr_ct, minLOD
+      bslib::card(
+        projectUI("project_df"),            # project
+        hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+      bslib::card(
+        hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+      width = 400),
     hotspotPanelOutput("hotspot_list")
   )
   server <- function(input, output, session) {
@@ -49,9 +52,6 @@ hotspotPanelServer <- function(id, project_df) {
     covar_df <- covarServer("covar_df", pheno_mx, project_df)
     phenoPlotServer("pheno_plot", pheno_names, pheno_mx, covar_df)
     
-    output$chr_pos <- shiny::renderText({
-      paste("Hotspots", shiny::req(win_par$hotspot))
-    })
     output$version <- shiny::renderText({
       versions()
     })
@@ -59,11 +59,11 @@ hotspotPanelServer <- function(id, project_df) {
     output$hotspot_output <- shiny::renderUI({
       switch(shiny::req(input$radio),
         Phenotypes = shiny::tagList(
-          phenoNamesOutput(ns("pheno_names")), # pheno_names
-          phenoPlotOutput(ns("pheno_plot"))),  # pheno_plot
+          phenoPlotOutput(ns("pheno_plot")),    # pheno_plot
+          phenoNamesOutput(ns("pheno_names"))), # pheno_names
         Hotspots   = shiny::tagList(
-          hotspotOutput(ns("hotspot")),        # hotspot_plot
-          hotspotUI(ns("hotspot"))))           # hotspot_table
+          hotspotOutput(ns("hotspot")),         # hotspot_plot
+          hotspotUI(ns("hotspot"))))            # hotspot_table
     })
     
     output$radio_input <- shiny::renderUI({
@@ -72,7 +72,7 @@ hotspotPanelServer <- function(id, project_df) {
     })
     
     ## Additional reactives not used yet.
-    kinship_list <- kinshipServer("kinship_list", hotspot_list$win_par, project_df)
+    kinship_list <- kinshipServer("kinship_list", win_par, project_df)
     allele_info <- shiny::reactive(read_project(project_df(), "allele_info"))
     
     ## Return.
@@ -93,8 +93,7 @@ hotspotPanelInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     setParInput(ns("set_par")),           # class, subject_model
-    phenoNamesInput(ns("pheno_names")),   # pheno_names
-    shiny::uiOutput(ns("chr_pos"))        # chr_pos
+    phenoNamesInput(ns("pheno_names"))    # pheno_names
   )
 }
 #' @export
@@ -102,15 +101,19 @@ hotspotPanelInput <- function(id) {
 hotspotPanelUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    setParUI(ns("set_par")),              # window_Mbp
-    shiny::uiOutput(ns("radio_input")),   # radio
     winParInput(ns("win_par")),           # hotspot
-    hotspotInput(ns("hotspot")))          # chr_ct, minLOD
+    bslib::layout_columns(
+      col_widths = c(4, 8),
+      setParUI(ns("set_par")),            # window_Mbp
+      hotspotInput(ns("hotspot"))))       # chr_ct, minLOD
     #shiny::uiOutput(ns("version"))
 }
 #' @export
 #' @rdname hotspotPanelApp
 hotspotPanelOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("hotspot_output"))
+  shiny::tagList(
+    shiny::uiOutput(ns("radio_input")),   # radio
+    shiny::uiOutput(ns("hotspot_output"))
+  )
 }

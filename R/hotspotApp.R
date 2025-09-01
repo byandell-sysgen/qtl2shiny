@@ -16,7 +16,7 @@
 #' @importFrom dplyr arrange desc distinct filter
 #' @importFrom shiny column fluidRow isTruthy moduleServer
 #'             numericInput observeEvent reactive renderPlot renderTable
-#'             renderUI req selectInput setProgress strong tableOutput tagList
+#'             renderUI req selectInput setProgress tableOutput
 #'             uiOutput updateNumericInput updateSelectInput withProgress
 #' @importFrom DT dataTableOutput renderDataTable 
 #' @importFrom rlang .data
@@ -51,7 +51,7 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
     
     shiny::observeEvent(project_df(), {
       choices <- chr_names()
-      shiny::updateSelectInput(session, "chr_ct", shiny::strong("chrs"),
+      shiny::updateSelectInput(session, "chr_ct", "chrs",
                                choices = c("all", choices),
                                selected = NULL)
       if(shiny::isTruthy(peak_df())) {
@@ -69,7 +69,7 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
       choices <- chr_names()
       if(is.null(selected <- input$chr_ct))
         selected <- "all"
-      shiny::selectInput(ns("chr_ct"), strong("chrs"),
+      shiny::selectInput(ns("chr_ct"), "chrs",
                          choices = c("all", choices),
                          selected = selected,
                          multiple = TRUE)
@@ -143,13 +143,11 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
 }
 #' @export
 #' @rdname hotspotApp
-hotspotInput <- function(id) {                                # chr_ct, minLOD 
+hotspotInput <- function(id) {                             # chr_ct, minLOD 
   ns <- shiny::NS(id)
-  shiny::tagList(      
-    shiny::strong("Hotspot Info"),
-    shiny::fluidRow(
-      shiny::column(6, shiny::uiOutput(ns("chr_ct_input"))),  # chr_ct
-      shiny::column(6, shiny::uiOutput(ns("minLOD_input"))))) # minLOD
+  shiny::fluidRow(
+    shiny::column(6, shiny::uiOutput(ns("chr_ct_input"))), # chr_ct
+    shiny::column(6, shiny::uiOutput(ns("minLOD_input")))) # minLOD
 }
 #' @export
 #' @rdname hotspotApp

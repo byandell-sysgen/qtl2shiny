@@ -4,6 +4,7 @@
 # dplyr::filter(peak_df(), chr == chr_ct, pheno_type %in% dataset)
 # dplyr::select(pheno, pheno_type, chr, pos, lod)
 #' @importFrom rlang .data
+#' @importFrom dplyr across arrange desc filter mutate where
 #' 
 peakDataTable <- function(peak_df, hotspot_df = NULL, local = TRUE,
                           chr_id = NULL) {
@@ -23,9 +24,11 @@ peakDataTable <- function(peak_df, hotspot_df = NULL, local = TRUE,
     }
   }
   dplyr::arrange(
-    dplyr::select(
-      peak_df,
-      .data$phenotype, .data$phenotype_class, .data$subject_model,
-      .data$qtl_chr, .data$qtl_pos, .data$qtl_lod),
-    desc(.data$qtl_lod))
+    dplyr::mutate(
+      dplyr::select(
+        peak_df,
+        .data$phenotype, .data$phenotype_class, .data$subject, .data$model,
+        .data$qtl_chr, .data$qtl_pos, .data$qtl_lod),
+      dplyr::across(dplyr::where(is.double), signif, digits = 4)),
+    dplyr::desc(.data$qtl_lod))
 }

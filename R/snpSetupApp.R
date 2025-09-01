@@ -42,7 +42,7 @@ snpSetupApp <- function() {
 #' @export
 #' @rdname snpSetupApp
 snpSetupServer <- function(id, hotspot_list, hap_par, project_df,
-  snp_action = shiny::reactive({"basic"})) {
+                           snp_action = shiny::reactive({"basic"})) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     

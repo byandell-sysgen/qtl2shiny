@@ -9,13 +9,11 @@
 patternServer(
   id,
   job_par,
-  chr_pos,
   win_par,
   phe_mx,
   cov_df,
   pairprobs_obj,
   K_chr,
-  analyses_df,
   patterns,
   project_df,
   allele_info,
@@ -31,7 +29,7 @@ patternOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{job_par, chr_pos, win_par, phe_mx, cov_df, pairprobs_obj, K_chr, analyses_df, patterns, project_df, allele_info, snp_action}{reactive arguments}
+\item{job_par, win_par, phe_mx, cov_df, pairprobs_obj, K_chr, analyses_df, patterns, project_df, allele_info, snp_action}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

@@ -3,7 +3,7 @@
 #' Shiny module for SNP pattern plots, with interfaces \code{patternUI} and  \code{patternOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param job_par,chr_pos,win_par,phe_mx,cov_df,pairprobs_obj,K_chr,analyses_df,patterns,project_df,allele_info,snp_action reactive arguments
+#' @param job_par,win_par,phe_mx,cov_df,pairprobs_obj,K_chr,analyses_df,patterns,project_df,allele_info,snp_action reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -22,8 +22,8 @@
 #' @importFrom grDevices dev.off pdf
 #' @importFrom utils write.csv
 #' @importFrom rlang .data
-patternServer <- function(id, job_par, chr_pos, win_par,
-                         phe_mx, cov_df, pairprobs_obj, K_chr, analyses_df,
+patternServer <- function(id, job_par, win_par,
+                         phe_mx, cov_df, pairprobs_obj, K_chr,
                          patterns, project_df, allele_info, 
                          snp_action = shiny::reactive({NULL})) {
   shiny::moduleServer(id, function(input, output, session) {
@@ -32,6 +32,7 @@ patternServer <- function(id, job_par, chr_pos, win_par,
     phe1_mx <- reactive({
       phe_mx()[, shiny::req(input$pheno_name), drop = FALSE]
     })
+    #** analyses_df no longer used.
     alleleServer("allele", win_par,  phe1_mx, cov_df, pairprobs_obj, K_chr,
                 analyses_df, patterns, scan_pat, project_df, snp_action)
     
@@ -164,8 +165,12 @@ patternServer <- function(id, job_par, chr_pos, win_par,
     ## Downloads
     output$downloadData <- shiny::downloadHandler(
       filename = function() {
+        shiny::req(win_par())
         pheno_in <- shiny::req(input$pheno_name)
-        file.path(paste0(pheno_in, "_", snp_action(), "_effects_", chr_pos(), ".csv"))
+        file.path(paste0(
+          paste(pheno_in, snp_action(), "effects", win_par()$chr, win_par()$pos,
+                sep = "_"),
+          ".csv"))
       },
       content = function(file) {
         scan_in <- shiny::req(scan_pat())
@@ -176,7 +181,10 @@ patternServer <- function(id, job_par, chr_pos, win_par,
     output$downloadPlot <- shiny::downloadHandler(
       filename = function() {
         shiny::req(input$pheno_name)
-        file.path(paste0("pattern", "_", snp_action(), "_scan_", chr_pos(), ".pdf"))
+        file.path(paste0(
+          paste(pheno_in, snp_action(), "effects", win_par()$chr, win_par()$pos,
+                sep = "_"),
+          ".pdf"))
       },
       content = function(file) {
         shiny::req(scan_pat(), pattern_choices(), job_par$sex_type)

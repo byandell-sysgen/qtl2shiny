@@ -4,6 +4,7 @@
 \alias{winParApp}
 \alias{winParServer}
 \alias{winParInput}
+\alias{winParOutput}
 \title{Shiny Window Parameters App}
 \usage{
 winParApp()
@@ -11,6 +12,8 @@ winParApp()
 winParServer(id, hotspot_df, project_df)
 
 winParInput(id)
+
+winParOutput(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}

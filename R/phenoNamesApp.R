@@ -13,21 +13,23 @@
 #' @importFrom shiny moduleServer NS observeEvent reactive renderText req
 #'             selectizeInput tagList uiOutput updateSelectizeInput
 #' @importFrom rlang .data
-#' @importFrom bslib layout_columns page_sidebar sidebar
+#' @importFrom bslib card layout_columns page_sidebar sidebar
 phenoNamesApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Phenotype Names",
     sidebar = bslib::sidebar(
-      projectUI("project_df"),        # project
-      setParInput("set_par"),         # class, subject_model 
-      phenoNamesInput("pheno_names"), # pheno_names
-      bslib::layout_columns(
-        col_widths = c(6, 4),
-        winParInput("win_par"),       # hotspot
-        setParUI("set_par")           # window_Mbp 
-      ),
-      hotspotInput("hotspot")         # chr_ct, minLOD
+      bslib::card(
+        projectUI("project_df"),         # project
+        setParInput("set_par"),          # class, subject_model
+        phenoNamesInput("pheno_names")), # pheno_names
+      bslib::card(
+        winParInput("win_par"),          # hotspot
+        bslib::layout_columns(
+          col_widths = c(4, 8),
+          setParUI("set_par"),           # window_Mbp 
+          hotspotInput("hotspot"))),     # chr_ct, minLOD
+      width = 400
     ),
     phenoNamesUI("pheno_names"),
     phenoNamesOutput("pheno_names")
@@ -58,13 +60,10 @@ phenoNamesServer <- function(id, set_par, win_par, peak_df, project_df) {
       shiny::checkboxInput(ns("filter"),
         "Filter by hotspot(s)?", TRUE)
     })
-    hotspot <- shiny::reactive({
-      decode_hotspot(shiny::req(win_par$hotspot))
-    })
     peak_filter_df <- shiny::reactive({
-      shiny::req(project_df(), peak_df(), hotspot())
-      chr_id <- hotspot()$chr
-      peak_Mbp <- hotspot()$pos
+      shiny::req(project_df(), peak_df(), win_par())
+      chr_id <- win_par()$chr
+      peak_Mbp <- win_par()$pos
       window_Mbp <- shiny::req(set_par$window_Mbp)
       peaks_in_pos(peak_df(), shiny::isTruthy(input$filter),
                    chr_id, peak_Mbp, window_Mbp)
@@ -78,7 +77,7 @@ phenoNamesServer <- function(id, set_par, win_par, peak_df, project_df) {
     output$pheno_names_input <- shiny::renderUI({
       shiny::selectizeInput(ns("pheno_names"), "", choices = "", multiple = TRUE)
     })
-    shiny::observeEvent(shiny::req(project_df(), hotspot(),
+    shiny::observeEvent(shiny::req(project_df(), win_par(),
       set_par$window_Mbp, peak_filter_df()), {
       out <- select_phenames(NULL, peak_filter_df())
       shiny::updateSelectizeInput(session, "pheno_names", out$label,

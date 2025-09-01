@@ -149,7 +149,7 @@ summary.hotspot <- function(object, ...) {
       dplyr::bind_rows(scan, scan_all),
       .data$chr, .data$pos)
     
-    dplyr::select(
+    out <- dplyr::select(
       dplyr::arrange(
         dplyr::filter(
           dplyr::select(
@@ -160,11 +160,13 @@ summary.hotspot <- function(object, ...) {
                   scan,
                   names_from = "pheno", values_from = "count"),
                 -.data$marker),
-              hotspot = paste0(.data$chr, ":", .data$pos, " (", .data$all, ")")),
+              hotspot = encode_hotspot(.data$chr, .data$pos, .data$all)),
             hotspot, dplyr::everything()),
           .data$all > 0),
         dplyr::desc(.data$all), .data$chr, .data$pos),
       -all)
+    attr(out, "window") <- attr(object, "window")
+    out
   } else {
     NULL
   }
