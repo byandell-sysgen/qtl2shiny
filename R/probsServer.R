@@ -26,7 +26,7 @@ probsServer <- function(id, win_par, project_df) {
       win <- win_par()$window_Mbp
       start_val <- mid - win
       end_val <- mid + win
-browser()
+      
       # Define query_probs function
       query_probs <- read_query_rds(project_df(), "query_probs.rds")
       # Note probs object keeps map with it
