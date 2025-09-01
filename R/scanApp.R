@@ -67,9 +67,10 @@ scanServer <- function(id, hotspot_list, hap_par, probs_obj, project_df) {
     })
     
     # Scan Window slider
+    #** Faulty behavior if more than one hotspot.
     output$scan_window_input <- shiny::renderUI({
       shiny::req(project_df(), hotspot_list$pheno_mx(), hotspot_list$win_par())
-      chr_id <- shiny::req(hotspot_list$win_par()$chr_id)
+      chr_id <- shiny::req(hotspot_list$win_par())$chr_id[1]
       map <- shiny::req(probs_obj())$map[[chr_id]]
       rng <- round(2 * range(map)) / 2
       selected <- select_range(input$scan_window, rng)
@@ -80,7 +81,7 @@ scanServer <- function(id, hotspot_list, hap_par, probs_obj, project_df) {
     ## Reset scan_window if chromosome changes.
     observeEvent(probs_obj()$map, {
       map <- shiny::req(probs_obj()$map)
-      chr <- shiny::req(hotspot_list$win_par())$chr_id
+      chr <- shiny::req(hotspot_list$win_par())$chr_id[1]
       rng <- round(2 * range(map[[chr]])) / 2
       shiny::updateSliderInput(session, "scan_window", NULL, rng, 
                                rng[1], rng[2], step=.5)
@@ -95,7 +96,7 @@ scanServer <- function(id, hotspot_list, hap_par, probs_obj, project_df) {
     
     ## Scan1 plot
     output$scan_plot <- shiny::renderPlot({
-      if(!shiny::isTruthy(hotspot_list$win_par()$chr_id) || !shiny::isTruthy(hotspot_list$pheno_mx()))
+      if(!shiny::isTruthy(hotspot_list$win_par()$chr_id[1]) || !shiny::isTruthy(hotspot_list$pheno_mx()))
         return(plot_null("need to select\nRegion & Phenotype"))
       shiny::req(hotspot_list$win_par(), input$scan_window, scan_obj(), probs_obj())
       shiny::withProgress(message = 'Genome LOD Plot ...', value = 0, {
@@ -103,7 +104,7 @@ scanServer <- function(id, hotspot_list, hap_par, probs_obj, project_df) {
         plot_scan(scan_obj(), 
                   probs_obj()$map, 
                   seq(ncol(scan_obj())), 
-                  hotspot_list$win_par()$chr_id, 
+                  hotspot_list$win_par()$chr_id[1], 
                   input$scan_window, 
                   hotspot_list$pheno_mx())
       })
@@ -189,7 +190,7 @@ scanServer <- function(id, hotspot_list, hap_par, probs_obj, project_df) {
     filepath <- shiny::reactive({
       # Catch if `chr_id` is not valid and return "".
       tryCatch(
-        file.path(paste0("scan_", shiny::req(hotspot_list$win_par())$chr_id)),
+        file.path(paste0("scan_", shiny::req(hotspot_list$win_par())$chr_id[1])),
         error = function(e) return(""))
     })
     download_Plot <- shiny::reactiveValues()
@@ -200,7 +201,7 @@ scanServer <- function(id, hotspot_list, hap_par, probs_obj, project_df) {
       win <- shiny::req(input$scan_window)
       map <- shiny::req(probs_obj())$map
       ggplot2::autoplot(scans, map, lodcolumn = seq_along(names(effs)),
-                        chr = shiny::req(hotspot_list$win_par()$chr_id), xlim = win)
+                        chr = hotspot_list$win_par()$chr_id[1], xlim = win)
     })
     # Trick to get Effect plots into `download_Plot` reactiveValues.
     plot_effs <- shiny::reactive({

@@ -29,15 +29,10 @@ scan1covar <- function(pheno_mx, covar_df, genoprobs, kinship, peaks_df,
     pheno_mx <- pheno_mx[, !is.na(phenos), drop = FALSE]
   
   # Check for multiple addcovars or intcovars.
+  peaks_df <- peaks_df[phenos,]
   addcovar <- covar_model_matrix(peaks_df$addcovar, covar_df)
   intcovar <- covar_model_matrix(peaks_df$intcovar, covar_df)
-  if(length(addcovar) > 1 || length(intcovar) > 1) {
-    message("not all covariates the same")
-    return(NULL)
-  }
-  addcovar <- if(length(addcovar)) addcovar[[1]] else NULL
-  intcovar <- if(length(intcovar)) intcovar[[1]] else NULL
-  
+
   kinship <- if(model == "binary") NULL else kinship
   scans <- qtl2::scan1(genoprobs, pheno_mx, kinship,
     addcovar, intcovar = intcovar, model = model, ...)
@@ -46,6 +41,17 @@ scan1covar <- function(pheno_mx, covar_df, genoprobs, kinship, peaks_df,
   modify_object(scans, scans[,order(-apply(scans,2,max)), drop=FALSE])
 }
 covar_model_matrix <- function(covform, covar_df) {
+  uform <- unique(covform)
+  uform <- uform[uform != "none"]
+  if(!length(uform)) return(NULL)
+  
+  # Combine all formula into one
+  uform <- paste0("~",
+    paste(stringr::str_remove(uform, "^~"),
+          collapse = "+"))
+  stats::model.matrix(formula(uform), covar_df)[,-1, drop = FALSE]
+}
+covar_model_matrix_save <- function(covform, covar_df) {
   uform <- unique(covform)
   out <- list()
   for(i in uform) {
