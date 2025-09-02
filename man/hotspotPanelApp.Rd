@@ -6,6 +6,8 @@
 \alias{hotspotPanelInput}
 \alias{hotspotPanelUI}
 \alias{hotspotPanelOutput}
+\alias{hotspotPhenoOutput}
+\alias{hotspotHotspotOutput}
 \title{Shiny Hotspot Panel App}
 \usage{
 hotspotPanelApp()
@@ -17,6 +19,10 @@ hotspotPanelInput(id)
 hotspotPanelUI(id)
 
 hotspotPanelOutput(id)
+
+hotspotPhenoOutput(id)
+
+hotspotHotspotOutput(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}

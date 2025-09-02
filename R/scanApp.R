@@ -19,25 +19,48 @@
 #'             reactive renderPlot renderUI req selectInput setProgress
 #'             sliderInput strong tagList uiOutput updateSliderInput
 #'             withProgress
-#' @importFrom utils write.csv
-#' @importFrom grDevices dev.off pdf
-#' @importFrom qtl2mediate scan1covar
-#' @importFrom bslib card page_sidebar sidebar
+#' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
 scanApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
-  ui <- bslib::page_sidebar(
-    title =  "Test Scan",
-    sidebar = bslib::sidebar(
-      bslib::card(
-        projectUI("project_df"),            # project
-        hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
-      bslib::card(
-        hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
-      bslib::card(
-        hapParInput("hap_par"),
-        scanUI("scan")),
-      width = 400),
-    scanOutput("scan")
+  # ui <- bslib::page_sidebar(
+  #   title =  "Test Scan",
+  #   sidebar = bslib::sidebar(
+  #     bslib::card(
+  #       projectUI("project_df"),            # project
+  #       hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+  #     bslib::card(
+  #       hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+  #     bslib::card(
+  #       hapParInput("hap_par"),
+  #       scanUI("scan")),
+  #     width = 400),
+  #   scanOutput("scan")
+  # )
+  ui <- bslib::page_navbar(
+    title = "Test Scan",
+    bg = "#2D89C8",
+    inverse = TRUE,
+    bslib::nav_panel(
+      title = "Hotspots",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI("project_df"),            # project
+            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI("hotspot_list")),   # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput("hotspot_list"))
+    ),
+    bslib::nav_panel(
+      title = "Scan",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          hapParInput("hap_par"),
+          scanUI("scan")),
+        bslib::card(
+          scanOutput("scan")))
+    )
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)

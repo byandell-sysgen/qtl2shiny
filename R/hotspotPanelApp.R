@@ -56,16 +56,21 @@ hotspotPanelServer <- function(id, project_df) {
       versions()
     })
     
-    output$hotspot_output <- shiny::renderUI({
+    output$hotspot_switch <- shiny::renderUI({
       switch(shiny::req(input$radio),
-        Phenotypes = shiny::tagList(
-          phenoPlotOutput(ns("pheno_plot")),    # pheno_plot
-          phenoNamesOutput(ns("pheno_names"))), # pheno_names
-        Hotspots   = shiny::tagList(
-          hotspotOutput(ns("hotspot")),         # hotspot_plot
-          hotspotUI(ns("hotspot"))))            # hotspot_table
+        Phenotypes = shiny::uiOutput(ns("pheno_output")),
+        Hotspots   = shiny::uiOutput(ns("hotspot_output")))
     })
-    
+    output$pheno_output <- shiny::renderUI({
+      shiny::tagList(
+        phenoPlotOutput(ns("pheno_plot")),   # pheno_plot
+        phenoNamesOutput(ns("pheno_names"))) # pheno_names
+    })
+    output$hotspot_output <- shiny::renderUI({
+      shiny::tagList(
+        hotspotOutput(ns("hotspot")),        # hotspot_plot
+        hotspotUI(ns("hotspot")))            # hotspot_table
+    })
     output$radio_input <- shiny::renderUI({
       shiny::radioButtons(ns("radio"), NULL,
         c("Hotspots", "Phenotypes"), input$radio, inline=TRUE)
@@ -114,6 +119,18 @@ hotspotPanelOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("radio_input")),   # radio
-    shiny::uiOutput(ns("hotspot_output"))
+    shiny::uiOutput(ns("hotspot_switch"))
   )
+}
+#' @export
+#' @rdname hotspotPanelApp
+hotspotPhenoOutput <- function(id) {
+  ns <- shiny::NS(id)
+  shiny::uiOutput(ns("pheno_output"))
+}
+#' @export
+#' @rdname hotspotPanelApp
+hotspotHotspotOutput <- function(id) {
+  ns <- shiny::NS(id)
+  shiny::uiOutput(ns("hotspot_output"))
 }
