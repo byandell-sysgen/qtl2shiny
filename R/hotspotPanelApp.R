@@ -44,7 +44,7 @@ hotspotPanelServer <- function(id, project_df) {
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     hotspot_df <- 
-      hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
+      hotspotServer("hotspot_df", set_par, peak_df, pmap_obj, project_df)
     win_par <- winParServer("win_par", hotspot_df, project_df)
     pheno_names <-
       phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
@@ -56,24 +56,15 @@ hotspotPanelServer <- function(id, project_df) {
       versions()
     })
     
-    output$hotspot_switch <- shiny::renderUI({
-      switch(shiny::req(input$radio),
-        Phenotypes = shiny::uiOutput(ns("pheno_output")),
-        Hotspots   = shiny::uiOutput(ns("hotspot_output")))
+    output$hotspot_output <- shiny::renderUI({ 
+      shiny::tagList(
+        hotspotOutput(ns("hotspot_df")),     # hotspot_plot
+        hotspotUI(ns("hotspot_df")))         # hotspot_table
     })
     output$pheno_output <- shiny::renderUI({
       shiny::tagList(
         phenoPlotOutput(ns("pheno_plot")),   # pheno_plot
         phenoNamesOutput(ns("pheno_names"))) # pheno_names
-    })
-    output$hotspot_output <- shiny::renderUI({
-      shiny::tagList(
-        hotspotOutput(ns("hotspot")),        # hotspot_plot
-        hotspotUI(ns("hotspot")))            # hotspot_table
-    })
-    output$radio_input <- shiny::renderUI({
-      shiny::radioButtons(ns("radio"), NULL,
-        c("Hotspots", "Phenotypes"), input$radio, inline=TRUE)
     })
     
     ## Additional reactives not used yet.
@@ -83,6 +74,8 @@ hotspotPanelServer <- function(id, project_df) {
     ## Return.
     shiny::reactiveValues(
       pheno_names = pheno_names,
+      set_par = set_par,
+      hotspot_df = hotspot_df,
       win_par = win_par,
       peak_df = peak_df,
       pmap_obj = pmap_obj,
@@ -110,27 +103,14 @@ hotspotPanelUI <- function(id) {
     bslib::layout_columns(
       col_widths = c(4, 8),
       setParUI(ns("set_par")),            # window_Mbp
-      hotspotInput(ns("hotspot"))))       # chr_ct, minLOD
+      hotspotInput(ns("hotspot_df"))))    # chr_ct, minLOD
     #shiny::uiOutput(ns("version"))
 }
 #' @export
 #' @rdname hotspotPanelApp
 hotspotPanelOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::uiOutput(ns("radio_input")),   # radio
-    shiny::uiOutput(ns("hotspot_switch"))
-  )
-}
-#' @export
-#' @rdname hotspotPanelApp
-hotspotPhenoOutput <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::uiOutput(ns("pheno_output"))
-}
-#' @export
-#' @rdname hotspotPanelApp
-hotspotHotspotOutput <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::uiOutput(ns("hotspot_output"))
+  bslib::navset_tab(
+    bslib::nav_panel("Hotspots", shiny::uiOutput(ns("hotspot_output"))),
+    bslib::nav_panel("Phenotypes", shiny::uiOutput(ns("pheno_output"))))
 }
