@@ -13,22 +13,30 @@
 #' @export
 #' @importFrom shiny mainPanel moduleServer NS radioButtons renderText renderUI
 #'             req sidebarPanel strong tagList textOutput uiOutput
-#' @importFrom bslib card page_sidebar sidebar
+#' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
 haploApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
-  ui <- bslib::page_sidebar(
+  ui <- bslib::page_navbar(
     title =  "Test Haplo",
-    sidebar = bslib::sidebar(
-      bslib::card(
-        projectUI("project_df"),            # project
-        hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
-      bslib::card(
-        hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
-#      bslib::card(
-#        haploUI("haplo")),
-      width = 400)
-#    bslib::card(
-#      haploOutput("haplo")
+    bslib::nav_panel(
+      title = "Hotspots",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI("project_df"),            # project
+            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput("hotspot_list"))
+    ),
+    bslib::nav_panel(
+      title = "Haplo",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(haploUI("haplo")), # <various>
+        bslib::card(haploOutput("haplo"))
+      )
+    )
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
@@ -48,7 +56,7 @@ haploServer <- function(id, hotspot_list, project_df) {
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     ## Genome Scan.
     scanServer("scan", hotspot_list, hap_par, probs_obj, project_df)
-    ## SNP Association
+    ## SNP Association and Allele Patterns
     patterns <- snpSetupServer("snp_setup", hotspot_list, hap_par, project_df)
     ## Mediation
     #mediateServer("mediate", hotspot_list, probs_obj, patterns, project_df)
@@ -88,8 +96,8 @@ haploUI <- function(id) {
   shiny::tagList(
     shiny::uiOutput(ns("project")),
     shiny::strong("SNP/Gene Additive"),
-    hapParUI(ns("hap_par")),   # button
-    hapParInput(ns("hap_par")), # sex_type
+    hapParUI(ns("hap_par")),               # button
+    hapParInput(ns("hap_par")),            # sex_type
     shiny::uiOutput(ns("hap_input")),
     shiny::textOutput(ns("allele_names")))
 }

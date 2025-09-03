@@ -89,8 +89,7 @@ snpFeatureServer <- function(id, snp_list) {
 #' @rdname snpFeatureServer
 snpFeatureInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::selectInput(ns("by_choice"), NULL, 
-              c("Pattern","Consequence"))
+  shiny::selectInput(ns("by_choice"), NULL, c("Pattern","Consequence")) # by_choice
 }
 #' @export
 #' @rdname snpFeatureServer

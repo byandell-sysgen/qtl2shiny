@@ -26,22 +26,35 @@
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
-#' 
+#' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
 mediateApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
-  ui <- bslib::page_sidebar(
-    title =  "Test SNP Setup",
-    sidebar = bslib::sidebar(
-      projectUI("project"),              # project
-      hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
-      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, local, win_par, chr_ct, minLOD
-      hapParUI("hap_par"),               # button
-      hapParInput("hap_par"),            # sex_type
-      snpSetupInput("snp_setup"),
-      mediateUI("mediate")),
-    bslib::card(snpSetupUI("snp_setup")),
-    bslib::card(snpSetupOutput("snp_setup")),
-    bslib::card(mediateOutput("mediate"))
+  ui <- bslib::page_navbar(
+    title =  "Test Mediate",
+    bslib::nav_panel(
+      title = "Hotspots",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI("project_df"),            # project
+            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput("hotspot_list"))
+    ),
+    bslib::nav_panel(
+      title = "Mediate",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          hapParUI("hap_par"),                    # button
+          hapParInput("hap_par"),                 # sex_type
+          snpSetupInput("snp_setup"),            # <various>
+          mediateUI("mediate")),
+        bslib::card(snpSetupOutput("snp_setup")),
+        bslib::card(mediateOutput("mediate"))
+      )
+    )
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)

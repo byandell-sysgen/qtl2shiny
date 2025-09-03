@@ -1,4 +1,4 @@
-#' Shiny SNP Association
+#' Shiny SNP Gene App
 #' 
 #' Shiny module for SNP association mapping, with interfaces \code{snpGeneInput}, \code{snpGeneUI} and  \code{snpGeneOutput}.
 #'
@@ -13,6 +13,47 @@
 #' @export
 #' @importFrom shiny column fluidRow moduleServer NS radioButtons reactive
 #'             renderUI req tagList uiOutput
+#' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
+snpGeneApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_navbar(
+    title =  "Test SNP Gene Setup",
+    bslib::nav_panel(
+      title = "Hotspots",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI("project_df"),            # project
+            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput("hotspot_list"))
+    ),
+    bslib::nav_panel(
+      title = "snpGene",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          hapParInput("hap_par"),                 # sex_type
+          snpGeneInput("snp_gene"),       # button, snp_check
+          snpListInput2("snp_list"),            # minLOD
+          snpListUI("snp_list"), # pheno_name
+          snpListInput("snp_list")), # scan_window
+        bslib::card(snpGeneOutput("snp_gene"))
+      )
+    )
+  )
+  server <- function(input, output, session) {
+    project_df <- projectServer("project_df", projects_df)
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    hap_par <- hapParServer("hap_par")
+    snp_list <- snpListServer("snp_list", hotspot_list, hap_par, project_df)
+    ass_par <- snpGeneServer("snp_gene", snp_list, project_df)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname snpGeneApp
 snpGeneServer <- function(id, snp_list, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -63,7 +104,7 @@ snpGeneServer <- function(id, snp_list, project_df) {
   })
 }
 #' @export
-#' @rdname snpGeneServer
+#' @rdname snpGeneApp
 snpGeneInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -74,13 +115,13 @@ snpGeneInput <- function(id) {
   )
 }
 #' @export
-#' @rdname snpGeneServer
+#' @rdname snpGeneApp
 snpGeneUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("download_csv_plot"))
 }
 #' @export
-#' @rdname snpGeneServer
+#' @rdname snpGeneApp
 snpGeneOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("snp_output"))

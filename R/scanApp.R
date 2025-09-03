@@ -22,20 +22,6 @@
 #' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
 scanApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
-  # ui <- bslib::page_sidebar(
-  #   title =  "Test Scan",
-  #   sidebar = bslib::sidebar(
-  #     bslib::card(
-  #       projectUI("project_df"),            # project
-  #       hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
-  #     bslib::card(
-  #       hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
-  #     bslib::card(
-  #       hapParInput("hap_par"),
-  #       scanUI("scan")),
-  #     width = 400),
-  #   scanOutput("scan")
-  # )
   ui <- bslib::page_navbar(
     title = "Test Scan",
     bg = "#2D89C8",

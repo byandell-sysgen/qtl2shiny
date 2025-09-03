@@ -8,36 +8,46 @@
 #' 
 #' @export
 #' 
-#' @importFrom dplyr distinct
+#' @importFrom dplyr across distinct mutate where
 #' @importFrom qtl2pattern sdp_to_pattern
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom shiny column downloadButton downloadHandler fluidRow moduleServer
 #'             NS plotOutput radioButtons reactive renderPlot renderUI req
 #'             selectInput setProgress strong tagList uiOutput
 #'             updateRadioButtons withProgress
-#' @importFrom plotly plotlyOutput renderPlotly
-#' @importFrom utils write.csv
-#' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
+#' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
 snpPatternApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
-  ui <- bslib::page_sidebar(
-    title =  "Test SNP Pattern",
-    sidebar = bslib::sidebar(
-      projectUI("project"),              # project
-      hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
-      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, win_par, chr_ct, minLOD
-      hapParUI("hap_par"),               # button
-      hapParInput("hap_par"),            # sex_type
-      snpListInput("snp_list"),          # scan_window
-      snpListInput2("snp_list"),         # minLOD
-      snpListUI("snp_list"),             # pheno_name
-      snpPatternInput("snp_pattern")),   # button_input pat_input
-    bslib::card(snpPatternUI("snp_pattern")),
-    bslib::card(snpPatternOutput("snp_pattern"))
+  ui <- bslib::page_navbar(
+    title =  "Test SNP Pattern Setup",
+    bslib::nav_panel(
+      title = "Hotspots",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI("project_df"),            # project
+            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput("hotspot_list"))
+    ),
+    bslib::nav_panel(
+      title = "snpPattern",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          hapParInput("hap_par"),                 # sex_type
+          snpPatternInput("snp_pattern"),   # button_input pat_input
+          snpListInput2("snp_list"),            # minLOD
+          snpListUI("snp_list"), # pheno_name
+          snpListInput("snp_list")), # scan_window
+        bslib::card(snpPatternOutput("snp_pattern"))
+      )
+    )
   )
   server <- function(input, output, session) {
-    project_df <- projectServer("project", projects_df)
+    project_df <- projectServer("project_df", projects_df)
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
     hap_par <- hapParServer("hap_par")
     snp_list <- snpListServer("snp_list", hotspot_list, hap_par, project_df)
@@ -58,26 +68,30 @@ snpPatternServer <- function(id, snp_list, allele_info) {
       summary(shiny::req(snp_list$top_snps_tbl()))
     })
     
-    chr_id <- reactive({
-      snp_list$hotspot()$chr
-    })
-    
     output$snp_pattern_table <- DT::renderDataTable({
-      sum_top_pat()
+      dplyr::mutate(sum_top_pat(),
+                    dplyr::across(dplyr::where(is.numeric),
+                                  signif, digits = 4))
     }, escape = FALSE,
     options = list(scrollX = TRUE, pageLength = 5))
     
-    dropHilit <- reactive({
+    dropHilit <- shiny::reactive({
       max(0,
           max(unclass(shiny::req(snp_list$snp_scan_obj()))) - 
             shiny::req(snp_list$snp_par$minLOD))
     })
-    
+    chr_id <- shiny::reactive(snp_list$win_par()$chr_id[1])
+    peak_Mbp <- shiny::reactive(snp_list$win_par()$peak_Mbp[1])
+    ready <- shiny::reactive({
+      shiny::isTruthy(snp_list$snp_par$pheno_name) |
+        shiny::isTruthy(snp_list$snp_scan_obj()) |
+        shiny::isTruthy(snp_list$snp_par$scan_window) |
+        shiny::isTruthy(snp_list$snp_action()) |
+        shiny::isTruthy(snp_list$snpinfo()) |
+        all(shiny::isTruthy(chr_id()))
+    })
     output$snp_pattern_plot <- shiny::renderPlot({
-      if(is.null(snp_list$snp_par$pheno_name) | is.null(snp_list$snp_scan_obj()) |
-         is.null(snp_list$snp_par$scan_window) | is.null(snp_list$snp_action()) |
-         is.null(snp_list$snpinfo()) | is.null(chr_id()))
-        return(plot_null())
+      if(!ready()) return(plot_null())
       shiny::withProgress(message = 'SNP pattern plots ...', value = 0, {
         shiny::setProgress(1)
         top_pat_plot(snp_list$snp_par$pheno_name, 
@@ -91,10 +105,7 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     })
     
     output$snp_pattern_plotly <- plotly::renderPlotly({
-      if(is.null(snp_list$snp_par$pheno_name) | is.null(snp_list$snp_scan_obj()) |
-         is.null(snp_list$snp_par$scan_window) | is.null(snp_list$snp_action()) |
-         is.null(snp_list$snpinfo()) | is.null(chr_id()))
-        return(plot_null())
+      if(!ready()) return(plot_null())
       shiny::withProgress(message = 'SNP pattern plots ...', value = 0, {
         shiny::setProgress(1)
         top_pat_plot(snp_list$snp_par$pheno_name, 
@@ -110,19 +121,17 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     
     ## SNP Pheno patterns
     output$snp_phe_pat <- shiny::renderPlot({
-      if(is.null(snp_list$pheno_names()) | is.null(snp_scan_obj()) |
-         is.null(snp_par$scan_window) | is.null(snp_action()))
-        return(plot_null())
+      if(!ready()) return(plot_null())
       shiny::withProgress(message = 'SNP Pheno patterns ...', value = 0, {
         shiny::setProgress(1)
         top_pat_plot(snp_list$pheno_names(), 
-                     snp_scan_obj(), 
+                     snp_list$snp_scan_obj(), 
                      chr_id(),
-                     snpinfo(),
-                     snp_par$scan_window,
+                     snp_list$snpinfo(),
+                     snp_list$snp_par$scan_window,
                      drop_hilit = dropHilit(),
                      facet = "pheno", 
-                     snp_action = snp_action())
+                     snp_action = snp_list$snp_action())
       })
     })
     
@@ -130,8 +139,8 @@ snpPatternServer <- function(id, snp_list, allele_info) {
       shiny::req(allele_info())$code
     })
     output$pattern <- shiny::renderUI({
-      shiny::req(snp_action())
-      top_pat <- shiny::req(top_snps_tbl())
+      shiny::req(snp_list$snp_action())
+      top_pat <- shiny::req(snp_list$top_snps_tbl())
       choices <- qtl2pattern::sdp_to_pattern(
         dplyr::distinct(top_pat, .data$sdp)$sdp,
         haplos())
@@ -145,9 +154,7 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     })
     ## SNP Pattern phenos
     output$snp_pat_phe <- shiny::renderPlot({
-      if(is.null(snp_list$pheno_names()) | is.null(snp_list$snp_scan_obj()) |
-         is.null(snp_list$snp_par$scan_window) | is.null(snp_list$snp_action()))
-        return(plot_null())
+      if(!ready()) return(plot_null())
       #     shiny::req(input$pattern)
       top_pat <- shiny::req(snp_list$top_snps_tbl())
       patterns <- qtl2pattern::sdp_to_pattern(top_pat$sdp, haplos())
@@ -167,7 +174,7 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     output$pat_input <- shiny::renderUI({
       switch(shiny::req(input$button),
              #           "All Patterns" = shiny::uiOutput(ns("pattern")),
-             "Top SNPs"     = snpFeatureInput(ns("top_feature")))
+             "Top SNPs"     = snpFeatureInput(ns("top_feature"))) # by_choice
     })
     output$pat_output <- shiny::renderUI({
       switch(shiny::req(input$button),
@@ -192,8 +199,8 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     })
     output$downloadData <- shiny::downloadHandler(
       filename = function() {
-        file.path(paste0(paste0("pattern", snp_list$hotspot()$chr[1],
-                                snp_list$hotspot()$pos[1], snp_action(),
+        file.path(paste0(paste0("pattern", chr_id(),
+                                peak_Mbp(), snp_action(),
                                 sep = "_"),
                          ".csv")) },
       content = function(file) {
@@ -202,8 +209,8 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     )
     output$downloadPlot <- shiny::downloadHandler(
       filename = function() {
-        file.path(paste0(paste0("pattern", snp_list$hotspot()$chr[1],
-                                snp_list$hotspot()$pos[1], snp_action(),
+        file.path(paste0(paste0("pattern", chr_id(),
+                                peak_Mbp(), snp_action(),
                                 sep = "_"),
                          ".pdf")) },
       content = function(file) {
@@ -283,8 +290,8 @@ snpPatternServer <- function(id, snp_list, allele_info) {
 snpPatternInput <- function(id) { # button_input pat_input
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::uiOutput(ns("button_input")),
-    shiny::uiOutput(ns("pat_input"))
+    shiny::uiOutput(ns("button_input")), # button
+    shiny::uiOutput(ns("pat_input"))     # by_choice
   )
 }
 #' @export

@@ -13,26 +13,40 @@
 #' @importFrom qtl2pattern gene_exon top_snps_pattern snpprob_collapse
 #' @importFrom qtl2mediate scan1covar covar_matrix which_covar
 #' @importFrom shiny isTruthy moduleServer NS numericInput reactive renderUI req
-#'             selectInput setProgress sliderInput tagList uiOutput withProgress
+#'             selectInput setProgress tagList uiOutput withProgress
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom rlang .data
-#' @importFrom bslib card page_sidebar sidebar
+#' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
 snpSetupApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
-  ui <- bslib::page_sidebar(
+  ui <- bslib::page_navbar(
     title =  "Test SNP Setup",
-    sidebar = bslib::sidebar(
-      projectUI("project"),              # project
-      hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
-      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, win_par, chr_ct, minLOD
-      hapParUI("hap_par"),               # button
-      hapParInput("hap_par"),            # sex_type
-      snpSetupInput("snp_setup")),
-    bslib::card(snpSetupUI("snp_setup")),
-    bslib::card(snpSetupOutput("snp_setup"))
+    bslib::nav_panel(
+      title = "Hotspots",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI("project_df"),            # project
+            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput("hotspot_list"))
+    ),
+    bslib::nav_panel(
+      title = "snpSetup",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          hapParUI("hap_par"),                    # button
+          hapParInput("hap_par"),                 # sex_type
+          snpSetupInput("snp_setup")),            # <various>
+        bslib::card(snpSetupOutput("snp_setup"))
+#        bslib::card(snpSetupUI("snp_setup"))
+      )
+    )
   )
   server <- function(input, output, session) {
-    project_df <- projectServer("project", projects_df)
+    project_df <- projectServer("project_df", projects_df)
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
     hap_par <- hapParServer("hap_par")
     patterns <- snpSetupServer("snp_setup", hotspot_list, hap_par, project_df)
@@ -101,7 +115,7 @@ snpSetupServer <- function(id, hotspot_list, hap_par, project_df,
     output$snp_input <- shiny::renderUI({
       switch(shiny::req(hap_par$button),
              "SNP Association" = snpGeneInput(ns("snp_gene")),       # button, snp_check
-             "Allele Pattern"  = snpPatternInput(ns("snp_pattern")))
+             "Allele Pattern"  = snpPatternInput(ns("snp_pattern"))) # button, by_choice
     })
     output$snp_output <- shiny::renderUI({
       switch(shiny::req(hap_par$button),
@@ -143,11 +157,11 @@ snpSetupInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("title")),
-    shiny::uiOutput(ns("snp_input")),
+    shiny::uiOutput(ns("snp_input")),         # button(2), snp_check, by_choice
     snpListInput2(ns("snp_list")),            # minLOD
-    shiny::uiOutput(ns("phe_choice")),
-    shiny::uiOutput(ns("win_choice")),
-    shiny::uiOutput(ns("download_csv_plot")))
+    shiny::uiOutput(ns("phe_choice")),        # pheno_name
+    shiny::uiOutput(ns("win_choice")),        # scan_window
+    shiny::uiOutput(ns("download_csv_plot"))) # download
 }
 #' @export
 #' @rdname snpSetupApp

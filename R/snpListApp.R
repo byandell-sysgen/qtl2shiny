@@ -12,8 +12,9 @@
 #' @importFrom dplyr arrange desc filter mutate
 #' @importFrom qtl2pattern gene_exon top_snps_pattern snpprob_collapse
 #' @importFrom qtl2mediate scan1covar covar_matrix which_covar
-#' @importFrom shiny isTruthy moduleServer NS numericInput reactive renderUI req
-#'             selectInput setProgress sliderInput tagList uiOutput withProgress
+#' @importFrom shiny isolate isTruthy moduleServer NS numericInput reactive
+#'             renderUI req selectInput setProgress sliderInput tagList uiOutput
+#'             withProgress
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom rlang .data
 #' @importFrom bslib card page_sidebar sidebar
@@ -45,13 +46,14 @@ snpListServer <- function(id, hotspot_list, hap_par, project_df,
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    win_par <- shiny::isolate(hotspot_list$win_par)
     pheno_names <- shiny::reactive({
       shiny::req(project_df(), hotspot_list$pheno_mx())
       colnames(hotspot_list$pheno_mx())
     })
     ## SNP Probabilities.
-    snpprobs_obj <- snpProbsServer("snp_probs", hotspot_list$win_par, pheno_names,
-                                   project_df)
+    snpprobs_obj <- 
+      snpProbsServer("snp_probs", win_par, pheno_names, project_df)
     snpinfo <- reactive({
       shiny::req(project_df(), hotspot_list$pheno_mx())
       shiny::req(snpprobs_obj())$snpinfo
@@ -59,14 +61,17 @@ snpListServer <- function(id, hotspot_list, hap_par, project_df,
     
     ## SNP Scan.
     snp_scan_obj <- shiny::reactive({
-      shiny::req(snpprobs_obj(), hotspot_list$pheno_mx(), hotspot_list$peak_df())
-      shiny::req(hotspot_list$kinship_list(), hotspot_list$covar_df(), hap_par$sex_type)
+      shiny::req(snpprobs_obj(), hotspot_list$pheno_mx(),
+        hotspot_list$peak_df(), hotspot_list$covar_df(), hap_par$sex_type)
+      kinship_list <- shiny::req(hotspot_list$kinship_list())[
+        shiny::req(win_par())$chr_id[1]]
       snpprobs <- snpprobs_obj()$snpprobs
       shiny::withProgress(message = "SNP Scan ...", value = 0, {
         shiny::setProgress(1)
         snpprobs_act <- 
           qtl2pattern::snpprob_collapse(snpprobs, snp_action())
-        scan1covar(hotspot_list$pheno_mx(), hotspot_list$covar_df(), snpprobs_act, hotspot_list$kinship_list(), hotspot_list$peak_df())
+        scan1covar(hotspot_list$pheno_mx(), hotspot_list$covar_df(),
+                   snpprobs_act, kinship_list, hotspot_list$peak_df())
       })
     })
     ## Top SNPs table.
@@ -108,11 +113,10 @@ snpListServer <- function(id, hotspot_list, hap_par, project_df,
     # Scan Window slider
     output$scan_window_input <- shiny::renderUI({
       shiny::req(pheno_names())
-      rng <- round(shiny::req(hotspot_list$win_par()$peak_Mbp) + 
-                     c(-1,1) * shiny::req(hotspot_list$win_par()$window_Mbp), 
+      rng <- round(shiny::req(win_par()$peak_Mbp[1]) + 
+                     c(-1,1) * shiny::req(win_par()$window_Mbp), 
                    1)
       selected <- select_range(input$scan_window, rng)
-      
       shiny::sliderInput(ns("scan_window"), NULL, rng[1], rng[2],
                          selected, step=.1)
     })
@@ -136,8 +140,8 @@ snpListServer <- function(id, hotspot_list, hap_par, project_df,
     ## Return `snp_list`.
     shiny::reactiveValues(
       snp_par = input,
+      win_par = win_par,
       pheno_names = pheno_names,
-      hotspot = hotspot,
       snp_scan_obj = snp_scan_obj,
       snpinfo = snpinfo,
       top_snps_tbl = top_snps_tbl,
