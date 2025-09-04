@@ -17,19 +17,35 @@
 #'             withProgress
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom rlang .data
-#' @importFrom bslib card page_sidebar sidebar
+#' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
 snpListApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
-  ui <- bslib::page_sidebar(
-    title =  "Test SNP Setup",
-    sidebar = bslib::sidebar(
-      projectUI("project"),              # project
-      hotspotPanelInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
-      hotspotPanelUI("hotspot_list"),    # window_Mbp, radio, win_par, chr_ct, minLOD
-      snpListInput("snp_list"),
-      snpListInput2("snp_list"),
-      snpListUI("snp_list")),
-    snpListOutput("snp_list")
+  ui <- bslib::page_navbar(
+    title =  "Test SNP List",
+    bslib::nav_panel(
+      title = "Hotspots",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI("project_df"),            # project
+            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput("hotspot_list"))
+    ),
+    bslib::nav_panel(
+      title = "snpList",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          hapParUI("hap_par"),                  # button
+          hapParInput("hap_par"),               # sex_type
+          snpListInput("snp_list"),             # scan_window
+          snpListInput2("snp_list"),            # minLOD
+          snpListUI("snp_list")),               # pheno_name
+        bslib::card(snpListOutput("snp_list"))
+      )
+    )
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
@@ -106,6 +122,7 @@ snpListServer <- function(id, hotspot_list, hap_par, project_df,
       }
     })
     output$minLOD_input <- shiny::renderUI({
+      shiny::req(snp_scan_obj())
       value <- minLOD()
       shiny::numericInput(ns("minLOD"), "LOD threshold", value,
                           min = 0, step = 0.5)

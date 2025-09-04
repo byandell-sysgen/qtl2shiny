@@ -19,14 +19,14 @@
 scan1covar <- function(pheno_mx, covar_df, genoprobs, kinship, peaks_df, 
                        model = "normal", ..., force = FALSE) {
   # Match phenotypes between data and peaks.
-  phenos <- match(colnames(pheno_mx), peaks_df$phenotype)
-  if(any(is.na(phenos))) {
+  phenos <- match(colnames(pheno_mx), peaks_df$phenotype, nomatch = 0)
+  if(any(phenos == 0)) {
     message("phenotypes not in peaks: ",
-            paste(colnames(pheno_mx)[is.na(phenos)], collapse = ", "))
+            paste(colnames(pheno_mx)[phenos == 0], collapse = ", "))
   }
-  if(all(is.na(phenos))) return(NULL)
+  if(all(phenos == 0)) return(NULL)
   if(force)
-    pheno_mx <- pheno_mx[, !is.na(phenos), drop = FALSE]
+    pheno_mx <- pheno_mx[, phenos, drop = FALSE]
   
   # Check for multiple addcovars or intcovars.
   peaks_df <- peaks_df[phenos,]

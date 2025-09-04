@@ -2,15 +2,15 @@
 #' @importFrom dplyr filter mutate
 #' 
 pull_patterns <- function(patterns, pheno_names) {
-  if(all(pheno_names %in% patterns$pheno)) {
+  # if(all(pheno_names %in% patterns$pheno)) {
     dplyr::filter(patterns, .data$pheno %in% pheno_names)
-  }
-  else {
-    out <- dplyr::filter(patterns, .data$pheno == "AddSex")
-    if(nrow(out))
-      out <- dplyr::mutate(out, pheno = pheno_names[1])
-    out
-  }
+  # }
+  # else {
+  #   out <- dplyr::filter(patterns, .data$pheno == "AddSex")
+  #   if(nrow(out))
+  #     out <- dplyr::mutate(out, pheno = pheno_names[1])
+  #   out
+  # }
 }
 scan1_pattern <- function(pheno, phe_mx, addcovar, pairprobs_obj, K_chr, analyses_df,
                           pats, sex_type, blups) {

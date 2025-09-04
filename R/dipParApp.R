@@ -65,15 +65,15 @@ dipParServer <- function(id) {
 #' @rdname dipParApp
 dipParInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("sex_type_input"))
+  shiny::uiOutput(ns("sex_type_input"))      # sex_type
 }
 #' @export
 #' @rdname dipParApp
 dipParUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::uiOutput(ns("button_input")),
-    shiny::uiOutput(ns("snp_action_input")))
+    shiny::uiOutput(ns("button_input")),     # button
+    shiny::uiOutput(ns("snp_action_input"))) # snp_action
 }
 #' @export
 #' @rdname dipParApp

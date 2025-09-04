@@ -1,9 +1,9 @@
-#' Shiny Pattern module
+#' Shiny Pattern App
 #'
 #' Shiny module for SNP pattern plots, with interfaces \code{patternUI} and  \code{patternOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param job_par,win_par,phe_mx,cov_df,pairprobs_obj,K_chr,analyses_df,patterns,project_df,allele_info,snp_action reactive arguments
+#' @param hotspot_list,dip_par,pairprobs_obj,patterns,snp_action,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -22,33 +22,75 @@
 #' @importFrom grDevices dev.off pdf
 #' @importFrom utils write.csv
 #' @importFrom rlang .data
-patternServer <- function(id, job_par, win_par,
-                         phe_mx, cov_df, pairprobs_obj, K_chr,
-                         patterns, project_df, allele_info, 
-                         snp_action = shiny::reactive({NULL})) {
+patternApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_navbar(
+    title =  "Test Pattern",
+    bslib::nav_panel(
+      title = "Hotspots",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI("project_df"),            # project
+            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput("hotspot_list"))
+    ),
+    bslib::nav_panel(
+      title = "Pattern",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          dipParInput("dip_par"),
+          dipParUI("dip_par"),
+          snpSetupInput("snp_setup"),
+          patternUI("dip_pat")),      
+        bslib::card(patternOutput("dip_pat"))
+      )
+    )
+  )
+  server <- function(input, output, session) {
+    project_df <- projectServer("project_df", projects_df)
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    dip_par <- diploServer("dip_par")
+    pairprobs_obj <-
+      pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
+    snp_action <- shiny::reactive({dip_par$snp_action})
+    patterns <-
+      snpSetupServer("snp_setup", hotspot_list, dip_par, project_df, snp_action)
+    patternServer("dip_pat", hotspot_list, dip_par, pairprobs_obj, patterns,
+                  snp_action, project_df)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname patternApp
+patternServer <- function(id, hotspot_list, dip_par, pairprobs_obj, patterns,
+                          snp_action = shiny::reactive({NULL}), project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     phe1_mx <- reactive({
-      phe_mx()[, shiny::req(input$pheno_name), drop = FALSE]
+      hotspot_list$pheno_mx()[, shiny::req(input$pheno_name), drop = FALSE]
     })
     #** analyses_df no longer used.
-    alleleServer("allele", win_par,  phe1_mx, cov_df, pairprobs_obj, K_chr,
+    alleleServer("allele", hotspot_list$win_par,  phe1_mx, hotspot_list$covar_df, pairprobs_obj, hotspot_list$kinship_list,
                 analyses_df, patterns, scan_pat, project_df, snp_action)
     
     ## Select phenotype for plots.
     output$pheno_name_input <- shiny::renderUI({
       shiny::selectInput(ns("pheno_name"), NULL,
-                         choices = colnames(shiny::req(phe_mx())),
+                         choices = colnames(shiny::req(hotspot_list$pheno_mx())),
                          selected = input$pheno_name)
     })
     ## Select pattern for plots.
     pats <- shiny::reactive({
       shiny::req(input$pheno_name, patterns())
-      pull_patterns(patterns(), colnames(shiny::req(phe_mx())))
+      pull_patterns(patterns(), colnames(shiny::req(hotspot_list$pheno_mx())))
     })
     haplos <- reactive({
-      shiny::req(allele_info())$code
+      shiny::req(hotspot_list$allele_info())$code
     })
     pattern_choices <- shiny::reactive({
       qtl2pattern::sdp_to_pattern(pats()$sdp, haplos())
@@ -84,13 +126,13 @@ patternServer <- function(id, job_par, win_par,
     scan_pat <- shiny::reactive({
       req(snp_action())
       pheno_in <- shiny::req(input$pheno_name)
-      shiny::req(phe_mx(), cov_df(), pairprobs_obj(), K_chr(),
-                 pats(), analyses_df(), job_par$sex_type)
+      shiny::req(hotspot_list$pheno_mx(), hotspot_list$covar_df(), pairprobs_obj(), hotspot_list$kinship_list(),
+                 pats(), analyses_df(), dip_par$sex_type)
       withProgress(message = 'Scan Patterns ...', value = 0, {
         setProgress(1)
-        scan1_pattern(pheno_in, phe_mx(), cov_df(), 
-                      pairprobs_obj(), K_chr(), analyses_df(),
-                      pats(), job_par$sex_type, input$blups)
+        scan1_pattern(pheno_in, hotspot_list$pheno_mx(), hotspot_list$covar_df(), 
+                      pairprobs_obj(), hotspot_list$kinship_list(), analyses_df(),
+                      pats(), dip_par$sex_type, input$blups)
       })
     })
     
@@ -165,10 +207,11 @@ patternServer <- function(id, job_par, win_par,
     ## Downloads
     output$downloadData <- shiny::downloadHandler(
       filename = function() {
-        shiny::req(win_par())
+        shiny::req(hotspot_list$win_par())
         pheno_in <- shiny::req(input$pheno_name)
         file.path(paste0(
-          paste(pheno_in, snp_action(), "effects", win_par()$chr, win_par()$pos,
+          paste(pheno_in, snp_action(), "effects",
+                hotspot_list$win_par()$chr, hotspot_list$win_par()$pos,
                 sep = "_"),
           ".csv"))
       },
@@ -182,22 +225,23 @@ patternServer <- function(id, job_par, win_par,
       filename = function() {
         shiny::req(input$pheno_name)
         file.path(paste0(
-          paste(pheno_in, snp_action(), "effects", win_par()$chr, win_par()$pos,
+          paste(pheno_in, snp_action(), "effects",
+                hotspot_list$win_par()$chr, hotspot_list$win_par()$pos,
                 sep = "_"),
           ".pdf"))
       },
       content = function(file) {
-        shiny::req(scan_pat(), pattern_choices(), job_par$sex_type)
+        shiny::req(scan_pat(), pattern_choices(), dip_par$sex_type)
         scan_in <- shiny::req(scan_pat())
         top_panel_prop <- 0.65
         grDevices::pdf(file, width = 9, height = 9)
-        for(pheno_in in colnames(phe_mx())) {
+        for(pheno_in in colnames(hotspot_list$pheno_mx())) {
           pats <- dplyr::filter(patterns(), .data$pheno == pheno_in)
           pat_choices <- qtl2pattern::sdp_to_pattern(pats$sdp, haplos())
           
-          scan_now <- scan1_pattern(pheno_in, phe_mx(), cov_df(), 
-                                    pairprobs_obj(), K_chr(), analyses_df(),
-                                    pats, job_par$sex_type, input$blups)
+          scan_now <- scan1_pattern(pheno_in, hotspot_list$pheno_mx(), hotspot_list$covar_df(), 
+                                    pairprobs_obj(), hotspot_list$kinship_list(), analyses_df(),
+                                    pats, dip_par$sex_type, input$blups)
           
           scan_pat_type(scan_now, pairprobs_obj()$map, "coef_and_lod", pat_choices,
                         pheno_in, haplos())
@@ -227,7 +271,7 @@ patternServer <- function(id, job_par, win_par,
   })
 }
 #' @export
-#' @rdname patternServer
+#' @rdname patternApp
 patternUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -238,7 +282,7 @@ patternUI <- function(id) {
     shiny::uiOutput(ns("select")))
 }
 #' @export
-#' @rdname patternServer
+#' @rdname patternApp
 patternOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
