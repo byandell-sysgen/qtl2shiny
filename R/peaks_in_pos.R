@@ -18,6 +18,9 @@ peaks_in_pos <- function(peaks_df, use_pos = TRUE,
       }
     }
   }
+  if(!nrow(peaks_df)) return(NULL)
+  
+  # Arrange by descending `qtl_lod`
   dplyr::mutate(
     dplyr::distinct(
       dplyr::arrange(

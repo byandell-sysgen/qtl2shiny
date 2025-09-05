@@ -33,8 +33,8 @@ dipParServer <- function(id) {
     
     output$button_input <- shiny::renderUI({
       shiny::radioButtons(ns("button"), "",
-                          c("SNP Association","Allele Pattern","Genome Scans"),
-                          input$button)
+        c("SNP Association","Allele Pattern","Genome Scans","Summary"),
+        input$button)
     })
     output$snp_action_input <- shiny::renderUI({
       shiny::selectInput(ns("snp_action"), "",

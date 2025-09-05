@@ -12,16 +12,17 @@ pull_patterns <- function(patterns, pheno_names) {
   #   out
   # }
 }
-scan1_pattern <- function(pheno, phe_mx, addcovar, pairprobs_obj, K_chr, analyses_df,
-                          pats, sex_type, blups) {
-  analyses_df <- qtl2mediate::which_covar(analyses_df)
-  wh <- match(pheno, colnames(phe_mx))
+scan1_pattern <- function(pheno_name, pheno_mx, covar_df, pairprobs_obj, K_chr,
+                          peak_df, pats, sex_type, blups) {
+  peak_df <- peak_probs_filter(pheno_name, peak_df, pairprobs_obj)
+  if(is.null(peak_df)) return(NULL)
   
-  addcovar <- qtl2mediate::which_covar(analyses_df, wh, addcovar)
-  addcovar <- qtl2mediate::covar_matrix(addcovar)
+  addcovar <- covar_model_matrix(peak_df$addcovar, covar_df)
+  #** Need to add intcovar to qtl2pattern::scan1pattern.
+  intcovar <- covar_model_matrix(peak_df$intcovar, covar_df)
   
   qtl2pattern::scan1pattern(pairprobs_obj$probs,
-                            phe_mx[,, drop=FALSE],
+                            pheno_mx[, pheno_name, drop=FALSE],
                             K_chr, addcovar,
                             pairprobs_obj$map,
                             pats,

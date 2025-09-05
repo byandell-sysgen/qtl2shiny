@@ -8,6 +8,7 @@ top_pat_plot <- function(pheno,
                          facet = "pheno",
                          snp_action = "basic",
                          cex = 4, ...) {
+  if(is.null(pheno)) return(plot_null())
   mytitle <- FALSE
   if(length(pheno) == 1) {
     mytitle <- paste(pheno, "chr", chr_id)

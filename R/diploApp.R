@@ -17,7 +17,7 @@
 diploApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
-    title =  "Test Haplo",
+    title =  "Test Diplo",
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(
@@ -31,7 +31,7 @@ diploApp <- function() {
         hotspotPanelOutput("hotspot_list"))
     ),
     bslib::nav_panel(
-      title = "Haplo",
+      title = "Diplo",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(diploUI("diplo")), # <various>
         bslib::card(diploOutput("diplo"))
@@ -59,10 +59,12 @@ diploServer <- function(id, hotspot_list, project_df) {
     ## SNP Association
     patterns <-
       snpSetupServer("snp_setup", hotspot_list, dip_par, project_df, snp_action)
-    
-    patternServer("dip_pat", hotspot_list, dip_par, pairprobs_obj, patterns,
-                  snp_action, project_df)
-    
+    pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
+      pairprobs_obj, patterns, snp_action, project_df)
+    patternPlotServer("pattern_plot", pattern_list, pairprobs_obj)
+    alleleServer("allele", hotspot_list, pattern_list, pairprobs_obj,
+      patterns, project_df, snp_action)
+
     output$allele_names <- shiny::renderText({
       allele_info <- shiny::req(hotspot_list$allele_info())
       paste(allele_info$code, allele_info$shortname, sep = "=", collapse = ", ")
@@ -70,15 +72,14 @@ diploServer <- function(id, hotspot_list, project_df) {
     
     output$dip_input <- shiny::renderUI({
       switch(shiny::req(dip_par$button),
-             "Genome Scans"    = patternUI(ns("dip_pat")),
-             "SNP Association" =,
-             "Allele Pattern"  = snpSetupInput(ns("snp_setup")))
+             "Allele Pattern"  = alleleUI(ns("allele")))
     })
     output$dip_output <- shiny::renderUI({
       switch(shiny::req(dip_par$button),
-             "Genome Scans"    = patternOutput(ns("dip_pat")),
-             "SNP Association" = ,
-             "Allele Pattern"  = snpSetupOutput(ns("snp_setup")))
+             "Genome Scans"    = patternPlotOutput(ns("pattern_plot")),
+             "Summary"         = patternOutput(ns("pattern_list")),
+             "SNP Association" = snpSetupOutput(ns("snp_setup")),
+             "Allele Pattern"  = alleleOutput(ns("allele")))
     })
   })
 }
@@ -89,8 +90,11 @@ diploUI <- function(id) {
   shiny::tagList(
     shiny::uiOutput(ns("project")),
     shiny::strong("SNP/Gene Action"),
-    dipParInput(ns("dip_par")),
-    dipParUI(ns("dip_par")),
+    dipParInput(ns("dip_par")),            # sex_type
+    dipParUI(ns("dip_par")),               # button, snp_action
+    snpSetupInput(ns("snp_setup")),        # <various>
+    patternInput(ns("pattern_list")),      # button, blups, pheno_name
+    patternUI(ns("pattern_list")),         # pattern
     shiny::uiOutput(ns("dip_input")),
     shiny::textOutput(ns("allele_names")))
 }

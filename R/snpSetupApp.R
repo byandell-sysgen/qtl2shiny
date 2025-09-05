@@ -109,7 +109,7 @@ snpSetupServer <- function(id, hotspot_list, hap_par, project_df,
     
     ## UI Logic
     output$title <- shiny::renderUI({
-      if(snp_action() == "basic")
+      if(shiny::req(snp_action()) == "basic")
         strong(shiny::req(hap_par$button))
     })
     output$snp_input <- shiny::renderUI({
@@ -122,14 +122,7 @@ snpSetupServer <- function(id, hotspot_list, hap_par, project_df,
              "SNP Association" = snpGeneOutput(ns("snp_gene")),
              "Allele Pattern"  = snpPatternOutput(ns("snp_pattern")))
     })
-    
-    ## Downloads
-    output$download_csv_plot <- shiny::renderUI({
-      switch(shiny::req(hap_par$button),
-             "SNP Association" = snpGeneUI(ns("snp_gene")),
-             "Allele Pattern"  = snpPatternUI(ns("snp_pattern")))
-    })
-    
+
     patterns <- shiny::reactive({
       if(shiny::isTruthy(snp_list$snp_action()) &&
          shiny::isTruthy(snp_list$top_snps_tbl())) {
@@ -160,8 +153,7 @@ snpSetupInput <- function(id) {
     shiny::uiOutput(ns("snp_input")),         # button(2), snp_check, by_choice
     snpListInput2(ns("snp_list")),            # minLOD
     shiny::uiOutput(ns("phe_choice")),        # pheno_name
-    shiny::uiOutput(ns("win_choice")),        # scan_window
-    shiny::uiOutput(ns("download_csv_plot"))) # download
+    shiny::uiOutput(ns("win_choice")))        # scan_window
 }
 #' @export
 #' @rdname snpSetupApp
