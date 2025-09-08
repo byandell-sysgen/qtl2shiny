@@ -3,13 +3,16 @@
 \name{scanApp}
 \alias{scanApp}
 \alias{scanServer}
+\alias{scanInput}
 \alias{scanUI}
 \alias{scanOutput}
 \title{Shiny Scan Module}
 \usage{
 scanApp()
 
-scanServer(id, hotspot_list, hap_par, probs_obj, project_df)
+scanServer(id, hotspot_list, probs_obj, project_df)
+
+scanInput(id)
 
 scanUI(id)
 
@@ -18,7 +21,7 @@ scanOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{hotspot_list, hap_par, probs_obj, project_df}{reactive arguments}
+\item{hotspot_list, probs_obj, project_df}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

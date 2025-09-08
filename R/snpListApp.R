@@ -3,7 +3,7 @@
 #' Shiny module to create list of SNP objects.
 #'
 #' @param id identifier for shiny reactive
-#' @param hotspot_list,hap_par,project_df,snp_action reactive arguments
+#' @param hotspot_list,project_df,snp_action reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -38,8 +38,6 @@ snpListApp <- function() {
       title = "snpList",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          hapParUI("hap_par"),                  # button
-          hapParInput("hap_par"),               # sex_type
           snpListInput("snp_list"),             # scan_window
           snpListInput2("snp_list"),            # minLOD
           snpListUI("snp_list")),               # pheno_name
@@ -50,14 +48,13 @@ snpListApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
-    hap_par <- hapParServer("hap_par")
-    snp_list <- snpListServer("snp_list", hotspot_list, hap_par, project_df)
+    snp_list <- snpListServer("snp_list", hotspot_list, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname snpListApp
-snpListServer <- function(id, hotspot_list, hap_par, project_df,
+snpListServer <- function(id, hotspot_list, project_df,
                           snp_action = shiny::reactive({"basic"})) { 
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -78,7 +75,7 @@ snpListServer <- function(id, hotspot_list, hap_par, project_df,
     ## SNP Scan.
     snp_scan_obj <- shiny::reactive({
       shiny::req(snpprobs_obj(), hotspot_list$pheno_mx(),
-        hotspot_list$peak_df(), hotspot_list$covar_df(), hap_par$sex_type)
+        hotspot_list$peak_df(), hotspot_list$covar_df())
       kinship_list <- shiny::req(hotspot_list$kinship_list())[
         shiny::req(win_par())$chr_id[1]]
       snpprobs <- snpprobs_obj()$snpprobs
@@ -154,6 +151,22 @@ snpListServer <- function(id, hotspot_list, hap_par, project_df,
       )
     })
     
+    # `patterns` for return
+    patterns <- shiny::reactive({
+      if(shiny::isTruthy(snp_action()) &&
+         shiny::isTruthy(top_snps_tbl())) {
+        dplyr::arrange(
+          dplyr::mutate(
+            dplyr::filter(
+              summary(top_snps_tbl()), 
+              .data$max_lod >= 3), 
+            contrast = snp_action()), 
+          dplyr::desc(.data$max_lod))
+      } else {
+        NULL
+      }
+    })
+    
     ## Return `snp_list`.
     shiny::reactiveValues(
       snp_par = input,
@@ -163,6 +176,7 @@ snpListServer <- function(id, hotspot_list, hap_par, project_df,
       snpinfo = snpinfo,
       top_snps_tbl = top_snps_tbl,
       gene_exon_tbl = gene_exon_tbl,
+      patterns = patterns,
       snp_action = snp_action)
   })
 }

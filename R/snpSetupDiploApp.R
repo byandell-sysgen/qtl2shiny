@@ -24,7 +24,7 @@ snpSetupDiploApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           dipParInput("dip_par"),      # sex_type
-          dipParUI("dip_par"),         # button, snp_action
+          dipParUI("dip_par"),         # snp_action
           snpSetupInput("snp_setup")), # <various>
         bslib::card(snpSetupOutput("snp_setup"))
       )
@@ -62,7 +62,7 @@ snpListDiploApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           dipParInput("dip_par"),               # sex_type
-          dipParUI("dip_par"),                  # button, snp_action
+          dipParUI("dip_par"),                  # snp_action
           snpListInput("snp_list"),             # scan_window
           snpListInput2("snp_list"),            # minLOD
           snpListUI("snp_list")),               # pheno_name

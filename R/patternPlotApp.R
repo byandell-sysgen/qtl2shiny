@@ -42,7 +42,7 @@ patternPlotApp <- function() {
         sidebar = bslib::sidebar(
           bslib::card(
             dipParInput("dip_par"),       # sex_type
-            dipParUI("dip_par"),          # button, snp_action
+            dipParUI("dip_par"),          # snp_action
             snpSetupInput("snp_setup")),  # <various>
           bslib::card(
             patternInput("pattern_list"), # button, blups, pheno_name

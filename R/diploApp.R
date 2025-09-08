@@ -14,10 +14,13 @@
 #' @importFrom shiny mainPanel moduleServer NS radioButtons reactive renderText
 #'             renderUI req selectInput sidebarPanel strong tagList textOutput
 #'             uiOutput
+#' @importFrom bslib card layout_sidebar navbar_options navset_tab nav_panel
+#'             page_navbar sidebar
 diploApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
     title =  "Test Diplo",
+    navbar_options = bslib::navbar_options(bg = "#2D89C8", theme = "dark"),
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(
@@ -70,16 +73,16 @@ diploServer <- function(id, hotspot_list, project_df) {
       paste(allele_info$code, allele_info$shortname, sep = "=", collapse = ", ")
     })
     
-    output$dip_input <- shiny::renderUI({
-      switch(shiny::req(dip_par$button),
-             "Allele Pattern"  = alleleUI(ns("allele")))
-    })
     output$dip_output <- shiny::renderUI({
-      switch(shiny::req(dip_par$button),
-             "Genome Scans"    = patternPlotOutput(ns("pattern_plot")),
-             "Summary"         = patternOutput(ns("pattern_list")),
-             "SNP Association" = snpSetupOutput(ns("snp_setup")),
-             "Allele Pattern"  = alleleOutput(ns("allele")))
+      bslib::navset_tab(
+        bslib::nav_panel("Genome Scans", patternPlotOutput(ns("pattern_plot"))),
+        bslib::nav_panel("SNP Association", snpSetupOutput(ns("snp_setup"))),
+        bslib::nav_panel("Allele Pattern", shiny::tagList(
+          bslib::card(alleleOutput(ns("allele"))),
+          bslib::card(alleleInput(ns("allele"))),
+          bslib::card(alleleUI(ns("allele")))
+        )),
+        bslib::nav_panel("Summary", patternOutput(ns("pattern_list"))))
     })
   })
 }
@@ -91,11 +94,10 @@ diploUI <- function(id) {
     shiny::uiOutput(ns("project")),
     shiny::strong("SNP/Gene Action"),
     dipParInput(ns("dip_par")),            # sex_type
-    dipParUI(ns("dip_par")),               # button, snp_action
+    dipParUI(ns("dip_par")),               # snp_action
     snpSetupInput(ns("snp_setup")),        # <various>
     patternInput(ns("pattern_list")),      # button, blups, pheno_name
     patternUI(ns("pattern_list")),         # pattern
-    shiny::uiOutput(ns("dip_input")),
     shiny::textOutput(ns("allele_names")))
 }
 #' @export

@@ -41,16 +41,16 @@ alleleApp <- function() {
         sidebar = bslib::sidebar(
           bslib::card(
             dipParInput("dip_par"),         # sex_type
-            dipParUI("dip_par")),           # button, snp_action
+            dipParUI("dip_par")),           # snp_action
           bslib::card(
             snpSetupInput("snp_setup")),    # <various>
           bslib::card(
             patternInput("pattern_list"),   # button, blups, pheno_name
             patternUI("pattern_list")),     # pattern
-          bslib::card(
-            alleleUI("allele")),            # pos_Mbp
           width = 400),
-        bslib::card(alleleOutput("allele"))
+        bslib::card(alleleOutput("allele")),
+        bslib::card(alleleInput("allele"), min_height = "100px"), # pos_Mbp
+        bslib::card(alleleUI("allele"))
       )
     )
   )
@@ -134,20 +134,25 @@ alleleServer <- function(id, hotspot_list, pattern_list, pairprobs_obj,
         shiny::setProgress(1)
         summary(allele_obj(), pos = input$pos_Mbp)
       })
-    })
+    }, escape = FALSE,
+    options = list(scrollX = TRUE, pageLength = 5))
   })
 }
 #' @export
 #' @rdname alleleApp
-alleleUI <- function(id) {
+alleleInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("pos_Mbp_input"))                        # pos_Mbp
 }
 #' @export
 #' @rdname alleleApp
+alleleUI <- function(id) {
+  ns <- shiny::NS(id)
+  DT::dataTableOutput(ns("allele_table"))
+}
+#' @export
+#' @rdname alleleApp
 alleleOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::plotOutput(ns("allele_plot")),
-    DT::dataTableOutput(ns("allele_table")))
+  shiny::plotOutput(ns("allele_plot"))
 }

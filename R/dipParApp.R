@@ -17,7 +17,7 @@ dipParApp <- function() {
     title =  "Test Diplo Parameters",
     sidebar = bslib::sidebar(
       dipParInput("dip_par"), # sex_type
-      dipParUI("dip_par")),   # button
+      dipParUI("dip_par")),   # snp_action
     dipParOutput("dip_par")
   )
   server <- function(input, output, session) {
@@ -31,11 +31,6 @@ dipParServer <- function(id) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    output$button_input <- shiny::renderUI({
-      shiny::radioButtons(ns("button"), "",
-        c("SNP Association","Allele Pattern","Genome Scans","Summary"),
-        input$button)
-    })
     output$snp_action_input <- shiny::renderUI({
       shiny::selectInput(ns("snp_action"), "",
                          c("add+dom","additive","non-add",
@@ -52,7 +47,6 @@ dipParServer <- function(id) {
     output$show_dip_par <- shiny::renderUI({
       shiny::tagList(
         shiny::renderText(paste("sex_type: ", input$sex_type)),
-        shiny::renderText(paste("button: ", input$button)),
         shiny::renderText(paste("snp_action: ", input$snp_action))
       )
     })
@@ -65,15 +59,13 @@ dipParServer <- function(id) {
 #' @rdname dipParApp
 dipParInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("sex_type_input"))      # sex_type
+  shiny::uiOutput(ns("sex_type_input"))   # sex_type
 }
 #' @export
 #' @rdname dipParApp
 dipParUI <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::uiOutput(ns("button_input")),     # button
-    shiny::uiOutput(ns("snp_action_input"))) # snp_action
+  shiny::uiOutput(ns("snp_action_input")) # snp_action
 }
 #' @export
 #' @rdname dipParApp

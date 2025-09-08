@@ -3,6 +3,7 @@
 \name{haploApp}
 \alias{haploApp}
 \alias{haploServer}
+\alias{haploInput}
 \alias{haploUI}
 \alias{haploOutput}
 \title{Shiny Haplotype Analysis App}
@@ -10,6 +11,8 @@
 haploApp()
 
 haploServer(id, hotspot_list, project_df)
+
+haploInput(id)
 
 haploUI(id)
 

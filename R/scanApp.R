@@ -3,7 +3,7 @@
 #' Shiny module for scan1 LOD and coefficient plots, with interfaces \code{scanUI} and  \code{scanOutput}.
 #'
 #' @param id identifier for shiny reactive
-#' @param hotspot_list,hap_par,probs_obj,project_df reactive arguments
+#' @param hotspot_list,probs_obj,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -15,17 +15,17 @@
 #' @importFrom ggplot2 autoplot
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom shiny checkboxInput column
-#'             fluidRow isTruthy moduleServer NS plotOutput radioButtons
+#'             fluidRow isTruthy moduleServer NS plotOutput
 #'             reactive renderPlot renderUI req selectInput setProgress
 #'             sliderInput strong tagList uiOutput updateSliderInput
 #'             withProgress
-#' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
+#' @importFrom bslib card layout_sidebar navbar_options navset_tab nav_panel
+#'             page_navbar sidebar
 scanApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
     title = "Test Scan",
-    bg = "#2D89C8",
-    inverse = TRUE,
+    navbar_options = bslib::navbar_options(bg = "#2D89C8", theme = "dark"),
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(
@@ -34,7 +34,7 @@ scanApp <- function() {
             projectUI("project_df"),            # project
             hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
           bslib::card(
-            hotspotPanelUI("hotspot_list")),   # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
         hotspotPanelOutput("hotspot_list"))
     ),
@@ -42,8 +42,8 @@ scanApp <- function() {
       title = "Scan",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          hapParInput("hap_par"),
-          scanUI("scan")),
+          scanInput("scan"),                    # blups, pheno_name
+          scanUI("scan")),                      # scan_window
         bslib::card(
           scanOutput("scan")))
     )
@@ -51,26 +51,26 @@ scanApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
-    hap_par <- hapParServer("hap_par")
-    #** query_probs for DO1200 somehow corrupted?
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
-    scanServer("scan", hotspot_list, hap_par, probs_obj, project_df)
+    scanServer("scan", hotspot_list, probs_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname scanApp
-scanServer <- function(id, hotspot_list, hap_par, probs_obj, project_df) {
+scanServer <- function(id, hotspot_list, probs_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     ## Genome scan 
     scan_obj <- shiny::reactive({
-      shiny::req(hotspot_list$pheno_mx(), probs_obj(), hotspot_list$kinship_list(), hotspot_list$covar_df(), hotspot_list$peak_df(),
-                 hap_par$sex_type)
+      shiny::req(hotspot_list$pheno_mx(), probs_obj(),
+                 hotspot_list$kinship_list(), hotspot_list$covar_df(),
+                 hotspot_list$peak_df())
       shiny::withProgress(message = "Genome Scan ...", value = 0, {
         shiny::setProgress(1)
-        scan1covar(hotspot_list$pheno_mx(), hotspot_list$covar_df(), probs_obj()$probs, hotspot_list$kinship_list(),
+        scan1covar(hotspot_list$pheno_mx(), hotspot_list$covar_df(),
+                   probs_obj()$probs, hotspot_list$kinship_list(),
                    hotspot_list$peak_df())
       })
     })
@@ -121,12 +121,14 @@ scanServer <- function(id, hotspot_list, hap_par, probs_obj, project_df) {
     
     ## Coefficient Effects.
     eff_obj <- shiny::reactive({
-      shiny::req(hotspot_list$pheno_mx(), probs_obj(), hotspot_list$kinship_list(), hotspot_list$covar_df(),
-                 hap_par$sex_type)
+      shiny::req(hotspot_list$pheno_mx(), probs_obj(),
+                 hotspot_list$kinship_list(), hotspot_list$covar_df(),
+                 hotspot_list$peak_df())
       shiny::withProgress(message = 'Effect scans ...', value = 0, {
         shiny::setProgress(1)
-        scan1_effect(probs_obj()$probs, hotspot_list$pheno_mx(), hotspot_list$kinship_list(), hotspot_list$covar_df(),
-                     hap_par$sex_type, input$blups)
+        scan1_effect(probs_obj()$probs, hotspot_list$pheno_mx(),
+                     hotspot_list$kinship_list(), hotspot_list$covar_df(),
+                     hotspot_list$peak_df(), input$blups)
       })
     })
     output$coef_plot <- shiny::renderPlot({
@@ -161,107 +163,44 @@ scanServer <- function(id, hotspot_list, hap_par, probs_obj, project_df) {
     })
     
     output$pheno_choice <- shiny::renderUI({
-      switch(shiny::req(input$button),
+      switch(shiny::req(input$scan_tab),
              "LOD & Effects" =,
-             Effects = shiny::uiOutput(ns("pheno_name_input")))
+             Effects = shiny::tagList(
+               shiny::uiOutput(ns("blups_input")),       # blups
+               shiny::uiOutput(ns("pheno_name_input")))) # pheno_name
     })
     output$win_choice <- shiny::renderUI({
-      switch(shiny::req(input$button),
+      switch(shiny::req(input$scan_tab),
              LOD     =,
              "LOD & Effects" =,
              Effects = shiny::uiOutput(ns("scan_window_input")))
     })
-    output$LOD <- shiny::renderUI({
-      switch(shiny::req(input$button),
-             LOD             = shiny::plotOutput(ns("scan_plot")))
-    })
-    output$Effects <- shiny::renderUI({
-      switch(shiny::req(input$button),
-             Effects         = shiny::plotOutput(ns("coef_plot")),
-             "LOD & Effects" = shiny::plotOutput(ns("scan_coef_plot")))
-    })
-    output$Summary <- shiny::renderUI({
-      switch(shiny::req(input$button),
-             Summary = DT::dataTableOutput(ns("scan_table")))
-    })
-    
-    
+
     output$blups_input <- shiny::renderUI({
       shiny::checkboxInput(ns("blups"), "BLUPs?")
     })
-    output$button_input <- shiny::renderUI({
-      shiny::radioButtons(ns("button"), "",
-                          c("LOD","Effects","LOD & Effects","Summary"),
-                          input$button)
-    })
-    
-    ## Downloads.
-    filepath <- shiny::reactive({
-      # Catch if `chr_id` is not valid and return "".
-      tryCatch(
-        file.path(paste0("scan_", shiny::req(hotspot_list$win_par())$chr_id[1])),
-        error = function(e) return(""))
-    })
-    download_Plot <- shiny::reactiveValues()
-    download_Plot$scan <- shiny::reactive({
-      shiny::req(hotspot_list$win_par(), hotspot_list$allele_info())
-      effs <- shiny::req(eff_obj())
-      scans <- shiny::req(scan_obj())
-      win <- shiny::req(input$scan_window)
-      map <- shiny::req(probs_obj())$map
-      ggplot2::autoplot(scans, map, lodcolumn = seq_along(names(effs)),
-                        chr = hotspot_list$win_par()$chr_id[1], xlim = win)
-    })
-    # Trick to get Effect plots into `download_Plot` reactiveValues.
-    plot_effs <- shiny::reactive({
-      # Catch if not valid and return NULL.
-      effs <- tryCatch(shiny::req(eff_obj()), error = function(e) return(NULL))
-      for(pheno in names(effs)) {
-        download_Plot[[pheno]] <- shiny::reactive({
-          shiny::req(hotspot_list$win_par(), hotspot_list$allele_info())
-          scans <- shiny::req(scan_obj())
-          win <- shiny::req(input$scan_window)
-          map <- shiny::req(probs_obj())$map
-          plot_eff(pheno, effs, map, scans, win, addlod = TRUE, hotspot_list$allele_info())
-        })
-      }
-    })
-    shiny::isolate(plot_effs())
-    download_list <- shiny::reactiveValues(
-      filename = shiny::isolate(filepath()),
-      Plot = download_Plot,
-      Table = shiny::reactiveValues(
-        scan = shiny::reactive({
-          shiny::req(eff_obj(), scan_obj(), probs_obj())
-          summary(eff_obj(), scan_obj(), probs_obj()$map)
-        }))
-    )
-    # downloadServer(ns("download"), download_list,
-    #                selected_item = shiny::reactive("scan"),
-    #                plot_table = shiny::reactive(input$plot_table),
-    #                title_download = shiny::reactive("Scan"))
   })
+}
+#' @export
+#' @rdname scanApp
+scanInput <- function(id) {
+  ns <- shiny::NS(id)
+  shiny::uiOutput(ns("pheno_choice"))                # blups, pheno_name
 }
 #' @export
 #' @rdname scanApp
 scanUI <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::strong("Genome Scans"),
-    shiny::fluidRow(
-      shiny::column(6, shiny::uiOutput(ns("button_input"))),
-      shiny::column(6, shiny::uiOutput(ns("blups_input")))),
-    shiny::uiOutput(ns("pheno_choice")),
-    shiny::uiOutput(ns("win_choice")),
-    shiny::selectInput(ns("plot_table"), "", c("Plot","Table")),
-    downloadOutput(ns("download")))      # downloadButton, filename
+  shiny::uiOutput(ns("win_choice"))                  # scan_window
 }
 #' @export
 #' @rdname scanApp
 scanOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::uiOutput(ns("LOD")),
-    shiny::uiOutput(ns("Effects")),
-    shiny::uiOutput(ns("Summary")))
+  bslib::navset_tab(
+    id = ns("scan_tab"),
+    bslib::nav_panel("LOD", shiny::plotOutput(ns("scan_plot"))),
+    bslib::nav_panel("Effects", shiny::plotOutput(ns("coef_plot"))),
+    bslib::nav_panel("LOD & Effects", shiny::plotOutput(ns("scan_coef_plot"))),
+    bslib::nav_panel("Summary", DT::dataTableOutput(ns("scan_table"))))
 }

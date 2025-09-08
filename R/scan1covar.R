@@ -18,6 +18,19 @@
 #' @export
 scan1covar <- function(pheno_mx, covar_df, genoprobs, kinship, peaks_df, 
                        model = "normal", ..., force = FALSE) {
+
+  covars <- covar_matrix_phenos(pheno_mx, covar_df, peaks_df)
+  if(force)
+    pheno_mx <- pheno_mx[, covars$phenos, drop = FALSE]
+  
+  kinship <- if(model == "binary") NULL else kinship
+  scans <- qtl2::scan1(genoprobs, pheno_mx, kinship,
+    covars$addcovar, intcovar = covars$intcovar, model = model, ...)
+  attr(scans, "hsq") <- NULL
+  # reorder by decreasing max lod
+  modify_object(scans, scans[,order(-apply(scans,2,max)), drop=FALSE])
+}
+covar_matrix_phenos <- function(pheno_mx, covar_df, peaks_df) {
   # Match phenotypes between data and peaks.
   phenos <- match(colnames(pheno_mx), peaks_df$phenotype, nomatch = 0)
   if(any(phenos == 0)) {
@@ -25,20 +38,13 @@ scan1covar <- function(pheno_mx, covar_df, genoprobs, kinship, peaks_df,
             paste(colnames(pheno_mx)[phenos == 0], collapse = ", "))
   }
   if(all(phenos == 0)) return(NULL)
-  if(force)
-    pheno_mx <- pheno_mx[, phenos, drop = FALSE]
   
   # Check for multiple addcovars or intcovars.
   peaks_df <- peaks_df[phenos,]
-  addcovar <- covar_model_matrix(peaks_df$addcovar, covar_df)
-  intcovar <- covar_model_matrix(peaks_df$intcovar, covar_df)
-
-  kinship <- if(model == "binary") NULL else kinship
-  scans <- qtl2::scan1(genoprobs, pheno_mx, kinship,
-    addcovar, intcovar = intcovar, model = model, ...)
-  attr(scans, "hsq") <- NULL
-  # reorder by decreasing max lod
-  modify_object(scans, scans[,order(-apply(scans,2,max)), drop=FALSE])
+  list(
+    phenos = phenos,
+    addcovar = covar_model_matrix(peaks_df$addcovar, covar_df),
+    intcovar = covar_model_matrix(peaks_df$intcovar, covar_df))
 }
 covar_model_matrix <- function(covform, covar_df) {
   uform <- unique(covform)

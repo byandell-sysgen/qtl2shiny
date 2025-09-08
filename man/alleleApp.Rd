@@ -3,6 +3,7 @@
 \name{alleleApp}
 \alias{alleleApp}
 \alias{alleleServer}
+\alias{alleleInput}
 \alias{alleleUI}
 \alias{alleleOutput}
 \title{Shiny Allele App}
@@ -18,6 +19,8 @@ alleleServer(
   project_df,
   snp_action
 )
+
+alleleInput(id)
 
 alleleUI(id)
 
