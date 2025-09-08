@@ -46,11 +46,6 @@ pheno_region <- function(chr_id, scan_window, covar, map,
   # Replace NA covariate calls by FALSE.
   covars <- colnames(covar)
 
-  # Match below by pheno and other optional columns. Used in 'qtl2shiny'.
-  bycols <- c("pheno", "longname", "output", "pheno_group", "pheno_type")
-  m <- match(bycols, names(peaks_df))
-  bycols <- bycols[!is.na(m)]
-
   ## Annotation
   annot <- 
     dplyr::rename(
@@ -69,7 +64,7 @@ pheno_region <- function(chr_id, scan_window, covar, map,
       id = .data$phenotype)
 
   # Used in 'qtl2shiny'.
-  if("pheno_type" %in% names(annot)) {
+  if("phenotype_class" %in% names(annot)) {
     annot <- dplyr::rename(
       annot,
       biotype = .data$phenotype_class)
