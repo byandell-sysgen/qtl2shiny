@@ -116,8 +116,7 @@ snpSetupServer <- function(id, hotspot_list, hap_par, project_df,
     })
     output$snp_input <- shiny::renderUI({
       switch(shiny::req(hap_par$button),
-             "SNP Association" = snpGeneInput(ns("snp_gene")),       # button, snp_check
-             "Allele Pattern"  = snpPatternInput(ns("snp_pattern"))) # button, by_choice
+             "SNP Association" = snpGeneInput(ns("snp_gene")))       # button, snp_check
     })
     output$snp_output <- shiny::renderUI({
       switch(shiny::req(hap_par$button),

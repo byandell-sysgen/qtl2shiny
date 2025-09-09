@@ -11,16 +11,17 @@
 #' @importFrom dplyr across distinct mutate where
 #' @importFrom qtl2pattern sdp_to_pattern
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny column downloadButton downloadHandler fluidRow moduleServer
-#'             NS plotOutput radioButtons reactive renderPlot renderUI req
+#' @importFrom shiny column fluidRow moduleServer
+#'             NS plotOutput reactive renderPlot renderUI req
 #'             selectInput setProgress strong tagList uiOutput
-#'             updateRadioButtons withProgress
+#'             withProgress
 #' @importFrom rlang .data
-#' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
+#' @importFrom bslib card layout_sidebar navset_tab nav_hide nav_panel
+#'             nav_select nav_show page_navbar sidebar
 snpPatternApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
-    title =  "Test SNP Pattern Setup",
+    title =  "Test SNP Pattern",
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(
@@ -37,8 +38,6 @@ snpPatternApp <- function() {
       title = "snpPattern",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          hapParInput("hap_par"),                 # sex_type
-          snpPatternInput("snp_pattern"),   # button_input pat_input
           snpListInput2("snp_list"),            # minLOD
           snpListUI("snp_list"), # pheno_name
           snpListInput("snp_list")), # scan_window
@@ -49,9 +48,8 @@ snpPatternApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
-    hap_par <- hapParServer("hap_par")
-    snp_list <- snpListServer("snp_list", hotspot_list, hap_par, project_df)
-    snpPatternServer("snp_pattern", snp_list, allele_info)
+    snp_list <- snpListServer("snp_list", hotspot_list, project_df)
+    snpPatternServer("snp_pattern", snp_list, hotspot_list$allele_info)
   }
   shiny::shinyApp(ui, server)
 }
@@ -171,140 +169,40 @@ snpPatternServer <- function(id, snp_list, allele_info) {
       })
     })
     
-    output$pat_input <- shiny::renderUI({
-      switch(shiny::req(input$button),
-             #           "All Patterns" = shiny::uiOutput(ns("pattern")),
-             "Top SNPs"     = snpFeatureInput(ns("top_feature"))) # by_choice
-    })
-    output$pat_output <- shiny::renderUI({
-      switch(shiny::req(input$button),
-             "Top SNPs"     = snpFeatureOutput(ns("top_feature")),
-             "By Pheno"     = shiny::plotOutput(ns("snp_pattern_plot")),
-             "All Phenos"   = shiny::plotOutput(ns("snp_phe_pat")),
-             "All Patterns" = shiny::plotOutput(ns("snp_pat_phe")),
-             "Interactive"  = plotly::plotlyOutput(ns("snp_pattern_plotly")))
-    })
     output$title <- shiny::renderUI({
       if(snp_action() == "basic")
         shiny::strong("SNP Plots")
     })
     
-    ## Downloads
-    output$download_csv_plot <- shiny::renderUI({
-      switch(shiny::req(input$button),
-        "Top SNPs" = snpFeatureUI(ns("top_feature")),
-        shiny::fluidRow(
-          shiny::column(6, shiny::downloadButton(ns("downloadData"), "CSV")),
-          shiny::column(6, shiny::downloadButton(ns("downloadPlot"), "Plots"))))
-    })
-    output$downloadData <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0(paste0("pattern", chr_id(),
-                                peak_Mbp(), snp_action(),
-                                sep = "_"),
-                         ".csv")) },
-      content = function(file) {
-        utils::write.csv(sum_top_pat(), file)
-      }
-    )
-    output$downloadPlot <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0(paste0("pattern", chr_id(),
-                                peak_Mbp(), snp_action(),
-                                sep = "_"),
-                         ".pdf")) },
-      content = function(file) {
-        scans <- shiny::req(snp_list$snp_scan_obj())
-        snp_w <- shiny::req(snp_list$snp_par$scan_window)
-        phenos <- shiny::req(snp_list$snp_list$pheno_names())
-        grDevices::pdf(file, width = 9)
-        ## Plots over all phenotypes
-        print(top_pat_plot(phenos, 
-                           scans, 
-                           chr_id(),
-                           snp_list$snpinfo(), 
-                           snp_w,
-                           drop_hilit = dropHilit(),
-                           facet = "pheno", 
-                           snp_action = snp_list$snp_action()))
-        
-        print(top_pat_plot(snp_list$pheno_names(), 
-                           snp_list$snp_scan_obj(), 
-                           chr_id(),
-                           snp_list$snpinfo(), 
-                           snp_list$snp_par$scan_window,
-                           drop_hilit = dropHilit(),
-                           facet = "pattern", 
-                           snp_action = snp_list$snp_action()))
-        
-        ## Plots by phenotype.
-        for(pheno in phenos) {
-          print(top_pat_plot(pheno, 
-                             scans, 
-                             chr_id(),
-                             snp_list$snpinfo(), 
-                             snp_w, 
-                             drop_hilit = dropHilit(),
-                             snp_action = snp_list$snp_action()))
-        }
-        grDevices::dev.off()
-      }
-    )
-    output$button_input <- shiny::renderUI({
-      button_val <- c("All Phenos","All Patterns",
-                      "By Pheno",
-                      "Top SNPs","Interactive")
-      if(length(snp_list$pheno_names()) == 1) {
-        button_val <- button_val[-(1:2)]
-      }
-      if(!is.null(selected <- input$button)) {
-        if(!(selected %in% button_val))
-          selected <- button_val[1]
-      }
-      shiny::radioButtons(ns("button"), "",
-                          button_val, selected)
-    })
-    ## Update Radio Button if 1 or >1 Phenotype Names.
-    shiny::observeEvent(snp_list$pheno_names(), {
-      button_val <- c("All Phenos","All Patterns",
-                      "By Pheno",
-                      "Top SNPs")
-      if(length(snp_list$pheno_names()) == 1) {
-        button_val <- button_val[-(1:2)]
-      }
-      selected <- input$button
-      if(!is.null(selected)) {
-        if(!(selected %in% button_val))
-          selected <- button_val[1]
-        shiny::updateRadioButtons(session, "button", 
-                                  selected = selected,
-                                  choices = button_val)
-      }
-    })
-    
+    # shiny::observeEvent(snp_list$pheno_names(), {
+    #   browser()
+    #   if(length(snp_list$pheno_names()) == 1) {
+    #     shiny::tagList(
+    #       bslib::nav_select(ns("pat_tab"), "All Phenos", session),
+    #       bslib::nav_hide(ns("pat_tab"), "Top SNPs", session),
+    #       bslib::nav_hide(ns("pat_tab"), "By Pheno", session))
+    #   } else {
+    #     shiny::tagList(
+    #       bslib::nav_select(ns("pat_tab"), "Top SNPs", session),
+    #       bslib::nav_show(ns("pat_tab"), "Top SNPs", session),
+    #       bslib::nav_show(ns("pat_tab"), "By Pheno", session))
+    #   }
+    # })
+
+    # Return.
     input
   })
 }
 #' @export
 #' @rdname snpPatternApp
-snpPatternInput <- function(id) { # button_input pat_input
-  ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::uiOutput(ns("button_input")), # button
-    shiny::uiOutput(ns("pat_input"))     # by_choice
-  )
-}
-#' @export
-#' @rdname snpPatternApp
-snpPatternUI <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::uiOutput(ns("download_csv_plot"))
-}
-#' @export
-#' @rdname snpPatternApp
 snpPatternOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::uiOutput(ns("pat_output")),
-    DT::dataTableOutput(ns("snp_pattern_table")))
+  bslib::navset_tab(
+    id = ns("pat_tab"),
+    bslib::nav_panel("Top SNPs",     snpFeatureOutput(ns("top_feature"))),
+    bslib::nav_panel("By Pheno",     shiny::plotOutput(ns("snp_pattern_plot"))),
+    bslib::nav_panel("All Phenos",   shiny::plotOutput(ns("snp_phe_pat"))),
+    bslib::nav_panel("All Patterns", shiny::plotOutput(ns("snp_pat_phe"))),
+    bslib::nav_panel("Summary",      DT::dataTableOutput(ns("snp_pattern_table"))),
+    bslib::nav_panel("Interactive",  plotly::plotlyOutput(ns("snp_pattern_plotly"))))
 }

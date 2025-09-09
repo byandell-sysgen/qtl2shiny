@@ -22,7 +22,7 @@
 alleleApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
-    title =  "Test Pattern",
+    title =  "Test Allele",
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(
@@ -48,9 +48,8 @@ alleleApp <- function() {
             patternInput("pattern_list"),   # button, blups, pheno_name
             patternUI("pattern_list")),     # pattern
           width = 400),
-        bslib::card(alleleOutput("allele")),
         bslib::card(alleleInput("allele"), min_height = "100px"), # pos_Mbp
-        bslib::card(alleleUI("allele"))
+        bslib::card(alleleOutput("allele"))
       )
     )
   )
@@ -146,13 +145,11 @@ alleleInput <- function(id) {
 }
 #' @export
 #' @rdname alleleApp
-alleleUI <- function(id) {
-  ns <- shiny::NS(id)
-  DT::dataTableOutput(ns("allele_table"))
-}
-#' @export
-#' @rdname alleleApp
 alleleOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::plotOutput(ns("allele_plot"))
+  bslib::navset_tab(
+    id = "all_tab",
+    bslib::nav_panel("Plot",    shiny::plotOutput(ns("allele_plot"))),
+    bslib::nav_panel("Summary", DT::dataTableOutput(ns("allele_table"))))
 }

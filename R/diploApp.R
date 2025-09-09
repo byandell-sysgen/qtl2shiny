@@ -61,7 +61,6 @@ diploServer <- function(id, hotspot_list, project_df) {
     snp_action <- shiny::reactive({dip_par$snp_action})
     ## SNP Association
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
-    snpGeneServer("snp_gene", snp_list, project_df)
     pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
       pairprobs_obj, snp_list$patterns, snp_list$snp_action, project_df)
     patternPlotServer("pattern_plot", pattern_list, pairprobs_obj)
@@ -75,14 +74,14 @@ diploServer <- function(id, hotspot_list, project_df) {
     
     output$tabset_input <- shiny::renderUI({
       switch(shiny::req(input$dip_tab),
-        "Genome Scans" =,
-        "Summary" = bslib::card(
+        "SDP Scans" = bslib::card(
           patternInput(ns("pattern_list")), # button, blups, pheno_name
           patternUI(ns("pattern_list"))),   # pattern
         "Allele Pattern" = bslib::card(
-          alleleInput(ns("allele"))),       # pos_Mbp
-        "SNP Association" = bslib::card(
-          snpGeneInput(ns("snp_gene"))))    # button, snp_check
+          alleleInput(ns("allele"))))       # pos_Mbp
+    })
+    output$pattern_output <- shiny::renderUI({
+      
     })
   })
 }
@@ -106,10 +105,11 @@ diploOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = ns("dip_tab"),
-    bslib::nav_panel("Genome Scans",    patternPlotOutput(ns("pattern_plot"))),
-    bslib::nav_panel("SNP Association", snpGeneOutput(ns("snp_gene"))),
-    bslib::nav_panel("Allele Pattern",  bslib::card(
-      alleleOutput(ns("allele")),
-      alleleUI(ns("allele")))),
-    bslib::nav_panel("Summary",         patternOutput(ns("pattern_list"))))
+    bslib::nav_panel("SDP Scans", bslib::navset_tab(
+      bslib::nav_panel("Plot",
+        bslib::card(patternPlotOutput(ns("pattern_plot")))),
+      bslib::nav_panel("Summary",
+        bslib::card(patternOutput(ns("pattern_list")))))),
+    bslib::nav_panel("Allele Pattern", 
+      bslib::card(alleleOutput(ns("allele")))))
 }

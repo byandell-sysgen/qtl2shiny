@@ -47,7 +47,7 @@ patternApp <- function() {
           bslib::card(
             snpSetupInput("snp_setup")),  # <various>
           bslib::card(
-            patternInput("pattern_list"), # button, blups, pheno_name
+            patternInput("pattern_list"), # blups, pheno_name
             patternUI("pattern_list")),   # pattern
           width = 400),
         bslib::card(patternOutput("pattern_list"))
@@ -168,9 +168,7 @@ patternServer <- function(id, hotspot_list, dip_par, pairprobs_obj, patterns,
 patternInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::fluidRow(
-      shiny::column(6, shiny::uiOutput(ns("button_input"))), # button
-      shiny::column(6, shiny::uiOutput(ns("blups_input")))), # blups
+    shiny::uiOutput(ns("blups_input")),                      # blups
     shiny::uiOutput(ns("pheno_name_input")))                 # pheno_name
 }
 #' @export

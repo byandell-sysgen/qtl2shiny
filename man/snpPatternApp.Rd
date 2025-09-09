@@ -3,18 +3,12 @@
 \name{snpPatternApp}
 \alias{snpPatternApp}
 \alias{snpPatternServer}
-\alias{snpPatternInput}
-\alias{snpPatternUI}
 \alias{snpPatternOutput}
 \title{Shiny SNP Pattern App}
 \usage{
 snpPatternApp()
 
 snpPatternServer(id, snp_list, allele_info)
-
-snpPatternInput(id)
-
-snpPatternUI(id)
 
 snpPatternOutput(id)
 }

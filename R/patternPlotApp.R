@@ -15,8 +15,8 @@
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom shiny checkboxInput column downloadButton downloadHandler
 #'             fluidRow moduleServer NS observeEvent plotOutput radioButtons
-#'             reactive renderPlot renderUI req selectInput tagList uiOutput
-#'             updateSelectInput
+#'             reactive renderPlot renderUI req selectInput setProgress tagList
+#'             uiOutput updateSelectInput withProgress
 #' @importFrom grDevices dev.off pdf
 #' @importFrom utils write.csv
 #' @importFrom rlang .data
@@ -41,7 +41,6 @@ patternPlotApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            dipParInput("dip_par"),       # sex_type
             dipParUI("dip_par"),          # snp_action
             snpSetupInput("snp_setup")),  # <various>
           bslib::card(
@@ -68,51 +67,63 @@ patternPlotApp <- function() {
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname patternApp
+#' @rdname patternPlotApp
 patternPlotServer <- function(id, pattern_list, pairprobs_obj) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    output$pattern_plot <- shiny::renderUI({
-      switch(shiny::req(pattern_list$pat_par$button),
-        LOD             = {
-          type <- "lod"
-          msg <- 'Pattern LOD ...'
-        },
-        Effects         = {
-          type <- "coef"
-          msg <- 'Pattern Effects ...'
-        },
-        "LOD & Effects" = {
-          #** Effects garbled if more that 4.
-          #** Warning in matrix(pattern, nrow(lod), ncol(lod)) :
-          #** data length differs from size of matrix: [441 != 63 x 3]
-          #** Warning: Removed 378 rows containing missing values or values outside the scale range
-          #** (`geom_line()`).
-          type <- "coef_and_lod"
-          msg <- 'Pattern Effects & LOD ...'
-        })
-      if(pattern_list$pat_par$button %in% c("LOD","Effects", "LOD & Effects")) {
-        shiny::renderPlot({
-          if(is.null(pattern_list$scan_pat()))
-            return(plot_null())
-          shiny::req(pattern_list$scan_pat(), pattern_list$pattern_choices(),
-                     pattern_list$pat_par$pheno_name, pairprobs_obj())
-          withProgress(message = msg, value = 0, {
-            setProgress(1)
-            scan_pat_type(pattern_list$scan_pat(), pairprobs_obj()$map, type,
-                          pattern_list$pattern_choices(), 
-                          pattern_list$pat_par$pheno_name,
-                          pattern_list$haplos())
-          })
-        })
-      }
+    plot_type_msg <- shiny::reactive({
+      switch(shiny::req(input$pat_plot_tab),
+        LOD             = list(type = "lod", msg = 'Pattern LOD ...'),
+        Effects         = list(type = "coef", msg = 'Pattern Effects ...'),
+        "LOD & Effects" = list(type = "coef_and_lod", msg = 'Pattern Effects & LOD ...'))
+      #** Effects garbled if more that 4.
+      #** Warning in matrix(pattern, nrow(lod), ncol(lod)) :
+      #** data length differs from size of matrix: [441 != 63 x 3]
+      #** Warning: Removed 378 rows containing missing values or values outside the scale range
+      #** (`geom_line()`).
+    })
+    scan_pat_type_progress <- shiny::reactive({
+      if(is.null(pattern_list$scan_pat()))
+        return(plot_null())
+      shiny::req(pattern_list$scan_pat(), pattern_list$pattern_choices(),
+                 pattern_list$pat_par$pheno_name, pairprobs_obj(),
+                 plot_type_msg())
+      shiny::withProgress(message = plot_type_msg()$msg, value = 0, {
+        shiny::setProgress(1)
+        scan_pat_type(pattern_list$scan_pat(), pairprobs_obj()$map,
+                      plot_type_msg()$type,
+                      pattern_list$pattern_choices(), 
+                      pattern_list$pat_par$pheno_name,
+                      pattern_list$haplos())
+      })
+    })
+    output$pattern_plot_lod <- shiny::renderUI({
+      shiny::req(input$pat_plot_tab, plot_type_msg(), scan_pat_type_progress())
+      shiny::renderPlot(scan_pat_type_progress())
+    })
+    output$pattern_plot_eff <- shiny::renderUI({
+      shiny::req(input$pat_plot_tab, plot_type_msg(), scan_pat_type_progress())
+      shiny::renderPlot(scan_pat_type_progress())
+    })
+    # ** This one is broken for SDP scans. **
+    output$pattern_plot_both <- shiny::renderUI({
+      shiny::req(input$pat_plot_tab, plot_type_msg(), scan_pat_type_progress())
+      shiny::renderPlot(scan_pat_type_progress())
     })
   })
 }
 #' @export
-#' @rdname patternApp
+#' @rdname patternPlotApp
 patternPlotOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("pattern_plot"))
+  bslib::navset_tab(
+    id = ns("pat_plot_tab"),
+    # Note that `plot_type_msg()` changes with `input$pat_plot_tab`.
+    bslib::nav_panel("LOD", bslib::card(
+      shiny::uiOutput(ns("pattern_plot_lod")))),
+    bslib::nav_panel("Effects", bslib::card(
+      shiny::uiOutput(ns("pattern_plot_eff")))),
+    bslib::nav_panel("LOD & Effects", bslib::card(
+      shiny::uiOutput(ns("pattern_plot_both")))))
 }

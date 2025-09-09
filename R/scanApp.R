@@ -164,6 +164,7 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
     output$pheno_choice <- shiny::renderUI({
       switch(shiny::req(input$scan_tab),
              "LOD & Effects" =,
+             Summary =,
              Effects = shiny::tagList(
                shiny::uiOutput(ns("blups_input")),       # blups
                shiny::uiOutput(ns("pheno_name_input")))) # pheno_name

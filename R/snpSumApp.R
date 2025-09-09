@@ -20,6 +20,43 @@
 #' @importFrom utils write.csv
 #' @importFrom rlang .data
 #' 
+snpSumApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_navbar(
+    title =  "Test SNP Sum",
+    bslib::nav_panel(
+      title = "Hotspots",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI("project_df"),            # project
+            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput("hotspot_list"))
+    ),
+    bslib::nav_panel(
+      title = "snpSum",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          snpListInput2("snp_list"),            # minLOD
+          snpListUI("snp_list"),                # pheno_name
+          snpListInput("snp_list")),            # scan_window
+        bslib::card(snpSumOutput("snp_sum"))
+      )
+    )
+  )
+  server <- function(input, output, session) {
+    project_df <- projectServer("project_df", projects_df)
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    snp_list <- snpListServer("snp_list", hotspot_list, project_df)
+    snpSumServer("snp_sum", snp_list, project_df)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname snpSumApp
 snpSumServer <- function(id, snp_list, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -71,43 +108,20 @@ snpSumServer <- function(id, snp_list, project_df) {
                           })
     }, escape = FALSE,
     options = list(scrollX = TRUE, pageLength = 5))
-    output$snp_sum_input <- shiny::renderUI({
-      switch(input$snp_sum,
-             best   = DT::dataTableOutput(ns("top_snps_best")),
-             indels = DT::dataTableOutput(ns("top_indels")),
-             peaks  = DT::dataTableOutput(ns("top_snps_peak")),
-             range  = DT::dataTableOutput(ns("top_snps_tbl")))
-    })
-    
-    ## Downloads.
-    output$downloadData <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0("top_snps_", snp_list$chr_pos(), "_",
-                         snp_list$snp_action(), ".csv")) },
-      content = function(file) {
-        utils::write.csv(best_http(), file)
-      }
-    )
   })
 }
 #' @export
-#' @rdname snpSumServer
-snpSumInput <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::selectInput(ns("snp_sum"), "Summary",
-                       c("best","indels","peaks","range"))
-  )
-}
-#' @export
-#' @rdname snpSumServer
-snpSumUI <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::downloadButton(ns("downloadData"), "CSV")
-}
-#' @export
-#' @rdname snpSumServer
+#' @rdname snpSumApp
 snpSumOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("snp_sum_input"))
+  bslib::navset_tab(
+    id = ns("sum_tab"),
+    bslib::nav_panel("best", bslib::card(
+      DT::dataTableOutput(ns("top_snps_best")))),
+    bslib::nav_panel("indels", bslib::card(
+      DT::dataTableOutput(ns("top_indels")))),
+    bslib::nav_panel("peaks", bslib::card(
+      DT::dataTableOutput(ns("top_snps_peak")))),
+    bslib::nav_panel("range", bslib::card(
+      DT::dataTableOutput(ns("top_snps_tbl")))))
 }

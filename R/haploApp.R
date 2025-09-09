@@ -84,8 +84,7 @@ haploServer <- function(id, hotspot_list, project_df) {
           scanInput(ns("scan")),
           scanUI(ns("scan"))      # button, snp_check
         ),
-        "SNP Association" = snpGeneInput(ns("snp_gene")),
-        "Pattern Scan" = snpPatternInput(ns("snp_pattern")))  # button, by_choice
+        "SNP Association" = snpGeneInput(ns("snp_gene")))
     })
   })
 }

@@ -4,7 +4,6 @@
 \alias{snpGeneApp}
 \alias{snpGeneServer}
 \alias{snpGeneInput}
-\alias{snpGeneUI}
 \alias{snpGeneOutput}
 \title{Shiny SNP Gene App}
 \usage{
@@ -13,8 +12,6 @@ snpGeneApp()
 snpGeneServer(id, snp_list, project_df)
 
 snpGeneInput(id)
-
-snpGeneUI(id)
 
 snpGeneOutput(id)
 }

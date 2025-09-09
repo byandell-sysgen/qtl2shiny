@@ -20,6 +20,46 @@
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
+#' @importFrom bslib card layout_sidebar navset_tab nav_panel
+#'             page_navbar sidebar
+geneExonApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_navbar(
+    title =  "Test Gene Exon",
+    bslib::nav_panel(
+      title = "Hotspots",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI("project_df"),            # project
+            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput("hotspot_list"))
+    ),
+    bslib::nav_panel(
+      title = "geneExon",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          geneExonInput("gene_exon"),            # gene_name
+          snpListInput2("snp_list"),             # minLOD
+          snpListUI("snp_list"),                 # pheno_name
+          snpListInput("snp_list")),             # scan_window
+        bslib::card(geneExonOutput("gene_exon"))
+      )
+    )
+  )
+  server <- function(input, output, session) {
+    project_df <- projectServer("project_df", projects_df)
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    snp_list <- snpListServer("snp_list", hotspot_list, project_df)
+    geneExonServer("gene_exon", snp_list)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname geneExonApp
 geneExonServer <- function(id, snp_list) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -103,66 +143,25 @@ geneExonServer <- function(id, snp_list) {
     
     ## Outputs
     output$exon_input <- shiny::renderUI({
-      switch(shiny::req(input$button),
+      switch(shiny::req(input$exon_tab),
              Plot    = shiny::uiOutput(ns("gene_name")))
-    })
-    output$exon_output <- shiny::renderUI({
-      switch(shiny::req(input$button),
-             Plot    = shiny::plotOutput(ns("exon_plot")),
-             Summary = DT::dataTableOutput(ns("exon_table")))
-    })
-    
-    ## Downloads.
-    output$downloadData <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0("gene_exon_", snp_list$chr_pos(), "_",
-                         snp_list$snp_action(), ".csv")) },
-      content = function(file) {
-        utils::write.csv(shiny::req(summary_gene_exon()), file)
-      }
-    )
-    output$downloadPlot <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0("gene_exon_", snp_list$chr_pos(), "_",
-                         snp_list$snp_action(), ".pdf")) },
-      content = function(file) {
-        gene_exon <- shiny::req(gene_exon_pheno())
-        pheno_name <- shiny::req(snp_list$snp_par$pheno_name)
-        top_snps <- dplyr::filter(shiny::req(snp_list$top_snps_tbl()),
-                                  .data$pheno == pheno_name)
-        grDevices::pdf(file, width = 9)
-        for(gene_name in shiny::req(gene_names())) {
-          print(plot_gene_exons(gene_exon, top_snps,
-                                gene_name, pheno_name))
-        }
-        grDevices::dev.off()
-      }
-    )
-    output$select <- shiny::renderUI({
-      shiny::selectInput(ns("button"), NULL, c("Plot","Summary"),
-                         input$button)
     })
   })
 }
 #' @export
-#' @rdname geneExonServer
+#' @rdname geneExonApp
 geneExonInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::fluidRow(
-    shiny::uiOutput(ns("select")),
-    shiny::uiOutput(ns("exon_input")))
+  shiny::uiOutput(ns("exon_input"))
 }
 #' @export
-#' @rdname geneExonServer
-geneExonUI <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::fluidRow(
-    shiny::column(6, shiny::downloadButton(ns("downloadData"), "CSV")),
-    shiny::column(6, shiny::downloadButton(ns("downloadPlot"), "Plots")))
-}
-#' @export
-#' @rdname geneExonServer
+#' @rdname geneExonApp
 geneExonOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("exon_output")) # exon_plot, exon_table
+  bslib::navset_tab(
+    id = ns("exon_tab"),
+    bslib::nav_panel("Plot", bslib::card(
+      shiny::plotOutput(ns("exon_plot")))),
+    bslib::nav_panel("Summary", bslib::card(
+      DT::dataTableOutput(ns("exon_table")))))
 }

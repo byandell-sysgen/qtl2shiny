@@ -2,9 +2,15 @@
 % Please edit documentation in R/patternPlotApp.R
 \name{patternPlotApp}
 \alias{patternPlotApp}
+\alias{patternPlotServer}
+\alias{patternPlotOutput}
 \title{Shiny Pattern Plot App}
 \usage{
 patternPlotApp()
+
+patternPlotServer(id, pattern_list, pairprobs_obj)
+
+patternPlotOutput(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}

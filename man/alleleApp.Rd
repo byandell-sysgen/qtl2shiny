@@ -4,7 +4,6 @@
 \alias{alleleApp}
 \alias{alleleServer}
 \alias{alleleInput}
-\alias{alleleUI}
 \alias{alleleOutput}
 \title{Shiny Allele App}
 \usage{
@@ -21,8 +20,6 @@ alleleServer(
 )
 
 alleleInput(id)
-
-alleleUI(id)
 
 alleleOutput(id)
 }

@@ -13,11 +13,51 @@
 #' @export
 #' @importFrom ggplot2 autoplot ggtitle
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny checkboxInput column downloadButton downloadHandler
+#' @importFrom shiny checkboxInput column
 #'             fluidRow isTruthy moduleServer NS plotOutput reactive renderPlot
 #'             renderUI req setProgress tagList uiOutput withProgress
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
+#' @importFrom bslib card layout_sidebar navset_tab nav_panel
+#'             page_navbar sidebar
+geneRegionApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_navbar(
+    title =  "Test Gene Region",
+    bslib::nav_panel(
+      title = "Hotspots",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI("project_df"),            # project
+            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput("hotspot_list"))
+    ),
+    bslib::nav_panel(
+      title = "geneRegion",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          geneRegionInput("gene_region"),        # SNP
+          snpListInput2("snp_list"),             # minLOD
+          snpListUI("snp_list"),                 # pheno_name
+          snpListInput("snp_list")),             # scan_window
+        bslib::card(geneRegionOutput("gene_region"))
+      )
+    )
+  )
+  server <- function(input, output, session) {
+    project_df <- projectServer("project_df", projects_df)
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    snp_list <- snpListServer("snp_list", hotspot_list, project_df)
+    geneRegionServer("gene_region", snp_list, project_df)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname geneRegionApp
 geneRegionServer <- function(id, snp_list, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -62,55 +102,22 @@ geneRegionServer <- function(id, snp_list, project_df) {
       plot_gene_region(phename, gene_region_tbl(), snp_list$top_snps_tbl(), 
                        wrng, use_snp, snp_list$snp_action())
     })
-    output$downloadData <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0("gene_region_", chr_pos_all(), "_",
-                         snp_list$snp_action(), ".csv")) },
-      content = function(file) {
-        utils::write.csv(shiny::req(gene_region_tbl()), file)
-      }
-    )
-    output$downloadPlot <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0("gene_region_", chr_pos(), "_",
-                         snp_list$snp_action(), ".pdf")) },
-      content = function(file) {
-        shiny::req(gene_region_tbl(), snp_list$top_snps_tbl())
-        wrng <- shiny::req(snp_list$snp_par$scan_window)
-        phename <- shiny::req(snp_list$snp_par$pheno_name)
-        use_snp <- shiny::isTruthy(input$SNP)
-        pheno_names <- unique(shiny::req(snp_list$top_snps_tbl())$pheno)
-        grDevices::pdf(file, width = 9)
-        for(pheno in pheno_names)
-          print(plot_gene_region(pheno, gene_region_tbl(), 
-                                 snp_list$top_snps_tbl(), 
-                                 wrng, use_snp, snp_list$snp_action()))
-        grDevices::dev.off()
-      }
-    )
   })
 }
 #' @export
-#' @rdname geneRegionServer
+#' @rdname geneRegionApp
 geneRegionInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("SNP"))
 }
 #' @export
-#' @rdname geneRegionServer
-geneRegionUI <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::fluidRow(
-    shiny::fluidRow(
-      shiny::column(6, shiny::downloadButton(ns("downloadData"), "CSV")),
-      shiny::column(6, shiny::downloadButton(ns("downloadPlot"), "Plot"))))
-}
-#' @export
-#' @rdname geneRegionServer
+#' @rdname geneRegionApp
 geneRegionOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(                         # gene_plot, gene_table
-    shiny::plotOutput(ns("gene_plot")),
-    DT::dataTableOutput(ns("gene_table"))
-  )
+  bslib::navset_tab(
+    id = ns("exon_tab"),
+    bslib::nav_panel("Plot", bslib::card(
+      shiny::plotOutput(ns("gene_plot")))),
+    bslib::nav_panel("Summary", bslib::card(
+      DT::dataTableOutput(ns("gene_table")))))
 }
