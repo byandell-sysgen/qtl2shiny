@@ -22,6 +22,8 @@ comediator_region(
 
 \item{covar}{covariate data frame}
 
+\item{peaks_df}{table of peaks}
+
 \item{qtls}{number of drivers (1 or 2; default is 2)}
 
 \item{pmap}{physical map}
@@ -29,8 +31,6 @@ comediator_region(
 \item{pheno_data}{phenotype data}
 
 \item{analyses_tbl}{table of analyses}
-
-\item{peaks}{table of peaks}
 }
 \description{
 Create list with mediators in region

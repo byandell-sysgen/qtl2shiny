@@ -36,8 +36,8 @@ haploApp <- function() {
       title = "Haplo",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          haploInput("haplo"),                  # <various>
-          haploUI("haplo")),                    # <various>
+          haploUI("haplo"),                  # <various>
+          haploInput("haplo")),                    # <various>
         bslib::card(haploOutput("haplo"))
       )
     )
@@ -62,11 +62,11 @@ haploServer <- function(id, hotspot_list, project_df) {
     ## SNP List and Patterns
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
     ## SNP Association
-    ass_par <- snpGeneServer("snp_gene", snp_list, project_df)
-    ## Allele Patterns
-    pat_par <- snpPatternServer("snp_pattern", snp_list, hotspot_list$allele_info)
+    snpGeneServer("snp_gene", snp_list, project_df)
+    ## Pattern Scans
+    snpPatternServer("snp_pattern", snp_list, hotspot_list$allele_info)
     ## Mediation
-    #mediateServer("mediate", hotspot_list, probs_obj, patterns, project_df)
+    mediateServer("mediate", hotspot_list, probs_obj, snp_list$patterns, project_df)
     
     output$allele_names <- shiny::renderText({
       allele_info <- shiny::req(hotspot_list$allele_info())
@@ -78,14 +78,14 @@ haploServer <- function(id, hotspot_list, project_df) {
                                      project_df()$project,
                                      "\n")))
     })
-    output$ui_choice <- shiny::renderUI({
+    output$tabset_input <- shiny::renderUI({
       switch(shiny::req(input$hap_tab),
         "Genome Scans" = shiny::tagList(
           scanInput(ns("scan")),
           scanUI(ns("scan"))      # button, snp_check
         ),
         "SNP Association" = snpGeneInput(ns("snp_gene")),
-        "Allele Pattern" = snpPatternInput(ns("snp_pattern")))  # button, by_choice
+        "Pattern Scan" = snpPatternInput(ns("snp_pattern")))  # button, by_choice
     })
   })
 }
@@ -94,8 +94,6 @@ haploServer <- function(id, hotspot_list, project_df) {
 haploInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::uiOutput(ns("project")),
-    shiny::strong("SNP/Gene Additive"),
     snpListInput(ns("snp_list")),          # scan_window
     snpListInput2(ns("snp_list")),         # minLOD
     snpListUI(ns("snp_list")),             # pheno_name
@@ -105,7 +103,10 @@ haploInput <- function(id) {
 #' @rdname haploApp
 haploUI <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("ui_choice"))
+  shiny::tagList(
+    shiny::uiOutput(ns("project")),
+    shiny::strong("SNP/Gene Additive"),
+    shiny::uiOutput(ns("tabset_input")))
 }
 #' @export
 #' @rdname haploApp
@@ -113,8 +114,8 @@ haploOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = ns("hap_tab"),
-    bslib::nav_panel("Genome Scans", scanOutput(ns("scan"))),
+    bslib::nav_panel("Genome Scans",    scanOutput(ns("scan"))),
     bslib::nav_panel("SNP Association", snpGeneOutput(ns("snp_gene"))),
-    bslib::nav_panel("Allele Pattern", snpPatternOutput(ns("snp_pattern"))))
-  #bslib::nav_panel("Mediation", mediateOutput(ns("mediate"))))
+    bslib::nav_panel("Pattern Scan",    snpPatternOutput(ns("snp_pattern"))),
+    bslib::nav_panel("Mediation",       mediateOutput(ns("mediate"))))
 }  

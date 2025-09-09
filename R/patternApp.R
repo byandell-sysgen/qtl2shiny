@@ -43,7 +43,6 @@ patternApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            dipParInput("dip_par"),       # sex_type
             dipParUI("dip_par")),         # snp_action
           bslib::card(
             snpSetupInput("snp_setup")),  # <various>
@@ -136,13 +135,13 @@ patternServer <- function(id, hotspot_list, dip_par, pairprobs_obj, patterns,
       pheno_name <- shiny::req(input$pheno_name)
       shiny::req(hotspot_list$pheno_mx(), hotspot_list$covar_df(),
                  pairprobs_obj(), hotspot_list$kinship_list(),
-                 hotspot_list$peak_df(), pats(), dip_par$sex_type)
+                 hotspot_list$peak_df(), pats())
       withProgress(message = 'Scan Patterns ...', value = 0, {
         setProgress(1)
         scan1_pattern(pheno_name, hotspot_list$pheno_mx(),
                       hotspot_list$covar_df(), pairprobs_obj(),
                       hotspot_list$kinship_list(), hotspot_list$peak_df(),
-                      pats(), dip_par$sex_type, input$blups)
+                      pats(), input$blups)
       })
     })
     output$pattern_table <- DT::renderDataTable({

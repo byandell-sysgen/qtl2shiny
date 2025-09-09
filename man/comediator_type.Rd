@@ -4,7 +4,7 @@
 \alias{comediator_type}
 \title{Get mediators of same type as pheno_name}
 \usage{
-comediator_type(comed, peaks, pheno_name, doThis)
+comediator_type(comed, peaks_df, pheno_name, doThis)
 }
 \arguments{
 \item{comed}{object from `comediator_region`}

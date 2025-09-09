@@ -13,7 +13,7 @@ pull_patterns <- function(patterns, pheno_names) {
   # }
 }
 scan1_pattern <- function(pheno_name, pheno_mx, covar_df, pairprobs_obj, K_chr,
-                          peak_df, pats, sex_type, blups) {
+                          peak_df, pats, blups) {
   peak_df <- peak_probs_filter(pheno_name, peak_df, pairprobs_obj)
   if(is.null(peak_df)) return(NULL)
   

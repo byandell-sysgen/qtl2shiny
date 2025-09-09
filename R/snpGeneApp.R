@@ -34,7 +34,6 @@ snpGeneApp <- function() {
       title = "snpGene",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          hapParInput("hap_par"),                 # sex_type
           snpGeneInput("snp_gene"),       # button, snp_check
           snpListInput2("snp_list"),            # minLOD
           snpListUI("snp_list"), # pheno_name
@@ -46,8 +45,7 @@ snpGeneApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
-    hap_par <- hapParServer("hap_par")
-    snp_list <- snpListServer("snp_list", hotspot_list, hap_par, project_df)
+    snp_list <- snpListServer("snp_list", hotspot_list, project_df)
     ass_par <- snpGeneServer("snp_gene", snp_list, project_df)
   }
   shiny::shinyApp(ui, server)
@@ -58,14 +56,9 @@ snpGeneServer <- function(id, snp_list, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    ## Shiny Modules
-    ## SNP Association Scan
     snpPlotServer("snp_scan", snp_list) #**#
-    ## SNP Summary
     snpSumServer("best_snp", snp_list, project_df) #**#
-    ## Gene Region
     geneRegionServer("gene_region", snp_list, project_df) #**#
-    ## Genes and Exons
     geneExonServer("gene_exon", snp_list) #**#
     
     output$snp_check <- shiny::renderUI({
@@ -73,34 +66,10 @@ snpGeneServer <- function(id, snp_list, project_df) {
              Genes   = geneRegionInput(ns("gene_region"))) # SNP
     })
     output$snp_input <- shiny::renderUI({
-      switch(shiny::req(input$button),
-             Exons   = geneExonInput(ns("gene_exon")),
-             Scan = snpSumInput(ns("best_snp")))
+      switch(shiny::req(input$gen_tab),
+             Exons      = geneExonInput(ns("gene_exon")),
+             "SNP Scan" = snpSumInput(ns("best_snp")))
     })
-    output$snp_output <- shiny::renderUI({
-      switch(shiny::req(input$button),
-             Scan    = shiny::tagList(
-               snpPlotOutput(ns("snp_scan")),
-               snpSumOutput(ns("best_snp"))),
-             Genes   = geneRegionOutput(ns("gene_region")),
-             Exons   = geneExonOutput(ns("gene_exon")))
-    })
-    
-    ## Downloads
-    output$download_csv_plot <- shiny::renderUI({
-      switch(shiny::req(input$button),
-             Scan    = shiny::tagList(shiny::fluidRow(
-               shiny::column(6, snpSumUI(ns("best_snp"))),
-               shiny::column(6, snpPlotUI(ns("snp_scan"))))),
-             Genes   = geneRegionUI(ns("gene_region")), # gene_plot, gene_table
-             Exons   = geneExonUI(ns("gene_exon")))     # exon_plot, exon_table
-    })
-    output$button_input <- shiny::renderUI({
-      shiny::radioButtons(ns("button"), "",
-                          c("Scan", "Genes", "Exons"),
-                          input$button)
-    })
-    input
   })
 }
 #' @export
@@ -124,5 +93,13 @@ snpGeneUI <- function(id) {
 #' @rdname snpGeneApp
 snpGeneOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("snp_output"))
+  bslib::navset_tab(
+    id = ns("gen_tab"),
+    bslib::nav_panel("SNP Scan", bslib::card(
+      snpPlotOutput(ns("snp_scan")),
+      snpSumOutput(ns("best_snp")))),
+    bslib::nav_panel("Genes", bslib::card(
+      geneRegionOutput(ns("gene_region")))),   # gene_plot, gene_table
+    bslib::nav_panel("Exons", bslib::card(
+      geneExonOutput(ns("gene_exon")))))       # exon_plot, exon_table
 }

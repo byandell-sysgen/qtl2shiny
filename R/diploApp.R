@@ -60,10 +60,10 @@ diploServer <- function(id, hotspot_list, project_df) {
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
     snp_action <- shiny::reactive({dip_par$snp_action})
     ## SNP Association
-    patterns <-
-      snpSetupServer("snp_setup", hotspot_list, dip_par, project_df, snp_action)
+    snp_list <- snpListServer("snp_list", hotspot_list, project_df)
+    snpGeneServer("snp_gene", snp_list, project_df)
     pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
-      pairprobs_obj, patterns, snp_action, project_df)
+      pairprobs_obj, snp_list$patterns, snp_list$snp_action, project_df)
     patternPlotServer("pattern_plot", pattern_list, pairprobs_obj)
     alleleServer("allele", hotspot_list, pattern_list, pairprobs_obj,
       patterns, project_df, snp_action)
@@ -73,16 +73,16 @@ diploServer <- function(id, hotspot_list, project_df) {
       paste(allele_info$code, allele_info$shortname, sep = "=", collapse = ", ")
     })
     
-    output$dip_output <- shiny::renderUI({
-      bslib::navset_tab(
-        bslib::nav_panel("Genome Scans", patternPlotOutput(ns("pattern_plot"))),
-        bslib::nav_panel("SNP Association", snpSetupOutput(ns("snp_setup"))),
-        bslib::nav_panel("Allele Pattern", shiny::tagList(
-          bslib::card(alleleOutput(ns("allele"))),
-          bslib::card(alleleInput(ns("allele"))),
-          bslib::card(alleleUI(ns("allele")))
-        )),
-        bslib::nav_panel("Summary", patternOutput(ns("pattern_list"))))
+    output$tabset_input <- shiny::renderUI({
+      switch(shiny::req(input$dip_tab),
+        "Genome Scans" =,
+        "Summary" = bslib::card(
+          patternInput(ns("pattern_list")), # button, blups, pheno_name
+          patternUI(ns("pattern_list"))),   # pattern
+        "Allele Pattern" = bslib::card(
+          alleleInput(ns("allele"))),       # pos_Mbp
+        "SNP Association" = bslib::card(
+          snpGeneInput(ns("snp_gene"))))    # button, snp_check
     })
   })
 }
@@ -93,16 +93,23 @@ diploUI <- function(id) {
   shiny::tagList(
     shiny::uiOutput(ns("project")),
     shiny::strong("SNP/Gene Action"),
-    dipParInput(ns("dip_par")),            # sex_type
+    shiny::uiOutput(ns("tabset_input")),   # <various--see above>
     dipParUI(ns("dip_par")),               # snp_action
-    snpSetupInput(ns("snp_setup")),        # <various>
-    patternInput(ns("pattern_list")),      # button, blups, pheno_name
-    patternUI(ns("pattern_list")),         # pattern
+    snpListInput(ns("snp_list")),          # scan_window
+    snpListInput2(ns("snp_list")),         # minLOD
+    snpListUI(ns("snp_list")),             # pheno_name
     shiny::textOutput(ns("allele_names")))
 }
 #' @export
 #' @rdname diploApp
 diploOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("dip_output"))
+  bslib::navset_tab(
+    id = ns("dip_tab"),
+    bslib::nav_panel("Genome Scans",    patternPlotOutput(ns("pattern_plot"))),
+    bslib::nav_panel("SNP Association", snpGeneOutput(ns("snp_gene"))),
+    bslib::nav_panel("Allele Pattern",  bslib::card(
+      alleleOutput(ns("allele")),
+      alleleUI(ns("allele")))),
+    bslib::nav_panel("Summary",         patternOutput(ns("pattern_list"))))
 }
