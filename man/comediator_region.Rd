@@ -8,7 +8,7 @@ comediator_region(
   pheno_name,
   chr_id,
   scan_window,
-  covar,
+  covar_df,
   peaks_df,
   qtls = 2,
   pmap,
@@ -20,7 +20,7 @@ comediator_region(
 
 \item{chr_id, scan_window}{chromosome and start and end value}
 
-\item{covar}{covariate data frame}
+\item{covar_df}{covariate data frame}
 
 \item{peaks_df}{table of peaks}
 
@@ -29,8 +29,6 @@ comediator_region(
 \item{pmap}{physical map}
 
 \item{pheno_data}{phenotype data}
-
-\item{analyses_tbl}{table of analyses}
 }
 \description{
 Create list with mediators in region

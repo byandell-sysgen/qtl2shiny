@@ -2,8 +2,7 @@
 #' 
 #' @param pheno_name phenotype name
 #' @param chr_id,scan_window chromosome and start and end value
-#' @param covar covariate data frame
-#' @param analyses_tbl table of analyses
+#' @param covar_df covariate data frame
 #' @param peaks_df table of peaks
 #' @param qtls number of drivers (1 or 2; default is 2)
 #' @param pmap physical map
@@ -14,8 +13,9 @@
 #' 
 #' @export
 comediator_region <- function(pheno_name, chr_id, scan_window, 
-                              covar, peaks_df, 
+                              covar_df, peaks_df, 
                               qtls = 2, pmap, pheno_data) {
+  if(is.null(pheno_data) | is.null(covar_df) | is.null(peaks_df)) return(NULL)
   peaks_df <- dplyr::filter(peaks_df,
                          .data$phenotype != pheno_name,
                          .data$qtl_chr == chr_id,
@@ -27,7 +27,7 @@ comediator_region <- function(pheno_name, chr_id, scan_window,
   pheno_data <- pheno_data[, phenos, drop = FALSE]
   
   # Create comediator object.
-  out <- pheno_region(chr_id, scan_window, covar, pmap,
+  out <- pheno_region(chr_id, scan_window, covar_df, pmap,
                       peaks_df, pheno_data, drivers = qtls)
   
   out

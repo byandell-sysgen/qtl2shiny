@@ -82,7 +82,7 @@ pheno_region <- function(chr_id, scan_window, covar, map,
   
   # Identify markers for drivers of mediators.
   if(drivers == 2)
-    annot$driver <- qtl2::find_marker(map, chr_id, annot$pos)
+    annot$driver <- qtl2::find_marker(map, chr_id, annot$qtl_pos)
   
   # Make sure some pheno_data have peaks.
   m <- match(annot$id, colnames(pheno_data))

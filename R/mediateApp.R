@@ -25,7 +25,7 @@
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
-#' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
+#' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
 mediateApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
@@ -46,11 +46,10 @@ mediateApp <- function() {
       title = "Mediate",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          hapParUI("hap_par"),                    # button
-          hapParInput("hap_par"),                 # sex_type
-          snpSetupInput("snp_setup"),            # <various>
-          mediateUI("mediate")),
-        bslib::card(snpSetupOutput("snp_setup")),
+          snpListInput("snp_list"),           # scan_window
+          snpListInput2("snp_list"),          # minLOD
+          snpListUI("snp_list"),              # pheno_name
+          mediateUI("mediate")),              # checkplot, pattern
         bslib::card(mediateOutput("mediate"))
       )
     )
@@ -58,20 +57,20 @@ mediateApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
-    hap_par <- hapParServer("hap_par")
-    patterns <- snpSetupServer("snp_setup", hotspot_list, hap_par, project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
-    mediateServer("mediate", hotspot_list, probs_obj, patterns, project_df)
+    snp_list <- snpListServer("snp_list", hotspot_list, project_df)
+    mediateServer("mediate", hotspot_list, snp_list, probs_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname mediateApp
-mediateServer <- function(id, hotspot_list, probs_obj, patterns, project_df) {
+mediateServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
   #** need to check; also eliminate `analyses_df`.
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    patterns <- shiny::reactive(snp_list$patterns)
     win_par <- shiny::isolate(hotspot_list$win_par)
     chr_id <- shiny::reactive({
       shiny::req(win_par()$chr_id[1])
@@ -89,41 +88,36 @@ mediateServer <- function(id, hotspot_list, probs_obj, patterns, project_df) {
     ## Expression data
     expr_ls <- shiny::reactive({
       shiny::req(win_par())
+      shiny::req(input$qtls, chr_id(), scan_window(), 
+                 hotspot_list$covar_df(), hotspot_list$pmap_obj(), query_mrna())
       qtl2mediate::expr_region(chr_id(), scan_window(), hotspot_list$covar_df(),
-                               shiny::req(hotspot_list$pmap_obj()), 
-                               drivers = shiny::req(input$qtls),
+                               hotspot_list$pmap_obj(), 
+                               drivers = input$qtls,
                                query_mrna = query_mrna())
     })
     query_mrna <- shiny::reactive({
       read_query_rds(project_df(), "query_mrna.rds")
     })
     pheno_data <- shiny::reactive({
-      pheno_read(project_df(), analyses_tbl())
+      read_pheno(shiny::req(project_df()), shiny::req(hotspot_list$set_par$class))
     })
     
     ## Comediator data
     comed_ls <- shiny::reactive({
-      shiny::req(input$pheno_name, hotspot_list$win_par, project_df())
-      comediator_region(
-        input$pheno_name, chr_id(), scan_window(), hotspot_list$covar_df(),
-        hotspot_list$peak_df(), shiny::req(input$qtls), shiny::req(hotspot_list$pmap_obj()), pheno_data())
+      shiny::req(input$pheno_name, input$qtls, chr_id(), scan_window(), 
+                 hotspot_list$covar_df(), hotspot_list$peak_df(),
+                 hotspot_list$pmap_obj(), pheno_data())
+      comediator_region(input$pheno_name, chr_id(), scan_window(),
+        hotspot_list$covar_df(), hotspot_list$peak_df(), input$qtls,
+        hotspot_list$pmap_obj(), pheno_data())
     })
     med_ls <- shiny::reactive({
-      out <- switch(shiny::req(input$med_type, input$pheno_name),
+      out <- switch(shiny::req(input$med_type),
         expression = expr_ls(),
         phenotype = comediator_type(
-          comed_ls(), shiny::req(hotspot_list$peak_df()), input$pheno_name,
-          shiny::isTruthy(input$other)))
+          shiny::req(comed_ls()), shiny::req(hotspot_list$peak_df()),
+          shiny::req(input$pheno_name), shiny::isTruthy(input$other)))
       out
-    })
-    
-    # Get genotype matrix and map at 
-    peak_mar <- shiny::reactive({
-      qtl2::find_marker(probs_obj()$map, chr_id(), input$pos_Mbp)
-    })
-    geno_max <- shiny::reactive({
-      shiny::req(input$pos_Mbp, probs_obj())
-      subset(probs_obj()$probs, chr = chr_id(), mar = peak_mar())[[1]][,,1]
     })
     
     # Select pattern 
@@ -157,7 +151,7 @@ mediateServer <- function(id, hotspot_list, probs_obj, patterns, project_df) {
     })
     
     ## Triad Plots
-    triadServer("triad", input, patterns, geno_max, peak_mar, med_ls,
+    triadServer("triad", input, patterns, med_ls,
                 mediate_signif, phe1_mx, hotspot_list$covar_df, hotspot_list$kinship_list, probs_obj, chr_id, sdp)
     
     ## Mediate1
@@ -184,7 +178,12 @@ mediateServer <- function(id, hotspot_list, probs_obj, patterns, project_df) {
     })
     mediate_signif <- shiny::reactive({
       out <- shiny::req(mediate_obj())
-      out$best <- dplyr::filter(out$best, .data$pvalue <= 0.1)
+      out$best <- 
+        # Rename `qtl_pos` as `pos` for `intermediate::ggplot_mediation_test`.
+        dplyr::rename(
+          # Filter out n.s. entries.
+          dplyr::filter(out$best, .data$pvalue <= 0.1),
+          pos = "qtl_pos")
       class(out) <- class(mediate_obj())
       out
     })
@@ -232,14 +231,14 @@ mediateServer <- function(id, hotspot_list, probs_obj, patterns, project_df) {
     })
     ## Mediate1 plot
     output$mediate_plot <- shiny::renderPlot({
-      if(!shiny::isTruthy(med_ls()) || !shiny::isTruthy(mediate_obj())) {
+      if(!shiny::isTruthy(med_ls()) || !shiny::isTruthy(mediate_signif())) {
         plot_null("too much\nmissing data\nin mediators\nreduce window width")
       } else {
-        shiny::req(med_plot_type(), mediate_obj())
+        shiny::req(med_plot_type(), mediate_signif())
         shiny::withProgress(message = 'Mediation Plot ...', value = 0, {
           shiny::setProgress(1)
           ggplot2::autoplot(
-            mediate_obj(), med_plot_type(),
+            mediate_signif(), med_plot_type(),
             local_only = input$local, 
             significant = input$signif) +
             ggplot2::geom_point(size = 4)
@@ -248,7 +247,7 @@ mediateServer <- function(id, hotspot_list, probs_obj, patterns, project_df) {
     })
     ## Mediate1 plotly
     output$mediate_plotly <- plotly::renderPlotly({
-      shiny::req(mediate_obj())
+      shiny::req(mediate_signif())
       shiny::withProgress(message = 'Mediation Plotly ...', value = 0, {
         shiny::setProgress(1)
         ggplot2::autoplot(
@@ -316,56 +315,6 @@ mediateServer <- function(id, hotspot_list, probs_obj, patterns, project_df) {
       shiny::checkboxInput(ns("signif"), "Significant?", value)
     })
     
-    ## Downloads.
-    output$downloadData <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0("mediate_", chr_id(), "_", peak_Mbp(), ".csv"))
-      },
-      content = function(file) {
-        shiny::req(mediate_obj())
-        utils::write.csv(mediate_obj()$best, file)
-      }
-    )
-    output$downloadPlot <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0("mediate_", chr_id(), "_", peak_Mbp(), ".pdf"))
-      },
-      content = function(file) {
-        shiny::req(hotspot_list$pheno_mx(), geno_max(), hotspot_list$kinship_list(), hotspot_list$covar_df(),
-                   input$pos_Mbp, input$med_type)
-        grDevices::pdf(file, width=9,height=9)
-        for(pheno in colnames(hotspot_list$pheno_mx())) {
-          med <- qtl2mediate::mediation_test_qtl2(
-            target = hotspot_list$pheno_mx()[, pheno, drop = FALSE],
-            mediator = med_ls()[[1]],
-            annotation = med_ls()[[2]],
-            covar_tar = hotspot_list$covar_df(),
-            covar_med = med_ls()$covar,
-            genoprobs = probs_obj()$probs,
-            map = probs_obj()$map,
-            chr = chr_id(),
-            pos = input$pos_Mbp,
-            kinship = hotspot_list$kinship_list())
-          
-          print(ggplot2::autoplot(
-            med, "pos_LR",
-            local_only = input$local, 
-            significant = input$signif))
-          print(ggplot2::autoplot(
-            med, "pos_pvalue",
-            local_only = input$local, 
-            significant = TRUE))
-          print(ggplot2::autoplot(
-            med, "pvalue_LR",
-            local_only = input$local, 
-            significant = TRUE))
-          print(ggplot2::autoplot(
-            med, "mediator",
-            local_only = input$local, 
-            significant = TRUE))
-        }
-        grDevices::dev.off()
-      })
     output$mediation <- shiny::renderUI({
       shiny::tagList(
         shiny::uiOutput(ns("qtls_input")),
@@ -376,10 +325,7 @@ mediateServer <- function(id, hotspot_list, probs_obj, patterns, project_df) {
           shiny::column(6, shiny::uiOutput(ns("signif_input"))),
           shiny::column(6, shiny::uiOutput(ns("local_other")))),
         shiny::uiOutput(ns("med_plot_input")),
-        shiny::uiOutput(ns("pos_Mbp_input")),
-        shiny::fluidRow(
-          shiny::column(6, shiny::downloadButton(ns("downloadData"), "CSV")),
-          shiny::column(6, shiny::downloadButton(ns("downloadPlot"), "Plots"))))
+        shiny::uiOutput(ns("pos_Mbp_input")))
     })
     output$medUI <- shiny::renderUI({
       switch(1 + shiny::isTruthy(input$checkplot),
@@ -397,10 +343,14 @@ mediateServer <- function(id, hotspot_list, probs_obj, patterns, project_df) {
     output$medOutput <- shiny::renderUI({
       if(shiny::isTruthy(input$checkplot))
         triadOutput(ns("triad"))
-      else
-        shiny::tagList(
-          shiny::uiOutput(ns("out_choice")),
-          DT::dataTableOutput(ns("mediate_table")))
+      else {
+        bslib::navset_tab(
+          id = ns("med_tab"),
+          bslib::nav_panel("Plot", bslib::card(
+            shiny::uiOutput(ns("out_choice")))),
+          bslib::nav_panel("Summary", bslib::card(
+            DT::dataTableOutput(ns("mediate_table")))))
+      }
     })
   })
 }
@@ -410,8 +360,8 @@ mediateUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::strong("Mediation"),
-    shiny::uiOutput(ns("checkplot_input")),
-    shiny::uiOutput(ns("medUI")))
+    shiny::uiOutput(ns("checkplot_input")), # checkplot
+    shiny::uiOutput(ns("medUI")))           # pattern
 }
 #' @export
 #' @rdname mediateApp

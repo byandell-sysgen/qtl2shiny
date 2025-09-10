@@ -199,10 +199,10 @@ snpPatternOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = ns("pat_tab"),
-    bslib::nav_panel("Top SNPs",     snpFeatureOutput(ns("top_feature"))),
-    bslib::nav_panel("By Pheno",     shiny::plotOutput(ns("snp_pattern_plot"))),
     bslib::nav_panel("All Phenos",   shiny::plotOutput(ns("snp_phe_pat"))),
     bslib::nav_panel("All Patterns", shiny::plotOutput(ns("snp_pat_phe"))),
     bslib::nav_panel("Summary",      DT::dataTableOutput(ns("snp_pattern_table"))),
+    bslib::nav_panel("Top SNPs",     snpFeatureOutput(ns("top_feature"))),
+    bslib::nav_panel("By Pheno",     shiny::plotOutput(ns("snp_pattern_plot"))),
     bslib::nav_panel("Interactive",  plotly::plotlyOutput(ns("snp_pattern_plotly"))))
 }

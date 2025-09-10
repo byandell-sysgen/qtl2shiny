@@ -80,11 +80,11 @@ haploServer <- function(id, hotspot_list, project_df) {
     })
     output$tabset_input <- shiny::renderUI({
       switch(shiny::req(input$hap_tab),
-        "Genome Scans" = shiny::tagList(
-          scanInput(ns("scan")),
-          scanUI(ns("scan"))      # button, snp_check
-        ),
-        "SNP Association" = snpGeneInput(ns("snp_gene")))
+        "Genome Scans"    = shiny::tagList(
+          scanInput(ns("scan")),                          # blups, pheno_name
+          scanUI(ns("scan"))),                            # scan_window
+        "Mediation"       = mediateUI(ns("mediate")),     # checkplot, pattern
+        "SNP Association" = snpGeneInput(ns("snp_gene"))) # SNP, gene_name
     })
   })
 }
