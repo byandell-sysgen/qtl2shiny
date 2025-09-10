@@ -13,8 +13,7 @@
 #' @importFrom qtl2mediate expr_region mediation_test_qtl2
 #' @importFrom ggplot2 autoplot geom_point
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny checkboxInput column downloadButton downloadHandler
-#'             fluidRow isolate isTruthy moduleServer NS observeEvent plotOutput
+#' @importFrom shiny isolate isTruthy moduleServer NS observeEvent plotOutput
 #'             radioButtons reactive renderPlot renderUI req selectInput
 #'             setProgress sliderInput strong tagList uiOutput updateSelectInput
 #'             updateSliderInput withProgress
@@ -68,7 +67,7 @@ mediateServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    patterns <- shiny::reactive(snp_list$patterns)
+    patterns <- shiny::isolate(snp_list$patterns)
     win_par <- shiny::isolate(hotspot_list$win_par)
     chr_id <- shiny::reactive({
       shiny::req(win_par()$chr_id[1])
@@ -134,8 +133,11 @@ mediateServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
     
     ## Mediate1
     mediate_obj <- shiny::reactive({
+      # ** Warning: Unknown or uninitialised column: `driver_names`.
+      # ** `intermediate::mediation_test()`
+      # ** `intermediate:::mediation_test_internal()`?
       shiny::req(phe1_mx(), probs_obj(), hotspot_list$kinship_list(), hotspot_list$covar_df(), geno_max(), 
-                 input$pos_Mbp, input$med_type, med_ls())
+                 input$pos_Mbp, med_ls())
       shiny::withProgress(message = "Mediation Scan ...", value = 0, {
         shiny::setProgress(1)
         qtl2mediate::mediation_test_qtl2(
@@ -193,13 +195,22 @@ mediateServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
                          choices = colnames(hotspot_list$pheno_mx()),
                          selected = input$pheno_name)
     })
+    output$med_type_input <- shiny::renderUI({
+      shiny::selectInput(ns("med_type"), NULL,
+                         choices = c("phenotype","expression"),
+                         selected = input$med_type)
+    })
     
     output$mediate_output <- shiny::renderUI({
       shiny::tagList(
         shiny::renderText(paste("qtls:", input$qtls)),
         shiny::renderText(paste("pheno_name:", input$pheno_name)),
-        shiny::renderText(paste("pos_Mbp:", input$pos_Mbp))
-      )
+        shiny::renderText(paste("pos_Mbp:", input$pos_Mbp)),
+        bslib::card(
+          DT::renderDataTable({
+            shiny::req(mediate_obj())$best
+          }, escape = FALSE,
+          options = list(scrollX = TRUE, pageLength = 5))))
     })
 
     # Returns.
@@ -219,6 +230,7 @@ mediateInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("pheno_name_input")), # pheno_name
+    shiny::uiOutput(ns("med_type_input")),   # med_type
     shiny::uiOutput(ns("qtls_input")),       # qtls
     shiny::uiOutput(ns("pos_Mbp_input")))    # pos_Mbp
 }

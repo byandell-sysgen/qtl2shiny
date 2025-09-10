@@ -13,7 +13,7 @@
 #' @importFrom rlang .data
 #' @importFrom ggplot2 autoplot
 #' @importFrom qtl2mediate mediation_triad_qtl2
-#' @importFrom shiny column downloadButton downloadHandler fluidRow isTruthy
+#' @importFrom shiny isolate isTruthy
 #'             moduleServer NS plotOutput reactive renderPlot renderUI req
 #'             selectInput setProgress tagList uiOutput withProgress
 #' @importFrom utils write.csv
@@ -71,7 +71,7 @@ triadServer <- function(id, hotspot_list, snp_list, mediate_list, probs_obj) {
       shiny::req(win_par()$chr_id[1])
     })
     med_par <- shiny::isolate(mediate_list$med_par)
-    patterns <- shiny::reactive(snp_list$patterns)
+    patterns <- shiny::isolate(snp_list$patterns)
     
     sdp <- shiny::reactive({
       shiny::req(input$pattern)
@@ -82,7 +82,7 @@ triadServer <- function(id, hotspot_list, snp_list, mediate_list, probs_obj) {
       shiny::selectInput(ns("pattern"), NULL, choices_pattern(), input$pattern)
     })
     choices_pattern <- shiny::reactive({
-      shiny::req(mediate_list$sdps(), haplos())
+      shiny::req(mediate_list$sdps())
       haplos <- shiny::req(hotspot_list$allele_info())$code
       qtl2pattern::sdp_to_pattern(mediate_list$sdps(), haplos)
     })
@@ -107,19 +107,15 @@ triadServer <- function(id, hotspot_list, snp_list, mediate_list, probs_obj) {
       shiny::selectInput(ns("triad"), NULL,
                          choices = choices, input$triad)
     })
-    medID <- reactive({
-      ifelse("symbol" %in% names(shiny::req(mediate_list$mediate_obj())$best), "symbol", "longname")
-    })
     ## Select mediator for plots.
     output$med_name_input <- shiny::renderUI({
-      shiny::req(mediate_list$mediate_obj(), input$triad, medID())
-      choices <- dplyr::filter(mediate_list$mediate_obj()$best, .data$triad == input$triad)[[medID()]]
+      shiny::req(mediate_list$mediate_obj(), input$triad)
+      choices <- dplyr::filter(mediate_list$mediate_obj()$best, .data$triad == input$triad)$id
       shiny::selectInput(ns("med_name"), NULL,
                          choices = choices, input$med_name)
     })
     
     triad_df <- reactive({
-      browser()
       shiny::req(mediate_list$phe1_mx(), mediate_list$med_ls(), hotspot_list$covar_df(), probs_obj(), chr_id(),
                  input$med_name, med_par$pos_Mbp, sdp())
       qtl2mediate::mediation_triad_qtl2(
@@ -154,7 +150,8 @@ triadServer <- function(id, hotspot_list, snp_list, mediate_list, probs_obj) {
       if(!shiny::isTruthy(triad_df())) {
         plot_null("too much\nmissing data\nin mediators\nreduce window width")
       } else {
-        shiny::req(input$triad_plot, input$med_name, mediate_list$phe1_mx())
+        shiny::req(input$triad_plot, input$med_name, triad_df(),
+                   mediate_list$phe1_mx(), mediate_list$peak_mar())
         shiny::withProgress(message = 'Triad Plot ...', value = 0, {
           shiny::setProgress(1)
           p <- ggplot2::autoplot(triad_df(), type = input$triad_plot,
