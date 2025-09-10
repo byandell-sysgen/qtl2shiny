@@ -40,7 +40,7 @@ triadApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           triadUI("triad"),                   # triad, med_name, triad_plot
-          medListInput("mediate_list"),       # qtls, pos_Mbp
+          mediateInput("mediate_list"),       # qtls, pos_Mbp
           snpListInput("snp_list"),           # scan_window
           snpListInput2("snp_list"),          # minLOD
           snpListUI("snp_list")),             # pheno_name
@@ -55,7 +55,7 @@ triadApp <- function() {
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
     mediate_list <-
-      medListServer("mediate_list", hotspot_list, snp_list, probs_obj, project_df)
+      mediateServer("mediate_list", hotspot_list, snp_list, probs_obj, project_df)
     triadServer("triad", hotspot_list, snp_list, mediate_list, probs_obj)
   }
   shiny::shinyApp(ui, server)
