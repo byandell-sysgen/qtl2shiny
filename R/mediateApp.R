@@ -27,7 +27,7 @@
 mediateApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
-    title =  "Test Mediate List",
+    title =  "Test Mediate",
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(
@@ -41,7 +41,7 @@ mediateApp <- function() {
         hotspotPanelOutput("hotspot_list"))
     ),
     bslib::nav_panel(
-      title = "Mediate List",
+      title = "Mediate",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           mediateInput("mediate_list"),            # qtls, pos_Mbp
