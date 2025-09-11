@@ -11,18 +11,27 @@ plot_sex <- function(phe, cov) {
     phename <- phename[seq_len(10)]
     phe <- phe[,phename]
   }
-  if(m <- match("sex", tolower(dimnames(cov)[[2]]), nomatch = 0)) {
+  if(m <- match("sex", tolower(colnames(cov)), nomatch = 0)) {
+    sexname <- "sex"
     ## Need sex in covar. Ignore actual covariates for analyses.
-    insex <- data.frame(phe, sex = cov[,m])
+    if(md <- match("diet", tolower(colnames(cov)), nomatch = 0)) {
+      # If there is a `diet` column unite it with sex
+      cov[,m] <- paste(cov[,m], cov[,md], sep = "_")
+      sexname <- "sex_diet"
+      colnames(cov)[m] <- sexname
+      insex <- data.frame(phe, sex_diet = cov[,m])
+    } else {
+      insex <- data.frame(phe, sex = cov[,m])
+    }
     
     if(length(phename) == 1) {
       ggplot2::ggplot(insex, 
-                      ggplot2::aes_string(phename, col="sex")) +
+                      ggplot2::aes_string(phename, col = sexname)) +
         ggplot2::geom_density(na.rm = TRUE) + 
         ggplot2::geom_rug()
     } else {
       any.na <- apply(insex, 1, function(x) any(is.na(x)))
-      GGally::ggscatmat(insex[!any.na,], seq_len(ncol(phe)), color="sex")
+      GGally::ggscatmat(insex[!any.na,], seq_len(ncol(phe)), color = sexname)
     }
   } else {
     if(length(phename) == 1) {
