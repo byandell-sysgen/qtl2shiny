@@ -46,9 +46,7 @@ mediatePlotApp <- function() {
         sidebar = bslib::sidebar(
           mediatePlotInput("mediate_plot"),   # static, signif, local, med_plot
           mediateInput("mediate_list"),       # qtls, pos_Mbp
-          snpListInput("snp_list"),           # scan_window
-          snpListInput2("snp_list"),          # minLOD
-          snpListUI("snp_list")),             # pheno_name
+          snpListInput("snp_list")),          # scan_window, minLOD, pheno_name
         bslib::card(mediatePlotOutput("mediate_plot"))
       )
     )

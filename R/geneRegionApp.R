@@ -41,9 +41,7 @@ geneRegionApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           geneRegionInput("gene_region"),        # SNP
-          snpListInput2("snp_list"),             # minLOD
-          snpListUI("snp_list"),                 # pheno_name
-          snpListInput("snp_list")),             # scan_window
+          snpListInput("snp_list")),             # scan_window, minLOD, pheno_name
         bslib::card(geneRegionOutput("gene_region"))
       )
     )

@@ -41,10 +41,7 @@ triadApp <- function() {
         sidebar = bslib::sidebar(
           triadInput("triad"),                # triad, med_name, triad_plot
           mediateInput("mediate_list"),       # qtls, pos_Mbp
-          snpListInput("snp_list"),           # scan_window
-          snpListInput2("snp_list"),          # minLOD
-          snpListUI("snp_list")),             # pheno_name
-        # ** Output not working yet.
+          snpListInput("snp_list")),          # scan_window, minLOD, pheno_name
         bslib::card(triadOutput("triad"))
       )
     )

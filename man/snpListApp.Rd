@@ -4,8 +4,6 @@
 \alias{snpListApp}
 \alias{snpListServer}
 \alias{snpListInput}
-\alias{snpListInput2}
-\alias{snpListUI}
 \alias{snpListOutput}
 \title{Shiny SNP List App}
 \usage{
@@ -21,10 +19,6 @@ snpListServer(
 )
 
 snpListInput(id)
-
-snpListInput2(id)
-
-snpListUI(id)
 
 snpListOutput(id)
 }

@@ -38,9 +38,7 @@ snpListApp <- function() {
       title = "snpList",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          snpListInput("snp_list"),             # scan_window
-          snpListInput2("snp_list"),            # minLOD
-          snpListUI("snp_list")),               # pheno_name
+          snpListInput("snp_list")),           # scan_window, minLOD, pheno_name
         bslib::card(snpListOutput("snp_list"))
       )
     )
@@ -184,19 +182,10 @@ snpListServer <- function(id, hotspot_list, project_df,
 #' @rdname snpListApp
 snpListInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("scan_window_input")) # scan_window
-}
-#' @export
-#' @rdname snpListApp
-snpListInput2 <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::uiOutput(ns("minLOD_input"))      # minLOD
-}
-#' @export
-#' @rdname snpListApp
-snpListUI <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::uiOutput(ns("pheno_name_input"))  # pheno_name
+  shiny::tagList(
+    shiny::uiOutput(ns("scan_window_input")), # scan_window
+    shiny::uiOutput(ns("minLOD_input")),      # minLOD
+    shiny::uiOutput(ns("pheno_name_input")))  # pheno_name
 }
 #' @export
 #' @rdname snpListApp

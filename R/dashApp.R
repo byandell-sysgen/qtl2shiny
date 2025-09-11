@@ -16,6 +16,52 @@
 #' @importFrom shiny moduleServer NS reactive req 
 #' @importFrom rlang .data
 #' 
+dashApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_navbar(
+    title =  "Test Haplo",
+    navbar_options = bslib::navbar_options(bg = "#2D89C8", theme = "dark"),
+    bslib::nav_panel(
+      title = "Hotspots",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI("project_df"),            # project
+            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput("hotspot_list"))
+    ),
+    ## Currently just uses Haplo and Diplo Apps.
+    ## Need to rethink dashServer
+    bslib::nav_panel(
+      title = "Haplo",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          haploUI("haplo"),                     # <various>
+          haploInput("haplo")),                # <various>
+        haploOutput("haplo")
+      )
+    ),
+    bslib::nav_panel(
+      title = "Diplo",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(diploUI("diplo")), # <various>
+        bslib::card(diploOutput("diplo"))
+      )
+    )
+  )
+  server <- function(input, output, session) {
+    project_df <- projectServer("project_df", projects_df)
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    haploServer("haplo", hotspot_list, project_df)
+    diploServer("diplo", hotspot_list, project_df)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname dashApp
 dashServer <- function(id, projects_df) {
   shiny::moduleServer(id, function(input, output, session) {
   ns <- session$ns
@@ -88,25 +134,25 @@ dashServer <- function(id, projects_df) {
 })
 }
 
-#' @rdname dashServer
+#' @rdname dashApp
 #' @export
 dashInput <- function(id) {
   ns <- shiny::NS(id)
   hotspotPanelInput(ns("hotspot_list"))
 }
-#' @rdname dashServer
+#' @rdname dashApp
 #' @export
 dashUI <- function(id) {
   ns <- shiny::NS(id)
   hotspotPanelUI(ns("hotspot_list"))
 }
-#' @rdname dashServer
+#' @rdname dashApp
 #' @export
 dashOutput <- function(id) {
   ns <- shiny::NS(id)
   haploUI(ns("hap_scan"))
 }
-#' @rdname dashServer
+#' @rdname dashApp
 #' @export
 dashOutput2 <- function(id) {
   ns <- shiny::NS(id)

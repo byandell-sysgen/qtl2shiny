@@ -43,7 +43,7 @@ alleleApp <- function() {
             dipParInput("dip_par"),         # sex_type
             dipParUI("dip_par")),           # snp_action
           bslib::card(
-            snpSetupInput("snp_setup")),    # <various>
+            snpListInput("snp_list")),      # scan_window, minLOD, pheno_name
           bslib::card(
             patternInput("pattern_list"),   # button, blups, pheno_name
             patternUI("pattern_list")),     # pattern
@@ -58,12 +58,11 @@ alleleApp <- function() {
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
     dip_par <- dipParServer("dip_par")
     snp_action <- shiny::reactive({dip_par$snp_action})
-    patterns <-
-      snpSetupServer("snp_setup", hotspot_list, dip_par, project_df, snp_action)
+    snp_list <- snpListServer("snp_list", hotspot_list, project_df)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
     pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
-                                  pairprobs_obj, patterns, snp_action, project_df)
+      pairprobs_obj, snp_list$patterns, snp_action, project_df)
     alleleServer("allele", hotspot_list, pattern_list, pairprobs_obj,
                  patterns, project_df, snp_action)
   }

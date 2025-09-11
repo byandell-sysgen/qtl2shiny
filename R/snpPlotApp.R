@@ -10,6 +10,41 @@
 #' @importFrom shiny downloadButton downloadHandler isTruthy moduleServer NS
 #'             plotOutput reactive renderPlot req setProgress withProgress
 #' @importFrom grDevices dev.off pdf
+snpPlotApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- bslib::page_navbar(
+    title =  "Test SNP Plot",
+    bslib::nav_panel(
+      title = "Hotspots",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI("project_df"),            # project
+            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput("hotspot_list"))
+    ),
+    bslib::nav_panel(
+      title = "snpPlot",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          snpListInput("snp_list")),            # scan_window, minLOD, pheno_name
+        bslib::card(snpPlotOutput("snp_plot"))
+      )
+    )
+  )
+  server <- function(input, output, session) {
+    project_df <- projectServer("project_df", projects_df)
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    snp_list <- snpListServer("snp_list", hotspot_list, project_df)
+    snpPlotServer("snp_plot", snp_list)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname snpPlotApp
 snpPlotServer <- function(id, snp_list) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -50,13 +85,13 @@ snpPlotServer <- function(id, snp_list) {
   })
 }
 #' @export
-#' @rdname snpPlotServer
+#' @rdname snpPlotApp
 snpPlotUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::downloadButton(ns("downloadPlot"), "Plots")
 }
 #' @export
-#' @rdname snpPlotServer
+#' @rdname snpPlotApp
 snpPlotOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::plotOutput(ns("snp_plot"))

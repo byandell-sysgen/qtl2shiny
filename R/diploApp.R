@@ -94,10 +94,8 @@ diploUI <- function(id) {
     shiny::strong("SNP/Gene Action"),
     shiny::uiOutput(ns("tabset_input")),   # <various--see above>
     dipParUI(ns("dip_par")),               # snp_action
-    snpListInput(ns("snp_list")),          # scan_window
-    snpListInput2(ns("snp_list")),         # minLOD
-    snpListUI(ns("snp_list")),             # pheno_name
-    shiny::textOutput(ns("allele_names")))
+    snpListInput(ns("snp_list")),          # scan_window, minLOD, pheno_name
+    shiny::textOutput(ns("allele_names"))) # allele_names
 }
 #' @export
 #' @rdname diploApp

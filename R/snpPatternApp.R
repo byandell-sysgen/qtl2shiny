@@ -38,9 +38,7 @@ snpPatternApp <- function() {
       title = "snpPattern",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          snpListInput2("snp_list"),            # minLOD
-          snpListUI("snp_list"), # pheno_name
-          snpListInput("snp_list")), # scan_window
+          snpListInput("snp_list")),    # scan_window, minLOD, pheno_name
         bslib::card(snpPatternOutput("snp_pattern"))
       )
     )
