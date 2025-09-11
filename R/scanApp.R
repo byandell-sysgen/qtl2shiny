@@ -41,8 +41,7 @@ scanApp <- function() {
       title = "Scan",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          scanInput("scan"),                    # blups, pheno_name
-          scanUI("scan")),                      # scan_window
+          scanInput("scan")),                   # blups, pheno_name, scan_window
         bslib::card(
           scanOutput("scan")))
     )
@@ -185,13 +184,9 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
 #' @rdname scanApp
 scanInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("pheno_choice"))                # blups, pheno_name
-}
-#' @export
-#' @rdname scanApp
-scanUI <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::uiOutput(ns("win_choice"))                  # scan_window
+  shiny::tagList(
+    shiny::uiOutput(ns("pheno_choice")), # blups, pheno_name
+    shiny::uiOutput(ns("win_choice")))   # scan_window
 }
 #' @export
 #' @rdname scanApp

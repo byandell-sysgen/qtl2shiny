@@ -4,7 +4,6 @@
 \alias{scanApp}
 \alias{scanServer}
 \alias{scanInput}
-\alias{scanUI}
 \alias{scanOutput}
 \title{Shiny Scan Module}
 \usage{
@@ -13,8 +12,6 @@ scanApp()
 scanServer(id, hotspot_list, probs_obj, project_df)
 
 scanInput(id)
-
-scanUI(id)
 
 scanOutput(id)
 }
