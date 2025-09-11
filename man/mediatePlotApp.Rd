@@ -9,7 +9,7 @@
 \usage{
 mediatePlotApp()
 
-mediatePlotServer(id, hotspot_list, snp_list, probs_obj, project_df)
+mediatePlotServer(id, hotspot_list, mediate_list, probs_obj, project_df)
 
 mediatePlotInput(id)
 

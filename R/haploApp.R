@@ -66,7 +66,10 @@ haploServer <- function(id, hotspot_list, project_df) {
     ## Pattern Scans
     snpPatternServer("snp_pattern", snp_list, hotspot_list$allele_info)
     ## Mediation
-    mediateServer("mediate", hotspot_list, probs_obj, snp_list$patterns, project_df)
+    mediate_list <-
+      mediateServer("mediate_list", hotspot_list, snp_list, probs_obj, project_df)
+    mediatePlotServer("mediate_plot", hotspot_list, mediate_list, probs_obj, project_df)
+    triadServer("triad", hotspot_list, snp_list, mediate_list, probs_obj)
     
     output$allele_names <- shiny::renderText({
       allele_info <- shiny::req(hotspot_list$allele_info())
@@ -83,8 +86,19 @@ haploServer <- function(id, hotspot_list, project_df) {
         "Genome Scans"    = shiny::tagList(
           scanInput(ns("scan")),                          # blups, pheno_name
           scanUI(ns("scan"))),                            # scan_window
-        "Mediation"       = mediateUI(ns("mediate")),     # checkplot, pattern
+        "Mediation"       = bslib::card(
+          switch(input$med_tab,
+            Plot = mediatePlotInput(ns("mediate_plot")),  # static, signif, local, med_plot
+            Triad = triadInput(ns("triad"))),             # triad, med_name, triad_plot
+          mediateInput(ns("mediate_list"))),              # qtls, pos_Mbp
         "SNP Association" = snpGeneInput(ns("snp_gene"))) # SNP, gene_name
+    })
+    output$mediate_panel <- shiny::renderUI({
+      bslib::navset_tab(
+        id = ns("med_tab"),
+        bslib::nav_panel("Plot",    mediatePlotOutput(ns("mediate_plot"))),
+        bslib::nav_panel("Triad",   triadOutput(ns("triad"))),
+        bslib::nav_panel("Summary", mediateOutput(ns("mediate_list"))))
     })
   })
 }
@@ -116,5 +130,5 @@ haploOutput <- function(id) {
     bslib::nav_panel("Genome Scans",    scanOutput(ns("scan"))),
     bslib::nav_panel("SNP Association", snpGeneOutput(ns("snp_gene"))),
     bslib::nav_panel("Pattern Scan",    snpPatternOutput(ns("snp_pattern"))),
-    bslib::nav_panel("Mediation",       mediateOutput(ns("mediate"))))
+    bslib::nav_panel("Mediation",       shiny::uiOutput(ns("mediate_panel"))))
 }  

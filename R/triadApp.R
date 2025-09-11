@@ -39,7 +39,7 @@ triadApp <- function() {
       title = "Triad",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          triadUI("triad"),                   # triad, med_name, triad_plot
+          triadInput("triad"),                # triad, med_name, triad_plot
           mediateInput("mediate_list"),       # qtls, pos_Mbp
           snpListInput("snp_list"),           # scan_window
           snpListInput2("snp_list"),          # minLOD
@@ -168,7 +168,7 @@ triadServer <- function(id, hotspot_list, snp_list, mediate_list, probs_obj) {
 }
 #' @export
 #' @rdname triadApp
-triadUI <- function(id) { # med_name, triad_plot
+triadInput <- function(id) { # med_name, triad_plot
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("triad_input")),      # triad

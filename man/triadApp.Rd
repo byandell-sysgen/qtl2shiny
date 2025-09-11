@@ -3,7 +3,7 @@
 \name{triadApp}
 \alias{triadApp}
 \alias{triadServer}
-\alias{triadUI}
+\alias{triadInput}
 \alias{triadOutput}
 \title{Shiny Triad App}
 \usage{
@@ -11,7 +11,7 @@ triadApp()
 
 triadServer(id, hotspot_list, snp_list, mediate_list, probs_obj)
 
-triadUI(id)
+triadInput(id)
 
 triadOutput(id)
 }

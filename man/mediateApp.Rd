@@ -4,6 +4,7 @@
 \alias{mediateApp}
 \alias{mediateServer}
 \alias{mediateInput}
+\alias{mediateUI}
 \alias{mediateOutput}
 \title{Shiny Mediate App}
 \usage{
@@ -12,6 +13,8 @@ mediateApp()
 mediateServer(id, hotspot_list, snp_list, probs_obj, project_df)
 
 mediateInput(id)
+
+mediateUI(id)
 
 mediateOutput(id)
 }

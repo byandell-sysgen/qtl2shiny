@@ -43,10 +43,11 @@ mediateApp <- function() {
       title = "Mediate",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          mediateInput("mediate_list"),            # qtls, pos_Mbp
+          mediateInput("mediate_list"),            # pheno_name, med_type, qtls, pos_Mbp
           snpListInput("snp_list"),                # scan_window
           snpListInput2("snp_list"),               # minLOD
           snpListUI("snp_list")),                  # pheno_name
+        mediateUI("mediate_list"),
         bslib::card(mediateOutput("mediate_list"))
       )
     )
@@ -201,16 +202,18 @@ mediateServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
                          selected = input$med_type)
     })
     
-    output$mediate_output <- shiny::renderUI({
+    output$mediate_ui <- shiny::renderUI({
       shiny::tagList(
         shiny::renderText(paste("qtls:", input$qtls)),
         shiny::renderText(paste("pheno_name:", input$pheno_name)),
-        shiny::renderText(paste("pos_Mbp:", input$pos_Mbp)),
-        bslib::card(
-          DT::renderDataTable({
-            shiny::req(mediate_obj())$best
-          }, escape = FALSE,
-          options = list(scrollX = TRUE, pageLength = 5))))
+        shiny::renderText(paste("pos_Mbp:", input$pos_Mbp)))
+    })
+    output$mediate_table <- shiny::renderUI({
+      bslib::card(
+        DT::renderDataTable({
+          shiny::req(mediate_obj())$best
+        }, escape = FALSE,
+        options = list(scrollX = TRUE, pageLength = 5)))
     })
 
     # Returns.
@@ -236,7 +239,13 @@ mediateInput <- function(id) {
 }
 #' @export
 #' @rdname mediateApp
+mediateUI <- function(id) {
+  ns <- shiny::NS(id)
+  shiny::uiOutput(ns("mediate_ui"))
+}
+#' @export
+#' @rdname mediateApp
 mediateOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("mediate_output"))
+  shiny::uiOutput(ns("mediate_table"))        # mediate_table
 }
