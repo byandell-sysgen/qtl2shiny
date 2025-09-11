@@ -77,7 +77,7 @@ haploServer <- function(id, hotspot_list, project_df) {
     output$haplo_ui <- shiny::renderUI({
       switch(shiny::req(input$hap_tab),
         "Genome Scans"    = scanInput(ns("scan")),        # blups, pheno_name, scan_window
-        "Mediation"       = mediatePanelInput(ns("mediate_panel")), # <various>              # qtls, pos_Mbp
+        "Mediation"       = mediatePanelInput(ns("mediate_panel")), # <various>
         "SNP Association" = snpGeneInput(ns("snp_gene"))) # SNP, gene_name
     })
   })
