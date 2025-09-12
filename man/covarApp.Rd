@@ -8,14 +8,14 @@
 \usage{
 covarApp()
 
-covarServer(id, pheno_mx, project_df)
+covarServer(id, project_df)
 
 covarOutput(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{pheno_mx, project_df}{reactive arguments}
+\item{project_df}{reactive arguments}
 }
 \description{
 Shiny Covariate App
