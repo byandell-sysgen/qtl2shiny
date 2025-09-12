@@ -31,7 +31,7 @@ plot_sex <- function(phe, cov) {
         ggplot2::geom_rug()
     } else {
       any.na <- apply(insex, 1, function(x) any(is.na(x)))
-      GGally::ggscatmat(insex[!any.na,], seq_len(ncol(phe)), color = sexname)
+      GGally::ggscatmat(insex[!any.na,], seq_len(ncol(phe)), alpha = 0.25, color = sexname)
     }
   } else {
     if(length(phename) == 1) {

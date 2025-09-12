@@ -16,9 +16,11 @@ select_phenames <- function(peak_df, primary = NULL, pheno_mx) {
     if(ncol(pheno_mx) == 1) return(NULL)
     wh <- match(primary, colnames(pheno_mx))
     if(is.na(wh)) return(NULL)
-    cx <- -abs(cor(pheno_mx[,wh], pheno_mx[,-wh], use = "pair",
-                   method = "spearman"))
-    phenames <- colnames(cx)[rank(cx, ties.method = "random")]
+    # Order the ranks of absolute correlation.
+    cx <- cor(pheno_mx[,wh], pheno_mx[,-wh], use = "pair",
+              method = "spearman")
+    cx <- cx[, order(rank(-abs(cx), ties.method = "random"))]
+    phenames <- names(cx)
   }
 
   selected <- NULL
