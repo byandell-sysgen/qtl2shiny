@@ -1,34 +1,36 @@
 #' @importFrom dplyr arrange desc distinct filter
 #' @importFrom rlang .data
 #' 
-select_phenames <- function(phenames, peak_df) {
-  # See foundrHarmony/R/LivRna.R for compression of gene symbol, id and transcript id.
-  selected <- phenames
-  if(shiny::isTruthy(peak_df) && nrow(peak_df)) {
-    phenames <- dplyr::distinct(
-      dplyr::arrange(
-        peak_df,
-        dplyr::desc(.data$qtl_lod)),
-      .data$phenotype)$phenotype
+select_phenames <- function(peak_df, primary = NULL, pheno_mx) {
+  if(is.null(primary)) {
+    if(shiny::isTruthy(peak_df) && nrow(peak_df) ) {
+      phenames <- dplyr::distinct(
+        dplyr::arrange(
+          peak_df,
+          dplyr::desc(.data$qtl_lod)),
+        .data$phenotype)$phenotype
+    } else {
+      return(NULL)
+    }
+  } else {
+    if(ncol(pheno_mx) == 1) return(NULL)
+    wh <- match(primary, colnames(pheno_mx))
+    if(is.na(wh)) return(NULL)
+    cx <- -abs(cor(pheno_mx[,wh], pheno_mx[,-wh], use = "pair",
+                   method = "spearman"))
+    phenames <- colnames(cx)[rank(cx, ties.method = "random")]
   }
 
-  if("all" %in% selected)
-    selected <- c(selected[!(selected %in% c("all","none"))],
-                  phenames)
-  if("none" %in% selected)
-    selected <- ""
-  if(!is.null(selected)) {
-    selected <- sort(unique(selected))
-    selected <- selected[selected %in% phenames]
-  }
+  selected <- NULL
+  choices <- phenames
   
   ## Update phenames to include selected (but not "")
-  phenames <- unique(c(selected, phenames))
-  phenames <- phenames[phenames != ""]
-  if(is.null(selected))
-    selected <- phenames[1]
+  if(is.null(primary)) { # Primary name.
+    label <- "Primary phenotype"
+  } else { # Additional names.
+    phenames <- phenames[phenames != primary]
+    label <- "More phenotypes"
+  }
   
-  choices <- c("all","none", phenames)
-  label <- "Choose phenotypes"
   list(label = label, choices = choices, selected = selected)
 }

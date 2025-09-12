@@ -53,7 +53,9 @@ phenoNamesServer <- function(id, set_par, win_par, peak_df, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    pheno_names <- shiny::reactive(input$pheno_names)
+    pheno_names <- shiny::reactive({
+      c(shiny::req(input$pheno_name), input$pheno_names)
+    })
     
     # Filter peaks to hotspots.
     output$filter <- shiny::renderUI({
@@ -73,16 +75,38 @@ phenoNamesServer <- function(id, set_par, win_par, peak_df, project_df) {
     }, options = list(scrollX = TRUE, pageLength = 5,
                       lengthMenu = c(5,10,25)))
     
+    # Phenotypes transformed via `rankZ`.
+    pheno_mx <- shiny::reactive({
+      shiny::req(project_df(), set_par$class, peak_filter_df())
+      pheno_names <- peak_filter_df()$phenotype
+      read_pheno(project_df(), set_par$class, columns = pheno_names)
+    })
+    
     # Input `input$pheno_names`.
+    output$pheno_name_input <- shiny::renderUI({
+      # Primary phenotype.
+      shiny::selectizeInput(ns("pheno_name"), "", choices = "", multiple = FALSE)
+    })
     output$pheno_names_input <- shiny::renderUI({
+      # Additional phenotypes.
       shiny::selectizeInput(ns("pheno_names"), "", choices = "", multiple = TRUE)
     })
     shiny::observeEvent(shiny::req(project_df(), win_par(),
       set_par$window_Mbp, peak_filter_df()), {
-      out <- select_phenames(NULL, peak_filter_df())
-      shiny::updateSelectizeInput(session, "pheno_names", out$label,
-                               choices = out$choices,
-                               selected = out$selected, server = TRUE)
+      out <- select_phenames(peak_filter_df())
+      if(!is.null(out)) {
+        shiny::updateSelectizeInput(session, "pheno_name", out$label,
+          choices = out$choices, selected = out$selected, server = TRUE)
+      }
+    })
+    shiny::observeEvent(shiny::req(project_df(), win_par(),
+      set_par$window_Mbp, peak_filter_df(), input$pheno_name), {
+      out <- select_phenames(peak_filter_df(), input$pheno_name,
+                             shiny::req(pheno_mx()))
+      if(!is.null(out)) {
+        shiny::updateSelectizeInput(session, "pheno_names", out$label,
+          choices = out$choices, selected = out$selected, server = TRUE)
+      }
     })
     output$pheno_names_output <- shiny::renderUI({
       shiny::renderText(paste("phenotype names: ",
@@ -97,15 +121,17 @@ phenoNamesServer <- function(id, set_par, win_par, peak_df, project_df) {
 phenoNamesInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::uiOutput(ns("pheno_names_input")),
-    shiny::uiOutput(ns("filter"))
-  )
+    bslib::layout_columns(
+      col_widths = c(6,6),
+      shiny::uiOutput(ns("pheno_name_input")),   # pheno_name
+      shiny::uiOutput(ns("pheno_names_input"))), # pheno_names
+    shiny::uiOutput(ns("filter")))               # filter
 }
 #' @export
 #' @rdname phenoNamesApp
 phenoNamesUI <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("pheno_names_output")) # pheno_names
+  shiny::uiOutput(ns("pheno_names_output"))      # pheno_names
 }
 #' @export
 #' @rdname phenoNamesApp

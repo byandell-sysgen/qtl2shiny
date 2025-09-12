@@ -19,6 +19,7 @@ phenoPanelApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Pheno Panel",
     sidebar = bslib::sidebar(
+      projectUI("project_df"),          # project
       setParInput("set_par"),           # class, subject_model
       phenoPanelInput("pheno_panel"),   # pheno_names
       winParInput("win_par"),           # hotspot
