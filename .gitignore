@@ -22,7 +22,6 @@ inst/doc/CCmouse
 *.png
 *.js
 
-inst/doc
 inst/scripts/CCmouse
 inst/qtl2shinyApp/qtl2shinyData/CCmouse
 
