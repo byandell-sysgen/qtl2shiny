@@ -134,7 +134,7 @@ It depends on the `peak_df` and `pmap_obj` objects, as well as the
 As currently configured, this panel has the following additional modules:
 
 - [hotspotPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/hotspotPanelApp.R) # Hotspot and phenotype panels
-  - [hotspot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/hotspotApp.R) # show hotspots from `peaks` with summary or plot, select a hotspot
+  - [hotspot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/hotspotApp.R) #  summary or plot of `peak_df` hotspots, select hotspot
   - [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPanelApp.R) # Phenotype panel
   - [winPar](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/winParApp.R) # Hotspot window parameters
   
