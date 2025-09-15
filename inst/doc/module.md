@@ -116,13 +116,14 @@ data area and read in dynamically (as needed) with the
 [read_query_rds](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/read_query_rds.R)
 internal function.
 
-## Panel organizations
+## Panels Module Organization
 
 Panels are dependent on each other based on input parameters
-and read or calculated results.
+and other module results.
 For instance, the `pheno` panel depends on the `hotspots` panel
 (and both are organized at present into one `Hotspots` panel),
-while all other panels depend on these two (details not shown here).
+while all other panels depend on these two
+(details involving results not shown here).
 Information is passed among panels via result lists,
 which are typically
 [reactiveValues](https://mastering-shiny.org/reactivity-objects.html).
