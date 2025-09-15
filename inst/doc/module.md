@@ -66,8 +66,8 @@ In addition, the
 `subject_model` (subset of `subject`s and additive/interactive `model` type)
 are determined with the `setPar` server.
 
-- [projectServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/projectApp.R) # select `project`
-- [setParServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/setParApp.R) # select `class` and `subject_model`
+- `project_df <-` [projectServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/projectApp.R) # select `project`
+- `set_par <-` [setParServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/setParApp.R) # select `class` and `subject_model`
 
 ### Phenotype and Other Project Data
 
@@ -88,10 +88,10 @@ Other `project` data files are read in as needed using the
 [read_project()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/readproject.R)
 function, which depends on the `project`.
 
-- [covar_df](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/covarApp.R): covariate data frame
-- [kinship_list](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/kinshipApp.R): kinship list of LOCO matrices
-- `pmap_obj`: physical map object with list of markers and `Mbp` positions
-- `allele_info`: allele information data frame
+- `covar_df <-` [covarServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/covarApp.R): covariate data frame
+- `kinship_list <-` [kinshipServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/kinshipApp.R): kinship list of LOCO matrices
+- `pmap_obj <- read_project(project_df(), "pmap")`: physical map object with list of markers and `Mbp` positions
+- `allele_info <- read_project(project_df(), "allele")`: allele information data frame
 
 ### Project Genotype and SNP Information
 
@@ -101,7 +101,7 @@ They rely on specially designed `query` functions (see
 [qtl2shinyApp/README.md](https://github.com/byandell-sysgen/qtl2shinyApp/blob/main/README.md)
 and links) that are embedded in shiny modules
 
-- [probsServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/probsApp.R) # read FST probability object
+- `probs_obj <-` [probsServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/probsApp.R) # read FST probability object
 - [geneRegion()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneRegionApp.R) # read and plot genes in a region
 - [geneExon()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneExonApp.R) # read and plot exons of a gene
 
@@ -122,7 +122,7 @@ Panels are dependent on each other based on input parameters
 and read or calculated results.
 For instance, the `pheno` panel depends on the `hotspots` panel
 (and both are organized at present into one `Hotspots` panel),
-while all other panels depend on these two.
+while all other panels depend on these two (details not shown here).
 Information is passed among panels via result lists,
 which are typically
 [reactiveValues](https://mastering-shiny.org/reactivity-objects.html).
