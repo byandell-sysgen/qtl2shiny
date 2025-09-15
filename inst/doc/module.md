@@ -100,11 +100,12 @@ on the `hotspot` server to identify the hotspot of interest.
 Other `project` data files are read in as needed using the
 [read_project()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/readproject.R)
 function, which depends on the `project`.
+The `kinship_list` has a server since it depends on the reactively chosen chromosome.
 
-- `covar_df <-` [covarServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/covarApp.R) #
-covariate data frame
 - `kinship_list <-` [kinshipServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/kinshipApp.R) #
 kinship list of LOCO matrices
+- `covar_df <- read_project(project_df(), "covar")` 
+covariate data frame
 - `pmap_obj <- read_project(project_df(), "pmap")` #
 physical map object with list of markers and `Mbp` positions
 - `allele_info <- read_project(project_df(), "allele")` #
@@ -112,7 +113,7 @@ allele information data frame
 
 ### Project Genotype and SNP Information
 
-Genotype and SNP information are dynamically read for a specfied `hotspot`.
+Genotype and SNP information are reactively read for a specfied `hotspot`.
 They a bit complicated, as data are stored in large `SQLite` or `FST` files.
 They rely on specially designed `query` functions (see
 [qtl2shinyApp/README.md](https://github.com/byandell-sysgen/qtl2shinyApp/blob/main/README.md)
@@ -132,7 +133,7 @@ The `probs` (alleles) and `pairProbs` (allele pairs) servers use the
 The `geneRegion` and `geneExon` servers use the
 `query_genes()` function.
 These are pre-determined functions saved as `RDS` files in the
-data area and read in dynamically (as needed) with the
+data area and read in reactively (as needed) with the
 [read_query_rds](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/read_query_rds.R)
 internal function.
 

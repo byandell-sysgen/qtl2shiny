@@ -39,7 +39,7 @@ phenoPlotApp <- function() {
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    covar_df <- covarServer("covar_df", project_df)
+    covar_df <- shiny::reactive(read_project(project_df(), "covar"))
     hotspot_df <- 
       hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
     win_par <- 

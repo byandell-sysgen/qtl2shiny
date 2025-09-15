@@ -5,7 +5,7 @@ Yandell R/qtl2shiny project.
 ### What is this repository for? ###
 
 * Code to create shiny interface for [R/qtl2](https://cran.r-project.org/package=qtl2).
-* Version 1.3 (branch refactor)
+* Version 1.3 (branch refactor; guides from v 1.1)
 * See following documents:
     + [R/qtl2shiny Screen Shots](http://pages.stat.wisc.edu/~yandell/software/qtl2shiny/screenshots.html)
     + [R/qtl2shiny User Guide](https://github.com/byandell/qtl2shiny/blob/master/vignettes/UserGuide.Rmd)
