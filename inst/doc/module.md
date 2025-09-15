@@ -57,7 +57,16 @@ which sets up the shiny logic.
 
 Data are read based on the `project`, which is determined through the 
 `project` server
-This uses a flat (`CSV`) file to identify where data are stored.
+This uses a flat (`CSV`) file called `projects.csv` in folder `data`
+to identify where data are stored,
+Something like this:
+
+|project|taxa|directory|
+|:------|:---|:--------|
+|DO1200|CCmouse|qtl2shinyData|
+|Recla|CCmouse|qtl2shinyData|
+
+Both `project`s are in directory `qtl2shinyData`, in the taxa `CCmouse`.
 See
 [qtl2shinyApp/README.md](https://github.com/byandell-sysgen/qtl2shinyApp/blob/main/README.md)
 for detailed information on data organization.
@@ -66,15 +75,19 @@ In addition, the
 `subject_model` (subset of `subject`s and additive/interactive `model` type)
 are determined with the `setPar` server.
 
-- `project_df <-` [projectServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/projectApp.R) # select `project`
-- `set_par <-` [setParServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/setParApp.R) # select `class` and `subject_model`
+- `project_df <-` [projectServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/projectApp.R) #
+select `project`
+- `set_par <-` [setParServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/setParApp.R) #
+select `class` and `subject_model`
 
 ### Phenotype and Other Project Data
 
 Project-specific phenotype data are read in as needed using the following modules 
 
-- `peak_df <-` [peakServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/peakApp.R) # precomputed peaks and summaries
-- `pheno_mx <-` [phenoServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoApp.R) # raw phenotype data
+- `peak_df <-` [peakServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/peakApp.R) #
+precomputed peaks and summaries
+- `pheno_mx <-` [phenoServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoApp.R) #
+raw phenotype data
 
 The `peak` server is straight-forward, depending on `project`, `class` and `subject_model`
 through the `project` and `setPar` servers.
@@ -88,10 +101,14 @@ Other `project` data files are read in as needed using the
 [read_project()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/readproject.R)
 function, which depends on the `project`.
 
-- `covar_df <-` [covarServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/covarApp.R): covariate data frame
-- `kinship_list <-` [kinshipServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/kinshipApp.R): kinship list of LOCO matrices
-- `pmap_obj <- read_project(project_df(), "pmap")`: physical map object with list of markers and `Mbp` positions
-- `allele_info <- read_project(project_df(), "allele")`: allele information data frame
+- `covar_df <-` [covarServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/covarApp.R) #
+covariate data frame
+- `kinship_list <-` [kinshipServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/kinshipApp.R) #
+kinship list of LOCO matrices
+- `pmap_obj <- read_project(project_df(), "pmap")` #
+physical map object with list of markers and `Mbp` positions
+- `allele_info <- read_project(project_df(), "allele")` #
+allele information data frame
 
 ### Project Genotype and SNP Information
 
@@ -101,9 +118,12 @@ They rely on specially designed `query` functions (see
 [qtl2shinyApp/README.md](https://github.com/byandell-sysgen/qtl2shinyApp/blob/main/README.md)
 and links) that are embedded in shiny modules
 
-- `probs_obj <-` [probsServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/probsApp.R) # read FST probability object
-- [geneRegion()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneRegionApp.R) # read and plot genes in a region
-- [geneExon()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneExonApp.R) # read and plot exons of a gene
+- `probs_obj <-` [probsServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/probsApp.R) #
+read FST probability object
+- [geneRegion()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneRegionApp.R) #
+read and plot genes in a region
+- [geneExon()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneExonApp.R) #
+read and plot exons of a gene
 
 The `probs` (alleles) and `pairProbs` (allele pairs) servers use the
 `query_probs()` function, while the
@@ -133,17 +153,25 @@ It depends on the `peak_df` and `pmap_obj` objects, as well as the
 `project` and `setPar` modules.
 As currently configured, this panel has the following additional modules:
 
-- [hotspotPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/hotspotPanelApp.R) # Hotspot and phenotype panels
-  - [hotspot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/hotspotApp.R) #  summary or plot of `peak_df` hotspots, select hotspot
-  - [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPanelApp.R) # Phenotype panel
-  - [winPar](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/winParApp.R) # Hotspot window parameters
+- [hotspotPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/hotspotPanelApp.R) #
+Hotspot and phenotype panels
+  - [hotspot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/hotspotApp.R) #
+summary or plot of `peak_df` hotspots, select hotspot
+  - [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPanelApp.R) #
+Phenotype panel
+  - [winPar](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/winParApp.R) #
+Hotspot window parameters
   
 The phenotype panel consists of the following four modules:
 
-- [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPanelApp.R)                # Phenotype Panel
-  - [phenoNames](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoNamesApp.R)            # Select phenotype names
-  - [pheno](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoApp.R)                 # Create phenotype object and summary
-  - [phenoPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPlotApp.R)             # Plot phenotypes
+- [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPanelApp.R) #
+Phenotype Panel
+  - [phenoNames](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoNamesApp.R) #
+Select phenotype names
+  - [pheno](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoApp.R) #
+Create phenotype object and summary
+  - [phenoPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPlotApp.R) #
+Plot phenotypes
 
 The scan panel is not quite configured as needed,
 residing for now in the
@@ -151,20 +179,31 @@ residing for now in the
 module.
 It consists of the following components:
 
-- [scan](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/scanApp.R) # allele-based genome scan
-- [snpList](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpListApp.R) # calculation of SNP objects, including SNP scan
-- [snpGene](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpGeneApp.R) # SNP association and genes
-  - [snpSum](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpSumApp.R) # SNP association summary
-  - [snpPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpPlotApp.R) # SNP association plot
-  - [geneRegion](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneRegionApp.R) # genes within `hotspot` region
-  - [geneExon](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneExonApp.R) # exons within gene
+- [scan](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/scanApp.R) #
+allele-based genome scan
+- [snpList](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpListApp.R) #
+calculation of SNP objects, including SNP scan
+- [snpGene](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpGeneApp.R) #
+SNP association and genes
+  - [snpSum](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpSumApp.R) #
+SNP association summary
+  - [snpPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpPlotApp.R) #
+SNP association plot
+  - [geneRegion](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneRegionApp.R) #
+genes within `hotspot` region
+  - [geneExon](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneExonApp.R) #
+exons within gene
 
 The mediation panel consists of the following modules:
 
-- [mediatePanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPanelApp.R)              # Mediation Panel
-  - [mediate](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoNamesApp.R)         # Run mediation
-  - [mediatePlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoApp.R)                       # Plot mediation results
-  - [triad](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/triadApp.R)         # Plot D-M-T triad scatterplots
+- [mediatePanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPanelApp.R) #
+Mediation Panel
+  - [mediate](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoNamesApp.R) #
+Run mediation
+  - [mediatePlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoApp.R) #
+Plot mediation results
+  - [triad](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/triadApp.R) #
+Plot D-M-T triad scatterplots
 
 The pattern module is currently spread between the
 [haploApp](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/haploApp.R)
@@ -173,12 +212,18 @@ and
 modules.
 It consists of the following components
 
-- [snpPattern](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpPatternApp.R) # SNP Pattern Scan plot and summary
-  - [snpFeature](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpFeatureApp.R)
-- [pattern](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/patternApp.R) # SDP Scans summary
-- [patternPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/patternPlotApp.R) # SDP Scans plot
-- [allele](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/alleleApp.R) # Allele Pattern plot and summary
-- [dipPar](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/dipParApp.R) # input needed parameters across modules
+- [snpPattern](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpPatternApp.R) #
+SNP Pattern Scan plot and summary
+  - [snpFeature](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpFeatureApp.R) #
+merge features from `scan` and `top_snps`
+- [pattern](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/patternApp.R) #
+SDP Scans summary
+- [patternPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/patternPlotApp.R) #
+SDP Scans plot
+- [allele](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/alleleApp.R) #
+Allele Pattern plot and summary
+- [dipPar](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/dipParApp.R) #
+input needed parameters across modules
 
 ## Download App
 

@@ -1,7 +1,5 @@
 #' Shiny SNP Features in SNP Region module
 #'
-#' Shiny module for scan1 analysis and plots, with interfaces \code{snpFeatureInput}, \code{snpFeatureUI} and  \code{snpFeatureOutput}.
-#'
 #' @param id identifier for shiny reactive
 #' @param snp_list reactive arguments
 #'
