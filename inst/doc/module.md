@@ -175,7 +175,6 @@ It consists of the following components
 
 - [snpPattern](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpPatternApp.R) # SNP Pattern Scan plot and summary
   - [snpFeature](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpFeatureApp.R)
-
 - [pattern](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/patternApp.R) # SDP Scans summary
 - [patternPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/patternPlotApp.R) # SDP Scans plot
 - [allele](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/alleleApp.R) # Allele Pattern plot and summary
