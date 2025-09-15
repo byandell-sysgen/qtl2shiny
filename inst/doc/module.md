@@ -53,7 +53,7 @@ Each shiny module is organized in a single file.
 Below, they are often referenced in terms of their `server` function,
 which sets up the shiny logic.
 
-# Data Reading
+## Data Reading
 
 Data are read based on the `project`, which is determined through the 
 `project` server
@@ -181,7 +181,7 @@ It consists of the following components
 - [allele](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/alleleApp.R) # Allele Pattern plot and summary
 - [dipPar](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/dipParApp.R) # input needed parameters across modules
 
-### Download App
+## Download App
 
 There is a
 [downloadApp()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/downloadApp.R)
@@ -198,7 +198,7 @@ and
 [qtlApp](https://github.com/AttieLab-Systems-Genetics/qtlApp)
 (see [qtlApp/R/modules/downloadApp.R](https://github.com/AttieLab-Systems-Genetics/qtlApp/blob/refactor/fs-reorg/R/modules/downloadApp.R)).
 
-### Deprecated Apps
+## Deprecated Apps
 
 - `hapPar` (subsumed as parameters no longer used)
 - `dash` (see `qtl2shinyApp`)
