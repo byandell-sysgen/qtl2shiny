@@ -34,7 +34,7 @@ scanPanelApp <- function() {
       title = "scanPanel",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          scanPanelUI("scan_panel"),            # <various>
+          scanPanelInput("scan_panel"),         # <various>
           snpListInput("snp_list")),            # scan_window, minLOD, pheno_name
         scanPanelOutput("scan_panel")
       )
@@ -67,7 +67,7 @@ scanPanelServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
 }
 #' @export
 #' @rdname scanPanelApp
-scanPanelUI <- function(id) {
+scanPanelInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("scan_input"))          # <various>
 }

@@ -9,15 +9,7 @@
 \usage{
 genoApp()
 
-genoServer(
-  id,
-  hotspot_list,
-  pattern_list,
-  pairprobs_obj,
-  patterns,
-  project_df,
-  snp_action
-)
+genoServer(id, hotspot_list, pattern_list, snp_list, pairprobs_obj, project_df)
 
 genoInput(id)
 

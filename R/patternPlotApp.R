@@ -76,8 +76,8 @@ patternPlotServer <- function(id, pattern_list, pairprobs_obj) {
     plot_type_msg <- shiny::reactive({
       switch(shiny::req(input$pat_plot_tab),
         LOD             = list(type = "lod", msg = 'Pattern LOD ...'),
-        Effects         = list(type = "coef", msg = 'Pattern Effects ...'),
-        "LOD & Effects" = list(type = "coef_and_lod", msg = 'Pattern Effects & LOD ...'))
+        Effects         = list(type = "coef", msg = 'Pattern Effects ...'))
+        #"LOD & Effects" = list(type = "coef_and_lod", msg = 'Pattern Effects & LOD ...'))
       #** Effects garbled if more that 4.
       #** Warning in matrix(pattern, nrow(lod), ncol(lod)) :
       #** data length differs from size of matrix: [441 != 63 x 3]
@@ -124,7 +124,7 @@ patternPlotOutput <- function(id) {
     bslib::nav_panel("LOD", bslib::card(
       shiny::uiOutput(ns("pattern_plot_lod")))),
     bslib::nav_panel("Effects", bslib::card(
-      shiny::uiOutput(ns("pattern_plot_eff")))),
-    bslib::nav_panel("LOD & Effects", bslib::card(
-      shiny::uiOutput(ns("pattern_plot_both")))))
+      shiny::uiOutput(ns("pattern_plot_eff")))))
+    # bslib::nav_panel("LOD & Effects", bslib::card(
+    #   shiny::uiOutput(ns("pattern_plot_both")))))
 }

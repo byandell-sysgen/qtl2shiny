@@ -3,7 +3,7 @@
 \name{scanPanelApp}
 \alias{scanPanelApp}
 \alias{scanPanelServer}
-\alias{scanPanelUI}
+\alias{scanPanelInput}
 \alias{scanPanelOutput}
 \title{Shiny Scan Panel App}
 \usage{
@@ -11,7 +11,7 @@ scanPanelApp()
 
 scanPanelServer(id, hotspot_list, snp_list, probs_obj, project_df)
 
-scanPanelUI(id)
+scanPanelInput(id)
 
 scanPanelOutput(id)
 }

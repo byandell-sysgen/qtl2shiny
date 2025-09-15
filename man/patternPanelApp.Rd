@@ -9,7 +9,14 @@
 \usage{
 patternPanelApp()
 
-patternPanelServer(id, dip_par, hotspot_list, snp_list, project_df)
+patternPanelServer(
+  id,
+  dip_par,
+  hotspot_list,
+  snp_list,
+  pairprobs_obj,
+  project_df
+)
 
 patternPanelInput(id)
 

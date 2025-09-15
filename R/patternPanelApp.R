@@ -56,23 +56,27 @@ patternPanelApp <- function() {
     dip_par <- dipParServer("dip_par", hotspot_list)
     snp_action <- shiny::reactive({dip_par$snp_action})
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
-    patternPanelServer("pattern_panel", dip_par, hotspot_list, snp_list, project_df)
+    pairprobs_obj <-
+      pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
+    patternPanelServer("pattern_panel", dip_par, hotspot_list, snp_list,
+                       pairprobs_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname patternPanelApp
-patternPanelServer <- function(id, dip_par, hotspot_list, snp_list, project_df) {
+patternPanelServer <- function(id, dip_par, hotspot_list, snp_list,
+                               pairprobs_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     ## SDP Patterns
     snpPatternServer("snp_pattern", snp_list, hotspot_list$allele_info)
-    pairprobs_obj <-
-      pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
     pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
       pairprobs_obj, snp_list$patterns, snp_list$snp_action, project_df)
     patternPlotServer("pattern_plot", pattern_list, pairprobs_obj)
+    # Return.
+    pattern_list
   })
 }
 #' @export
