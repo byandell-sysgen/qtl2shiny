@@ -18,7 +18,7 @@ snpFeatureOutput(id)
 \item{snp_list}{reactive arguments}
 }
 \description{
-Shiny module for scan1 analysis and plots, with interfaces \code{snpFeatureInput}, \code{snpFeatureUI} and  \code{snpFeatureOutput}.
+Shiny SNP Features in SNP Region module
 }
 \author{
 Brian S Yandell, \email{brian.yandell@wisc.edu}

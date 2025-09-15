@@ -174,25 +174,30 @@ Create phenotype object and summary
   - [phenoPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPlotApp.R) #
 Plot phenotypes
 
-The scan panel is not quite configured as needed,
-residing for now in the
-[haploApp](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/haploApp.R)
-module.
-It consists of the following components:
+Panels below rely on a few utility modules
 
-- [scan](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/scanApp.R) #
-allele-based genome scan
 - [snpList](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpListApp.R) #
 calculation of SNP objects, including SNP scan
-- [snpGene](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpGeneApp.R) #
+- [dipPar](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/dipParApp.R) #
+input parameters needed across SNP and SDP modules
+
+The `scan` panel performs allele-based scan and SNP association,
+and shows genes and exons in the selected hotspot.
+It consists of the following components:
+
+- [scanPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/scanPanelApp.R) #
+allele- and SNP-based genome scan
+  - [scan](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/scanApp.R) #
+allele-based genome scan
+  - [snpGene](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpGeneApp.R) #
 SNP association and genes
-  - [snpSum](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpSumApp.R) #
+    - [snpSum](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpSumApp.R) #
 SNP association summary
-  - [snpPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpPlotApp.R) #
+    - [snpPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpPlotApp.R) #
 SNP association plot
-  - [geneRegion](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneRegionApp.R) #
+    - [geneRegion](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneRegionApp.R) #
 genes within `hotspot` region
-  - [geneExon](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneExonApp.R) #
+    - [geneExon](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneExonApp.R) #
 exons within gene
 
 The mediation panel consists of the following modules:
@@ -206,25 +211,26 @@ Plot mediation results
   - [triad](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/triadApp.R) #
 Plot D-M-T triad scatterplots
 
-The pattern module is currently spread between the
-[haploApp](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/haploApp.R)
-and
-[diploApp](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/diploApp.R)
-modules.
-It consists of the following components
+The `pattern` panel examines the strain distribution pattern (`SDP`)
+in a variety of ways.
+It consists of the following modules:
 
-- [snpPattern](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpPatternApp.R) #
+- [patternPanelApp](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/patternPanelApp.R) #
+SDP scans and features
+  - [snpPattern](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpPatternApp.R) #
 SNP Pattern Scan plot and summary
-  - [snpFeature](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpFeatureApp.R) #
+    - [snpFeature](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpFeatureApp.R) #
 merge features from `scan` and `top_snps`
-- [pattern](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/patternApp.R) #
+  - [pattern](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/patternApp.R) #
 SDP Scans summary
-- [patternPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/patternPlotApp.R) #
+  - [patternPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/patternPlotApp.R) #
 SDP Scans plot
-- [allele](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/alleleApp.R) #
-Allele Pattern plot and summary
-- [dipPar](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/dipParApp.R) #
-input needed parameters across modules
+
+Finally, the `geno` panel shows the allele, allele pair and SDP genotypes
+for a selected genome location.
+
+- [geno](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/genoApp.R) #
+Genotype plot and summary
 
 ## Download App
 

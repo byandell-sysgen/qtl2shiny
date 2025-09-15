@@ -41,11 +41,13 @@ patternPlotApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            dipParUI("dip_par"),          # snp_action
+            dipParInput("dip_par"),       # snp_action
             snpListInput("snp_list")),    # scan_window, minLOD, pheno_name
           bslib::card(
             patternInput("pattern_list"), # button, blups, pheno_name
             patternUI("pattern_list")),   # pattern
+          bslib::card(
+            dipParUI("dip_par")),         # allele_names
           width = 400),
         bslib::card(patternPlotOutput("pattern_plot"))
       )
@@ -54,13 +56,13 @@ patternPlotApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
-    dip_par <- dipParServer("dip_par")
+    dip_par <- dipParServer("dip_par", hotspot_list)
     snp_action <- shiny::reactive({dip_par$snp_action})
-    snp_list <- snpListServer("snp_list", hotspot_list, project_df)
+    snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
     pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
-      pairprobs_obj, snp_list$patterns, snp_action, project_df)
+      pairprobs_obj, snp_list$patterns, snp_list$snp_action, project_df)
     patternPlotServer("pattern_plot", pattern_list, pairprobs_obj)
   }
   shiny::shinyApp(ui, server)

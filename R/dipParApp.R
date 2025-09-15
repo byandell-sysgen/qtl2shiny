@@ -13,21 +13,25 @@
 #'             renderUI req selectInput sidebarPanel strong tagList textOutput
 #'             uiOutput
 dipParApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Diplo Parameters",
     sidebar = bslib::sidebar(
-      dipParInput("dip_par"), # sex_type
-      dipParUI("dip_par")),   # snp_action
+      projectUI("project_df"), # project
+      dipParInput("dip_par"),  # snp_action
+      dipParUI("dip_par")),    # allele_names
     dipParOutput("dip_par")
   )
   server <- function(input, output, session) {
-    dipParServer("dip_par")
+    project_df <- projectServer("project_df", projects_df)
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    dipParServer("dip_par", hotspot_list)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname dipParApp
-dipParServer <- function(id) {
+dipParServer <- function(id, hotspot_list) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -45,10 +49,12 @@ dipParServer <- function(id) {
     })
     
     output$show_dip_par <- shiny::renderUI({
-      shiny::tagList(
-        shiny::renderText(paste("sex_type: ", input$sex_type)),
-        shiny::renderText(paste("snp_action: ", input$snp_action))
-      )
+      shiny::renderText(paste("snp_action: ", input$snp_action))
+    })
+    
+    output$allele_names <- shiny::renderText({
+      allele_info <- shiny::req(hotspot_list$allele_info())
+      paste(allele_info$code, allele_info$shortname, sep = "=", collapse = ", ")
     })
     
     # Return.
@@ -59,13 +65,13 @@ dipParServer <- function(id) {
 #' @rdname dipParApp
 dipParInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("sex_type_input"))   # sex_type
+  shiny::uiOutput(ns("snp_action_input")) # snp_action
 }
 #' @export
 #' @rdname dipParApp
 dipParUI <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("snp_action_input")) # snp_action
+  shiny::textOutput(ns("allele_names"))   # allele_names
 }
 #' @export
 #' @rdname dipParApp

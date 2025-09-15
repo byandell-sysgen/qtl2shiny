@@ -10,7 +10,7 @@
 \usage{
 dipParApp()
 
-dipParServer(id)
+dipParServer(id, hotspot_list)
 
 dipParInput(id)
 

@@ -38,7 +38,13 @@ snpPatternApp <- function() {
       title = "snpPattern",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          snpListInput("snp_list")),    # scan_window, minLOD, pheno_name
+          bslib::card(
+            dipParInput("dip_par")),      # snp_action
+          bslib::card(
+            snpListInput("snp_list")),    # scan_window, minLOD, pheno_name
+          bslib::card(
+            dipParUI("dip_par")),         # allele_names
+          width = 400),
         bslib::card(snpPatternOutput("snp_pattern"))
       )
     )
@@ -46,7 +52,9 @@ snpPatternApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
-    snp_list <- snpListServer("snp_list", hotspot_list, project_df)
+    dip_par <- dipParServer("dip_par", hotspot_list)
+    snp_action <- shiny::reactive({dip_par$snp_action})
+    snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
     snpPatternServer("snp_pattern", snp_list, hotspot_list$allele_info)
   }
   shiny::shinyApp(ui, server)

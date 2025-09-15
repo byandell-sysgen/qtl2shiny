@@ -40,7 +40,11 @@ snpSumApp <- function() {
       title = "snpSum",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          snpListInput("snp_list")),         # scan_window, minLOD, pheno_name
+          bslib::card(
+            snpListInput("snp_list")),    # scan_window, minLOD, pheno_name
+          bslib::card(
+            dipParUI("dip_par")),         # allele_names
+          width = 400),
         bslib::card(snpSumOutput("snp_sum"))
       )
     )
@@ -48,6 +52,7 @@ snpSumApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    dip_par <- dipParServer("dip_par", hotspot_list)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
     snpSumServer("snp_sum", snp_list, project_df)
   }

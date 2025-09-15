@@ -19,10 +19,10 @@
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
-alleleApp <- function() {
+genoApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
-    title =  "Test Allele",
+    title =  "Test Geno",
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(
@@ -36,41 +36,42 @@ alleleApp <- function() {
         hotspotPanelOutput("hotspot_list"))
     ),
     bslib::nav_panel(
-      title = "Allele",
+      title = "Genotypes",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            dipParInput("dip_par"),         # sex_type
-            dipParUI("dip_par")),           # snp_action
+            patternInput("pattern_list"),   # button, blups, pheno_name
+            patternUI("pattern_list")),     # pattern
+          bslib::card(
+            dipParInput("dip_par")),        # snp_action
           bslib::card(
             snpListInput("snp_list")),      # scan_window, minLOD, pheno_name
           bslib::card(
-            patternInput("pattern_list"),   # button, blups, pheno_name
-            patternUI("pattern_list")),     # pattern
+            dipParUI("dip_par")),           # allele_names
           width = 400),
-        bslib::card(alleleInput("allele"), min_height = "100px"), # pos_Mbp
-        bslib::card(alleleOutput("allele"))
+        bslib::card(genoInput("geno"), min_height = "100px"), # pos_Mbp
+        bslib::card(genoOutput("geno"))
       )
     )
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
-    dip_par <- dipParServer("dip_par")
+    dip_par <- dipParServer("dip_par", hotspot_list)
     snp_action <- shiny::reactive({dip_par$snp_action})
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
     pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
       pairprobs_obj, snp_list$patterns, snp_action, project_df)
-    alleleServer("allele", hotspot_list, pattern_list, pairprobs_obj,
-                 patterns, project_df, snp_action)
+    genoServer("geno", hotspot_list, pattern_list, pairprobs_obj,
+               snp_list$patterns, project_df, snp_action)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname alleleApp
-alleleServer <- function(id, hotspot_list, pattern_list, pairprobs_obj,
+#' @rdname genoApp
+genoServer <- function(id, hotspot_list, pattern_list, pairprobs_obj,
                          patterns, project_df, snp_action) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -130,23 +131,22 @@ alleleServer <- function(id, hotspot_list, pattern_list, pairprobs_obj,
       shiny::req(allele_obj(), input$pos_Mbp)
       shiny::withProgress(message = 'Effect summary ...', value = 0, {
         shiny::setProgress(1)
-        summary(allele_obj(), pos = input$pos_Mbp)
+        allele_summary(allele_obj(), pos = input$pos_Mbp)
       })
     }, escape = FALSE,
     options = list(scrollX = TRUE, pageLength = 5))
   })
 }
 #' @export
-#' @rdname alleleApp
-alleleInput <- function(id) {
+#' @rdname genoApp
+genoInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("pos_Mbp_input"))                        # pos_Mbp
+  shiny::uiOutput(ns("pos_Mbp_input"))    # pos_Mbp
 }
 #' @export
-#' @rdname alleleApp
-alleleOutput <- function(id) {
+#' @rdname genoApp
+genoOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::plotOutput(ns("allele_plot"))
   bslib::navset_tab(
     id = "all_tab",
     bslib::nav_panel("Plot",    shiny::plotOutput(ns("allele_plot"))),
