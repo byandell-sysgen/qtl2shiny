@@ -1,9 +1,7 @@
 # Shiny Module Organization
 
-This package contains a collection of over 20 shiny modules organized
+This package contains a collection of ~30 shiny modules organized
 into panels.
-**Somewhere I wrote about the types of modules, but cannot find right now.**
-
 Each panel on the `qtl2shiny` app is a shiny module that calls multiple
 modules.
 
@@ -27,7 +25,7 @@ chapter of the `Mastering Shiny` site.
 ├── xxxInput()            # (optional) shiny ui for input
 ├── xxxUI()               # (optional) shiny ui for user interface
 ├── xxxOutput()           # (optional) shiny ui for output
-├── result                # result object from xxxServer()
+├── result <- xxServer()  # result object from server
 ```
 
 Here is a prototype app with all these components.
