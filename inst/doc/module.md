@@ -75,8 +75,8 @@ are determined with the `setPar` server.
 
 Project-specific phenotype data are read in as needed using the following modules 
 
-- `peak_df <-` [peakServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/peakApp.R)
-- `pheno_mx <-` [phenoServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoApp.R)
+- `peak_df <-` [peakServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/peakApp.R) # precomputed peaks and summaries
+- `pheno_mx <-` [phenoServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoApp.R) # raw phenotype data
 
 The `peak` server is straight-forward, depending on `project`, `class` and `subject_model`
 through the `project` and `setPar` servers.
@@ -90,9 +90,9 @@ Other `project` data files are read in as needed using the
 [read_project()](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/readproject.R)
 function, which depends on the `project`.
 
-- `covar_df`: covariate data frame
-- `pmap_obj`: physical map object with list of markers and `Mbp` positions
+- [covar_df](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/covarApp.R): covariate data frame
 - [kinship_list](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/kinshipApp.R): kinship list of LOCO matrices
+- `pmap_obj`: physical map object with list of markers and `Mbp` positions
 - `allele_info`: allele information data frame
 
 ### Project Genotype and SNP Information
@@ -134,9 +134,9 @@ It depends on the `peak_df` and `pmap_obj` objects, as well as the
 `project` and `setPar` modules.
 As currently configured, this panel has the following additional modules:
 
-- [hotspotPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/hotspotPanelApp.R) # Hotspot and Phenotype panel
-  - [hotspot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/hotspotApp.R) # Create hotspot from `peaks`, summary, plot and selection
-  - [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPanelApp.R) # Phenotype Panel
+- [hotspotPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/hotspotPanelApp.R) # Hotspot and phenotype panels
+  - [hotspot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/hotspotApp.R) # show hotspots from `peaks` with summary or plot, select a hotspot
+  - [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPanelApp.R) # Phenotype panel
   - [winPar](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/winParApp.R) # Hotspot window parameters
   
 The phenotype panel consists of the following four modules:
@@ -156,7 +156,7 @@ It consists of the following components:
 - [snpList](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpListApp.R) # calculation of SNP objects, including SNP scan
 - [snpGene](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpGeneApp.R) # SNP association and genes
   - [snpSum](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpSumApp.R) # SNP association summary
-  - [snpPlot]((https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpPlotApp.R)) # SNP association plot
+  - [snpPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/snpPlotApp.R) # SNP association plot
   - [geneRegion](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneRegionApp.R) # genes within `hotspot` region
   - [geneExon](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneExonApp.R) # exons within gene
 
@@ -202,6 +202,6 @@ and
 ### Deprecated Apps
 
 - `hapPar` (subsumed as parameters no longer used)
-- `dashPar` (see `qtl2shinyApp`)
+- `dash` (see `qtl2shinyApp`)
 - `main` (see `qtl2shinyApp`)
 - `covar` (use `read_project` instead)
