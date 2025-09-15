@@ -25,7 +25,7 @@ chapter of the `Mastering Shiny` site.
 ├── xxxInput()            # (optional) shiny ui for input
 ├── xxxUI()               # (optional) shiny ui for user interface
 ├── xxxOutput()           # (optional) shiny ui for output
-├── result <- xxServer()  # result object from server
+├── result <- xxxServer() # result object from server
 ```
 
 Here is a prototype app with all these components.
