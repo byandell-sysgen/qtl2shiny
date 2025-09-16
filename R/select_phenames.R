@@ -41,6 +41,7 @@ cor_phenames <- function(pheno_mx, primary) {
   # turn correlation into +/-n, with n = 10 * abs(cx)
   cx <- round(10*cx)
   cx <- cx[abs(cx) > 0]
+  if(!length(cx)) return(NULL)
   sx <- c("-","+")[(sign(cx) + 3) / 2]
   nx <- names(cx)
   paste0(sx, abs(cx), " ", nx)
