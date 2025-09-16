@@ -79,25 +79,30 @@ genoServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_obj,
     win_par <- shiny::isolate(hotspot_list$win_par)
     patterns <- shiny::isolate(snp_list$patterns)
     snp_action <- shiny::isolate(snp_list$snp_action)
+    chr_id <- shiny::reactive(shiny::req(win_par())$chr_id[1])
+    peak_Mbp <- shiny::reactive(shiny::req(win_par())$peak_Mbp[1])
     
     # Scan Window slider
     output$pos_Mbp_input <- shiny::renderUI({
       shiny::req(project_df())
-      chr_id <- shiny::req(win_par())$chr_id
-      map <- shiny::req(pairprobs_obj())$map[[chr_id]]
+      chr <- shiny::req(chr_id())
+      map <- shiny::req(pairprobs_obj())$map[[chr]]
       rng <- round(2 * range(map)) / 2
-      if(is.null(selected <- input$pos_Mbp))
-        selected <- req(win_par())$peak_Mbp
+      if(is.null(value <- input$pos_Mbp))
+        value <- req(peak_Mbp())
+      if(value < rng[1] | value > rng[2]) value <- mean(rng)
       shiny::sliderInput(ns("pos_Mbp"), NULL, rng[1], rng[2],
-                         selected, step=.1)
+                         value, step=.1)
     })
     ## Reset pos_Mbp if chromosome changes.
     observeEvent(shiny::req(win_par()), {
       map <- shiny::req(pairprobs_obj()$map)
-      chr <- win_par()$chr_id
+      chr <- shiny::req(chr_id())
       rng <- round(2 * range(map[[chr]])) / 2
+      value <- shiny::req(peak_Mbp())
+      if(value < rng[1] | value > rng[2]) value <- mean(rng)
       shiny::updateSliderInput(session, "pos_Mbp", NULL, 
-                               win_par()$peak_Mbp, 
+                               value, 
                                rng[1], rng[2], step=.1)
     })
     

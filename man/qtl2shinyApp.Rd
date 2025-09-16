@@ -2,9 +2,15 @@
 % Please edit documentation in R/qtl2shinyApp.R
 \name{qtl2shinyApp}
 \alias{qtl2shinyApp}
+\alias{qtl2shinyServer}
+\alias{qtl2shinyUI}
 \title{Shiny QTL2 Shiny App}
 \usage{
 qtl2shinyApp()
+
+qtl2shinyServer(id, projects_df)
+
+qtl2shinyUI(id)
 }
 \arguments{
 \item{id}{shiny identifier}

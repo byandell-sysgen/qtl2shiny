@@ -75,12 +75,13 @@ phenoNamesServer <- function(id, set_par, win_par, peak_df, project_df) {
     }, options = list(scrollX = TRUE, pageLength = 5,
                       lengthMenu = c(5,10,25)))
     
-    # Phenotypes transformed via `rankZ`.
+    # Phenotypes for `pheno_names`.
     pheno_mx <- shiny::reactive({
       shiny::req(project_df(), set_par$class, peak_filter_df())
       pheno_names <- peak_filter_df()$phenotype
       read_pheno(project_df(), set_par$class, columns = pheno_names)
     })
+    covar_df <- shiny::reactive(read_project(shiny::req(project_df()), "covar"))
     
     # Input `input$pheno_names`.
     output$pheno_name_input <- shiny::renderUI({
@@ -99,10 +100,13 @@ phenoNamesServer <- function(id, set_par, win_par, peak_df, project_df) {
           choices = out$choices, selected = out$selected, server = TRUE)
       }
     })
+    # Use correlation of residuals after covariates.
+    # ** Make this an option? **
     shiny::observeEvent(shiny::req(project_df(), win_par(),
       set_par$window_Mbp, peak_filter_df(), input$pheno_name), {
       out <- select_phenames(peak_filter_df(), input$pheno_name,
-                             shiny::req(pheno_mx()))
+                             shiny::req(pheno_mx()),
+                             cor_covar = TRUE, shiny::req(covar_df()))
       if(!is.null(out)) {
         shiny::updateSelectizeInput(session, "pheno_names", out$label,
           choices = out$choices, selected = out$selected, server = TRUE)

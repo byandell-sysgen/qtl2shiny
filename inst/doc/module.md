@@ -20,18 +20,19 @@ A module has several components, as described in the
 chapter of the `Mastering Shiny` site.
 
 ```
+xxxApp.R                  # file containing app functions
 ├── xxxApp()              # runnable shiny app
-├── xxxServer()           # shiny server
-├── xxxInput()            # (optional) shiny ui for input
-├── xxxUI()               # (optional) shiny ui for user interface
-├── xxxOutput()           # (optional) shiny ui for output
-├── result <- xxxServer() # result object from server
+├── xxxServer()           # shiny server function with (optional) result
+├── xxxInput()            # (optional) shiny ui function for input
+├── xxxUI()               # (optional) shiny ui function for user interface
+└── xxxOutput()           # (optional) shiny ui function for output
 ```
 
 Here is a prototype app with all these components.
 The `"id"` is a common identifier across these components.
 The user interface function `xxxUI()` might appear in the `sidebar`
 or in the body of the `page`, depending on its use.
+Note the `result` returned from `xxxServer()`.
 
 ```
 xxxApp() <- function() {
@@ -149,6 +150,14 @@ Information is passed among panels via result lists,
 which are typically
 [reactiveValues](https://mastering-shiny.org/reactivity-objects.html).
 
+The overarching module is
+[qtl2shiny](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/qtl2shinyApp.R),
+which has the following functions:
+
+- `qtl2shinyApp()`: run the app; code that could be copied to `app.R`
+- `qtl2shinyServer()`: complete server logic
+- `qtl2shinyUI()`: complete UI with panel structure
+
 The hotspot panel has tabs for `Hotspots` and `Phenotypes`.
 It depends on the `peak_df` and `pmap_obj` objects, as well as the
 `project` and `setPar` modules.
@@ -249,9 +258,11 @@ and
 [qtlApp](https://github.com/AttieLab-Systems-Genetics/qtlApp)
 (see [qtlApp/R/modules/downloadApp.R](https://github.com/AttieLab-Systems-Genetics/qtlApp/blob/refactor/fs-reorg/R/modules/downloadApp.R)).
 
-## Deprecated Apps
+## Deprecated Files
 
-- `hapPar` (subsumed as parameters no longer used)
-- `dash` (see `qtl2shinyApp`)
-- `main` (see `qtl2shinyApp`)
-- `covar` (use `read_project` instead)
+- `dashApp.R` (see `qtl2shinyApp`)
+- `mainApp.R` (see `qtl2shinyApp`)
+- `haploApp.R` (early version of a panel)
+- `hapParApp.R` (subsumed as parameters no longer used)
+- `diploApp.R` (early version of a panel)
+- `helpPopup.R`
