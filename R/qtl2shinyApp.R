@@ -56,7 +56,7 @@ qtl2shinyServer <- function(id, projects_df) {
     
     # Genotypes Panel.
     dipParServer("geno_dip_par", hotspot_list)
-    genoServer("geno", hotspot_list, pattern_list, pattern_snp_list,
+    genoPanelServer("geno_panel", hotspot_list, pattern_list, pattern_snp_list,
                pairprobs_obj, project_df)
     
     output$qtl2shiny_ui <- shiny::renderUI({
@@ -123,10 +123,11 @@ qtl2shinyUI <- function(id) {
       title = "Genotypes",
       bslib::layout_sidebar(
         bslib::card(
-          dipParUI(ns("geno_dip_par"))),                          # allele_names
-        bslib::card(genoInput(ns("geno")), min_height = "100px"), # pos_Mbp
+          dipParUI(ns("geno_dip_par"))),                           # allele_names
+        bslib::card(
+          genoPanelInput(ns("geno_panel")), min_height = "100px"), # pos_Mbp
         width = 400),
-      bslib::card(genoOutput(ns("geno")))
+      bslib::card(genoPanelOutput(ns("geno_panel")))
     )
   )
 }

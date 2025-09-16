@@ -6,10 +6,13 @@ Each panel on the `qtl2shiny` app is a shiny module that calls multiple
 modules.
 
 ```
+qtl2shinyApp
 ├── hotspotPanel              # Hotspots and Phenotypes
+    └── phenoPanel            # Phenotypes
 ├── scanPanel                 # Allele and SNP Scans
 ├── mediatePanel              # Mediation
 ├── patternPanel              # SDP Pattern Scans
+└── genoPanel                 # Genotypes
 ```
 
 These are all being organized into the
@@ -238,7 +241,7 @@ SDP Scans plot
 Finally, the `geno` panel shows the allele, allele pair and SDP genotypes
 for a selected genome location.
 
-- [geno](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/genoApp.R) #
+- [genoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/genoPanelApp.R) #
 Genotype plot and summary
 
 ## Download App

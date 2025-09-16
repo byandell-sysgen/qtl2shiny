@@ -19,7 +19,7 @@
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
-genoApp <- function() {
+genoPanelApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
     title =  "Test Geno",
@@ -49,8 +49,8 @@ genoApp <- function() {
           bslib::card(
             dipParUI("dip_par")),           # allele_names
           width = 400),
-        bslib::card(genoInput("geno"), min_height = "100px"), # pos_Mbp
-        bslib::card(genoOutput("geno"))
+        bslib::card(genoPanelInput("geno_panel"), min_height = "100px"), # pos_Mbp
+        bslib::card(genoPanelOutput("geno_panel"))
       )
     )
   )
@@ -64,14 +64,14 @@ genoApp <- function() {
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
     pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
       pairprobs_obj, snp_list$patterns, snp_action, project_df)
-    genoServer("geno", hotspot_list, pattern_list, snp_list, pairprobs_obj,
+    genoPanelServer("geno_panel", hotspot_list, pattern_list, snp_list, pairprobs_obj,
                project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname genoApp
-genoServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_obj,
+#' @rdname genoPanelApp
+genoPanelServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_obj,
                        project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -145,14 +145,14 @@ genoServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_obj,
   })
 }
 #' @export
-#' @rdname genoApp
-genoInput <- function(id) {
+#' @rdname genoPanelApp
+genoPanelInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("pos_Mbp_input"))    # pos_Mbp
 }
 #' @export
-#' @rdname genoApp
-genoOutput <- function(id) {
+#' @rdname genoPanelApp
+genoPanelOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = "all_tab",
