@@ -16,8 +16,18 @@
 #' 
 qtl2shinyApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- qtl2shinyUI("qtl2shiny")
+  server <- function(input, output, session) {
+    qtl2shinyServer("qtl2shiny", projects_df)
+  }
+  shiny::shinyApp(ui, server)
+}
+#' @export
+#' @rdname qtl2shinyApp
+qtl2fullApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
-    title =  "Test Whole App",
+    title =  "QTL2 Full App",
     navbar_options = bslib::navbar_options(bg = "red", theme = "dark"),
     bslib::nav_panel(
       title = "Hotspots and Phenotypes",
@@ -110,3 +120,112 @@ qtl2shinyApp <- function() {
   }
   shiny::shinyApp(ui, server)
 }
+#' @export
+#' @rdname qtl2shinyApp
+qtl2shinyServer <- function(id, projects_df) {
+  shiny::moduleServer(id, function(input, output, session) {
+    ns <- session$ns
+
+    project_df <- projectServer("project_df", projects_df)
+    
+    # Hotspots and Phenotypes Panel.
+    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    
+    # Allele and SNP Scans Panel.
+    scan_snp_list <- snpListServer("scan_snp_list", hotspot_list, project_df)
+    probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
+    scanPanelServer("scan_panel", hotspot_list, scan_snp_list, probs_obj,
+                    project_df)
+    
+    # Mediation Panel.
+    mediatePanelServer("mediate_panel", hotspot_list, scan_snp_list, probs_obj,
+                       project_df)
+    
+    # Patterns Panel.
+    dip_par <- dipParServer("dip_par", hotspot_list)
+    snp_action <- shiny::reactive({dip_par$snp_action})
+    pattern_snp_list <-
+      snpListServer("pattern_snp_list", hotspot_list, project_df, snp_action)
+    pairprobs_obj <-
+      pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
+    pattern_list <-
+      patternPanelServer("pattern_panel", dip_par, hotspot_list,
+                         pattern_snp_list, pairprobs_obj, project_df)
+    
+    # Genotypes Panel.
+    dipParServer("geno_dip_par", hotspot_list)
+    genoServer("geno", hotspot_list, pattern_list, pattern_snp_list,
+               pairprobs_obj, project_df)
+    
+    output$qtl2shiny_ui <- shiny::renderUI({
+      
+    })
+  })    
+}
+#' @export
+#' @rdname qtl2shinyApp
+qtl2shinyUI <- function(id) {
+  ns <- shiny::NS(id)
+
+  bslib::page_navbar(
+    title =  "QTL2 Shiny App",
+    navbar_options = bslib::navbar_options(bg = "red", theme = "dark"),
+    bslib::nav_panel(
+      title = "Hotspots and Phenotypes",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            projectUI(ns("project_df")),            # project
+            hotspotPanelInput(ns("hotspot_list"))), # class, subject_model, pheno_names, hotspot
+          bslib::card(
+            hotspotPanelUI(ns("hotspot_list"))),    # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400),
+        hotspotPanelOutput(ns("hotspot_list")))
+    ),
+    ## Currently just uses Haplo and Diplo Apps.
+    ## Need to rethink dashServer
+    bslib::nav_panel(
+      title = "Allele and SNP Scans",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          scanPanelInput(ns("scan_panel")),         # <various>
+          snpListInput(ns("scan_snp_list"))),       # scan_window, minLOD, pheno_name
+        scanPanelOutput(ns("scan_panel"))
+      )
+    ),
+    bslib::nav_panel(
+      title = "Mediation",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          mediatePanelInput(ns("mediate_panel"))), # <various>
+        mediatePanelOutput(ns("mediate_panel"))
+      )
+    ),
+    bslib::nav_panel(
+      title = "Patterns",
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          bslib::card(
+            patternPanelInput(ns("pattern_panel"))), # <various>
+          bslib::card(
+            dipParInput(ns("dip_par"))),          # snp_action
+          bslib::card(
+            snpListInput(ns("pattern_snp_list"))), # scan_window, minLOD, pheno_name
+          bslib::card(
+            dipParUI(ns("dip_par"))),             # allele_names
+          width = 400),
+        bslib::card(patternPanelOutput(ns("pattern_panel")))
+      )
+    ),
+    bslib::nav_panel(
+      title = "Genotypes",
+      bslib::layout_sidebar(
+        bslib::card(
+          dipParUI(ns("geno_dip_par"))),                          # allele_names
+        bslib::card(genoInput(ns("geno")), min_height = "100px"), # pos_Mbp
+        width = 400),
+      bslib::card(genoOutput(ns("geno")))
+    )
+  )
+}
+
