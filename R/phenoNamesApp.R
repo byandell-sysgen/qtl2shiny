@@ -54,7 +54,7 @@ phenoNamesServer <- function(id, set_par, win_par, peak_df, project_df) {
     ns <- session$ns
     
     pheno_names <- shiny::reactive({
-      c(shiny::req(input$pheno_name), input$pheno_names)
+      c(shiny::req(input$pheno_name), cor_remove(input$pheno_names))
     })
     
     # Filter peaks to hotspots.
@@ -121,10 +121,8 @@ phenoNamesServer <- function(id, set_par, win_par, peak_df, project_df) {
 phenoNamesInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    bslib::layout_columns(
-      col_widths = c(6,6),
-      shiny::uiOutput(ns("pheno_name_input")),   # pheno_name
-      shiny::uiOutput(ns("pheno_names_input"))), # pheno_names
+    shiny::uiOutput(ns("pheno_name_input")),     # pheno_name
+    shiny::uiOutput(ns("pheno_names_input")),    # pheno_names
     shiny::uiOutput(ns("filter")))               # filter
 }
 #' @export

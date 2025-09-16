@@ -13,14 +13,8 @@ select_phenames <- function(peak_df, primary = NULL, pheno_mx) {
       return(NULL)
     }
   } else {
-    if(ncol(pheno_mx) == 1) return(NULL)
-    wh <- match(primary, colnames(pheno_mx))
-    if(is.na(wh)) return(NULL)
-    # Order the ranks of absolute correlation.
-    cx <- cor(pheno_mx[,wh], pheno_mx[,-wh], use = "pair",
-              method = "spearman")
-    cx <- cx[, order(rank(-abs(cx), ties.method = "random"))]
-    phenames <- names(cx)
+    phenames <- cor_phenames(pheno_mx, primary)
+    if(is.null(phenames)) return(NULL)
   }
 
   selected <- NULL
@@ -35,4 +29,23 @@ select_phenames <- function(peak_df, primary = NULL, pheno_mx) {
   }
   
   list(label = label, choices = choices, selected = selected)
+}
+cor_phenames <- function(pheno_mx, primary) {
+  if(ncol(pheno_mx) == 1) return(NULL)
+  wh <- match(primary, colnames(pheno_mx))
+  if(is.na(wh)) return(NULL)
+  # Order the ranks of absolute correlation.
+  cx <- cor(pheno_mx[,wh], pheno_mx[,-wh], use = "pair",
+            method = "spearman")
+  cx <- cx[, order(rank(-abs(cx), ties.method = "random"))]
+  # turn correlation into +/-n, with n = 10 * abs(cx)
+  cx <- round(10*cx)
+  cx <- cx[abs(cx) > 0]
+  sx <- c("-","+")[(sign(cx) + 3) / 2]
+  nx <- names(cx)
+  paste0(sx, abs(cx), " ", nx)
+}
+cor_remove <- function(phenames) {
+  if(is.null(phenames)) return(NULL)
+  stringr::str_remove(phenames, "^[+-][1-9] ")
 }
