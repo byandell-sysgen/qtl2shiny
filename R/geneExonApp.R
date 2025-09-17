@@ -14,11 +14,8 @@
 #' @importFrom dplyr filter
 #' @importFrom ggplot2 autoplot ggtitle
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny column downloadButton downloadHandler fluidRow moduleServer
-#'             NS plotOutput reactive renderPlot renderUI req selectInput
-#'             setProgress uiOutput updateSelectInput withProgress
-#' @importFrom utils write.csv
-#' @importFrom grDevices dev.off pdf
+#' @importFrom shiny moduleServer NS plotOutput reactive renderPlot renderUI req
+#'             selectInput setProgress uiOutput updateSelectInput withProgress
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_sidebar navset_tab nav_panel
 #'             page_navbar sidebar
@@ -94,14 +91,17 @@ geneExonServer <- function(id, snp_list) {
       }
     })
     
-    output$exon_table <- DT::renderDataTable({
+    exon_table <- shiny::reactive({
       shiny::withProgress(message = 'Gene Exon Table ...', value = 0, {
         shiny::setProgress(1)
         summary_gene_exon()
       })
-    }, options = list(scrollX = TRUE, pageLength = 5,
-                      lengthMenu = list(c(5,10,20,-1),
-                                        list("5","10","20","all"))))
+    })
+    output$exon_table_output <- DT::renderDataTable(
+      shiny::req(exon_table()),
+      options = list(scrollX = TRUE, pageLength = 5,
+        lengthMenu = list(c(5,10,20,-1), list("5","10","20","all"))))
+    
     output$gene_name <- shiny::renderUI({
       selected <- input$gene_name
       choices <- gene_names()
@@ -121,7 +121,7 @@ geneExonServer <- function(id, snp_list) {
                                selected = selected)
     })
     
-    output$exon_plot <- shiny::renderPlot({
+    exon_plot <- shiny::reactive({
       if(is.null(input$gene_name)) {
         plot_null()
       } else {
@@ -138,12 +138,20 @@ geneExonServer <- function(id, snp_list) {
         })
       }
     })
+    output$exon_plot_output <- shiny::renderPlot({
+      print(shiny::req(exon_plot()))
+    })
     
     ## Outputs
     output$exon_input <- shiny::renderUI({
       switch(shiny::req(input$exon_tab),
              Plot    = shiny::uiOutput(ns("gene_name")))
     })
+    
+    # Return.
+    shiny::reactiveValues(
+      plot = exon_plot,
+      table = exon_table)
   })
 }
 #' @export
@@ -159,7 +167,7 @@ geneExonOutput <- function(id) {
   bslib::navset_tab(
     id = ns("exon_tab"),
     bslib::nav_panel("Plot", bslib::card(
-      shiny::plotOutput(ns("exon_plot")))),
+      shiny::plotOutput(ns("exon_plot_output")))),
     bslib::nav_panel("Summary", bslib::card(
       DT::dataTableOutput(ns("exon_table")))))
 }

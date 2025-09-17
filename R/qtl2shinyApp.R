@@ -13,7 +13,7 @@
 #' @importFrom dplyr filter 
 #' @importFrom shiny moduleServer NS reactive req 
 #' @importFrom rlang .data
-#' 
+#' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
 qtl2shinyApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- qtl2shinyUI("qtl2shiny")
@@ -71,6 +71,7 @@ qtl2shinyUI <- function(id) {
 
   bslib::page_navbar(
     title =  "QTL2 Shiny App",
+    id = ns("panel"),
     navbar_options = bslib::navbar_options(bg = "red", theme = "dark"),
     bslib::nav_panel(
       title = "Hotspots and Phenotypes",

@@ -7,9 +7,9 @@
 #' @keywords utilities
 #'
 #' @export
-#' @importFrom shiny downloadButton downloadHandler isTruthy moduleServer NS
+#' @importFrom shiny isTruthy moduleServer NS
 #'             plotOutput reactive renderPlot req setProgress withProgress
-#' @importFrom grDevices dev.off pdf
+#' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
 snpPlotApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
@@ -57,7 +57,7 @@ snpPlotServer <- function(id, snp_list) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    output$snp_plot <- shiny::renderPlot({
+    snp_plot <- shiny::reactive({
       if(!shiny::isTruthy(snp_list$snp_par$scan_window) ||
          !shiny::isTruthy(snp_list$pheno_names()))
         return(plot_null("need to select\nRegion & Phenotype"))
@@ -75,32 +75,16 @@ snpPlotServer <- function(id, snp_list) {
                      minLOD = snp_list$snp_par$minLOD)
       })
     })
-    
-    output$downloadPlot <- shiny::downloadHandler(
-      filename = function() {
-        file.path(paste0("snp_scan_", snp_list$chr_pos(), "_",
-                         snp_list$snp_action(), ".pdf")) },
-      content = function(file) {
-        grDevices::pdf(file, width = 9)
-        print(top_snp_asso(shiny::req(snp_list$snp_scan_obj()), 
-                           shiny::req(snp_list$snpinfo()), 
-                           shiny::req(snp_list$snp_par$scan_window),
-                           snp_list$snp_action(), 
-                           minLOD = shiny::req(snp_list$snp_par$minLOD)))
-        grDevices::dev.off()
-      }
-    )
+    output$snp_plot_output <- shiny::renderPlot({
+      print(shiny::req(snp_plot()))
+    })
+    # Return.
+    snp_plot
   })
-}
-#' @export
-#' @rdname snpPlotApp
-snpPlotUI <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::downloadButton(ns("downloadPlot"), "Plots")
 }
 #' @export
 #' @rdname snpPlotApp
 snpPlotOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::plotOutput(ns("snp_plot"))
+  shiny::plotOutput(ns("snp_plot_output"))
 }

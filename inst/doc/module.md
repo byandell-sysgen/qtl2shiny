@@ -161,6 +161,21 @@ which has the following functions:
 - `qtl2shinyServer()`: complete server logic
 - `qtl2shinyUI()`: complete UI with panel structure
 
+The top-level module app looks like this:
+
+```
+qtl2shinyApp <- function() {
+  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  ui <- qtl2shinyUI("qtl2shiny")
+  server <- function(input, output, session) {
+    qtl2shinyServer("qtl2shiny", projects_df)
+  }
+  shiny::shinyApp(ui, server)
+}
+```
+
+### Hotspots and Phenotypes Panel
+
 The hotspot panel has tabs for `Hotspots` and `Phenotypes`.
 It depends on the `peak_df` and `pmap_obj` objects, as well as the
 `project` and `setPar` modules.
@@ -174,7 +189,7 @@ summary or plot of `peak_df` hotspots, select hotspot
 Phenotype panel
   - [winPar](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/winParApp.R) #
 Hotspot window parameters
-  
+
 The phenotype panel consists of the following four modules:
 
 - [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPanelApp.R) #
@@ -185,6 +200,8 @@ Select phenotype names
 Create phenotype object and summary
   - [phenoPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPlotApp.R) #
 Plot phenotypes
+
+### Allele and SNP Scans Panel
 
 Panels below rely on a few utility modules
 
@@ -212,6 +229,8 @@ genes within `hotspot` region
     - [geneExon](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/geneExonApp.R) #
 exons within gene
 
+### Mediation Panel
+
 The mediation panel consists of the following modules:
 
 - [mediatePanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/phenoPanelApp.R) #
@@ -223,7 +242,9 @@ Plot mediation results
   - [triad](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/triadApp.R) #
 Plot D-M-T triad scatterplots
 
-The `pattern` panel examines the strain distribution pattern (`SDP`)
+### Patterns Panel
+
+The pattern panel examines the strain distribution pattern (`SDP`)
 in a variety of ways.
 It consists of the following modules:
 
@@ -237,6 +258,8 @@ merge features from `scan` and `top_snps`
 SDP Scans summary
   - [patternPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/patternPlotApp.R) #
 SDP Scans plot
+
+### Genotypes Panel
 
 Finally, the `geno` panel shows the allele, allele pair and SDP genotypes
 for a selected genome location.
@@ -260,6 +283,22 @@ This is somewhat analagous to what was done in
 and
 [qtlApp](https://github.com/AttieLab-Systems-Genetics/qtlApp)
 (see [qtlApp/R/modules/downloadApp.R](https://github.com/AttieLab-Systems-Genetics/qtlApp/blob/refactor/fs-reorg/R/modules/downloadApp.R)).
+Here is my current thinking
+
+- each panel returns a `reactiveValue` with element `download`
+  - this identifies the currently viewed `plot` or `table` and a `filename`
+- these returns are collected into another `reactiveValue` `DL`
+- pass `DL` and the current panel (`input$panel`) to `downloadServer()`
+
+```
+DL <- shiny::reactiveValues()
+DL$hotspot <- hotspotPanelServer()
+DL$scan    <- scanPanelServer()
+DL$mediate <- mediatePanelServer()
+DL$pattern <- patternPanelServer()
+DL$geno    <- genoPanelServer()
+downloadServer("download", DL, input$panel)
+```
 
 ## Deprecated Files
 

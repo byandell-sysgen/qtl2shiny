@@ -3,15 +3,12 @@
 \name{snpPlotApp}
 \alias{snpPlotApp}
 \alias{snpPlotServer}
-\alias{snpPlotUI}
 \alias{snpPlotOutput}
 \title{Shiny SNP plot module}
 \usage{
 snpPlotApp()
 
 snpPlotServer(id, snp_list)
-
-snpPlotUI(id)
 
 snpPlotOutput(id)
 }

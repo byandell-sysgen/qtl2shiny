@@ -10,15 +10,13 @@
 #'
 #' @export
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny column downloadButton downloadHandler fluidRow moduleServer
-#'             NS plotOutput reactive renderPlot renderUI req setProgress
-#'             sliderInput tagList uiOutput updateSliderInput withProgress
+#' @importFrom shiny moduleServer NS plotOutput reactive renderPlot renderUI req
+#'             setProgress sliderInput uiOutput updateSliderInput withProgress
 #' @importFrom ggplot2 autoplot ggtitle
 #' @importFrom dplyr mutate select
 #' @importFrom tidyr pivot_wider
-#' @importFrom utils write.csv
-#' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
+#' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
 genoPanelApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
@@ -122,7 +120,7 @@ genoPanelServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_
                     blups)
       })
     })
-    output$allele_plot <- shiny::renderPlot({
+    allele_plot <- shiny::reactive({
       shiny::req(allele_obj(), input$pos_Mbp)
       shiny::withProgress(message = 'Allele plots ...', value = 0, {
         shiny::setProgress(1)
@@ -134,14 +132,25 @@ genoPanelServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_
         }
       })
     })
-    output$allele_table <- DT::renderDataTable({
+    output$allele_plot_output <- shiny::renderPlot(
+      print(shiny::req(allele_plot())))
+    
+    allele_table <- shiny::reactive({
       shiny::req(allele_obj(), input$pos_Mbp)
       shiny::withProgress(message = 'Effect summary ...', value = 0, {
         shiny::setProgress(1)
         allele_summary(allele_obj(), pos = input$pos_Mbp)
       })
-    }, escape = FALSE,
-    options = list(scrollX = TRUE, pageLength = 5))
+    })
+    output$allele_table_output <- DT::renderDataTable(
+      shiny::req(allele_table()),
+      escape = FALSE, options = list(scrollX = TRUE, pageLength = 5))
+    
+    # Return.
+    shiny::reactiveValues(
+      filename = "allele",
+      plot  = allele_plot,
+      table = allele_table)
   })
 }
 #' @export
@@ -156,6 +165,6 @@ genoPanelOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = "all_tab",
-    bslib::nav_panel("Plot",    shiny::plotOutput(ns("allele_plot"))),
-    bslib::nav_panel("Summary", DT::dataTableOutput(ns("allele_table"))))
+    bslib::nav_panel("Plot",    shiny::plotOutput(ns("allele_plot_output"))),
+    bslib::nav_panel("Summary", DT::dataTableOutput(ns("allele_table_output"))))
 }

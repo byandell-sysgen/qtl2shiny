@@ -13,13 +13,12 @@
 #' @export
 #' @importFrom dplyr filter
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny downloadButton downloadHandler moduleServer NS reactive
-#'             renderUI req selectInput setProgress tagList uiOutput
-#'             withProgress
+#' @importFrom shiny moduleServer NS reactive renderUI req selectInput
+#'             setProgress tagList uiOutput withProgress
 #' @importFrom ggplot2 autoplot
 #' @importFrom utils write.csv
 #' @importFrom rlang .data
-#' 
+#' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
 snpSumApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
@@ -76,41 +75,39 @@ snpSumServer <- function(id, snp_list, project_df) {
       best <- shiny::req(best_snps())
       ensembl_gene(best, project_df())
     })
-    
-    output$top_snps_tbl <- DT::renderDataTable({
-      shiny::req(snp_list$top_snps_tbl())
-      shiny::withProgress(message = "Top SNP Range ...", value = 0,
-                          {
-                            shiny::setProgress(1)
-                            summary(snp_list$top_snps_tbl())
-                          })
-    }, escape = FALSE,
-    options = list(scrollX = TRUE, pageLength = 5))
-    output$top_snps_best <- DT::renderDataTable({
-      shiny::withProgress(message = "Top SNP Best ...", value = 0,
-                          {
-                            shiny::setProgress(1)
-                            shiny::req(best_href())
-                          })
-    }, escape = FALSE,
-    options = list(scrollX = TRUE, pageLength = 5))
-    output$top_indels <- DT::renderDataTable({
-      shiny::withProgress(message = "Top InDels ...", value = 0, {
+    snp_sum_table <- shiny::reactive({
+      top_snps_tbl <- shiny::req(snp_list$top_snps_tbl())
+      msg <- switch(shiny::req(input$sum_tab),
+        best   = "SNP Best",
+        indels = "InDels",
+        peaks  = "SNP Peaks",
+        range  = "SNP Range")
+      
+      shiny::withProgress(message = paste("Top", msg, "..."), value = 0, {
         shiny::setProgress(1)
-        # This might change from .data$type to .data$variant_type someday
-        dplyr::filter(shiny::req(best_href()), .data$type != "SNP")
+        switch(shiny::req(input$sum_tab),
+          best   = shiny::req(best_href()),
+          indels = dplyr::filter(shiny::req(best_href()), .data$type != "SNP"),
+          peaks  = summary(top_snps_tbl, "peak"),
+          range  = summary(top_snps_tbl))
       })
-    }, escape = FALSE,
-    options = list(scrollX = TRUE, pageLength = 5))
-    output$top_snps_peak <- DT::renderDataTable({
-      shiny::req(snp_list$top_snps_tbl())
-      shiny::withProgress(message = "Top SNP Peaks ...", value = 0,
-                          {
-                            shiny::setProgress(1)
-                            summary(snp_list$top_snps_tbl(),"peak")
-                          })
-    }, escape = FALSE,
-    options = list(scrollX = TRUE, pageLength = 5))
+    })
+    
+    output$range_table <- DT::renderDataTable(
+      shiny::req(snp_sum_table()),
+      escape = FALSE, options = list(scrollX = TRUE, pageLength = 5))
+    output$best_table <- DT::renderDataTable(
+      shiny::req(snp_sum_table()),
+      escape = FALSE, options = list(scrollX = TRUE, pageLength = 5))
+    output$indels_table <- DT::renderDataTable(
+      shiny::req(snp_sum_table()),
+      escape = FALSE, options = list(scrollX = TRUE, pageLength = 5))
+    output$peaks_table <- DT::renderDataTable(
+      shiny::req(snp_sum_table()),
+      escape = FALSE, options = list(scrollX = TRUE, pageLength = 5))
+    
+    # Return.
+    snp_sum_table
   })
 }
 #' @export
@@ -120,11 +117,11 @@ snpSumOutput <- function(id) {
   bslib::navset_tab(
     id = ns("sum_tab"),
     bslib::nav_panel("best", bslib::card(
-      DT::dataTableOutput(ns("top_snps_best")))),
+      DT::dataTableOutput(ns("best_table")))),
     bslib::nav_panel("indels", bslib::card(
-      DT::dataTableOutput(ns("top_indels")))),
+      DT::dataTableOutput(ns("indels_table")))),
     bslib::nav_panel("peaks", bslib::card(
-      DT::dataTableOutput(ns("top_snps_peak")))),
+      DT::dataTableOutput(ns("peaks_table")))),
     bslib::nav_panel("range", bslib::card(
-      DT::dataTableOutput(ns("top_snps_tbl")))))
+      DT::dataTableOutput(ns("range_table")))))
 }

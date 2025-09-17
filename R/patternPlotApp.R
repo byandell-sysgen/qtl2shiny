@@ -10,16 +10,11 @@
 #'
 #' @export
 #' 
-#' @importFrom qtl2pattern sdp_to_pattern
-#' @importFrom dplyr filter
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny checkboxInput column downloadButton downloadHandler
-#'             fluidRow moduleServer NS observeEvent plotOutput radioButtons
-#'             reactive renderPlot renderUI req selectInput setProgress tagList
-#'             uiOutput updateSelectInput withProgress
-#' @importFrom grDevices dev.off pdf
-#' @importFrom utils write.csv
+#' @importFrom shiny moduleServer NS observeEvent plotOutput reactive renderPlot
+#'             renderUI req setProgress uiOutput withProgress
 #' @importFrom rlang .data
+#' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
 patternPlotApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
