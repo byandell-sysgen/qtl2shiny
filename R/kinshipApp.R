@@ -40,15 +40,16 @@ kinshipServer <- function(id, win_par, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    chr_id <- shiny::reactive(shiny::req(win_par())$chr_id[1])
     kinship_list <- shiny::reactive({
-      shiny::req(project_df(), win_par())
-      read_project(project_df(), "kinship")[win_par()$chr_id]
+      shiny::req(project_df(), chr_id())
+      read_project(project_df(), "kinship")[chr_id()]
     })
 
     # Output Kinship Size.
     output$kinship_size <- shiny::renderUI({
       shiny::renderText(paste(
-        "kinship for chr", shiny::req(win_par())$chr_id,
+        "kinship for chr", shiny::req(chr_id()),
         "is size", sapply(shiny::req(kinship_list()), nrow)))
     })
     

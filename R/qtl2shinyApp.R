@@ -29,19 +29,23 @@ qtl2shinyServer <- function(id, projects_df) {
     ns <- session$ns
 
     project_df <- projectServer("project_df", projects_df)
+    DL <- shiny::reactiveValues()
     
     # Hotspots and Phenotypes Panel.
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    DL$hotspot <- hotspot_list
     
     # Allele and SNP Scans Panel.
     scan_snp_list <- snpListServer("scan_snp_list", hotspot_list, project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
-    scanPanelServer("scan_panel", hotspot_list, scan_snp_list, probs_obj,
-                    project_df)
+    DL$scan <-
+      scanPanelServer("scan_panel", hotspot_list, scan_snp_list, probs_obj,
+                      project_df)
     
     # Mediation Panel.
-    mediatePanelServer("mediate_panel", hotspot_list, scan_snp_list, probs_obj,
-                       project_df)
+    DL$mediate <-
+      mediatePanelServer("mediate_panel", hotspot_list, scan_snp_list,
+                         probs_obj, project_df)
     
     # Patterns Panel.
     dip_par <- dipParServer("dip_par", hotspot_list)
@@ -53,15 +57,16 @@ qtl2shinyServer <- function(id, projects_df) {
     pattern_list <-
       patternPanelServer("pattern_panel", dip_par, hotspot_list,
                          pattern_snp_list, pairprobs_obj, project_df)
+    DL$pattern <- pattern_list
     
     # Genotypes Panel.
     dipParServer("geno_dip_par", hotspot_list)
-    genoPanelServer("geno_panel", hotspot_list, pattern_list, pattern_snp_list,
-               pairprobs_obj, project_df)
+    DL$geno <-
+      genoPanelServer("geno_panel", hotspot_list, pattern_list,
+                      pattern_snp_list, pairprobs_obj, project_df)
     
-    output$qtl2shiny_ui <- shiny::renderUI({
-      
-    })
+    # Download Module
+    #downloadServer("download", DL, input$panel)
   })    
 }
 #' @export
