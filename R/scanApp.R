@@ -60,6 +60,8 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    win_par <- shiny::isolate(hotspot_list$win_par)
+    
     ## Genome scan 
     scan_obj <- shiny::reactive({
       shiny::req(hotspot_list$pheno_mx(), probs_obj(),
@@ -76,8 +78,8 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
     # Scan Window slider
     #** Faulty behavior if more than one hotspot.
     output$scan_window_input <- shiny::renderUI({
-      shiny::req(project_df(), hotspot_list$pheno_mx(), hotspot_list$win_par())
-      chr_id <- shiny::req(hotspot_list$win_par())$chr_id[1]
+      shiny::req(project_df(), hotspot_list$pheno_mx(), win_par())
+      chr_id <- shiny::req(win_par())$chr_id
       map <- shiny::req(probs_obj())$map[[chr_id]]
       rng <- round(2 * range(map)) / 2
       selected <- select_range(input$scan_window, rng)
@@ -88,7 +90,7 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
     ## Reset scan_window if chromosome changes.
     observeEvent(probs_obj()$map, {
       map <- shiny::req(probs_obj()$map)
-      chr <- shiny::req(hotspot_list$win_par())$chr_id[1]
+      chr <- shiny::req(win_par())$chr_id
       rng <- round(2 * range(map[[chr]])) / 2
       shiny::updateSliderInput(session, "scan_window", NULL, rng, 
                                rng[1], rng[2], step=.5)
@@ -103,15 +105,15 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
     
     ## Scan1 plot
     output$scan_plot <- shiny::renderPlot({
-      if(!shiny::isTruthy(hotspot_list$win_par()$chr_id[1]) || !shiny::isTruthy(hotspot_list$pheno_mx()))
+      if(!shiny::isTruthy(win_par()$chr_id) || !shiny::isTruthy(hotspot_list$pheno_mx()))
         return(plot_null("need to select\nRegion & Phenotype"))
-      shiny::req(hotspot_list$win_par(), input$scan_window, scan_obj(), probs_obj())
+      shiny::req(win_par(), input$scan_window, scan_obj(), probs_obj())
       shiny::withProgress(message = 'Genome LOD Plot ...', value = 0, {
         shiny::setProgress(1)
         plot_scan(scan_obj(), 
                   probs_obj()$map, 
                   seq(ncol(scan_obj())), 
-                  hotspot_list$win_par()$chr_id[1], 
+                  win_par()$chr_id, 
                   input$scan_window, 
                   hotspot_list$pheno_mx())
       })
@@ -131,7 +133,7 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
     })
     output$coef_plot <- shiny::renderPlot({
       shiny::req(input$pheno_name, scan_obj(), eff_obj(),
-                 hotspot_list$win_par(), hotspot_list$allele_info())
+                 win_par(), hotspot_list$allele_info())
       map <- shiny::req(probs_obj())$map
       shiny::withProgress(message = 'Effect plots ...', value = 0, {
         shiny::setProgress(1)
@@ -150,7 +152,7 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
     
     ## Effect and LOD Plot
     output$scan_coef_plot <- shiny::renderPlot({
-      shiny::req(input$pheno_name, input$scan_window, hotspot_list$win_par(),
+      shiny::req(input$pheno_name, input$scan_window, win_par(),
                  eff_obj(), scan_obj(), hotspot_list$allele_info())
       map <- shiny::req(probs_obj())$map
       shiny::withProgress(message = 'Effect & LOD plots ...', value = 0, {

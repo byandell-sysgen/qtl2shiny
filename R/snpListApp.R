@@ -75,7 +75,7 @@ snpListServer <- function(id, hotspot_list, project_df,
       shiny::req(snpprobs_obj(), hotspot_list$pheno_mx(),
         hotspot_list$peak_df(), hotspot_list$covar_df())
       kinship_list <- shiny::req(hotspot_list$kinship_list())[
-        shiny::req(win_par())$chr_id[1]]
+        shiny::req(win_par())$chr_id]
       snpprobs <- snpprobs_obj()$snpprobs
       shiny::withProgress(message = "SNP Scan ...", value = 0, {
         shiny::setProgress(1)
@@ -125,7 +125,7 @@ snpListServer <- function(id, hotspot_list, project_df,
     # Scan Window slider
     output$scan_window_input <- shiny::renderUI({
       shiny::req(pheno_names())
-      rng <- round(shiny::req(win_par()$peak_Mbp[1]) + 
+      rng <- round(shiny::req(win_par()$peak_Mbp) + 
                      c(-1,1) * shiny::req(win_par()$window_Mbp), 
                    1)
       selected <- select_range(input$scan_window, rng)

@@ -77,8 +77,8 @@ genoPanelServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_
     win_par <- shiny::isolate(hotspot_list$win_par)
     patterns <- shiny::isolate(snp_list$patterns)
     snp_action <- shiny::isolate(snp_list$snp_action)
-    chr_id <- shiny::reactive(shiny::req(win_par())$chr_id[1])
-    peak_Mbp <- shiny::reactive(shiny::req(win_par())$peak_Mbp[1])
+    chr_id <- shiny::reactive(shiny::req(win_par())$chr_id)
+    peak_Mbp <- shiny::reactive(shiny::req(win_par())$peak_Mbp)
     
     # Scan Window slider
     output$pos_Mbp_input <- shiny::renderUI({

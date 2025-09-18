@@ -69,10 +69,10 @@ mediateServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
     patterns <- shiny::isolate(snp_list$patterns)
     win_par <- shiny::isolate(hotspot_list$win_par)
     chr_id <- shiny::reactive({
-      shiny::req(win_par()$chr_id[1])
+      shiny::req(win_par()$chr_id)
     })
     peak_Mbp <- shiny::reactive({
-      shiny::req(win_par()$peak_Mbp[1])
+      shiny::req(win_par()$peak_Mbp)
     })
     window_Mbp <- shiny::reactive({
       shiny::req(win_par()$window_Mbp)

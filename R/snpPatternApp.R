@@ -84,8 +84,8 @@ snpPatternServer <- function(id, snp_list, allele_info) {
           max(unclass(shiny::req(snp_list$snp_scan_obj()))) - 
             shiny::req(snp_list$snp_par$minLOD))
     })
-    chr_id <- shiny::reactive(snp_list$win_par()$chr_id[1])
-    peak_Mbp <- shiny::reactive(snp_list$win_par()$peak_Mbp[1])
+    chr_id <- shiny::reactive(snp_list$win_par()$chr_id)
+    peak_Mbp <- shiny::reactive(snp_list$win_par()$peak_Mbp)
     ready <- shiny::reactive({
       shiny::isTruthy(snp_list$snp_par$pheno_name) |
         shiny::isTruthy(snp_list$snp_scan_obj()) |

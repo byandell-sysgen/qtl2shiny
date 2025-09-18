@@ -65,7 +65,7 @@ triadServer <- function(id, hotspot_list, snp_list, mediate_list, probs_obj) {
   
     win_par <- shiny::isolate(hotspot_list$win_par)
     chr_id <- shiny::reactive({
-      shiny::req(win_par()$chr_id[1])
+      shiny::req(win_par()$chr_id)
     })
     med_par <- shiny::isolate(mediate_list$med_par)
     patterns <- shiny::isolate(snp_list$patterns)
