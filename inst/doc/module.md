@@ -265,7 +265,9 @@ Finally, the `geno` panel shows the allele, allele pair and SDP genotypes
 for a selected genome location.
 
 - [genoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/genoPanelApp.R) #
-Genotype plot and summary
+Genotype and Effects plot and summary
+  - [geno](https://github.com/byandell-sysgen/qtl2shiny/blob/refactor/R/genoApp.R) #
+Genotypes table
 
 ## Download App
 
