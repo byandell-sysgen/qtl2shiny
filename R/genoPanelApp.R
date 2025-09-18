@@ -10,8 +10,9 @@
 #'
 #' @export
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny moduleServer NS plotOutput reactive renderPlot renderUI req
-#'             setProgress sliderInput uiOutput updateSliderInput withProgress
+#' @importFrom shiny isTruthy moduleServer NS plotOutput reactive renderPlot renderUI req
+#'             shiny::isTruthy(patterns()) setProgress sliderInput uiOutput
+#'             updateSliderInput withProgress
 #' @importFrom ggplot2 autoplot ggtitle
 #' @importFrom dplyr mutate select
 #' @importFrom tidyr pivot_wider
@@ -20,7 +21,7 @@
 genoPanelApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
-    title =  "Test Geno",
+    title =  "Test Geno Panel",
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(
@@ -80,30 +81,11 @@ genoPanelServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_
     chr_id <- shiny::reactive(shiny::req(win_par())$chr_id)
     peak_Mbp <- shiny::reactive(shiny::req(win_par())$peak_Mbp)
     
-    # Scan Window slider
-    output$pos_Mbp_input <- shiny::renderUI({
-      shiny::req(project_df())
-      chr <- shiny::req(chr_id())
-      map <- shiny::req(pairprobs_obj())$map[[chr]]
-      rng <- round(2 * range(map)) / 2
-      if(is.null(value <- input$pos_Mbp))
-        value <- req(peak_Mbp())
-      if(value < rng[1] | value > rng[2]) value <- mean(rng)
-      shiny::sliderInput(ns("pos_Mbp"), NULL, rng[1], rng[2],
-                         value, step=.1)
-    })
-    ## Reset pos_Mbp if chromosome changes.
-    observeEvent(shiny::req(win_par()), {
-      map <- shiny::req(pairprobs_obj()$map)
-      chr <- shiny::req(chr_id())
-      rng <- round(2 * range(map[[chr]])) / 2
-      value <- shiny::req(peak_Mbp())
-      if(value < rng[1] | value > rng[2]) value <- mean(rng)
-      shiny::updateSliderInput(session, "pos_Mbp", NULL, 
-                               value, 
-                               rng[1], rng[2], step=.1)
-    })
+    geno_list <- 
+      genoServer("geno_list", hotspot_list, snp_list, pairprobs_obj, project_df)
+    gen_par <- shiny::isolate(geno_list$gen_par)
     
+
     ## Coefficient Effects.
     allele_obj <- shiny::reactive({
       shiny::req(snp_action(), project_df(), pairprobs_obj(),
@@ -121,12 +103,14 @@ genoPanelServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_
       })
     })
     allele_plot <- shiny::reactive({
-      shiny::req(allele_obj(), input$pos_Mbp)
+      if(!shiny::isTruthy(patterns()) || !shiny::isTruthy(allele_obj()))
+        return(plot_null("Visit Patterns Panel First"))
+      shiny::req(allele_obj(), gen_par$pos_Mbp)
       shiny::withProgress(message = 'Allele plots ...', value = 0, {
         shiny::setProgress(1)
-        p <- ggplot2::autoplot(allele_obj(), pos = input$pos_Mbp)
+        p <- ggplot2::autoplot(allele_obj(), pos = gen_par$pos_Mbp)
         if(is.null(p)) {
-          plot_null()
+          plot_null("Visit Patterns Panel First")
         } else {
           p + ggplot2::ggtitle(colnames(hotspot_list$pheno_mx()))
         }
@@ -136,35 +120,41 @@ genoPanelServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_
       print(shiny::req(allele_plot())))
     
     allele_table <- shiny::reactive({
-      shiny::req(allele_obj(), input$pos_Mbp)
+      shiny::req(allele_obj(), gen_par$pos_Mbp)
       shiny::withProgress(message = 'Effect summary ...', value = 0, {
         shiny::setProgress(1)
-        allele_summary(allele_obj(), pos = input$pos_Mbp)
+        allele_summary(allele_obj(), pos = gen_par$pos_Mbp)
       })
     })
     output$allele_table_output <- DT::renderDataTable(
       shiny::req(allele_table()),
       escape = FALSE, options = list(scrollX = TRUE, pageLength = 5))
     
-    # Return.
+    # Return. Modify to pick up either table using input$gen_tab
+    download_table <- shiny::reactive({
+      switch(shiny::req(input$gen_tab),
+        Genotypes = gen_list$table(),
+        Effects = allele_table())
+    })
     shiny::reactiveValues(
-      filename = "allele",
+      filename = "geno",
       plot  = allele_plot,
-      table = allele_table)
+      table = download_table)
   })
 }
 #' @export
 #' @rdname genoPanelApp
 genoPanelInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("pos_Mbp_input"))    # pos_Mbp
+  genoInput(ns("geno_list"))    # pos_Mbp
 }
 #' @export
 #' @rdname genoPanelApp
 genoPanelOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
-    id = "all_tab",
-    bslib::nav_panel("Plot",    shiny::plotOutput(ns("allele_plot_output"))),
-    bslib::nav_panel("Summary", DT::dataTableOutput(ns("allele_table_output"))))
+    id = "gen_tab",
+    bslib::nav_panel("Effects",   shiny::plotOutput(ns("allele_plot_output"))),
+    bslib::nav_panel("Genotypes", genoOutput(ns("geno_list"))),
+    bslib::nav_panel("Summary",   DT::dataTableOutput(ns("allele_table_output"))))
 }
