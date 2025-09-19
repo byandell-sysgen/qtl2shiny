@@ -109,15 +109,10 @@ genoServer <- function(id, hotspot_list, snp_list, pairprobs_obj, project_df) {
       shiny::req(geno_table()),
       escape = FALSE, options = list(scrollX = TRUE, pageLength = 5))
     
-    download <- shiny::reactiveValues(
-      filename = "geno",
-      #plot  = geno_plot,
-      table = geno_table)
-    
     # Return.
     shiny::reactiveValues(
       gen_par = input,
-      download = download)
+      table = geno_table)
   })
 }
 #' @export

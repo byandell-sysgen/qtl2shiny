@@ -1,4 +1,4 @@
-allele_scan <- function(pheno_mx, covar_df, pairprobs_obj, K_chr,
+effect_scan <- function(pheno_mx, covar_df, pairprobs_obj, K_chr,
                     peak_df, patterns, scan_pat, blups) {
   peak_df <- peak_probs_filter(colnames(pheno_mx), peak_df, pairprobs_obj)
   if(is.null(peak_df)) return(NULL)
@@ -13,7 +13,7 @@ allele_scan <- function(pheno_mx, covar_df, pairprobs_obj, K_chr,
                        scan_pat = scan_pat,
                        blups = blups)
 }
-allele_summary <- function(object, pos_Mbp) {
+effect_summary <- function(object, pos_Mbp) {
   positions <- unique(object$pos)
   pos_cen <- positions[which.min(abs(positions - pos_Mbp))]
   levels(object$source)[1:2] <- c("allele", "allele_pair")
