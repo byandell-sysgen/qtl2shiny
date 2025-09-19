@@ -11,16 +11,12 @@
 #' @export
 #' @importFrom qtl2 find_marker
 #' @importFrom qtl2mediate expr_region mediation_test_qtl2
-#' @importFrom ggplot2 autoplot geom_point
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny isolate isTruthy moduleServer NS observeEvent plotOutput
-#'             radioButtons reactive renderPlot renderUI req selectInput
+#' @importFrom shiny isolate isTruthy moduleServer NS observeEvent
+#'             radioButtons reactive renderUI req selectInput
 #'             setProgress sliderInput strong tagList uiOutput updateSelectInput
 #'             updateSliderInput withProgress
-#' @importFrom plotly renderPlotly plotlyOutput
 #' @importFrom dplyr filter
-#' @importFrom utils write.csv
-#' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
 mediateApp <- function() {
@@ -132,9 +128,6 @@ mediateServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
     
     ## Mediate1
     mediate_obj <- shiny::reactive({
-      # ** Warning: Unknown or uninitialised column: `driver_names`.
-      # ** `intermediate::mediation_test()`
-      # ** `intermediate:::mediation_test_internal()`?
       shiny::req(phe1_mx(), probs_obj(), hotspot_list$kinship_list(), hotspot_list$covar_df(), geno_max(), 
                  input$pos_Mbp, med_ls())
       shiny::withProgress(message = "Mediation Scan ...", value = 0, {
@@ -187,7 +180,7 @@ mediateServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
                           c("1 QTL" = 1, "2 QTLs" = 2),
                           selected, inline = TRUE)
     })
-    ## Select phenotype for plots.
+    ## Select phenotype.
     output$pheno_name_input <- shiny::renderUI({
       shiny::req(hotspot_list$pheno_mx())
       shiny::selectInput(ns("pheno_name"), NULL,

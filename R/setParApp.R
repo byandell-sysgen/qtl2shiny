@@ -97,8 +97,7 @@ setParServer <- function(id, project_df) {
 #' @rdname setParApp
 setParInput <- function(id) {                  # class, subject_model
   ns <- shiny::NS(id)
-  bslib::layout_columns(
-    col_widths = c(5, 7),
+  shiny::tagList(
     shiny::uiOutput(ns("class_input")),        # class
     shiny::uiOutput(ns("subject_model_input")) # subject_model
   )

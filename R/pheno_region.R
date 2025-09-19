@@ -69,6 +69,8 @@ pheno_region <- function(chr_id, scan_window, covar, map,
       annot,
       biotype = .data$phenotype_class)
   }
+  # driver_names
+  #annot$driver_names <- ""
   
   # Reduce to phenotypes with peaks in region.
   annot <- dplyr::filter(

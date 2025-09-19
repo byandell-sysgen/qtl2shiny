@@ -65,6 +65,12 @@ qtl2shinyServer <- function(id, projects_df) {
       genoPanelServer("geno_panel", hotspot_list, pattern_list,
                       pattern_snp_list, pairprobs_obj, project_df)
     
+    output$download <- shiny::renderUI({
+      # Note: `input$panel` is of form `qtl2shiny-<panel>`.
+      shiny::tagList(
+        shiny::renderText(paste("input$panel:", shiny::req(input$panel))),
+        shiny::renderText(paste("DL:", paste(names(DL), collapse = ", "))))
+    })
     # Download Module
     #downloadServer("download", DL, input$panel)
   })    
@@ -78,13 +84,18 @@ qtl2shinyUI <- function(id) {
     title =  "QTL2 Shiny App",
     id = ns("panel"),
     navbar_options = bslib::navbar_options(bg = "red", theme = "dark"),
+    sidebar = bslib::sidebar(
+      bslib::card(
+        projectUI(ns("project_df")),            # project
+        hotspotPanelInput(ns("hotspot_list"))), # class, subject_model, pheno_names
+      bslib::card(
+        shiny::uiOutput(ns("download")))
+    ),
     bslib::nav_panel(
       title = "Hotspots and Phenotypes",
+      value = ns("hotspot"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          bslib::card(
-            projectUI(ns("project_df")),            # project
-            hotspotPanelInput(ns("hotspot_list"))), # class, subject_model, pheno_names, hotspot
           bslib::card(
             hotspotPanelUI(ns("hotspot_list"))),    # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
@@ -94,6 +105,7 @@ qtl2shinyUI <- function(id) {
     ## Need to rethink dashServer
     bslib::nav_panel(
       title = "Allele and SNP Scans",
+      value = ns("scan"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           scanPanelInput(ns("scan_panel")),         # <various>
@@ -103,6 +115,7 @@ qtl2shinyUI <- function(id) {
     ),
     bslib::nav_panel(
       title = "Mediation",
+      value = ns("mediate"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           mediatePanelInput(ns("mediate_panel"))), # <various>
@@ -111,6 +124,7 @@ qtl2shinyUI <- function(id) {
     ),
     bslib::nav_panel(
       title = "Patterns",
+      value = ns("pattern"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
@@ -127,6 +141,7 @@ qtl2shinyUI <- function(id) {
     ),
     bslib::nav_panel(
       title = "Genotypes",
+      value = ns("geno"),
       bslib::layout_sidebar(
         bslib::card(
           dipParUI(ns("geno_dip_par"))),                           # allele_names

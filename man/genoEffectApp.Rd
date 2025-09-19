@@ -14,7 +14,7 @@ genoEffectServer(
   hotspot_list,
   pattern_list,
   snp_list,
-  gen_list,
+  geno_list,
   pairprobs_obj,
   project_df
 )

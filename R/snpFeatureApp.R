@@ -71,7 +71,7 @@ snpFeatureServer <- function(id, snp_list) {
       summary(tops)
     }, options = list(scrollX = TRUE, paging = FALSE, searching=FALSE))
     output$feature_pattern_table <- DT::renderDataTable({
-      summary(top_feature(), "pattern")
+      summary(shiny::req(top_feature()), "pattern")
     }, options = list(scrollX = TRUE, paging = FALSE, searching=FALSE))
     phename <- shiny::reactive({dimnames(snp_list$snp_scan_obj())[[2]]})
     output$feature_pattern_plot <- shiny::renderPlot({

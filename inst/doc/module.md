@@ -174,15 +174,15 @@ qtl2shinyApp <- function() {
 }
 ```
 
-### Hotspots and Phenotypes Panel
+### Hotspot and Phenotype Panel
 
 The hotspot panel has tabs for `Hotspots` and `Phenotypes`.
 It depends on the `peak_df` and `pmap_obj` objects, as well as the
 `project` and `setPar` modules.
-As currently configured, this panel has the following additional modules:
+This panel has the following modules:
 
 - [hotspotPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotPanelApp.R) #
-Hotspot and phenotype panels
+Hotspot and Phenotype Panel
   - [hotspot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotApp.R) #
 summary or plot of `peak_df` hotspots, select hotspot
   - [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPanelApp.R) #
@@ -190,7 +190,8 @@ Phenotype panel
   - [winPar](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/winParApp.R) #
 Hotspot window parameters
 
-The phenotype panel consists of the following four modules:
+The phenotype panel, subsumed in the hotspot panel,
+consists of the following four modules:
 
 - [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPanelApp.R) #
 Phenotype Panel
@@ -201,21 +202,14 @@ Create phenotype object and summary
   - [phenoPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPlotApp.R) #
 Plot phenotypes
 
-### Allele and SNP Scans Panel
-
-Panels below rely on a few utility modules
-
-- [snpList](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpListApp.R) #
-calculation of SNP objects, including SNP scan
-- [dipPar](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/dipParApp.R) #
-input parameters needed across SNP and SDP modules
+### Scan Panel
 
 The `scan` panel performs allele-based scan and SNP association,
 and shows genes and exons in the selected hotspot.
 It consists of the following components:
 
 - [scanPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/scanPanelApp.R) #
-allele- and SNP-based genome scan
+Scan by Alleles and SNPs Panel
   - [scan](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/scanApp.R) #
 allele-based genome scan
   - [snpGene](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpGeneApp.R) #
@@ -242,32 +236,43 @@ Plot mediation results
   - [triad](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/triadApp.R) #
 Plot D-M-T triad scatterplots
 
-### Patterns Panel
+### SDP Pattern Panel
 
 The pattern panel examines the strain distribution pattern (`SDP`)
 in a variety of ways.
 It consists of the following modules:
 
 - [patternPanelApp](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternPanelApp.R) #
-SDP scans and features
+SDP Pattern Panel
   - [snpPattern](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpPatternApp.R) #
 SNP Pattern Scan plot and summary
     - [snpFeature](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpFeatureApp.R) #
-merge features from `scan` and `top_snps`
+SNP Features (Pattern and Consequence)
   - [pattern](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternApp.R) #
 SDP Scans summary
   - [patternPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternPlotApp.R) #
 SDP Scans plot
 
-### Genotypes Panel
+### Genotype Panel
 
 Finally, the `geno` panel shows the allele, allele pair and SDP genotypes
 for a selected genome location.
 
 - [genoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoPanelApp.R) #
-Genotype and Effects plot and summary
+Genotype and Effects Panel
   - [geno](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoApp.R) #
 Genotypes table
+  - [genoEffect](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoApp.R) #
+Genotype Effects plot and table
+
+### Utility Modules
+
+The following utility modules are used for several other modules
+
+- [snpList](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpListApp.R) #
+calculate SNP objects, including SNP scan
+- [dipPar](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/dipParApp.R) #
+input parameters needed across SNP and SDP modules
 
 ## Download App
 
