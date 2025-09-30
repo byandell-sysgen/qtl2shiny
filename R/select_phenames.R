@@ -5,6 +5,9 @@ select_phenames <- function(peak_df, primary = NULL, pheno_mx,
                             cor_covar = FALSE, covar_df = NULL) {
   if(is.null(primary)) {
     if(shiny::isTruthy(peak_df) && nrow(peak_df) ) {
+      # Use `gene_short` instead of `phenotype` if available.
+      peak_df <- replace_peak_gene_short(peak_df)
+      
       phenames <- dplyr::distinct(
         dplyr::arrange(
           peak_df,
@@ -16,7 +19,7 @@ select_phenames <- function(peak_df, primary = NULL, pheno_mx,
   } else {
     # Residuals after covariates if `cor_covar` is `TRUE`.
     if(cor_covar) pheno_mx <- covar_resid(pheno_mx, peak_df, covar_df)
-    phenames <- cor_phenames(pheno_mx, primary)
+    phenames <- cor_phenames(pheno_mx, peak_df, primary)
     if(is.null(phenames)) return(NULL)
   }
 
@@ -33,8 +36,13 @@ select_phenames <- function(peak_df, primary = NULL, pheno_mx,
   
   list(label = label, choices = choices, selected = selected)
 }
-cor_phenames <- function(pheno_mx, primary, min_cor = 0.1) {
+cor_phenames <- function(pheno_mx, peak_df, primary, min_cor = 0.1) {
   if(ncol(pheno_mx) == 1) return(NULL)
+  
+  # Modify `colnames` of `pheno_mx` if using `gene_short`.
+  # Assuming here that all `colnames` are in `peak_df$phenotype`.
+  colnames(pheno_mx) <- pheno_name_gene_short(peak_df, colnames(pheno_mx))
+  
   wh <- match(primary, colnames(pheno_mx))
   if(is.na(wh)) return(NULL)
   # Order the ranks of absolute correlation.
