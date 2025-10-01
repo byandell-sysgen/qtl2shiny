@@ -42,13 +42,12 @@ hotspotPanelServer <- function(id, project_df) {
     ## Modules.    
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
-    covar_df <- shiny::reactive(read_project(project_df(), "covar"))
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     hotspot_df <- 
       hotspotServer("hotspot_df", set_par, peak_df, pmap_obj, project_df)
     win_par <- winParServer("win_par", hotspot_df, project_df)
     pheno_list <-
-      phenoPanelServer("pheno_panel", set_par, win_par, peak_df, covar_df,
+      phenoPanelServer("pheno_panel", set_par, win_par, peak_df,
                        pmap_obj, hotspot_df, project_df)
     
     ## Return.

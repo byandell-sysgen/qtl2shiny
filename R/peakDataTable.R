@@ -23,9 +23,7 @@ peakDataTable <- function(peak_df, hotspot_df = NULL, local = TRUE,
       if(!nrow(peak_df)) return(NULL)
     }
   }
-  # Use `gene_short` instead of `phenotype` if available.
-  peak_df <- replace_peak_gene_short(peak_df)
-  
+  # Arrange in descending LOD with selected columns.
   dplyr::arrange(
     dplyr::mutate(
       dplyr::select(

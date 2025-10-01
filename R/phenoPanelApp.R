@@ -1,7 +1,7 @@
 #' Shiny Hotspot Panel App
 #'
 #' @param id identifier for shiny reactive
-#' @param set_par,win_par,peak_df,covar_df,pmap_obj,hotspot_df,project_df reactive arguments
+#' @param set_par,win_par,peak_df,pmap_obj,hotspot_df,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -34,28 +34,30 @@ phenoPanelApp <- function() {
     project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
-    covar_df <- shiny::reactive(read_project(project_df(), "covar"))
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     hotspot_df <- 
       hotspotServer("hotspot_df", set_par, peak_df, pmap_obj, project_df)
     win_par <- winParServer("win_par", hotspot_df, project_df)
     pheno_list <-
-      phenoPanelServer("pheno_panel", set_par, win_par, peak_df, covar_df,
+      phenoPanelServer("pheno_panel", set_par, win_par, peak_df,
                        pmap_obj, hotspot_df, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname phenoPanelApp
-phenoPanelServer <- function(id, set_par, win_par, peak_df, covar_df,
+phenoPanelServer <- function(id, set_par, win_par, peak_df,
                              pmap_obj, hotspot_df, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    pheno_names <-
-      phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
-    pheno_mx <- phenoServer("pheno_mx", set_par, pheno_names, project_df)
-    phenoPlotServer("pheno_plot", pheno_names, pheno_mx, covar_df)
+    pheno_mx <- phenoServer("pheno_mx", set_par, win_par, peak_df, project_df)
+    covar_df <- shiny::reactive(read_project(project_df(), "covar"))
+    pheno_names <- 
+      phenoNamesServer("pheno_names", set_par, peak_df, pheno_mx, covar_df,
+                       project_df)
+    pheno_mx_names <-
+      phenoPlotServer("pheno_plot", pheno_names, pheno_mx, covar_df)
     
     output$version <- shiny::renderText({
       versions()
@@ -79,7 +81,7 @@ phenoPanelServer <- function(id, set_par, win_par, peak_df, covar_df,
       pmap_obj = pmap_obj,
       covar_df = covar_df,
       hotspot_df = hotspot_df,
-      pheno_mx = pheno_mx,
+      pheno_mx = pheno_mx_names,
       pheno_names = pheno_names,
       kinship_list = kinship_list,
       allele_info = allele_info)

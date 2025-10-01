@@ -14,7 +14,6 @@ phenoPanelServer(
   set_par,
   win_par,
   peak_df,
-  covar_df,
   pmap_obj,
   hotspot_df,
   project_df
@@ -27,7 +26,7 @@ phenoPanelOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{set_par, win_par, peak_df, covar_df, pmap_obj, hotspot_df, project_df}{reactive arguments}
+\item{set_par, win_par, peak_df, pmap_obj, hotspot_df, project_df}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

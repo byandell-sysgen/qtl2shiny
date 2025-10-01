@@ -20,17 +20,13 @@ peaks_in_pos <- function(peak_df, use_pos = TRUE,
   }
   if(!nrow(peak_df)) return(NULL)
   
-  # Encode `gene` and `isoform` information if present.
-  peak_df <- create_peak_gene_short(peak_df)
-  
   # Arrange by descending `qtl_lod`
   dplyr::mutate(
     dplyr::distinct(
       dplyr::arrange(
         peak_df,
         dplyr::desc(.data$qtl_lod)),
-      # For now, include `gene_short` in dataframe.
-      .data$phenotype, .data$gene_short, .data$phenotype_class,
+      .data$phenotype, .data$phenotype_original, .data$phenotype_class,
       .data$qtl_lod, .data$qtl_chr, .data$qtl_pos,
       .data$addcovar, .data$intcovar, .data$subject, .data$model),
     qtl_lod = round(.data$qtl_lod, 1),

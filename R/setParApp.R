@@ -38,8 +38,7 @@ setParServer <- function(id, project_df) {
     output$class_input <- shiny::renderUI({
       shiny::req(project_df())
       choices <- project_classes(project_df())
-      if(is.null(selected <- input$class))
-        selected <- choices[1]
+      selected <- input$class
       shiny::selectInput(ns("class"), "Class",
         choices = as.list(choices), selected = selected, multiple = TRUE)
     })

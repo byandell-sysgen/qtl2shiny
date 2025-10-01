@@ -3,13 +3,16 @@
 \name{phenoApp}
 \alias{phenoApp}
 \alias{phenoServer}
+\alias{phenoInput}
 \alias{phenoUI}
 \alias{phenoOutput}
 \title{Shiny Phenotype App}
 \usage{
 phenoApp()
 
-phenoServer(id, set_par, pheno_names, project_df)
+phenoServer(id, set_par, win_par, peak_df, project_df)
+
+phenoInput(id)
 
 phenoUI(id)
 

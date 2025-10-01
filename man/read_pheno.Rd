@@ -4,7 +4,7 @@
 \alias{read_pheno}
 \title{Read Phenotypes}
 \usage{
-read_pheno(project_df, class, columns = NULL, legacy = FALSE)
+read_pheno(project_df, class, columns = NULL, peak_df = NULL, legacy = FALSE)
 }
 \arguments{
 \item{project_df}{dataframe of project information}

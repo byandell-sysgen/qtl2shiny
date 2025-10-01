@@ -19,7 +19,7 @@ phenoApp <- function() {
     sidebar = bslib::sidebar(
       projectUI("project_df"),        # project
       setParInput("set_par"),         # class, subject_model
-      phenoNamesInput("pheno_names"), # pheno_names
+      phenoInput("pheno_mx"),         # filter
       bslib::layout_columns(
         col_widths = c(6, 4),
         winParInput("win_par"),       # hotspot
@@ -28,7 +28,8 @@ phenoApp <- function() {
       hotspotInput("hotspot"),        # chr_ct, minLOD
       phenoUI("pheno_mx")             # raw_data
     ),
-    phenoOutput("pheno_mx")
+    phenoOutput("pheno_mx"),
+    peakOutput("peak_df")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
@@ -37,23 +38,38 @@ phenoApp <- function() {
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     hotspot_df <- 
       hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
-    win_par <- 
-      winParServer("win_par", hotspot_df, project_df)
-    pheno_names <-
-      phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
-    pheno_mx <- phenoServer("pheno_mx", set_par, pheno_names, project_df)
+    win_par <- winParServer("win_par", hotspot_df, project_df)
+    pheno_mx <- phenoServer("pheno_mx", set_par, win_par, peak_df, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname phenoApp
-phenoServer <- function(id, set_par, pheno_names, project_df) {
+phenoServer <- function(id, set_par, win_par, peak_df, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    # Filter peaks to hotspots.
+    output$filter <- shiny::renderUI({
+      shiny::checkboxInput(ns("filter"),
+                           "Filter by hotspot(s)?", TRUE)
+    })
+    
+    peak_filter_df <- shiny::reactive({
+      shiny::req(project_df(), peak_df(), win_par())
+      chr_id <- win_par()$chr_id
+      peak_Mbp <- win_par()$peak_Mbp
+      window_Mbp <- shiny::req(set_par$window_Mbp)
+      peaks_in_pos(peak_df(), shiny::isTruthy(input$filter),
+                   chr_id, peak_Mbp, window_Mbp)
+    })
+
+    # Phenotypes filtered by `peak_df`.
     pheno_raw_mx <- shiny::reactive({
-      shiny::req(project_df(), set_par$class, pheno_names())
-      read_pheno(project_df(), set_par$class, columns = pheno_names())
+      shiny::req(project_df(), set_par$class, peak_filter_df())
+      pheno_names <- peak_filter_df()$phenotype
+      read_pheno(project_df(), set_par$class, columns = pheno_names,
+                 peak_df = peak_filter_df())
     })
     pheno_mx <- shiny::reactive({
       out <- shiny::req(pheno_raw_mx())
@@ -64,16 +80,21 @@ phenoServer <- function(id, set_par, pheno_names, project_df) {
       row.names(out) <- rout
       out
     })
-
-    # Output Peak Table.
-    output$pheno_table <- DT::renderDataTable({
-      shiny::req(pheno_mx())      
-    }, options = list(scrollX = TRUE, pageLength = 5,
-                      lengthMenu = c(5,10,25)))
     
+    output$pheno_mx_output <- shiny::renderUI({
+      shiny::req(pheno_mx(), set_par$class)
+      shiny::renderText(paste("dim of pheno:", paste(dim(pheno_mx()), collapse = ",")))
+    })
+
     ## Return.
     pheno_mx
   })
+}
+#' @export
+#' @rdname phenoApp
+phenoInput <- function(id) {
+  ns <- shiny::NS(id)
+  shiny::uiOutput(ns("filter"))               # filter
 }
 #' @export
 #' @rdname phenoApp
@@ -85,5 +106,5 @@ phenoUI <- function(id) {
 #' @rdname phenoApp
 phenoOutput <- function(id) {
   ns <- shiny::NS(id)
-  DT::dataTableOutput(ns("pheno_table")) # peak_table
+  shiny::uiOutput(ns("pheno_mx_output"))
 }

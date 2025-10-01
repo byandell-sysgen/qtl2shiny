@@ -8,7 +8,8 @@
 #' @returns dataframe
 #' @export
 #' @importFrom tibble column_to_rownames
-read_pheno <- function(project_df, class, columns = NULL, legacy = FALSE) {
+read_pheno <- function(project_df, class, columns = NULL, peak_df = NULL,
+                       legacy = FALSE) {
   out <- list()
   for(classi in class) {
     # Code for multiple classes. Watch out for columns.
@@ -17,6 +18,9 @@ read_pheno <- function(project_df, class, columns = NULL, legacy = FALSE) {
     # `read_project` with filetype `fst` can use `columns` argument.
     result <- read_project(project_df, dataname, "pheno", legacy = legacy)
     if(is.null(result)) return(NULL)
+    # Adjust column names if `gene_symbol` in data.
+    # Also drop those `phenotype`s not in `peak_df`.
+    result <- gene_symbol_pheno(result, peak_df)
     out[[classi]] <- result
   }
   

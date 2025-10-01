@@ -44,9 +44,11 @@ phenoPlotApp <- function() {
       hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
     win_par <- 
       winParServer("win_par", hotspot_df, project_df)
-    pheno_names <-
-      phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
-    pheno_mx <- phenoServer("pheno_mx", set_par, pheno_names, project_df)
+    pheno_mx <- phenoServer("pheno_mx", set_par, win_par, peak_df, project_df)
+    covar_df <- shiny::reactive(read_project(shiny::req(project_df()), "covar"))
+    pheno_names <- 
+      phenoNamesServer("pheno_names", set_par, peak_df, pheno_mx, covar_df,
+                       project_df)
     phenoPlotServer("pheno_plot", pheno_names, pheno_mx, covar_df)
   }
   shiny::shinyApp(ui, server)
@@ -56,27 +58,36 @@ phenoPlotApp <- function() {
 phenoPlotServer <- function(id, pheno_names, pheno_mx, covar_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
+
+    pheno_mx_names <- shiny::reactive({
+      browser()
+      shiny::req(pheno_mx(), pheno_names())
+      if(!all(pheno_names() %in% colnames(pheno_mx()))) return(NULL)
+      pheno_mx()[, pheno_names(), drop = FALSE]
+    })
     
     ## Scatter plot or density
     output$pheno_table <- DT::renderDataTable({
-      shiny::req(pheno_mx())
+      shiny::req(pheno_mx_names())
       shiny::withProgress(message = 'Pheno Summary ...', value = 0, {
         shiny::setProgress(1)
-        summary_na(pheno_mx())
+        summary_na(pheno_mx_names())
       })
     }, escape = FALSE, 
     options = list(scrollX = TRUE, 
                    pageLength = 5,
                    lengthMenu = list(c(5,10,-1), c(5,10,"all"))))
     output$pheno_plot <- shiny::renderPlot({
-      if(!shiny::isTruthy(pheno_names()))
+      if(!shiny::isTruthy(pheno_mx_names()))
         return(plot_null("need to\nChoose phenotype"))
-      shiny::req(pheno_mx(), covar_df())
+      shiny::req(pheno_mx_names(), covar_df())
       shiny::withProgress(message = 'Pheno Plot ...', value = 0, {
         shiny::setProgress(1)
-        plot_sex(pheno_mx(), covar_df())
+        plot_sex(pheno_mx_names(), covar_df())
       })
     })
+    # Return.
+    pheno_mx_names
   })
 }
 #' @export

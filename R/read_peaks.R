@@ -21,12 +21,15 @@ read_peaks <- function(project_df, class = NULL, subject_model = NULL, legacy = 
     if(is.null(result)) return(NULL)
     # remove Which_mice column if present
     if("Which_mice" %in% names(result)) result[["Which_mice"]] <- NULL
+    # If `gene` or `isoform` replace Ensembl ID with symbol.
+    result <- gene_symbol_peak(result)
     # `result$phenotype_class` should agree with `class` but often does not.
     # Fix this here:
     result$phenotype_class <- classes[i]
     out[[i]] <- dplyr::mutate(result, subject_model = subjmod[i])
   }
-  out <- dplyr::bind_rows(out) |>
+  # Separate `subject` and `model` into their own columns.
+  dplyr::bind_rows(out) |>
     tidyr::separate_wider_delim(subject_model, "_mice_", 
                                 names = c("subject", "model"))
 }

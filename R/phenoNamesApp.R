@@ -31,8 +31,8 @@ phenoNamesApp <- function() {
           hotspotInput("hotspot"))),     # chr_ct, minLOD
       width = 400
     ),
-    phenoNamesUI("pheno_names"),
-    phenoNamesOutput("pheno_names")
+    phenoNamesOutput("pheno_names"),
+    peakOutput("peak_df")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
@@ -42,69 +42,60 @@ phenoNamesApp <- function() {
     hotspot_df <- 
       hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
     win_par <- winParServer("win_par", hotspot_df, project_df)
+    pheno_mx <- phenoServer("pheno_mx", set_par, win_par, peak_df, project_df)
+    covar_df <- shiny::reactive(read_project(shiny::req(project_df()), "covar"))
     pheno_names <- 
-      phenoNamesServer("pheno_names", set_par, win_par, peak_df, project_df)
+      phenoNamesServer("pheno_names", set_par, peak_df, pheno_mx, covar_df,
+                       project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname phenoNamesApp
-phenoNamesServer <- function(id, set_par, win_par, peak_df, project_df) {
+phenoNamesServer <- function(id, set_par, peak_df, pheno_mx, covar_df,
+                             project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
     pheno_names <- shiny::reactive({
+      shiny::req(set_par$class)
       c(shiny::req(input$pheno_name), cor_remove(input$pheno_names))
     })
-    
-    # Filter peaks to hotspots.
-    output$filter <- shiny::renderUI({
-      shiny::checkboxInput(ns("filter"),
-        "Filter by hotspot(s)?", TRUE)
-    })
-    peak_filter_df <- shiny::reactive({
-      shiny::req(project_df(), peak_df(), win_par())
-      chr_id <- win_par()$chr_id
-      peak_Mbp <- win_par()$peak_Mbp
-      window_Mbp <- shiny::req(set_par$window_Mbp)
-      peaks_in_pos(peak_df(), shiny::isTruthy(input$filter),
-                   chr_id, peak_Mbp, window_Mbp)
-    })
-    output$peak_table <- DT::renderDataTable({
-      peakDataTable(peak_filter_df())
-    }, options = list(scrollX = TRUE, pageLength = 5,
-                      lengthMenu = c(5,10,25)))
-    
-    # Phenotypes for `pheno_names`.
-    pheno_mx <- shiny::reactive({
-      shiny::req(project_df(), set_par$class, peak_filter_df())
-      pheno_names <- peak_filter_df()$phenotype
-      read_pheno(project_df(), set_par$class, columns = pheno_names)
-    })
-    covar_df <- shiny::reactive(read_project(shiny::req(project_df()), "covar"))
-    
-    # Input `input$pheno_names`.
+
+    # Input primary and secondary phenotype names.
+    # Primary `input$pheno_name`.
     output$pheno_name_input <- shiny::renderUI({
       # Primary phenotype.
       shiny::selectizeInput(ns("pheno_name"), "", choices = "", multiple = FALSE)
     })
-    output$pheno_names_input <- shiny::renderUI({
-      # Additional phenotypes.
-      shiny::selectizeInput(ns("pheno_names"), "", choices = "", multiple = TRUE)
-    })
-    shiny::observeEvent(shiny::req(project_df(), win_par(),
-      set_par$window_Mbp, peak_filter_df()), {
-      out <- select_phenames(peak_filter_df())
+    shiny::observeEvent(shiny::req(project_df(), peak_df()), {
+      out <- select_phenames(shiny::req(peak_df()))
       if(!is.null(out)) {
         shiny::updateSelectizeInput(session, "pheno_name", out$label,
           choices = out$choices, selected = out$selected, server = TRUE)
       }
     })
+    shiny::observeEvent(set_par$class, {
+      if(!shiny::isTruthy(set_par$class)) {
+        shiny::updateSelectizeInput(session, "pheno_name", "Primary phenotype",
+          choices = NULL, selected = NULL, server = TRUE)
+      } else {
+        out <- select_phenames(shiny::req(peak_df()))
+        if(!is.null(out)) {
+          shiny::updateSelectizeInput(session, "pheno_name", out$label,
+                                      choices = out$choices, selected = out$selected, server = TRUE)
+        }
+      }
+    }, ignoreNULL = FALSE)
+    # Primary `input$pheno_names`.
+    output$pheno_names_input <- shiny::renderUI({
+      # Additional phenotypes.
+      shiny::selectizeInput(ns("pheno_names"), "", choices = "", multiple = TRUE)
+    })
     # Use correlation of residuals after covariates.
-    # ** Make this an option? **
-    shiny::observeEvent(shiny::req(project_df(), win_par(),
-      set_par$window_Mbp, peak_filter_df(), input$pheno_name), {
-      out <- select_phenames(peak_filter_df(), input$pheno_name,
+    shiny::observeEvent(shiny::req(project_df(), peak_df(), pheno_mx(),
+                                   covar_df(), input$pheno_name), {
+      out <- select_phenames(peak_df(), input$pheno_name,
                              shiny::req(pheno_mx()),
                              cor_covar = TRUE, shiny::req(covar_df()))
       if(!is.null(out)) {
@@ -126,18 +117,11 @@ phenoNamesInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("pheno_name_input")),     # pheno_name
-    shiny::uiOutput(ns("pheno_names_input")),    # pheno_names
-    shiny::uiOutput(ns("filter")))               # filter
-}
-#' @export
-#' @rdname phenoNamesApp
-phenoNamesUI <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::uiOutput(ns("pheno_names_output"))      # pheno_names
+    shiny::uiOutput(ns("pheno_names_input")))    # pheno_names
 }
 #' @export
 #' @rdname phenoNamesApp
 phenoNamesOutput <- function(id) {
   ns <- shiny::NS(id)
-  DT::dataTableOutput(ns("peak_table")) # peak_table
+  shiny::uiOutput(ns("pheno_names_output"))      # pheno_names
 }
