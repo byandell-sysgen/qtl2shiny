@@ -98,13 +98,13 @@ snpPatternServer <- function(id, snp_list, allele_info) {
       if(!ready()) return(plot_null())
       shiny::withProgress(message = 'SNP pattern plots ...', value = 0, {
         shiny::setProgress(1)
-        top_pat_plot(snp_list$snp_par$pheno_name, 
+        print(top_pat_plot(snp_list$snp_par$pheno_name, 
                      snp_list$snp_scan_obj(), 
                      chr_id(),
                      snp_list$snpinfo(),
                      snp_list$snp_par$scan_window,
                      drop_hilit = dropHilit(),
-                     snp_action = snp_list$snp_action())
+                     snp_action = snp_list$snp_action()))
       })
     })
     
@@ -112,14 +112,14 @@ snpPatternServer <- function(id, snp_list, allele_info) {
       if(!ready()) return(plot_null())
       shiny::withProgress(message = 'SNP pattern plots ...', value = 0, {
         shiny::setProgress(1)
-        top_pat_plot(snp_list$snp_par$pheno_name, 
+        print(top_pat_plot(snp_list$snp_par$pheno_name, 
                      snp_list$snp_scan_obj(), 
                      chr_id(),
                      snp_list$snpinfo(),
                      snp_list$snp_par$scan_window,
                      drop_hilit = dropHilit(),
                      snp_action = snp_list$snp_action(),
-                     lines = FALSE, cex = 2)
+                     lines = FALSE, cex = 2))
       })
     })
     
@@ -128,14 +128,14 @@ snpPatternServer <- function(id, snp_list, allele_info) {
       if(!ready()) return(plot_null())
       shiny::withProgress(message = 'SNP Pheno patterns ...', value = 0, {
         shiny::setProgress(1)
-        top_pat_plot(snp_list$pheno_names(), 
+        print(top_pat_plot(snp_list$pheno_names(), 
                      snp_list$snp_scan_obj(), 
                      chr_id(),
                      snp_list$snpinfo(),
                      snp_list$snp_par$scan_window,
                      drop_hilit = dropHilit(),
                      facet = "pheno", 
-                     snp_action = snp_list$snp_action())
+                     snp_action = snp_list$snp_action()))
       })
     })
     
@@ -164,14 +164,14 @@ snpPatternServer <- function(id, snp_list, allele_info) {
       patterns <- qtl2pattern::sdp_to_pattern(top_pat$sdp, haplos())
       shiny::withProgress(message = 'SNP Pattern phenos ...', value = 0, {
         shiny::setProgress(1)
-        top_pat_plot(snp_list$pheno_names(), 
+        print(top_pat_plot(snp_list$pheno_names(), 
                      snp_list$snp_scan_obj(), 
                      chr_id(),
                      snp_list$snpinfo(), 
                      snp_list$snp_par$scan_window,
                      drop_hilit = dropHilit(),
                      facet = "pattern", 
-                     snp_action = snp_list$snp_action())
+                     snp_action = snp_list$snp_action()))
       })
     })
     
@@ -205,10 +205,18 @@ snpPatternOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = ns("pat_tab"),
-    bslib::nav_panel("All Phenos",   shiny::plotOutput(ns("snp_phe_pat"))),
-    bslib::nav_panel("All Patterns", shiny::plotOutput(ns("snp_pat_phe"))),
-    bslib::nav_panel("Summary",      DT::dataTableOutput(ns("snp_pattern_table"))),
-    bslib::nav_panel("Top SNPs",     snpFeatureOutput(ns("top_feature"))),
-    bslib::nav_panel("By Pheno",     shiny::plotOutput(ns("snp_pattern_plot"))),
-    bslib::nav_panel("Interactive",  plotly::plotlyOutput(ns("snp_pattern_plotly"))))
+    bslib::nav_panel(
+      "Patterns",
+      bslib::navset_tab(
+        id = ns("pattern_tab"),
+        bslib::nav_panel("All Phenos",
+                         shiny::plotOutput(ns("snp_phe_pat"))),
+        bslib::nav_panel("All Patterns",
+                         shiny::plotOutput(ns("snp_pat_phe"))),
+        bslib::nav_panel("By Pheno",
+                         shiny::plotOutput(ns("snp_pattern_plot"))),
+        bslib::nav_panel("Interactive",
+                         plotly::plotlyOutput(ns("snp_pattern_plotly"))))),
+    bslib::nav_panel("Consequence", snpFeatureOutput(ns("top_feature"))),
+    bslib::nav_panel("Summary",  DT::dataTableOutput(ns("snp_pattern_table"))))
 }

@@ -51,14 +51,15 @@ phenoPanelServer <- function(id, set_par, win_par, peak_df,
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    pheno_mx <- phenoServer("pheno_mx", set_par, win_par, peak_df, project_df)
+    peak_filter_df <- peakFilterServer("peak_filter_df", set_par, win_par,
+                                       peak_df, project_df)
+    pheno_mx <- phenoServer("pheno_mx", set_par, peak_filter_df, project_df)
     covar_df <- shiny::reactive(read_project(project_df(), "covar"))
-    pheno_names <- 
-      phenoNamesServer("pheno_names", set_par, peak_df, pheno_mx, covar_df,
-                       project_df)
-    pheno_mx_names <-
+    pheno_names <- phenoNamesServer("pheno_names", set_par, peak_filter_df,
+                                    pheno_mx, covar_df, project_df)
+    pheno_rankz_mx <- 
       phenoPlotServer("pheno_plot", pheno_names, pheno_mx, covar_df)
-    
+
     output$version <- shiny::renderText({
       versions()
     })
@@ -77,12 +78,12 @@ phenoPanelServer <- function(id, set_par, win_par, peak_df,
     shiny::reactiveValues(
       set_par = set_par,
       win_par = win_par,
-      peak_df = peak_df,
+      peak_df = peak_filter_df, # filtered by `win_par`
       pmap_obj = pmap_obj,
       covar_df = covar_df,
       hotspot_df = hotspot_df,
-      pheno_mx = pheno_mx_names,
       pheno_names = pheno_names,
+      pheno_mx = pheno_rankz_mx, # filtered by `pheno_names`
       kinship_list = kinship_list,
       allele_info = allele_info)
   })

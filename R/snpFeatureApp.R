@@ -90,10 +90,10 @@ snpFeatureOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = ns("fea_tab"),
-    bslib::nav_panel("Pattern",     shiny::tagList(
+    bslib::nav_panel("By Pattern",     shiny::tagList(
       shiny::plotOutput(ns("feature_pattern_plot")),
       DT::dataTableOutput(ns("feature_pattern_table")))),
-    bslib::nav_panel("Consequence", shiny::tagList(
+    bslib::nav_panel("By Consequence", shiny::tagList(
       shiny::plotOutput(ns("feature_cons_plot")),
       DT::dataTableOutput(ns("feature_cons_table")))))
 }

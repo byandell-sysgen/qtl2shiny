@@ -19,26 +19,30 @@ plot_sex <- function(phe, cov) {
       cov[,m] <- paste(cov[,m], cov[,md], sep = "_")
       sexname <- "sex_diet"
       colnames(cov)[m] <- sexname
-      insex <- data.frame(phe, sex_diet = cov[,m])
+      insex <- data.frame(phe, sex_diet = cov[,m], check.names = FALSE)
     } else {
-      insex <- data.frame(phe, sex = cov[,m])
+      insex <- data.frame(phe, sex = cov[,m], check.names = FALSE)
     }
     
     if(length(phename) == 1) {
-      ggplot2::ggplot(insex, 
-                      ggplot2::aes_string(phename, col = sexname)) +
+      ggplot2::ggplot(dplyr::rename(insex,
+                                    phe_name = phename,
+                                    sex_name = sexname), 
+                      ggplot2::aes(phe_name, col = sex_name)) +
         ggplot2::geom_density(na.rm = TRUE) + 
-        ggplot2::geom_rug()
+        ggplot2::geom_rug() +
+        ggplot2::xlab(phename)
     } else {
       any.na <- apply(insex, 1, function(x) any(is.na(x)))
       GGally::ggscatmat(insex[!any.na,], seq_len(ncol(phe)), alpha = 0.25, color = sexname)
     }
   } else {
     if(length(phename) == 1) {
-      ggplot2::ggplot(phe, 
-                      ggplot2::aes_string(phename)) +
+      ggplot2::ggplot(dplyr::rename(phe, phe_name = phename), 
+                      ggplot2::aes(phe_name)) +
         ggplot2::geom_density(na.rm = TRUE) + 
-        ggplot2::geom_rug()
+        ggplot2::geom_rug() +
+        ggplot2::xlab(phename)
     } else {
       any.na <- apply(phe, 1, function(x) any(is.na(x)))
       GGally::ggscatmat(phe[!any.na,], seq_len(ncol(phe)))

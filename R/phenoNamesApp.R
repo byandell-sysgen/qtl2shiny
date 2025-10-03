@@ -32,7 +32,7 @@ phenoNamesApp <- function() {
       width = 400
     ),
     phenoNamesOutput("pheno_names"),
-    peakOutput("peak_df")
+    peakFilterOutput("peak_filter_df")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
@@ -42,11 +42,13 @@ phenoNamesApp <- function() {
     hotspot_df <- 
       hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
     win_par <- winParServer("win_par", hotspot_df, project_df)
-    pheno_mx <- phenoServer("pheno_mx", set_par, win_par, peak_df, project_df)
+    peak_filter_df <- peakFilterServer("peak_filter_df", set_par, win_par,
+                                       peak_df, project_df)
+    pheno_mx <- phenoServer("pheno_mx", set_par, peak_filter_df, project_df)
     covar_df <- shiny::reactive(read_project(shiny::req(project_df()), "covar"))
     pheno_names <- 
-      phenoNamesServer("pheno_names", set_par, peak_df, pheno_mx, covar_df,
-                       project_df)
+      phenoNamesServer("pheno_names", set_par, peak_filter_df, pheno_mx,
+                       covar_df, project_df)
   }
   shiny::shinyApp(ui, server)
 }
