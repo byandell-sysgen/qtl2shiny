@@ -15,10 +15,10 @@ kinshipApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Kinship Read",
     sidebar = bslib::sidebar(
-      projectUI("project_df"),  # project
-      setParInput("set_par"),   # class, subject_model
-      winParInput("win_par"),   # chr_id, peak_Mbp
-      hotspotInput("hotspot")), # chr_ct, minLOD
+      projectUI("project_df"),      # project
+      setParInput("set_par"),       # class, subject_model
+      winParInput("win_par"),       # chr_id, peak_Mbp
+      hotspotInput("hotspot_obj")), # chr_ct, minLOD
     kinshipOutput("kinship_list")
   )
   server <- function(input, output, session) {
@@ -26,8 +26,10 @@ kinshipApp <- function() {
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
+    hotspot_obj <- 
+      hotspotServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
     hotspot_df <- 
-      hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
+      hotspotTableServer("hotspot_df", hotspot_obj)
     win_par <-
       winParServer("win_par", set_par, peak_df, pmap_obj, hotspot_df, project_df)
     kinship_list <- kinshipServer("kinship_list", win_par, project_df)

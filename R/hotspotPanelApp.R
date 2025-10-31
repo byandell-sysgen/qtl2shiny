@@ -43,8 +43,13 @@ hotspotPanelServer <- function(id, project_df) {
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
+    hotspot_obj <- 
+      hotspotServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
     hotspot_df <- 
-      hotspotServer("hotspot_df", set_par, peak_df, pmap_obj, project_df)
+      hotspotTableServer("hotspot_df", hotspot_obj)
+    hotspot_plot <- 
+      hotspotPlotServer("hotspot_plot", set_par, hotspot_obj)
+    
     win_par <- winParServer("win_par", hotspot_df, project_df)
     pheno_list <-
       phenoPanelServer("pheno_panel", set_par, win_par, peak_df,
@@ -52,6 +57,21 @@ hotspotPanelServer <- function(id, project_df) {
     
     ## Return.
     pheno_list
+    
+    ## Return.
+    # shiny::reactiveValues(
+    #   set_par = set_par,
+    #   win_par = win_par,
+    #   peak_df = peak_filter_df, # filtered by `win_par`
+    #   pmap_obj = pmap_obj,
+    #   covar_df = covar_df,
+    #   hotspot_df = hotspot_df,
+    #   pheno_names = pheno_names,
+    #   pheno_mx = shiny::isolate(pheno_list$pheno_mx), # filtered by `pheno_names`
+    #   kinship_list = kinship_list,
+    #   allele_info = allele_info,
+    #   plot = shiny::isolate(pheno_list$plot),
+    #   table = shiny::isolate(pheno_list$table))
   })
 }
 #' @export
@@ -68,11 +88,11 @@ hotspotPanelInput <- function(id) {
 hotspotPanelUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    winParInput(ns("win_par")),             # hotspot
+    winParInput(ns("win_par")),              # hotspot
     bslib::layout_columns(
       col_widths = c(4, 8),
-      setParUI(ns("set_par")),              # window_Mbp
-      hotspotInput(ns("hotspot_df"))))      # chr_ct, minLOD
+      setParUI(ns("set_par")),               # window_Mbp
+      hotspotInput(ns("hotspot_obj"))))      # chr_ct, minLOD
     #shiny::uiOutput(ns("version"))
 }
 #' @export
@@ -82,8 +102,10 @@ hotspotPanelOutput <- function(id) {
   bslib::navset_tab(
     bslib::nav_panel("Hotspots",
       shiny::tagList(
-        hotspotOutput(ns("hotspot_df")),    # hotspot_plot
-        hotspotUI(ns("hotspot_df")))),      # hotspot_table
+        hotspotPlotOutput(ns("hotspot_plot")),  # hotspot_plot
+        hotspotTableOutput(ns("hotspot_df")))), # hotspot_table
     bslib::nav_panel("Phenotypes", 
-      phenoPanelOutput(ns("pheno_panel")))) # pheno_plot, pheno_names
+      shiny::tagList(
+        phenoPanelOutput(ns("pheno_panel")),    # pheno_plot
+        phenoPanelUI(ns("pheno_panel")))))      # pheno_table
 }

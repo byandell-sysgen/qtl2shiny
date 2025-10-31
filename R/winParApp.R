@@ -25,17 +25,17 @@ winParApp <- function() {
     title =  "Test Window Parameters",
     sidebar = bslib::sidebar(
       bslib::card(
-        projectUI("project_df"),     # project
-        setParInput("set_par")),     # class, subject_model
+        projectUI("project_df"),         # project
+        setParInput("set_par")),         # class, subject_model
       bslib::card(
         bslib::layout_columns(
           col_widths = c(6, 4),
-          winParInput("win_par"),    # hotspot
-          setParUI("set_par")),      # window_Mbp 
-        hotspotInput("hotspot_df")), # chr_ct, minLOD
+          winParInput("win_par"),        # hotspot
+          setParUI("set_par")),          # window_Mbp 
+        hotspotInput("hotspot_obj")),    # chr_ct, minLOD
       width = 400),
     bslib::card(
-      hotspotUI("hotspot_df")),      # hotspot_table
+      hotspotTableOutput("hotspot_df")), # hotspot_table
     winParOutput("win_par")
   )
   server <- function(input, output, session) {
@@ -43,8 +43,10 @@ winParApp <- function() {
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    hotspot_df <-
-      hotspotServer("hotspot_df", set_par, peak_df, pmap_obj, project_df)
+    hotspot_obj <- 
+      hotspotServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
+    hotspot_df <- 
+      hotspotTableServer("hotspot_df", hotspot_obj)
     win_par <- winParServer("win_par", hotspot_df, project_df)
   }
   shiny::shinyApp(ui, server)

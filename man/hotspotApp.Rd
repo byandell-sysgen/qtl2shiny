@@ -4,7 +4,6 @@
 \alias{hotspotApp}
 \alias{hotspotServer}
 \alias{hotspotInput}
-\alias{hotspotUI}
 \alias{hotspotOutput}
 \title{Shiny Hotspot App}
 \usage{
@@ -13,8 +12,6 @@ hotspotApp()
 hotspotServer(id, set_par, peak_df, pmap_obj, project_df)
 
 hotspotInput(id)
-
-hotspotUI(id)
 
 hotspotOutput(id)
 }
@@ -29,7 +26,7 @@ list of inputs and scan summary
 No return value; called for side effects.
 }
 \description{
-Shiny module to view hotspots for peak selection, with interfaces \code{hotspotInput} and  \code{hotspotOutput}.
+Shiny module to select hotspots for peak selection.
 }
 \author{
 Brian S Yandell, \email{brian.yandell@wisc.edu}

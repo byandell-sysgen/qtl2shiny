@@ -4,6 +4,7 @@
 \alias{phenoPanelApp}
 \alias{phenoPanelServer}
 \alias{phenoPanelInput}
+\alias{phenoPanelUI}
 \alias{phenoPanelOutput}
 \title{Shiny Hotspot Panel App}
 \usage{
@@ -20,6 +21,8 @@ phenoPanelServer(
 )
 
 phenoPanelInput(id)
+
+phenoPanelUI(id)
 
 phenoPanelOutput(id)
 }

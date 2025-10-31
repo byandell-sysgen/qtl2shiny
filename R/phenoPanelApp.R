@@ -26,17 +26,20 @@ phenoPanelApp <- function() {
       bslib::layout_columns(
         col_widths = c(4, 8),
         setParUI("set_par"),            # window_Mbp
-        hotspotInput("hotspot_df")),    # chr_ct, minLOD
+        hotspotInput("hotspot_obj")),   # chr_ct, minLOD
       width = 400),
-    phenoPanelOutput("pheno_panel")
+    phenoPanelOutput("pheno_panel"),
+    phenoPanelUI("pheno_panel"),
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
+    hotspot_obj <- 
+      hotspotServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
     hotspot_df <- 
-      hotspotServer("hotspot_df", set_par, peak_df, pmap_obj, project_df)
+      hotspotTableServer("hotspot_df", hotspot_obj)
     win_par <- winParServer("win_par", hotspot_df, project_df)
     pheno_list <-
       phenoPanelServer("pheno_panel", set_par, win_par, peak_df,
@@ -57,8 +60,12 @@ phenoPanelServer <- function(id, set_par, win_par, peak_df,
     covar_df <- shiny::reactive(read_project(project_df(), "covar"))
     pheno_names <- phenoNamesServer("pheno_names", set_par, peak_filter_df,
                                     pheno_mx, covar_df, project_df)
-    pheno_rankz_mx <- 
-      phenoPlotServer("pheno_plot", pheno_names, pheno_mx, covar_df)
+    pheno_data_mx <- 
+      phenoDataServer("pheno_data", pheno_names, pheno_mx, covar_df)
+    pheno_table <- 
+      phenoTableServer("pheno_table", pheno_data_mx, covar_df)
+    pheno_plot <- 
+      phenoPlotServer("pheno_plot", pheno_data_mx, covar_df)
 
     output$version <- shiny::renderText({
       versions()
@@ -83,22 +90,28 @@ phenoPanelServer <- function(id, set_par, win_par, peak_df,
       covar_df = covar_df,
       hotspot_df = hotspot_df,
       pheno_names = pheno_names,
-      pheno_mx = pheno_rankz_mx, # filtered by `pheno_names`
+      pheno_mx = pheno_data_mx, # filtered by `pheno_names`
       kinship_list = kinship_list,
-      allele_info = allele_info)
+      allele_info = allele_info,
+      plot = pheno_plot,
+      table = pheno_table)
   })
 }
 #' @export
 #' @rdname phenoPanelApp
 phenoPanelInput <- function(id) {
   ns <- shiny::NS(id)
-  phenoNamesInput(ns("pheno_names"))      # pheno_names
+  phenoNamesInput(ns("pheno_names"))     # pheno_names
+}
+#' @export
+#' @rdname phenoPanelApp
+phenoPanelUI <- function(id) {
+  ns <- shiny::NS(id)
+  phenoTableOutput(ns("pheno_table"))    # pheno_table
 }
 #' @export
 #' @rdname phenoPanelApp
 phenoPanelOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    phenoPlotOutput(ns("pheno_plot")),   # pheno_plot
-    phenoNamesOutput(ns("pheno_names"))) # pheno_names
+  phenoPlotOutput(ns("pheno_plot"))      # pheno_plot
 }

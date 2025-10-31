@@ -1,4 +1,4 @@
-#' Shiny Phenotype Plot App
+#' Shiny Phenotype Table App
 #'
 #' Shiny module to plot phenotypes.
 #'
@@ -15,10 +15,10 @@
 #' @importFrom shiny moduleServer NS plotOutput renderPlot renderUI req
 #'             setProgress tagList uiOutput withProgress
 #' @importFrom bslib card layout_columns page_sidebar sidebar
-phenoPlotApp <- function() {
+phenoTableApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
-    title =  "Test Phenotype Plot",
+    title =  "Test Phenotype Table",
     sidebar = bslib::sidebar(
       projectUI("project_df"),        # project
       setParInput("set_par"),         # class, subject_model 
@@ -31,7 +31,7 @@ phenoPlotApp <- function() {
       hotspotInput("hotspot_obj"),    # chr_ct, minLOD
       phenoDataInput("pheno_data")    # raw_data
     ),
-    phenoPlotOutput("pheno_plot")     # pheno_plot
+    phenoTableOutput("pheno_table")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
@@ -53,36 +53,39 @@ phenoPlotApp <- function() {
                                     pheno_mx, covar_df, project_df)
     pheno_data_mx <- 
       phenoDataServer("pheno_data", pheno_names, pheno_mx, covar_df)
-    pheno_plot <- 
-      phenoPlotServer("pheno_plot", pheno_data_mx, covar_df)
+    pheno_table <- 
+      phenoTableServer("pheno_plot", pheno_data_mx, covar_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname phenoPlotApp
-phenoPlotServer <- function(id, pheno_mx, covar_df) {
+#' @rdname phenoTableApp
+phenoTableServer <- function(id, pheno_mx, covar_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    pheno_plot <- shiny::reactive({
-      if(!shiny::isTruthy(pheno_mx()))
-        return(plot_null("need to\nChoose phenotype"))
+    ## Scatter plot or density
+    pheno_table <- shiny::reactive({
       shiny::req(pheno_mx(), covar_df())
-      shiny::withProgress(message = 'Pheno Plot ...', value = 0, {
+      shiny::withProgress(message = 'Pheno Summary ...', value = 0, {
         shiny::setProgress(1)
-        plot_sex(pheno_mx(), covar_df())
+        summary_na(pheno_mx(), covar_df())
       })
     })
-    output$pheno_render_plot <- shiny::renderPlot({
-      print(shiny::req(pheno_plot()))
-    })
+    output$pheno_render_table <- DT::renderDataTable(
+      shiny::req(pheno_table()),
+      escape = FALSE, 
+      options = list(scrollX = TRUE, 
+                     pageLength = 5,
+                     lengthMenu = list(c(5,10,-1), c(5,10,"all"))))
+
     # Return.
-    pheno_plot
+    pheno_table
   })
 }
 #' @export
-#' @rdname phenoPlotApp
-phenoPlotOutput <- function(id) {
+#' @rdname phenoTableApp
+phenoTableOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::plotOutput(ns("pheno_render_plot"))
+  DT::dataTableOutput(ns("pheno_render_table"))
 }

@@ -3,7 +3,7 @@
 #' Shiny module to plot phenotypes.
 #'
 #' @param id identifier for shiny reactive
-#' @param pheno_mx,covar_df reactive arguments
+#' @param pheno_names,pheno_mx,covar_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -15,7 +15,7 @@
 #' @importFrom shiny moduleServer NS plotOutput renderPlot renderUI req
 #'             setProgress tagList uiOutput withProgress
 #' @importFrom bslib card layout_columns page_sidebar sidebar
-phenoPlotApp <- function() {
+phenoDataApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Phenotype Plot",
@@ -31,7 +31,7 @@ phenoPlotApp <- function() {
       hotspotInput("hotspot_obj"),    # chr_ct, minLOD
       phenoDataInput("pheno_data")    # raw_data
     ),
-    phenoPlotOutput("pheno_plot")     # pheno_plot
+    phenoDataOutput("pheno_data")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
@@ -53,36 +53,56 @@ phenoPlotApp <- function() {
                                     pheno_mx, covar_df, project_df)
     pheno_data_mx <- 
       phenoDataServer("pheno_data", pheno_names, pheno_mx, covar_df)
-    pheno_plot <- 
-      phenoPlotServer("pheno_plot", pheno_data_mx, covar_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname phenoPlotApp
-phenoPlotServer <- function(id, pheno_mx, covar_df) {
+#' @rdname phenoDataApp
+phenoDataServer <- function(id, pheno_names, pheno_mx, covar_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    pheno_plot <- shiny::reactive({
-      if(!shiny::isTruthy(pheno_mx()))
-        return(plot_null("need to\nChoose phenotype"))
-      shiny::req(pheno_mx(), covar_df())
-      shiny::withProgress(message = 'Pheno Plot ...', value = 0, {
-        shiny::setProgress(1)
-        plot_sex(pheno_mx(), covar_df())
-      })
+    pheno_mx_names <- shiny::reactive({
+      shiny::req(pheno_mx(), pheno_names())
+      if(!all(pheno_names() %in% colnames(pheno_mx()))) return(NULL)
+      pheno_mx()[, pheno_names(), drop = FALSE]
     })
-    output$pheno_render_plot <- shiny::renderPlot({
-      print(shiny::req(pheno_plot()))
+    pheno_rankz_mx <- shiny::reactive({
+      out <- shiny::req(pheno_mx_names())
+      rout <- row.names(out)
+      if(!shiny::isTruthy(input$raw_data)) {
+        out <- apply(out, 2, rankZ)
+      }
+      row.names(out) <- rout
+      out
     })
+    pheno_data_mx <- shiny::reactive({
+      if(shiny::isTruthy(input$raw_data))
+        pheno_mx_names()
+      else
+        pheno_rankz_mx()
+    })
+    output$data_output <- shiny::renderUI({
+      pheno_data <- shiny::req(pheno_data_mx())
+      shiny::tagList(
+        shiny::renderText(paste("pheno data: ",
+                                paste(dim(pheno_data), collapse = ", "))),
+      )
+    })
+    
     # Return.
-    pheno_plot
+    pheno_data_mx
   })
 }
 #' @export
-#' @rdname phenoPlotApp
-phenoPlotOutput <- function(id) {
+#' @rdname phenoDataApp
+phenoDataInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::plotOutput(ns("pheno_render_plot"))
+  shiny::checkboxInput(ns("raw_data"), "Raw Data?", FALSE)
+}
+#' @export
+#' @rdname phenoDataApp
+phenoDataOutput <- function(id) {
+  ns <- shiny::NS(id)
+  shiny::uiOutput(ns("data_output"))
 }

@@ -25,7 +25,7 @@ peakFilterApp <- function() {
         winParInput("win_par"),          # hotspot
         setParUI("set_par")              # window_Mbp 
       ),
-      hotspotInput("hotspot")            # chr_ct, minLOD
+      hotspotInput("hotspot_obj")        # chr_ct, minLOD
     ),
     peakFilterOutput("peak_filter_df")
   )
@@ -34,8 +34,10 @@ peakFilterApp <- function() {
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
+    hotspot_obj <- 
+      hotspotServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
     hotspot_df <- 
-      hotspotServer("hotspot", set_par, peak_df, pmap_obj, project_df)
+      hotspotTableServer("hotspot_df", hotspot_obj)
     win_par <- winParServer("win_par", hotspot_df, project_df)
     peak_filter_df <- peakFilterServer("peak_filter_df", set_par, win_par,
                                        peak_df, project_df)

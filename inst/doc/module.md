@@ -15,10 +15,13 @@ qtl2shinyApp
 └── genoPanel                 # Genotypes
 ```
 
-These are all being organized into the
-[qtl2shinyApp()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/qtl2shinyApp.R)
+These are organized into the app function
+[qtl2shinyApp()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/qtl2shinyApp.R),
+which is the basis for the application
+[app.R](https://github.com/byandell-sysgen/qtl2shiny/blob/master/inst/qtl2shinyApp/app.R).
 
-A module has several components, as described in the
+Each module is organized in a single file with several components,
+following the conventions in
 [Shiny Modules](https://mastering-shiny.org/scaling-modules.html)
 chapter of the `Mastering Shiny` site.
 
@@ -31,11 +34,12 @@ xxxApp.R                  # file containing app functions
 └── xxxOutput()           # (optional) shiny ui function for output
 ```
 
-Here is a prototype app with all these components.
+Here is a prototype module app with all these components.
 The `"id"` is a common identifier across these components.
 The user interface function `xxxUI()` might appear in the `sidebar`
 or in the body of the `page`, depending on its use.
-Note the `result` returned from `xxxServer()`.
+Note the reactive `result` returned from `xxxServer()`,
+which could be input to another module server.
 
 ```
 xxxApp() <- function() {
@@ -53,11 +57,14 @@ xxxApp() <- function() {
 }
 ```
 
-Each shiny module is organized in a single file.
-Below, they are often referenced in terms of their `server` function,
+Modules in sections below are often referenced in terms of their `server` function,
 which sets up the shiny logic.
 
-## Data Reading
+- [Reading Data](#reading-data)
+- [Navigating Panels](#navigating-panels)
+- [Downloading Files](#downloading-files)
+
+## Reading Data
 
 Data are read based on the `project`, which is determined through the 
 `project` server
@@ -141,7 +148,7 @@ data area and read in reactively (as needed) with the
 [read_query_rds](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/read_query_rds.R)
 internal function.
 
-## Panels Module Organization
+## Navigating Panels
 
 Panels are dependent on each other based on input parameters
 and other module results.
@@ -274,16 +281,19 @@ calculate SNP objects, including SNP scan
 - [dipPar](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/dipParApp.R) #
 input parameters needed across SNP and SDP modules
 
-## Download App
+## Downloading Files
 
-There is a
+Downloading files is accomplished by going to a particular view in a panel.
+One
 [downloadApp()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/downloadApp.R)
-that will eventually be connected to the panels.
-The idea is that, at any time, each panel likely displays one plot
-and one table (summary) that a user might want to download,
-as PNG or PDF (plot) or CSV (table).
-This will involve adjusting the panel `result`s to provide the
-link back to plot or table object.
+enables the user to download a spreadsheet (`CSV`)
+or a plot (`PNG` or `PDF`).
+The idea is that, at any time, each panel displays one plot
+or one table (summary) that could be downloaded.
+The panel server function returns a `result` with reactive components
+for a plot and/or table.
+**Not fully implemented yet**.
+
 This is somewhat analagous to what was done in
 [foundrShiny](https://github.com/AttieLab-Systems-Genetics/foundrShiny)
 (see [foundrShiny/R/downloadApp.R](https://github.com/AttieLab-Systems-Genetics/foundrShiny/blob/main/R/downloadApp.R))
@@ -292,7 +302,9 @@ and
 (see [qtlApp/R/modules/downloadApp.R](https://github.com/AttieLab-Systems-Genetics/qtlApp/blob/master/fs-reorg/R/modules/downloadApp.R)).
 Here is my current thinking
 
-- each panel returns a `reactiveValue` with element `download`
+- each panel returns a
+[reactiveValue](https://mastering-shiny.org/reactivity-objects.html)
+with element `download`
   - this identifies the currently viewed `plot` or `table` and a `filename`
 - these returns are collected into another `reactiveValue` `DL`
 - pass `DL` and the current panel (`input$panel`) to `downloadServer()`
@@ -309,9 +321,12 @@ downloadServer("download", DL, input$panel)
 
 ## Deprecated Files
 
+The following will soon be removed.
+
 - `dashApp.R` (see `qtl2shinyApp`)
 - `mainApp.R` (see `qtl2shinyApp`)
 - `haploApp.R` (early version of a panel)
 - `hapParApp.R` (subsumed as parameters no longer used)
 - `diploApp.R` (early version of a panel)
 - `helpPopup.R`
+- `hotspotPartsApp.R`
