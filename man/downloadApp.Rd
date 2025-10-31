@@ -5,30 +5,17 @@
 \alias{downloadServer}
 \alias{downloadInput}
 \alias{downloadUI}
-\alias{downloadOutput}
 \title{Download App}
 \usage{
 downloadApp(selected_item = 1, plot_table = "Plot")
 
-downloadServer(
-  id,
-  download_list,
-  selected_item = shiny::reactive(NULL),
-  plot_table = shiny::reactive("Plot"),
-  title_download = shiny::reactive("")
-)
+downloadServer(id, download_list)
 
 downloadInput(id)
 
 downloadUI(id)
-
-downloadOutput(id)
 }
 \arguments{
-\item{selected_item}{index to selected plot or table}
-
-\item{plot_table}{either "Plot" or "Table"}
-
 \item{id}{identifier for shiny reactive}
 
 \item{download_list}{reactiveValues object}

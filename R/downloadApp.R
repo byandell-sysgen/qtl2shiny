@@ -2,8 +2,6 @@
 #'
 #' @param id identifier for shiny reactive
 #' @param download_list reactiveValues object
-#' @param selected_item index to selected plot or table
-#' @param plot_table either "Plot" or "Table"
 #'
 #' @importFrom shiny actionButton br checkboxInput div downloadButton
 #'             downloadHandler h4 isTruthy moduleServer NS numericInput
@@ -19,11 +17,8 @@ downloadApp <- function(selected_item = 1, plot_table = "Plot") {
     title = "Test Download",
     sidebar = bslib::sidebar("side_panel", width = 400,
       # Set up arguments for `downloadServer`.
-      shiny::selectInput("plot_table", "", c("Plot","Table")),
-      shiny::uiOutput("selected_item"),
-      shiny::textInput("title_download", "Title", "Test"),
-      
-      downloadOutput("download") # downloadButton, filename
+      shiny::uiOutput("selected_plot"),
+      shiny::uiOutput("selected_table")
     ),
     bslib::card(
       downloadInput("download"), # inputs for Plot or Table
@@ -35,46 +30,41 @@ downloadApp <- function(selected_item = 1, plot_table = "Plot") {
     )
   )
   server <- function(input, output, session) { 
-    # Test sets
-    prefix <- "Download"
-    download_Plot <- shiny::reactiveValues()
-    plot_names <- shiny::reactive(c("none","some"))
-    shiny::isolate({
-      for(i in plot_names()) {
-        download_Plot[[i]] <- shiny::reactive(plot_null(i))
-      }
+    # Test Plots
+    download_Plot <- shiny::reactiveValues(
+      none = shiny::reactive(plot_null("none")),
+      some = shiny::reactive(plot_null("some")))
+    output$selected_plot <- shiny::renderUI({
+      choices <- names(download_Plot)
+      shiny::selectInput("selected_plot", "", choices)
     })
+    selected_plot <- shiny::reactive({
+      download_Plot[[shiny::req(input$selected_plot)]]()
+    })
+    # Test Tables
+    download_Table <- shiny::reactiveValues(
+      twelve = shiny::reactive(matrix(1:12,nrow=3)),
+      twenty = shiny::reactive(matrix(1:20,nrow=4)))
+    output$selected_table <- shiny::renderUI({
+      choices <- names(download_Table)
+      shiny::selectInput("selected_table", "", choices)
+    })
+    selected_table <- shiny::reactive({
+      download_Table[[shiny::req(input$selected_table)]]()
+    })
+
     download_list <- shiny::reactiveValues(
-      filename = "panelID_instanceID",
-      Plot = download_Plot,
-#      Plot = shiny::reactiveValues(
-#        skip = shiny::reactive(plot_null("skip")),
-#        none = shiny::reactive(plot_null("nothing")),
-#        some = shiny::reactive(plot_null("something"))),
-      Table = shiny::reactiveValues(
-        twelve = shiny::reactive(matrix(1:12,nrow=3)),
-        twenty = shiny::reactive(matrix(1:20,nrow=4)))
-    )
-    output$selected_item <- shiny::renderUI({
-      plot_table <- shiny::req(input$plot_table)
-      choices <- names(download_list[[plot_table]])
-      # Skip over item `skip`.
-      choices <- choices[choices != "skip"]
-      shiny::selectInput("selected_item", "", choices)
-    })
-    downloadServer("download", download_list,
-      selected_item = shiny::reactive(input$selected_item),
-      plot_table = shiny::reactive(input$plot_table),
-      title_download = shiny::reactive(input$title_download))
+      Filename = "panelID_instanceID",
+      Plot = selected_plot,
+      Table = selected_table)
+    
+    downloadServer("download", download_list)
   }
   shiny::shinyApp(ui, server)
 }
 #' @rdname downloadApp
 #' @export
-downloadServer <- function(id, download_list,
-                           selected_item = shiny::reactive(NULL),
-                           plot_table = shiny::reactive("Plot"),
-                           title_download = shiny::reactive("")) {
+downloadServer <- function(id, download_list) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -105,15 +95,10 @@ downloadServer <- function(id, download_list,
     # Preview download app.
     output$preview <- shiny::renderUI({
       list(
-        "filename",
-        download_list$filename,
+        "Filename",
+        download_list$Filename,
         shiny::br(),
-        "Plot",
-        paste(names(download_list$Plot), collapse = ", "),
-        shiny::br(),
-        "Table", 
-        paste(names(download_list$Table), collapse = ", "),
-        switch(shiny::req(plot_table()),
+        switch(shiny::req(input$plot_table),
           Plot  = shiny::uiOutput(ns("preview_plots")),
           Table = DT::dataTableOutput(ns("preview_table")))
       )
@@ -122,31 +107,19 @@ downloadServer <- function(id, download_list,
       width <- shiny::reactive(plot_width_rv() / 2)
       height <- shiny::reactive(plot_height_rv() / 2)
       shiny::renderPlot({
-        shiny::req(selected_download())
+        shiny::req(download_list$Plot())
       }, width = width, height = height)
     })
     output$preview_table <- DT::renderDataTable({
-      if(shiny::req(plot_table()) == "Table")
-        shiny::req(selected_download())
-    })
-    
-    # Select plot or table from `download_list`.
-    selected_download <- shiny::reactive({
-      type <- shiny::req(plot_table())
-      choice = names(download_list[[type]])
-      choice <- choice[grep(shiny::req(selected_item()), choice)]
-      if(length(choice))
-        # The `choice` may not be valid reactive yet.
-        tryCatch(shiny::req(download_list[[type]][[choice]]()),
-                 error = function(e) return(NULL))
+      shiny::req(download_list$Table())
     })
 
     ## Switch between `Plot` or `Table`.
     output$buttons <- shiny::renderUI({
-      shiny::uiOutput(ns(paste0("choices_", shiny::req(plot_table()))))
+      shiny::uiOutput(ns(paste0("choices_", shiny::req(input$plot_table))))
     })
     output$dims <- shiny::renderUI({
-      switch(shiny::req(plot_table()),
+      switch(shiny::req(input$plot_table),
              Plot = shiny::uiOutput(ns("dims_Plot"))
       )
     })
@@ -169,7 +142,7 @@ downloadServer <- function(id, download_list,
                       "align-items: center; margin-bottom: 10px;",
                       "flex-wrap: wrap;"),
         shiny::h4(
-          paste(title_download(), shiny::req(plot_table())),
+          paste(shiny::req(input$plot_table)),
           style = "margin: 0 15px 0 0; color: #2c3e50; font-weight: 600;"),
         shiny::div(
           style = paste("display: flex; align-items: center; gap: 10px;",
@@ -213,15 +186,15 @@ downloadServer <- function(id, download_list,
       )
     })
     
-    # Download filename.
+    # Download Filename.
     base_filename <- shiny::reactive({
-      paste0(shiny::req(download_list$filename),
+      paste0(shiny::req(download_list$Filename),
              "_", format(Sys.time(), "%Y%m%d"))
     })
     # Optional UI to edit filename
     output$filename <- renderUI({
       filename <- shiny::req(base_filename())
-      shiny::textAreaInput(ns("filename"), "File Basename:", filename)
+      shiny::textAreaInput(ns("filename"), "", filename)
     })
     download_filename <- function(mime = "png") {
       function() {
@@ -236,7 +209,7 @@ downloadServer <- function(id, download_list,
     output$download_plot_png <- shiny::downloadHandler(
       filename = download_filename("png"),
       content = function(file) {
-        selected_plot <- shiny::req(selected_download())
+        selected_plot <- download_list$Plot()
         # Use dynamic width/height for saving
         ggplot2::ggsave(file, plot = selected_plot, 
           width = plot_width_rv()/96, # Assuming 96 DPI for conversion from px
@@ -247,7 +220,7 @@ downloadServer <- function(id, download_list,
     output$download_plot_pdf <- shiny::downloadHandler(
       filename = download_filename("pdf"),
       content = function(file) {
-        selected_plot <- shiny::req(selected_download())
+        selected_plot <- download_list$Plot()
         ggplot2::ggsave(file, plot = selected_plot, 
           width = plot_width_rv()/96, 
           height = plot_height_rv()/96, 
@@ -263,7 +236,7 @@ downloadServer <- function(id, download_list,
                       "align-items: center; margin-bottom: 10px;",
                       "flex-wrap: wrap;"),
         shiny::h4(
-          paste(title_download(), shiny::req(plot_table())),
+          shiny::req(input$plot_table),
           style = "margin: 0 15px 0 0; color: #2c3e50; font-weight: 600;"),
         shiny::downloadButton(ns("Table"), "Table", class = "btn-sm")
       )
@@ -271,7 +244,7 @@ downloadServer <- function(id, download_list,
     output$Table <- shiny::downloadHandler(
       filename = download_filename("csv"),
       content = function(file) {
-        table <- shiny::req(selected_download())
+        table <- shiny::req(download_list$Table())
         utils::write.csv(table, file, row.names = FALSE)
       }
     )
@@ -281,19 +254,19 @@ downloadServer <- function(id, download_list,
 #' @export
 downloadInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("buttons"))
+  bslib::card(
+    bslib::layout_columns(
+      col_widths = c(3, 9),
+      shiny::selectInput(ns("plot_table"), "", c("Plot","Table")),
+      shiny::uiOutput(ns("filename"))),
+    shiny::uiOutput(ns("buttons"))
+  )
 }
 #' @rdname downloadApp
 #' @export
 downloadUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("dims"))
-}
-#' @rdname downloadApp
-#' @export
-downloadOutput <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::uiOutput(ns("filename"))
 }
 downloadPreview <- function(id) {
   ns <- shiny::NS(id)

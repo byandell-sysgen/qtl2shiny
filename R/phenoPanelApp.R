@@ -28,6 +28,10 @@ phenoPanelApp <- function() {
         setParUI("set_par"),            # window_Mbp
         hotspotInput("hotspot_obj")),   # chr_ct, minLOD
       width = 400),
+    bslib::card(
+      downloadInput("download"), # inputs for Plot or Table
+      downloadUI("download")     # width and height for plot
+    ),
     phenoPanelOutput("pheno_panel"),
     phenoPanelUI("pheno_panel"),
   )
@@ -44,6 +48,7 @@ phenoPanelApp <- function() {
     pheno_list <-
       phenoPanelServer("pheno_panel", set_par, win_par, peak_df,
                        pmap_obj, hotspot_df, project_df)
+    downloadServer("download", pheno_list)
   }
   shiny::shinyApp(ui, server)
 }
@@ -93,8 +98,9 @@ phenoPanelServer <- function(id, set_par, win_par, peak_df,
       pheno_mx = pheno_data_mx, # filtered by `pheno_names`
       kinship_list = kinship_list,
       allele_info = allele_info,
-      plot = pheno_plot,
-      table = pheno_table)
+      Filename = "pheno",
+      Plot = pheno_plot,
+      Table = pheno_table)
   })
 }
 #' @export
