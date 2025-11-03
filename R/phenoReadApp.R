@@ -1,4 +1,4 @@
-#' Shiny Phenotype App
+#' Shiny Phenotype Read App
 #'
 #' Shiny module for peak selection.
 #'
@@ -12,7 +12,7 @@
 #' @importFrom shiny  column moduleServer NS reactive req
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom bslib layout_columns page_sidebar sidebar
-phenoApp <- function() {
+phenoReadApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Pheno Read",
@@ -20,20 +20,20 @@ phenoApp <- function() {
       projectUI("project_df"),           # project
       setParInput("set_par")             # class, subject_model
     ),
-    phenoOutput("pheno_mx"),
+    phenoReadOutput("pheno_mx"),
     peakOutput("peak_df")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
     peak_df <- peakServer("peak_df", set_par, project_df)
-    pheno_mx <- phenoServer("pheno_mx", set_par, peak_df, project_df)
+    pheno_mx <- phenoReadServer("pheno_mx", set_par, peak_df, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname phenoApp
-phenoServer <- function(id, set_par, peak_df, project_df) {
+#' @rdname phenoReadApp
+phenoReadServer <- function(id, set_par, peak_df, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -55,8 +55,8 @@ phenoServer <- function(id, set_par, peak_df, project_df) {
   })
 }
 #' @export
-#' @rdname phenoApp
-phenoOutput <- function(id) {
+#' @rdname phenoReadApp
+phenoReadOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("pheno_mx_output"))
 }
