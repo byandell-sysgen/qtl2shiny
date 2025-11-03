@@ -21,13 +21,13 @@ phenoReadApp <- function() {
       setParInput("set_par")             # class, subject_model
     ),
     phenoReadOutput("pheno_mx"),
-    peakOutput("peak_df")
+    peakReadOutput("peak_df")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
-    peak_df <- peakServer("peak_df", set_par, project_df)
-    pheno_mx <- phenoReadServer("pheno_mx", set_par, peak_df, project_df)
+    peak_read_df <- peakReadServer("peak_df", set_par, project_df)
+    pheno_mx <- phenoReadServer("pheno_mx", set_par, peak_read_df, project_df)
   }
   shiny::shinyApp(ui, server)
 }

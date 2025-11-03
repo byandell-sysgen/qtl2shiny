@@ -90,9 +90,9 @@ which depends on the `peak` and `hotspot` modules.
 
 - `project_df <-` [projectServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/projectApp.R) #
 select `project`
-- `set_par <-` [setParServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/setParApp.R) #
+- `set_par    <-` [setParServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/setParApp.R) #
 select `class` and `subject_model` (depends on `project` information)
-- `win_par` <- [winParServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/winParApp.R) #
+- `win_par    <-` [winParServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/winParApp.R) #
 Hotspot window parameters (depends on `hotspot` and `peak` module components)
 
 
@@ -100,9 +100,9 @@ Hotspot window parameters (depends on `hotspot` and `peak` module components)
 
 Project-specific phenotype data are read in as needed using the following modules 
 
-- `peak_df <-` [peakServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakApp.R) #
+- `peak_df  <-` [peakReadServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakReadApp.R) #
 precomputed peaks and summaries
-- `pheno_mx <-` [phenoServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoApp.R) #
+- `pheno_mx <-` [phenoReadServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoReadApp.R) #
 raw phenotype data
 
 The `peak_df` depends on `project`, `class` and `subject_model`
@@ -113,7 +113,7 @@ which further filters the `peak_df` to the selected `hotspot`.
 The `pheno` server depends on `project` and `class` and `peak_df`, using the
 [phenoNamesServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoNamesApp.R)
 server to identify the phenotype names.
-Both `peak` and `pheno` servers depend on (directly and indirectly, resp.)
+Both `peak` and `pheno` servers depend (directly and indirectly, resp.)
 on the `hotspot` server to identify the hotspot of interest.
 
 Other `project` data files are read in as needed using the
@@ -123,11 +123,11 @@ The `kinship_list` has a server since it depends on the reactively chosen chromo
 
 - `kinship_list <-` [kinshipServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/kinshipApp.R) #
 kinship list of LOCO matrices
-- `covar_df <- read_project(project_df(), "covar")` 
+- `covar_df     <- read_project(project_df(), "covar")` # 
 covariate data frame
-- `pmap_obj <- read_project(project_df(), "pmap")` #
+- `pmap_obj     <- read_project(project_df(), "pmap")` #
 physical map object with list of markers and `Mbp` positions
-- `allele_info <- read_project(project_df(), "allele")` #
+- `allele_info  <- read_project(project_df(), "allele")` #
 allele information data frame
 
 ### Project Genotype and SNP Information
@@ -212,11 +212,11 @@ Peak panel
 Phenotype panel
 
 The phenotype panel, subsumed in the hotspot panel,
-consists of the following four modules:
+consists of the following six modules:
 
 - [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPanelApp.R) #
 Phenotype Panel
-  - [pheno](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoApp.R) #
+  - [phenoRead](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoReadApp.R) #
 Create phenotype object and summary
   - [phenoNames](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoNamesApp.R) #
 Select phenotype names
@@ -231,8 +231,8 @@ Interleaved with `hotspot` panel is the `peak` panel
 
 - [peakPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakPanelApp.R) #
 Peaks filtered by selected `hotspot`
-  - [peak](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakApp.R) #
-Peak dataframe
+  - [peakRead](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakReadApp.R) #
+Read peak dataframe
 
 ### Scan Panel
 
@@ -259,11 +259,11 @@ exons within gene
 
 The mediation panel consists of the following modules:
 
-- [mediatePanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPanelApp.R) #
+- [mediatePanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediatePanelApp.R) #
 Mediation Panel
-  - [mediate](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoNamesApp.R) #
+  - [mediate](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediateApp.R) #
 Run mediation
-  - [mediatePlot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoApp.R) #
+  - [mediatePlot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediatePlotApp.R) #
 Plot mediation results
   - [triad](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/triadApp.R) #
 Plot D-M-T triad scatterplots

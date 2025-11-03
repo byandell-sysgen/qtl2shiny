@@ -3,7 +3,7 @@
 #' Shiny module for peak selection.
 #'
 #' @param id identifier for shiny reactive
-#' @param set_par,peak_project_df,pmap_obj,project_df reactive arguments
+#' @param set_par,peak_read_df,pmap_obj,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@wisc.edu}
 #' @keywords utilities
@@ -32,21 +32,21 @@ peakPanelApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
-    peak_project_df <- peakServer("peak_project_df", set_par, project_df)
+    peak_read_df <- peakReadServer("peak_read_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    hotspot_obj <- hotspotDataServer("hotspot_obj", set_par, peak_project_df,
+    hotspot_obj <- hotspotDataServer("hotspot_obj", set_par, peak_read_df,
                                      pmap_obj, project_df)
     hotspot_df <- 
       hotspotTableServer("hotspot_df", hotspot_obj)
     win_par <- winParServer("win_par", hotspot_df, project_df)
     peak_df <- peakPanelServer("peak_df", set_par, win_par,
-                               peak_project_df, project_df)
+                               peak_read_df, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname peakPanelApp
-peakPanelServer <- function(id, set_par, win_par, peak_project_df, project_df) {
+peakPanelServer <- function(id, set_par, win_par, peak_read_df, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -57,11 +57,11 @@ peakPanelServer <- function(id, set_par, win_par, peak_project_df, project_df) {
     })
     
     peak_df <- shiny::reactive({
-      shiny::req(project_df(), peak_project_df(), win_par())
+      shiny::req(project_df(), peak_read_df(), win_par())
       chr_id <- win_par()$chr_id
       peak_Mbp <- win_par()$peak_Mbp
       window_Mbp <- shiny::req(set_par$window_Mbp)
-      peaks_in_pos(peak_project_df(), !shiny::isTruthy(input$filter),
+      peaks_in_pos(peak_read_df(), !shiny::isTruthy(input$filter),
                    chr_id, peak_Mbp, window_Mbp)
     })
     

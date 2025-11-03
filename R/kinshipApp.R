@@ -24,14 +24,13 @@ kinshipApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
-    peak_df <- peakServer("peak_df", set_par, project_df)
+    peak_read_df <- peakReadServer("peak_read_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    hotspot_obj <- 
-      hotspotDataServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
-    hotspot_df <- 
-      hotspotTableServer("hotspot_df", hotspot_obj)
-    win_par <-
-      winParServer("win_par", set_par, peak_df, pmap_obj, hotspot_df, project_df)
+    hotspot_obj <- hotspotDataServer("hotspot_obj", set_par, peak_read_df,
+                                     pmap_obj, project_df)
+    hotspot_df <- hotspotTableServer("hotspot_df", hotspot_obj)
+    win_par <- winParServer("win_par", set_par, peak_read_df, pmap_obj,
+                            hotspot_df, project_df)
     kinship_list <- kinshipServer("kinship_list", win_par, project_df)
   }
   shiny::shinyApp(ui, server)

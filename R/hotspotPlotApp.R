@@ -35,10 +35,10 @@ hotspotPlotApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
-    peak_df <- peakServer("peak_df", set_par, project_df)
+    peak_read_df <- peakReadServer("peak_read_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     hotspot_obj<- 
-      hotspotDataServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
+      hotspotDataServer("hotspot_obj", set_par, peak_read_df, pmap_obj, project_df)
     hotspot_plot <- 
       hotspotPlotServer("hotspot_plot", set_par, hotspot_obj, project_df)
   }
