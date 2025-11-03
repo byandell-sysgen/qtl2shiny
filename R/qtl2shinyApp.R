@@ -114,15 +114,6 @@ qtl2shinyUI <- function(id) {
       )
     ),
     bslib::nav_panel(
-      title = "Mediation",
-      value = ns("mediate"),
-      bslib::layout_sidebar(
-        sidebar = bslib::sidebar(
-          mediatePanelInput(ns("mediate_panel"))), # <various>
-        mediatePanelOutput(ns("mediate_panel"))
-      )
-    ),
-    bslib::nav_panel(
       title = "Patterns",
       value = ns("pattern"),
       bslib::layout_sidebar(
@@ -149,6 +140,15 @@ qtl2shinyUI <- function(id) {
           genoPanelInput(ns("geno_panel")), min_height = "100px"), # pos_Mbp
         width = 400),
       bslib::card(genoPanelOutput(ns("geno_panel")))
+    ),
+    bslib::nav_panel(
+      title = "Mediation",
+      value = ns("mediate"),
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          mediatePanelInput(ns("mediate_panel"))), # <various>
+        mediatePanelOutput(ns("mediate_panel"))
+      )
     )
   )
 }

@@ -15,7 +15,7 @@
 peakPanelApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
-    title =  "Test Pheno Read",
+    title =  "Test Pheno Panel",
     sidebar = bslib::sidebar(
       projectUI("project_df"),           # project
       setParInput("set_par"),            # class, subject_model
@@ -82,7 +82,7 @@ peakPanelInput <- function(id) {
   shiny::uiOutput(ns("filter"))               # filter
 }
 #' @export
-#' @rdname peakApp
+#' @rdname peakPanelApp
 peakPanelOutput <- function(id) {
   ns <- shiny::NS(id)
   DT::dataTableOutput(ns("peak_table")) # peak_table

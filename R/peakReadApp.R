@@ -1,4 +1,4 @@
-#' Shiny Peak App
+#' Shiny Peak Read App
 #'
 #' Shiny module for peak selection.
 #'

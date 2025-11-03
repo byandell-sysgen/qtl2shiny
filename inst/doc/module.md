@@ -343,15 +343,3 @@ DL$pattern <- patternPanelServer()
 DL$geno    <- genoPanelServer()
 downloadServer("download", DL, input$panel)
 ```
-
-## Deprecated Files
-
-The following will soon be removed.
-
-- `dashApp.R` (see `qtl2shinyApp`)
-- `mainApp.R` (see `qtl2shinyApp`)
-- `haploApp.R` (early version of a panel)
-- `hapParApp.R` (subsumed as parameters no longer used)
-- `diploApp.R` (early version of a panel)
-- `helpPopup.R`
-- `hotspotPartsApp.R`

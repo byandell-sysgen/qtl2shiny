@@ -4,18 +4,21 @@
 \alias{peakPanelApp}
 \alias{peakPanelServer}
 \alias{peakPanelInput}
+\alias{peakPanelOutput}
 \title{Shiny Phenotype App}
 \usage{
 peakPanelApp()
 
-peakPanelServer(id, set_par, win_par, peak_project_df, project_df)
+peakPanelServer(id, set_par, win_par, peak_read_df, project_df)
 
 peakPanelInput(id)
+
+peakPanelOutput(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{set_par, peak_project_df, pmap_obj, project_df}{reactive arguments}
+\item{set_par, peak_read_df, pmap_obj, project_df}{reactive arguments}
 }
 \description{
 Shiny module for peak selection.
