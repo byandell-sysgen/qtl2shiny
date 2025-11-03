@@ -5,7 +5,7 @@
 \alias{phenoDataServer}
 \alias{phenoDataInput}
 \alias{phenoDataOutput}
-\title{Shiny Phenotype Plot App}
+\title{Shiny Phenotype Data App}
 \usage{
 phenoDataApp()
 
@@ -24,7 +24,8 @@ phenoDataOutput(id)
 2-element vector of scan window
 }
 \description{
-Shiny module to plot phenotypes.
+Shiny module to filter phenotypes by selected names
+and transform using `rankZ`.
 }
 \author{
 Brian S Yandell, \email{brian.yandell@wisc.edu}

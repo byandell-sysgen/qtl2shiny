@@ -41,16 +41,17 @@ hotspotPanelServer <- function(id, project_df) {
 
     ## Modules.    
     set_par <- setParServer("set_par", project_df)
-    peak_df <- peakServer("peak_df", set_par, project_df)
+    peak_project_df <- peakServer("peak_project_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    hotspot_obj <- 
-      hotspotServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
+    hotspot_obj <- hotspotDataServer("hotspot_obj", set_par, peak_project_df,
+                                     pmap_obj, project_df)
     hotspot_df <- 
       hotspotTableServer("hotspot_df", hotspot_obj)
     hotspot_plot <- 
       hotspotPlotServer("hotspot_plot", set_par, hotspot_obj)
-    
     win_par <- winParServer("win_par", hotspot_df, project_df)
+    peak_df <- peakPanelServer("peak_df", set_par, win_par,
+                               peak_project_df, project_df)
     pheno_list <-
       phenoPanelServer("pheno_panel", set_par, win_par, peak_df,
                        pmap_obj, hotspot_df, project_df)
@@ -62,7 +63,7 @@ hotspotPanelServer <- function(id, project_df) {
     # shiny::reactiveValues(
     #   set_par = set_par,
     #   win_par = win_par,
-    #   peak_df = peak_filter_df, # filtered by `win_par`
+    #   peak_df = peak_df, # filtered by `win_par`
     #   pmap_obj = pmap_obj,
     #   covar_df = covar_df,
     #   hotspot_df = hotspot_df,
@@ -92,7 +93,7 @@ hotspotPanelUI <- function(id) {
     bslib::layout_columns(
       col_widths = c(4, 8),
       setParUI(ns("set_par")),               # window_Mbp
-      hotspotInput(ns("hotspot_obj"))))      # chr_ct, minLOD
+      hotspotDataInput(ns("hotspot_obj"))))  # chr_ct, minLOD
     #shiny::uiOutput(ns("version"))
 }
 #' @export

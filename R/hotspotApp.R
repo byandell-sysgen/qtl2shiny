@@ -1,4 +1,4 @@
-#' Shiny Hotspot App
+#' Shiny Hotspot Data App
 #'
 #' Shiny module to select hotspots for peak selection.
 #'
@@ -21,7 +21,7 @@
 #' @importFrom DT dataTableOutput renderDataTable 
 #' @importFrom rlang .data
 #' @importFrom bslib page_sidebar sidebar
-hotspotApp <- function() {
+hotspotDataApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Hotspot",
@@ -29,8 +29,8 @@ hotspotApp <- function() {
       projectUI("project_df"),      # project
       setParInput("set_par"),       # class, subject_model 
       setParUI("set_par"),          # window_Mbp 
-      hotspotInput("hotspot_obj")), # chr_ct, minLOD
-    hotspotOutput("hotspot_obj")    # hotspot_obj
+      hotspotDataInput("hotspot_obj")), # chr_ct, minLOD
+    hotspotDataOutput("hotspot_obj")    # hotspot_obj
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
@@ -38,13 +38,13 @@ hotspotApp <- function() {
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     hotspot_obj <- 
-      hotspotServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
+      hotspotDataServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname hotspotApp
-hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
+#' @rdname hotspotDataApp
+hotspotDataServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -127,16 +127,16 @@ hotspotServer <- function(id, set_par, peak_df, pmap_obj, project_df) {
   })
 }
 #' @export
-#' @rdname hotspotApp
-hotspotInput <- function(id) {                             # chr_ct, minLOD 
+#' @rdname hotspotDataApp
+hotspotDataInput <- function(id) {                             # chr_ct, minLOD 
   ns <- shiny::NS(id)
   shiny::fluidRow(
     shiny::column(6, shiny::uiOutput(ns("chr_ct_input"))), # chr_ct
     shiny::column(6, shiny::uiOutput(ns("minLOD_input")))) # minLOD
 }
 #' @export
-#' @rdname hotspotApp
-hotspotOutput <- function(id) { 
+#' @rdname hotspotDataApp
+hotspotDataOutput <- function(id) { 
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("hotspot_str"))
 }

@@ -19,18 +19,18 @@ phenoPanelApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Pheno Panel",
     sidebar = bslib::sidebar(
-      projectUI("project_df"),          # project
-      setParInput("set_par"),           # class, subject_model
-      phenoPanelInput("pheno_panel"),   # pheno_names
-      winParInput("win_par"),           # hotspot
+      projectUI("project_df"),              # project
+      setParInput("set_par"),               # class, subject_model
+      phenoPanelInput("pheno_panel"),       # pheno_names
+      winParInput("win_par"),               # hotspot
       bslib::layout_columns(
         col_widths = c(4, 8),
-        setParUI("set_par"),            # window_Mbp
-        hotspotInput("hotspot_obj")),   # chr_ct, minLOD
+        setParUI("set_par"),                # window_Mbp
+        hotspotDataInput("hotspot_obj")),   # chr_ct, minLOD
       width = 400),
     bslib::card(
-      downloadInput("download"), # inputs for Plot or Table
-      downloadUI("download")     # width and height for plot
+      downloadInput("download"),            # inputs for Plot or Table
+      downloadUI("download")                # width and height for plot
     ),
     phenoPanelOutput("pheno_panel"),
     phenoPanelUI("pheno_panel"),
@@ -38,13 +38,15 @@ phenoPanelApp <- function() {
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
-    peak_df <- peakServer("peak_df", set_par, project_df)
+    peak_project_df <- peakServer("peak_project_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    hotspot_obj <- 
-      hotspotServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
+    hotspot_obj <- hotspotDataServer("hotspot_obj", set_par, peak_project_df,
+                                     pmap_obj, project_df)
     hotspot_df <- 
       hotspotTableServer("hotspot_df", hotspot_obj)
     win_par <- winParServer("win_par", hotspot_df, project_df)
+    peak_df <- peakPanelServer("peak_df", set_par, win_par,
+                               peak_project_df, project_df)
     pheno_list <-
       phenoPanelServer("pheno_panel", set_par, win_par, peak_df,
                        pmap_obj, hotspot_df, project_df)
@@ -59,11 +61,9 @@ phenoPanelServer <- function(id, set_par, win_par, peak_df,
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    peak_filter_df <- peakFilterServer("peak_filter_df", set_par, win_par,
-                                       peak_df, project_df)
-    pheno_mx <- phenoServer("pheno_mx", set_par, peak_filter_df, project_df)
+    pheno_mx <- phenoServer("pheno_mx", set_par, peak_df, project_df)
     covar_df <- shiny::reactive(read_project(project_df(), "covar"))
-    pheno_names <- phenoNamesServer("pheno_names", set_par, peak_filter_df,
+    pheno_names <- phenoNamesServer("pheno_names", set_par, peak_df,
                                     pheno_mx, covar_df, project_df)
     pheno_data_mx <- 
       phenoDataServer("pheno_data", pheno_names, pheno_mx, covar_df)
@@ -75,13 +75,7 @@ phenoPanelServer <- function(id, set_par, win_par, peak_df,
     output$version <- shiny::renderText({
       versions()
     })
-    
-    output$hotspot_output <- shiny::renderUI({ 
-      shiny::tagList(
-        hotspotOutput(ns("hotspot_df")),     # hotspot_plot
-        hotspotUI(ns("hotspot_df")))         # hotspot_table
-    })
-    
+
     ## Additional reactives not used yet.
     kinship_list <- kinshipServer("kinship_list", win_par, project_df)
     allele_info <- shiny::reactive(read_project(project_df(), "allele_info"))
@@ -90,7 +84,7 @@ phenoPanelServer <- function(id, set_par, win_par, peak_df,
     shiny::reactiveValues(
       set_par = set_par,
       win_par = win_par,
-      peak_df = peak_filter_df, # filtered by `win_par`
+      peak_df = peak_df, # filtered by `win_par`
       pmap_obj = pmap_obj,
       covar_df = covar_df,
       hotspot_df = hotspot_df,

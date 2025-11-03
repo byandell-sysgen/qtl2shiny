@@ -32,7 +32,7 @@ winParApp <- function() {
           col_widths = c(6, 4),
           winParInput("win_par"),        # hotspot
           setParUI("set_par")),          # window_Mbp 
-        hotspotInput("hotspot_obj")),    # chr_ct, minLOD
+        hotspotDataInput("hotspot_obj")),    # chr_ct, minLOD
       width = 400),
     bslib::card(
       hotspotTableOutput("hotspot_df")), # hotspot_table
@@ -44,7 +44,7 @@ winParApp <- function() {
     peak_df <- peakServer("peak_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
     hotspot_obj <- 
-      hotspotServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
+      hotspotDataServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
     hotspot_df <- 
       hotspotTableServer("hotspot_df", hotspot_obj)
     win_par <- winParServer("win_par", hotspot_df, project_df)

@@ -84,12 +84,17 @@ for detailed information on data organization.
 In addition, the 
 `class` (phenotype dataset) and
 `subject_model` (subset of `subject`s and additive/interactive `model` type)
-are determined with the `setPar` server.
+are determined given the `project` with the `setPar` server.
+Additional parameters for the viewing window come from the `winPar` server,
+which depends on the `peak` and `hotspot` modules.
 
 - `project_df <-` [projectServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/projectApp.R) #
 select `project`
 - `set_par <-` [setParServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/setParApp.R) #
-select `class` and `subject_model`
+select `class` and `subject_model` (depends on `project` information)
+- `win_par` <- [winParServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/winParApp.R) #
+Hotspot window parameters (depends on `hotspot` and `peak` module components)
+
 
 ### Phenotype and Other Project Data
 
@@ -100,9 +105,12 @@ precomputed peaks and summaries
 - `pheno_mx <-` [phenoServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoApp.R) #
 raw phenotype data
 
-The `peak` server is straight-forward, depending on `project`, `class` and `subject_model`
-through the `project` and `setPar` servers.
-The `pheno` server depends on `project` and `class`, but is a bit more complicated, as it uses the
+The `peak_df` depends on `project`, `class` and `subject_model`
+through the `project` and `setPar` servers,
+and provides data used for the `hotspot` selection,
+which further filters the `peak_df` to the selected `hotspot`.
+
+The `pheno` server depends on `project` and `class` and `peak_df`, using the
 [phenoNamesServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoNamesApp.R)
 server to identify the phenotype names.
 Both `peak` and `pheno` servers depend on (directly and indirectly, resp.)
@@ -184,30 +192,47 @@ qtl2shinyApp <- function() {
 ### Hotspot and Phenotype Panel
 
 The hotspot panel has tabs for `Hotspots` and `Phenotypes`.
-It depends on the `peak_df` and `pmap_obj` objects, as well as the
-`project` and `setPar` modules.
+It depends on the `project` and `setPar` modules.
+
+and 
+`peak_df` and `pmap_obj` objects, as well as the
 This panel has the following modules:
 
 - [hotspotPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotPanelApp.R) #
 Hotspot and Phenotype Panel
   - [hotspot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotApp.R) #
 summary or plot of `peak_df` hotspots, select hotspot
+  - [hotspotTable](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotTableApp.R) #
+Table of hotspots
+  - [hotspotPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotPlotApp.R) #
+Plot of hotspot
+  - [peakPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakPanelApp.R) #
+Peak panel
   - [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPanelApp.R) #
 Phenotype panel
-  - [winPar](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/winParApp.R) #
-Hotspot window parameters
 
 The phenotype panel, subsumed in the hotspot panel,
 consists of the following four modules:
 
 - [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPanelApp.R) #
 Phenotype Panel
-  - [phenoNames](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoNamesApp.R) #
-Select phenotype names
   - [pheno](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoApp.R) #
 Create phenotype object and summary
+  - [phenoNames](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoNamesApp.R) #
+Select phenotype names
+  - [phenoData](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoDataApp.R) #
+Filter phenotypes by names and transform by `rankZ`
+  - [phenoTable](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoTableApp.R) #
+Table of phenotypes
   - [phenoPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPlotApp.R) #
-Plot phenotypes
+Plot of phenotypes
+
+Interleaved with `hotspot` panel is the `peak` panel
+
+- [peakPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakPanelApp.R) #
+Peaks filtered by selected `hotspot`
+  - [peak](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakApp.R) #
+Peak dataframe
 
 ### Scan Panel
 

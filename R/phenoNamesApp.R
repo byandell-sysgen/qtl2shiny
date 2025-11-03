@@ -20,36 +20,36 @@ phenoNamesApp <- function() {
     title =  "Test Phenotype Names",
     sidebar = bslib::sidebar(
       bslib::card(
-        projectUI("project_df"),         # project
-        setParInput("set_par"),          # class, subject_model
-        phenoNamesInput("pheno_names")), # pheno_names
+        projectUI("project_df"),             # project
+        setParInput("set_par"),              # class, subject_model
+        phenoNamesInput("pheno_names")),     # pheno_names
       bslib::card(
-        winParInput("win_par"),          # hotspot
+        winParInput("win_par"),              # hotspot
         bslib::layout_columns(
           col_widths = c(4, 8),
-          setParUI("set_par"),           # window_Mbp 
-          hotspotInput("hotspot_obj"))), # chr_ct, minLOD
+          setParUI("set_par"),               # window_Mbp 
+          hotspotDataInput("hotspot_obj"))), # chr_ct, minLOD
       width = 400
     ),
     phenoNamesOutput("pheno_names"),
-    peakFilterOutput("peak_filter_df")
+    peakPanelOutput("peak_df")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     set_par <- setParServer("set_par", project_df)
-    peak_df <- peakServer("peak_df", set_par, project_df)
+    peak_project_df <- peakServer("peak_project_df", set_par, project_df)
     pmap_obj <- shiny::reactive(read_project(project_df(), "pmap"))
-    hotspot_obj <- 
-      hotspotServer("hotspot_obj", set_par, peak_df, pmap_obj, project_df)
+    hotspot_obj <- hotspotDataServer("hotspot_obj", set_par, peak_project_df,
+                                     pmap_obj, project_df)
     hotspot_df <- 
       hotspotTableServer("hotspot_df", hotspot_obj)
     win_par <- winParServer("win_par", hotspot_df, project_df)
-    peak_filter_df <- peakFilterServer("peak_filter_df", set_par, win_par,
-                                       peak_df, project_df)
-    pheno_mx <- phenoServer("pheno_mx", set_par, peak_filter_df, project_df)
+    peak_df <- peakPanelServer("peak_df", set_par, win_par,
+                               peak_project_df, project_df)
+    pheno_mx <- phenoServer("pheno_mx", set_par, peak_df, project_df)
     covar_df <- shiny::reactive(read_project(shiny::req(project_df()), "covar"))
     pheno_names <- 
-      phenoNamesServer("pheno_names", set_par, peak_filter_df, pheno_mx,
+      phenoNamesServer("pheno_names", set_par, peak_df, pheno_mx,
                        covar_df, project_df)
   }
   shiny::shinyApp(ui, server)
