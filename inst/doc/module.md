@@ -200,7 +200,7 @@ This panel has the following modules:
 
 - [hotspotPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotPanelApp.R) #
 Hotspot and Phenotype Panel
-  - [hotspot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotApp.R) #
+  - [hotspotData](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotDataApp.R) #
 summary or plot of `peak_df` hotspots, select hotspot
   - [hotspotTable](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotTableApp.R) #
 Table of hotspots
