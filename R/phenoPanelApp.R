@@ -28,10 +28,7 @@ phenoPanelApp <- function() {
         setParUI("set_par"),                # window_Mbp
         hotspotDataInput("hotspot_obj")),   # chr_ct, minLOD
       width = 400),
-    bslib::card(
-      downloadInput("download"),            # inputs for Plot or Table
-      downloadUI("download")                # width and height for plot
-    ),
+    downloadInput("download"),              # download inputs for Plot or Table
     phenoPanelOutput("pheno_panel"),
     phenoPanelUI("pheno_panel"),
   )

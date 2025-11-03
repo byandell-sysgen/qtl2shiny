@@ -20,10 +20,8 @@ downloadApp <- function(selected_item = 1, plot_table = "Plot") {
       shiny::uiOutput("selected_plot"),
       shiny::uiOutput("selected_table")
     ),
-    bslib::card(
-      downloadInput("download"), # inputs for Plot or Table
-      downloadUI("download")     # width and height for plot
-    ),
+    downloadInput("download"), # inputs for Plot or Table
+    downloadUI("download"),     # width and height for plot
     bslib::card(
       bslib::card_header("Download Preview"),
       downloadPreview("download")    # Only for Preview of downloadApp().
@@ -141,9 +139,6 @@ downloadServer <- function(id, download_list) {
         style = paste("display: flex; justify-content: space-between;",
                       "align-items: center; margin-bottom: 10px;",
                       "flex-wrap: wrap;"),
-        shiny::h4(
-          paste(shiny::req(input$plot_table)),
-          style = "margin: 0 15px 0 0; color: #2c3e50; font-weight: 600;"),
         shiny::div(
           style = paste("display: flex; align-items: center; gap: 10px;",
                         "flex-grow: 1; justify-content: flex-end;"),
@@ -188,13 +183,16 @@ downloadServer <- function(id, download_list) {
     
     # Download Filename.
     base_filename <- shiny::reactive({
-      paste0(shiny::req(download_list$Filename),
+      # Trick to allow `Filename` to be character or reactive.
+      filename <- shiny::req(download_list$Filename)
+      if(is.reactive(filename)) filename <- filename()
+      paste0(filename,
              "_", format(Sys.time(), "%Y%m%d"))
     })
     # Optional UI to edit filename
     output$filename <- renderUI({
       filename <- shiny::req(base_filename())
-      shiny::textAreaInput(ns("filename"), "", filename)
+      shiny::textInput(ns("filename"), "", filename)
     })
     download_filename <- function(mime = "png") {
       function() {
@@ -235,9 +233,6 @@ downloadServer <- function(id, download_list) {
         style = paste("display: flex; justify-content: space-between;",
                       "align-items: center; margin-bottom: 10px;",
                       "flex-wrap: wrap;"),
-        shiny::h4(
-          shiny::req(input$plot_table),
-          style = "margin: 0 15px 0 0; color: #2c3e50; font-weight: 600;"),
         shiny::downloadButton(ns("Table"), "Table", class = "btn-sm")
       )
     })
@@ -254,13 +249,12 @@ downloadServer <- function(id, download_list) {
 #' @export
 downloadInput <- function(id) {
   ns <- shiny::NS(id)
-  bslib::card(
-    bslib::layout_columns(
-      col_widths = c(3, 9),
-      shiny::selectInput(ns("plot_table"), "", c("Plot","Table")),
-      shiny::uiOutput(ns("filename"))),
-    shiny::uiOutput(ns("buttons"))
-  )
+  # ** Would like these to be aligned vertically better. **
+  bslib::layout_columns(
+    col_widths = c(2, 4, 6),
+    shiny::selectInput(ns("plot_table"), "", c("Plot","Table")),
+    shiny::uiOutput(ns("buttons")),
+    shiny::uiOutput(ns("filename")))
 }
 #' @rdname downloadApp
 #' @export
