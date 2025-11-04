@@ -56,27 +56,32 @@ hotspotPanelServer <- function(id, project_df) {
       phenoPanelServer("pheno_panel", set_par, win_par, peak_df,
                        pmap_obj, hotspot_df, project_df)
     
+    # Download.
     download_Plot <- shiny::reactive({
       switch(shiny::req(input$hot_tab),
         Hotspots = hotspot_plot(),
-        Phenotypes = pheno_list$Plot())
+        Phenotypes = pheno_list$pheno_plot())
     })
     download_Table <- shiny::reactive({
       switch(shiny::req(input$hot_tab),
              Hotspots = hotspot_df(),
-             Phenotypes = pheno_list$Table())
+             Phenotypes = pheno_list$pheno_table())
     })
-    download_Filename <- shiny::reactive({shiny::req(input$hot_tab)})
-
-    ## Return.
-    ## ** Challenge is that `hotspot_list` modifies `pheno_list`.
-    ## May want to rethink `pheno_list`. **
+    download_Filename <- shiny::reactive({
+      out <- switch(shiny::req(input$hot_tab),
+        Hotspots = shiny::req(set_par$class),
+        Phenotypes = paste(shiny::req(pheno_list$pheno_names()),
+                                      collapse = "_"))
+      paste(out, shiny::req(input$hot_tab), sep = "_")
+    })
     hotspot_list <- pheno_list
     hotspot_list$download <- shiny::reactiveValues(
       Plot = download_Plot,
       Table = download_Table,
       Filename = download_Filename
     )
+    
+    ## Return.
     hotspot_list
     
     ## Return.

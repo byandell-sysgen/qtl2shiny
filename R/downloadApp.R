@@ -12,7 +12,7 @@
 #' @importFrom utils write.csv    
 #' @importFrom ggplot2 ggsave
 #' @export
-downloadApp <- function(selected_item = 1, plot_table = "Plot") {
+downloadApp <- function() {
   ui <- bslib::page_sidebar(
     title = "Test Download",
     sidebar = bslib::sidebar("side_panel", width = 400,
@@ -50,19 +50,25 @@ downloadApp <- function(selected_item = 1, plot_table = "Plot") {
     selected_table <- shiny::reactive({
       download_Table[[shiny::req(input$selected_table)]]()
     })
+    download_Filename <- shiny::reactive({
+      # Trick to get input from `downloadServer`.
+      switch(input$`download-plot_table`,
+        Table = input$selected_table,
+        Plot = input$selected_plot)
+    })
 
     download_list <- shiny::reactiveValues(
-      Filename = "panelID_instanceID",
+      Filename = download_Filename,
       Plot = selected_plot,
       Table = selected_table)
     
-    downloadServer("download", download_list)
+    downloadServer("download", download_list, addDate = TRUE)
   }
   shiny::shinyApp(ui, server)
 }
 #' @rdname downloadApp
 #' @export
-downloadServer <- function(id, download_list) {
+downloadServer <- function(id, download_list, addDate = FALSE) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -94,7 +100,7 @@ downloadServer <- function(id, download_list) {
     output$preview <- shiny::renderUI({
       list(
         "Filename",
-        download_list$Filename,
+        download_list$Filename(),
         shiny::br(),
         switch(shiny::req(input$plot_table),
           Plot  = shiny::uiOutput(ns("preview_plots")),
@@ -183,11 +189,11 @@ downloadServer <- function(id, download_list) {
     
     # Download Filename.
     base_filename <- shiny::reactive({
-      # Trick to allow `Filename` to be character or reactive.
-      filename <- shiny::req(download_list$Filename)
-      if(is.reactive(filename)) filename <- filename()
-      paste0(filename,
-             "_", format(Sys.time(), "%Y%m%d"))
+      filename <- shiny::req(download_list$Filename())
+      if(addDate) {
+        filename <- paste0(filename, "_", format(Sys.time(), "%Y%m%d"))
+      }
+      filename
     })
     # Optional UI to edit filename
     output$filename <- renderUI({
@@ -233,7 +239,7 @@ downloadServer <- function(id, download_list) {
         style = paste("display: flex; justify-content: space-between;",
                       "align-items: center; margin-bottom: 10px;",
                       "flex-wrap: wrap;"),
-        shiny::downloadButton(ns("Table"), "Table", class = "btn-sm")
+        shiny::downloadButton(ns("Table"), "CSV", class = "btn-sm")
       )
     })
     output$Table <- shiny::downloadHandler(

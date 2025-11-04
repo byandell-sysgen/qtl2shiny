@@ -47,7 +47,12 @@ phenoPanelApp <- function() {
     pheno_list <-
       phenoPanelServer("pheno_panel", set_par, win_par, peak_df,
                        pmap_obj, hotspot_df, project_df)
-    downloadServer("download", pheno_list)
+    download_list <- shiny::reactiveValues(
+      Plot = shiny::isolate(pheno_list$pheno_plot),
+      Table = shiny::isolate(pheno_list$pheno_table),
+      Filename = shiny::reactive("pheno")
+    )
+    downloadServer("download", download_list)
   }
   shiny::shinyApp(ui, server)
 }
@@ -89,9 +94,8 @@ phenoPanelServer <- function(id, set_par, win_par, peak_df,
       pheno_mx = pheno_data_mx, # filtered by `pheno_names`
       kinship_list = kinship_list,
       allele_info = allele_info,
-      Filename = "pheno",
-      Plot = pheno_plot,
-      Table = pheno_table)
+      pheno_plot = pheno_plot,
+      pheno_table = pheno_table)
   })
 }
 #' @export

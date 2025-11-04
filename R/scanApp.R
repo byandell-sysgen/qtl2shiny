@@ -43,6 +43,7 @@ scanApp <- function() {
         sidebar = bslib::sidebar(
           scanInput("scan")),                   # blups, pheno_name, scan_window
         bslib::card(
+          downloadInput("download"),            # download inputs for Plot or Table
           scanOutput("scan")))
     )
   )
@@ -50,7 +51,8 @@ scanApp <- function() {
     project_df <- projectServer("project_df", projects_df)
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
-    scanServer("scan", hotspot_list, probs_obj, project_df)
+    download_list <- scanServer("scan", hotspot_list, probs_obj, project_df)
+    downloadServer("download", download_list)
   }
   shiny::shinyApp(ui, server)
 }
@@ -104,7 +106,7 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
     })
     
     ## Scan1 plot
-    output$scan_plot <- shiny::renderPlot({
+    scan_plot <- shiny::reactive({
       if(!shiny::isTruthy(win_par()$chr_id) || !shiny::isTruthy(hotspot_list$pheno_mx()))
         return(plot_null("need to select\nRegion & Phenotype"))
       shiny::req(win_par(), input$scan_window, scan_obj(), probs_obj())
@@ -117,6 +119,9 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
                   input$scan_window, 
                   hotspot_list$pheno_mx())
       })
+    })
+    output$scan_plot <- shiny::renderPlot({
+      print(shiny::req(scan_plot()))
     })
     
     ## Coefficient Effects.
@@ -131,7 +136,7 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
                      hotspot_list$peak_df(), input$blups)
       })
     })
-    output$coef_plot <- shiny::renderPlot({
+    coef_plot <- shiny::reactive({
       shiny::req(input$pheno_name, scan_obj(), eff_obj(),
                  win_par(), hotspot_list$allele_info())
       map <- shiny::req(probs_obj())$map
@@ -141,17 +146,23 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
                  input$scan_window,, hotspot_list$allele_info())
       })
     })
-    output$scan_table <- DT::renderDataTable({
+    output$coef_plot <- shiny::renderPlot({
+      print(shiny::req(coef_plot()))
+    })
+    scan_table <- shiny::reactive({
       shiny::req(eff_obj(), scan_obj(), probs_obj())
       shiny::withProgress(message = 'Effect summary ...', value = 0, {
         shiny::setProgress(1)
         summary(eff_obj(), scan_obj(), probs_obj()$map)
       })
-    }, escape = FALSE,
-    options = list(scrollX = TRUE, pageLength = 5))
+    })
+    output$scan_table <- DT::renderDataTable(
+      shiny::req(scan_table()),
+      escape = FALSE,
+      options = list(scrollX = TRUE, pageLength = 5))
     
     ## Effect and LOD Plot
-    output$scan_coef_plot <- shiny::renderPlot({
+    scan_coef_plot <- shiny::reactive({
       shiny::req(input$pheno_name, input$scan_window, win_par(),
                  eff_obj(), scan_obj(), hotspot_list$allele_info())
       map <- shiny::req(probs_obj())$map
@@ -161,10 +172,13 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
                  addlod = TRUE, hotspot_list$allele_info())
       })
     })
+    output$scan_coef_plot <- shiny::renderPlot({
+      print(shiny::req(scan_coef_plot()))
+    })
     
     output$pheno_choice <- shiny::renderUI({
       switch(shiny::req(input$scan_tab),
-             "LOD & Effects" =,
+             Both    =,
              Summary =,
              Effects = shiny::tagList(
                shiny::uiOutput(ns("blups_input")),       # blups
@@ -173,13 +187,36 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
     output$win_choice <- shiny::renderUI({
       switch(shiny::req(input$scan_tab),
              LOD     =,
-             "LOD & Effects" =,
+             Both    =,
              Effects = shiny::uiOutput(ns("scan_window_input")))
     })
 
     output$blups_input <- shiny::renderUI({
       shiny::checkboxInput(ns("blups"), "BLUPs?")
     })
+    
+    # Download.
+    download_Plot <- shiny::reactive({
+      switch(shiny::req(input$scan_tab),
+             Summary =,
+             LOD = scan_plot(),
+             Effects = coef_plot(),
+             Both = scan_coef_plot())
+    })
+    download_Filename <- shiny::reactive({
+      paste(shiny::req(hotspot_list$set_par$class),
+            shiny::req(input$scan_tab), sep = "_")
+    })
+    # ** Challenge: Table name not set right; need connection between Filename
+    # and choice within?
+    download_list <- shiny::reactiveValues(
+      Plot = download_Plot,
+      Table = scan_table,
+      Filename = download_Filename
+    )
+    
+    # Return.
+    download_list
   })
 }
 #' @export
@@ -198,6 +235,7 @@ scanOutput <- function(id) {
     id = ns("scan_tab"),
     bslib::nav_panel("LOD", shiny::plotOutput(ns("scan_plot"))),
     bslib::nav_panel("Effects", shiny::plotOutput(ns("coef_plot"))),
-    bslib::nav_panel("LOD & Effects", shiny::plotOutput(ns("scan_coef_plot"))),
+    bslib::nav_panel("LOD & Effects", value = "Both",
+                     shiny::plotOutput(ns("scan_coef_plot"))),
     bslib::nav_panel("Summary", DT::dataTableOutput(ns("scan_table"))))
 }
