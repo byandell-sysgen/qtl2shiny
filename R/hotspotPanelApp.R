@@ -72,7 +72,8 @@ hotspotPanelServer <- function(id, project_df) {
         Hotspots = shiny::req(set_par$class),
         Phenotypes = paste(shiny::req(pheno_list$pheno_names()),
                                       collapse = "_"))
-      paste(out, shiny::req(input$hot_tab), sep = "_")
+      out <- paste(out, shiny::req(input$hot_tab), sep = "_")
+      c(Plot = out, Table = out)
     })
     hotspot_list <- pheno_list
     hotspot_list$download <- shiny::reactiveValues(

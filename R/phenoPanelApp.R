@@ -47,11 +47,18 @@ phenoPanelApp <- function() {
     pheno_list <-
       phenoPanelServer("pheno_panel", set_par, win_par, peak_df,
                        pmap_obj, hotspot_df, project_df)
+    
+    # Download.
+    download_Filename <- shiny::reactive({
+      out <- paste0(
+        paste(shiny::req(pheno_list$pheno_names()), collapse = "_"),
+        "_Phenotypes")
+      c(Plot = out, Table = out)
+    })
     download_list <- shiny::reactiveValues(
       Plot = shiny::isolate(pheno_list$pheno_plot),
       Table = shiny::isolate(pheno_list$pheno_table),
-      Filename = shiny::reactive("pheno")
-    )
+      Filename = download_Filename)
     downloadServer("download", download_list)
   }
   shiny::shinyApp(ui, server)

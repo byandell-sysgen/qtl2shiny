@@ -198,14 +198,17 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
     # Download.
     download_Plot <- shiny::reactive({
       switch(shiny::req(input$scan_tab),
-             Summary =,
              LOD = scan_plot(),
              Effects = coef_plot(),
+             Summary =,
              Both = scan_coef_plot())
     })
     download_Filename <- shiny::reactive({
-      paste(shiny::req(hotspot_list$set_par$class),
-            shiny::req(input$scan_tab), sep = "_")
+      scan_tab <- shiny::req(input$scan_tab)
+      out <- shiny::req(hotspot_list$set_par$class)
+      c(Plot = paste(out,
+          ifelse(scan_tab == "Summary", "Both", scan_tab), sep = "_"),
+        Table = paste0(out, "_Summary"))
     })
     # ** Challenge: Table name not set right; need connection between Filename
     # and choice within?

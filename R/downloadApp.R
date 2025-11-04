@@ -51,9 +51,7 @@ downloadApp <- function() {
       download_Table[[shiny::req(input$selected_table)]]()
     })
     download_Filename <- shiny::reactive({
-      # Trick to get input from `downloadServer`.
-      switch(input$`download-plot_table`,
-        Table = input$selected_table,
+      c(Table = input$selected_table,
         Plot = input$selected_plot)
     })
 
@@ -98,11 +96,12 @@ downloadServer <- function(id, download_list, addDate = FALSE) {
     
     # Preview download app.
     output$preview <- shiny::renderUI({
+      plot_table <- shiny::req(input$plot_table)
       list(
         "Filename",
-        download_list$Filename(),
+        download_list$Filename()[plot_table],
         shiny::br(),
-        switch(shiny::req(input$plot_table),
+        switch(plot_table,
           Plot  = shiny::uiOutput(ns("preview_plots")),
           Table = DT::dataTableOutput(ns("preview_table")))
       )
@@ -190,6 +189,7 @@ downloadServer <- function(id, download_list, addDate = FALSE) {
     # Download Filename.
     base_filename <- shiny::reactive({
       filename <- shiny::req(download_list$Filename())
+      filename <- filename[shiny::req(input$plot_table)]
       if(addDate) {
         filename <- paste0(filename, "_", format(Sys.time(), "%Y%m%d"))
       }
