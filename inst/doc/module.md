@@ -1,6 +1,6 @@
 # Shiny Module Organization
 
-This package contains a collection of ~30 shiny modules organized
+This package contains a collection of ~40 shiny modules organized
 into panels.
 Each panel on the `qtl2shiny` app is a shiny module that calls multiple
 modules.

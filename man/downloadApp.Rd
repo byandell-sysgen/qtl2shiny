@@ -7,9 +7,9 @@
 \alias{downloadUI}
 \title{Download App}
 \usage{
-downloadApp(selected_item = 1, plot_table = "Plot")
+downloadApp()
 
-downloadServer(id, download_list)
+downloadServer(id, download_list, addDate = FALSE)
 
 downloadInput(id)
 
