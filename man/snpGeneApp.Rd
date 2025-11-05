@@ -9,7 +9,7 @@
 \usage{
 snpGeneApp()
 
-snpGeneServer(id, snp_list, project_df)
+snpGeneServer(id, hotspot_list, snp_list, project_df)
 
 snpGeneInput(id)
 

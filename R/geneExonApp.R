@@ -62,13 +62,16 @@ geneExonServer <- function(id, snp_list) {
     pheno_names <- shiny::reactive({
       sort(unique(shiny::req(snp_list$top_snps_tbl()$pheno)))
     })
-    summary_gene_exon <- shiny::reactive({
-      summary(shiny::req(snp_list$gene_exon_tbl()),
-              top_snps_tbl = shiny::req(snp_list$top_snps_tbl()))
+    exon_table <- shiny::reactive({
+      shiny::withProgress(message = 'Gene Exon Table ...', value = 0, {
+        shiny::setProgress(1)
+        summary(shiny::req(snp_list$gene_exon_tbl()),
+                top_snps_tbl = shiny::req(snp_list$top_snps_tbl()))
+      })
     })
     gene_names <- shiny::reactive({
       pheno_name <- shiny::req(snp_list$snp_par$pheno_name)
-      gene_in <- summary_gene_exon()
+      gene_in <- exon_table()
       if(nrow(gene_in)) {
         if(pheno_name %in% names(gene_in))
           gene_in <- gene_in[!is.na(gene_in[[pheno_name]]),]
@@ -91,14 +94,8 @@ geneExonServer <- function(id, snp_list) {
       }
     })
     
-    exon_table <- shiny::reactive({
-      shiny::withProgress(message = 'Gene Exon Table ...', value = 0, {
-        shiny::setProgress(1)
-        summary_gene_exon()
-      })
-    })
-    output$exon_table_output <- DT::renderDataTable(
-      shiny::req(exon_table()),
+    output$exon_table_output <- DT::renderDataTable({
+      shiny::req(exon_table())},
       options = list(scrollX = TRUE, pageLength = 5,
         lengthMenu = list(c(5,10,20,-1), list("5","10","20","all"))))
     
@@ -150,8 +147,8 @@ geneExonServer <- function(id, snp_list) {
     
     # Return.
     shiny::reactiveValues(
-      plot = exon_plot,
-      table = exon_table)
+      Plot = exon_plot,
+      Table = exon_table)
   })
 }
 #' @export
@@ -169,5 +166,5 @@ geneExonOutput <- function(id) {
     bslib::nav_panel("Plot", bslib::card(
       shiny::plotOutput(ns("exon_plot_output")))),
     bslib::nav_panel("Summary", bslib::card(
-      DT::dataTableOutput(ns("exon_table")))))
+      DT::dataTableOutput(ns("exon_table_output")))))
 }

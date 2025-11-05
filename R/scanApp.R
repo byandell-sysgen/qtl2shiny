@@ -210,8 +210,6 @@ scanServer <- function(id, hotspot_list, probs_obj, project_df) {
           ifelse(scan_tab == "Summary", "Both", scan_tab), sep = "_"),
         Table = paste0(out, "_Summary"))
     })
-    # ** Challenge: Table name not set right; need connection between Filename
-    # and choice within?
     download_list <- shiny::reactiveValues(
       Plot = download_Plot,
       Table = scan_table,

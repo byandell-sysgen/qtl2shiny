@@ -74,8 +74,11 @@ geneRegionServer <- function(id, snp_list, project_df) {
                             gene_region(chr_id(), wrng, project_df())
                           })
     })
+    gene_table <- shiny::reactive({
+      summary(shiny::req(gene_region_tbl()))
+    })
     output$gene_table <- DT::renderDataTable({
-      summary(gene_region_tbl())
+      shiny::req(gene_table())
     })
     chr_pos_all <- shiny::reactive({
       chr <- shiny::req(chr_id())
@@ -92,7 +95,7 @@ geneRegionServer <- function(id, snp_list, project_df) {
     output$SNP <- shiny::renderUI({
       shiny::checkboxInput(ns("SNP"), "Add SNPs?", input$SNP)
     })
-    output$gene_plot <- shiny::renderPlot({
+    gene_plot <- shiny::reactive({
       shiny::req(gene_region_tbl(), snp_list$top_snps_tbl())
       wrng <- shiny::req(snp_list$snp_par$scan_window)
       phename <- shiny::req(snp_list$snp_par$pheno_name)
@@ -100,6 +103,14 @@ geneRegionServer <- function(id, snp_list, project_df) {
       plot_gene_region(phename, gene_region_tbl(), snp_list$top_snps_tbl(), 
                        wrng, use_snp, snp_list$snp_action())
     })
+    output$gene_plot <- shiny::renderPlot({
+      print(shiny::req(gene_plot()))
+    })
+    
+    # Return.
+    shiny::reactiveValues(
+      Plot  = gene_plot,
+      Table = gene_table)
   })
 }
 #' @export

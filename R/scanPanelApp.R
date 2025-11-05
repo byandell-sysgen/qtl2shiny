@@ -36,6 +36,7 @@ scanPanelApp <- function() {
         sidebar = bslib::sidebar(
           scanPanelInput("scan_panel"),         # <various>
           snpListInput("snp_list")),            # scan_window, minLOD, pheno_name
+        downloadInput("download"),              # download inputs for Plot or Table
         scanPanelOutput("scan_panel")
       )
     )
@@ -45,7 +46,9 @@ scanPanelApp <- function() {
     hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
-    scanPanelServer("scan_panel", hotspot_list, snp_list, probs_obj, project_df)
+    download_list <- scanPanelServer("scan_panel", hotspot_list, snp_list,
+                                     probs_obj, project_df)
+    downloadServer("download", download_list)
   }
   shiny::shinyApp(ui, server)
 }
@@ -55,14 +58,38 @@ scanPanelServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    scanServer("scan", hotspot_list, probs_obj, project_df)
-    snpGeneServer("snp_gene", snp_list, project_df)
+    scan_list <- scanServer("scan", hotspot_list, probs_obj, project_df)
+    gene_list <- snpGeneServer("snp_gene", hotspot_list, snp_list, project_df)
 
     output$scan_input <- shiny::renderUI({
       switch(shiny::req(input$hap_tab),
-        "Genome Scans"    = scanInput(ns("scan")),        # blups, pheno_name, scan_window
-        "SNP Association" = snpGeneInput(ns("snp_gene"))) # SNP, gene_name
+        scan = scanInput(ns("scan")),        # blups, pheno_name, scan_window
+        snp  = snpGeneInput(ns("snp_gene"))) # SNP, gene_name
     })
+    
+    # Download.
+    download_Plot <- shiny::reactive({
+      switch(shiny::req(input$hap_tab),
+        scan = scan_list$Plot(),
+        snp  = gene_list$Plot())
+    })
+    download_Table <- shiny::reactive({
+      switch(shiny::req(input$hap_tab),
+             scan = scan_list$Table(),
+             snp  = gene_list$Table())
+    })
+    download_Filename <- shiny::reactive({
+      switch(shiny::req(input$hap_tab),
+             scan = scan_list$Filename(),
+             snp  = gene_list$Filename())
+    })
+    download_list <- shiny::reactiveValues(
+      Plot = download_Plot,
+      Table = download_Table,
+      Filename = download_Filename)
+    
+    # Return.
+    download_list
   })
 }
 #' @export
@@ -77,6 +104,8 @@ scanPanelOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = ns("hap_tab"),
-    bslib::nav_panel("Genome Scans",    scanOutput(ns("scan"))),
-    bslib::nav_panel("SNP Association", snpGeneOutput(ns("snp_gene"))))
+    bslib::nav_panel("Genome Scans",    value = "scan",
+                     scanOutput(ns("scan"))),
+    bslib::nav_panel("SNP Association", value = "snp",
+                     snpGeneOutput(ns("snp_gene"))))
 }  
