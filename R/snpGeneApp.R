@@ -47,7 +47,7 @@ snpGeneApp <- function() {
     project_df <- projectServer("project_df", projects_df)
     hotspot_list <- hotspotServer("hotspot_list", project_df)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
-    download_list <- snpGeneServer("snp_gene", hotspot_list, snp_list,
+    download_list <- snpGeneServer("snp_gene", snp_list,
                                    project_df)
     downloadServer("download", download_list)
   }
@@ -55,7 +55,7 @@ snpGeneApp <- function() {
 }
 #' @export
 #' @rdname snpGeneApp
-snpGeneServer <- function(id, hotspot_list, snp_list, project_df) {
+snpGeneServer <- function(id, snp_list, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -87,7 +87,7 @@ snpGeneServer <- function(id, hotspot_list, snp_list, project_df) {
       gen_tab <- shiny::req(input$gen_tab)
       pheno_names <- ifelse(
         gen_tab == "SNP",
-        paste(shiny::req(hotspot_list$pheno_names()),
+        paste(shiny::req(snp_list$pheno_names()),
               collapse = "_"),
         shiny::req(snp_list$snp_par$pheno_name))
       out <- paste(pheno_names, gen_tab, sep = "_")

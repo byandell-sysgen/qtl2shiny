@@ -59,7 +59,7 @@ scanPanelServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
     ns <- session$ns
     
     scan_list <- scanServer("scan", hotspot_list, probs_obj, project_df)
-    gene_list <- snpGeneServer("snp_gene", hotspot_list, snp_list, project_df)
+    gene_list <- snpGeneServer("snp_gene", snp_list, project_df)
 
     output$scan_input <- shiny::renderUI({
       switch(shiny::req(input$hap_tab),

@@ -50,8 +50,7 @@ hotspotServer <- function(id, project_df) {
     hotspot_df <- hotspotTableServer("hotspot_df", hotspot_obj)
     hotspot_plot <- hotspotPlotServer("hotspot_plot", set_par, hotspot_obj)
     win_par <- winParServer("win_par", hotspot_df, project_df)
-    peak_df <- peakPanelServer("peak_df", set_par, win_par, peak_read_df,
-                               project_df)
+    peak_df <- peakServer("peak_df", set_par, win_par, peak_read_df, project_df)
     pheno_list <-
       phenoServer("pheno_panel", set_par, win_par, peak_df,
                        pmap_obj, hotspot_df, project_df)

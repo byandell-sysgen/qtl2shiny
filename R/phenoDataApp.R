@@ -46,8 +46,7 @@ phenoDataApp <- function() {
       hotspotTableServer("hotspot_df", hotspot_obj)
     win_par <- 
       winParServer("win_par", hotspot_df, project_df)
-    peak_df <- peakPanelServer("peak_df", set_par, win_par, peak_read_df,
-                               project_df)
+    peak_df <- peakServer("peak_df", set_par, win_par, peak_read_df, project_df)
     pheno_mx <- phenoReadServer("pheno_mx", set_par, peak_df, project_df)
     covar_df <- shiny::reactive(read_project(shiny::req(project_df()), "covar"))
     pheno_names <- phenoNamesServer("pheno_names", set_par, peak_df,

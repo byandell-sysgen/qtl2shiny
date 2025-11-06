@@ -12,14 +12,14 @@
 #' @importFrom shiny  column moduleServer NS reactive req
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom bslib layout_columns page_sidebar sidebar
-peakPanelApp <- function() {
+peakApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Pheno Panel",
     sidebar = bslib::sidebar(
       projectUI("project_df"),           # project
       setParInput("set_par"),            # class, subject_model
-      peakPanelInput("peak_df"), # filter
+      peakInput("peak_df"),              # filter
       bslib::layout_columns(
         col_widths = c(6, 4),
         winParInput("win_par"),          # hotspot
@@ -27,7 +27,7 @@ peakPanelApp <- function() {
       ),
       hotspotDataInput("hotspot_obj")    # chr_ct, minLOD
     ),
-    peakPanelOutput("peak_df")
+    peakOutput("peak_df")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
@@ -39,14 +39,13 @@ peakPanelApp <- function() {
     hotspot_df <- 
       hotspotTableServer("hotspot_df", hotspot_obj)
     win_par <- winParServer("win_par", hotspot_df, project_df)
-    peak_df <- peakPanelServer("peak_df", set_par, win_par,
-                               peak_read_df, project_df)
+    peak_df <- peakServer("peak_df", set_par, win_par, peak_read_df, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname peakPanelApp
-peakPanelServer <- function(id, set_par, win_par, peak_read_df, project_df) {
+#' @rdname peakApp
+peakServer <- function(id, set_par, win_par, peak_read_df, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -76,14 +75,14 @@ peakPanelServer <- function(id, set_par, win_par, peak_read_df, project_df) {
   })
 }
 #' @export
-#' @rdname peakPanelApp
-peakPanelInput <- function(id) {
+#' @rdname peakApp
+peakInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("filter"))               # filter
 }
 #' @export
-#' @rdname peakPanelApp
-peakPanelOutput <- function(id) {
+#' @rdname peakApp
+peakOutput <- function(id) {
   ns <- shiny::NS(id)
   DT::dataTableOutput(ns("peak_table")) # peak_table
 }
