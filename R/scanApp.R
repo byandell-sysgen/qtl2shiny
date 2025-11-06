@@ -13,7 +13,7 @@
 #'             req sidebarPanel strong tagList textOutput uiOutput
 #' @importFrom bslib card layout_sidebar navbar_options navset_tab nav_panel
 #'             page_navbar sidebar
-scanPanelApp <- function() {
+scanApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
     title =  "Test Scan Panel",
@@ -31,13 +31,13 @@ scanPanelApp <- function() {
         Output("hotspot_list"))
     ),
     bslib::nav_panel(
-      title = "scanPanel",
+      title = "scan",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          scanPanelInput("scan_panel"), # <various>
+          scanInput("scan_panel"), # <various>
           snpListInput("snp_list")),    # scan_window, minLOD, pheno_name
         downloadInput("download"),      # download inputs for Plot or Table
-        scanPanelOutput("scan_panel")
+        scanOutput("scan_panel")
       )
     )
   )
@@ -46,15 +46,15 @@ scanPanelApp <- function() {
     hotspot_list <- Server("hotspot_list", project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
-    download_list <- scanPanelServer("scan_panel", hotspot_list, snp_list,
+    download_list <- scanServer("scan_panel", hotspot_list, snp_list,
                                      probs_obj, project_df)
     downloadServer("download", download_list)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname scanPanelApp
-scanPanelServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
+#' @rdname scanApp
+scanServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -93,14 +93,14 @@ scanPanelServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
   })
 }
 #' @export
-#' @rdname scanPanelApp
-scanPanelInput <- function(id) {
+#' @rdname scanApp
+scanInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("scan_input"))          # <various>
 }
 #' @export
-#' @rdname scanPanelApp
-scanPanelOutput <- function(id) {
+#' @rdname scanApp
+scanOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = ns("hap_tab"),

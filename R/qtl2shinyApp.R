@@ -39,7 +39,7 @@ qtl2shinyServer <- function(id, projects_df) {
     scan_snp_list <- snpListServer("scan_snp_list", hotspot_list, project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     DL$scan <-
-      scanPanelServer("scan_panel", hotspot_list, scan_snp_list, probs_obj,
+      scanServer("scan_panel", hotspot_list, scan_snp_list, probs_obj,
                       project_df)
     
     # Mediation Panel.
@@ -85,8 +85,8 @@ qtl2shinyUI <- function(id) {
     navbar_options = bslib::navbar_options(bg = "red", theme = "dark"),
     sidebar = bslib::sidebar(
       bslib::card(
-        projectUI(ns("project_df")),               # project
-        hotspotInput(ns("hotspot_list"))),         # class, subject_model, pheno_names
+        projectUI(ns("project_df")),          # project
+        hotspotInput(ns("hotspot_list"))),    # class, subject_model, pheno_names
       bslib::card(
         shiny::uiOutput(ns("download")))
     ),
@@ -96,7 +96,7 @@ qtl2shinyUI <- function(id) {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            hotspotUI(ns("hotspot_list"))),        # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotUI(ns("hotspot_list"))),   # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
         hotspotOutput(ns("hotspot_list")))
     ),
@@ -107,9 +107,9 @@ qtl2shinyUI <- function(id) {
       value = ns("scan"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          scanPanelInput(ns("scan_panel")),        # <various>
-          snpListInput(ns("scan_snp_list"))),      # scan_window, minLOD, pheno_name
-        scanPanelOutput(ns("scan_panel"))
+          scanInput(ns("scan_panel")),        # <various>
+          snpListInput(ns("scan_snp_list"))), # scan_window, minLOD, pheno_name
+        scanOutput(ns("scan_panel"))
       )
     ),
     bslib::nav_panel(
