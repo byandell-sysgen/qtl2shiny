@@ -7,12 +7,12 @@ modules.
 
 ```
 qtl2shinyApp
-├── hotspotPanel              # Hotspots and Phenotypes
-    └── phenoPanel            # Phenotypes
-├── scanPanel                 # Allele and SNP Scans
-├── mediatePanel              # Mediation
-├── patternPanel              # SDP Pattern Scans
-└── genoPanel                 # Genotypes
+├── hotspot              # Hotspots and Phenotypes
+    └── pheno            # Phenotypes
+├── scan                 # Allele and SNP Scans
+├── mediate              # Mediation
+├── pattern              # SDP Pattern Scans
+└── geno                 # Genotypes
 ```
 
 These are organized into the app function
@@ -198,7 +198,7 @@ and
 `peak_df` and `pmap_obj` objects, as well as the
 This panel has the following modules:
 
-- [hotspotPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotPanelApp.R) #
+- [hotspot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotApp.R) #
 Hotspot and Phenotype Panel
   - [hotspotData](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotDataApp.R) #
 summary or plot of `peak_df` hotspots, select hotspot
@@ -206,15 +206,15 @@ summary or plot of `peak_df` hotspots, select hotspot
 Table of hotspots
   - [hotspotPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotPlotApp.R) #
 Plot of hotspot
-  - [peakPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakPanelApp.R) #
+  - [peak](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakApp.R) #
 Peak panel
-  - [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPanelApp.R) #
+  - [pheno](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoApp.R) #
 Phenotype panel
 
 The phenotype panel, subsumed in the hotspot panel,
 consists of the following six modules:
 
-- [phenoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPanelApp.R) #
+- [pheno](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoApp.R) #
 Phenotype Panel
   - [phenoRead](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoReadApp.R) #
 Create phenotype object and summary
@@ -229,7 +229,7 @@ Plot of phenotypes
 
 Interleaved with `hotspot` panel is the `peak` panel
 
-- [peakPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakPanelApp.R) #
+- [peak](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakApp.R) #
 Peaks filtered by selected `hotspot`
   - [peakRead](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakReadApp.R) #
 Read peak dataframe
@@ -240,9 +240,9 @@ The `scan` panel performs allele-based scan and SNP association,
 and shows genes and exons in the selected hotspot.
 It consists of the following components:
 
-- [scanPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/scanPanelApp.R) #
+- [scan](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/scanApp.R) #
 Scan by Alleles and SNPs Panel
-  - [scan](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/scanApp.R) #
+  - [scanData](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/scanDataApp.R) #
 allele-based genome scan
   - [snpGene](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpGeneApp.R) #
 SNP association and genes
@@ -259,9 +259,9 @@ exons within gene
 
 The mediation panel consists of the following modules:
 
-- [mediatePanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediatePanelApp.R) #
+- [mediate](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediateApp.R) #
 Mediation Panel
-  - [mediate](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediateApp.R) #
+  - [mediateData](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediateDataApp.R) #
 Run mediation
   - [mediatePlot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediatePlotApp.R) #
 Plot mediation results
@@ -274,13 +274,13 @@ The pattern panel examines the strain distribution pattern (`SDP`)
 in a variety of ways.
 It consists of the following modules:
 
-- [patternPanelApp](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternPanelApp.R) #
+- [pattern](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternApp.R) #
 SDP Pattern Panel
   - [snpPattern](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpPatternApp.R) #
 SNP Pattern Scan plot and summary
     - [snpFeature](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpFeatureApp.R) #
 SNP Features (Pattern and Consequence)
-  - [pattern](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternApp.R) #
+  - [patternData](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternDataApp.R) #
 SDP Scans summary
   - [patternPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternPlotApp.R) #
 SDP Scans plot
@@ -290,9 +290,9 @@ SDP Scans plot
 Finally, the `geno` panel shows the allele, allele pair and SDP genotypes
 for a selected genome location.
 
-- [genoPanel](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoPanelApp.R) #
+- [geno](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoApp.R) #
 Genotype and Effects Panel
-  - [geno](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoApp.R) #
+  - [genoData](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoDataApp.R) #
 Genotypes table
   - [genoEffect](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoApp.R) #
 Genotype Effects plot and table
@@ -336,10 +336,10 @@ with element `download`
 
 ```
 DL <- shiny::reactiveValues()
-DL$hotspot <- hotspotPanelServer()
-DL$scan    <- scanPanelServer()
-DL$mediate <- mediatePanelServer()
-DL$pattern <- patternPanelServer()
-DL$geno    <- genoPanelServer()
+DL$hotspot <- hotspotServer()
+DL$scan    <- scanServer()
+DL$mediate <- mediateServer()
+DL$pattern <- patternServer()
+DL$geno    <- genoServer()
 downloadServer("download", DL, input$panel)
 ```
