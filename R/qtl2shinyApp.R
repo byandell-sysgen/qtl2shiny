@@ -62,8 +62,8 @@ qtl2shinyServer <- function(id, projects_df) {
     # Genotypes Panel.
     dipParServer("geno_dip_par", hotspot_list)
     DL$geno <-
-      genoPanelServer("geno_panel", hotspot_list, pattern_list,
-                      pattern_snp_list, pairprobs_obj, project_df)
+      genoServer("geno_panel", hotspot_list, pattern_list,
+                 pattern_snp_list, pairprobs_obj, project_df)
     
     output$download <- shiny::renderUI({
       # Note: `input$panel` is of form `qtl2shiny-<panel>`.
@@ -135,11 +135,12 @@ qtl2shinyUI <- function(id) {
       value = ns("geno"),
       bslib::layout_sidebar(
         bslib::card(
-          dipParUI(ns("geno_dip_par"))),                           # allele_names
+          dipParUI(ns("geno_dip_par"))),           # allele_names
         bslib::card(
-          genoPanelInput(ns("geno_panel")), min_height = "100px"), # pos_Mbp
+          genoInput(ns("geno_panel")),
+          min_height = "100px"),                   # pos_Mbp
         width = 400),
-      bslib::card(genoPanelOutput(ns("geno_panel")))
+      bslib::card(genoOutput(ns("geno_panel")))
     ),
     bslib::nav_panel(
       title = "Mediation",

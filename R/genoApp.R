@@ -18,7 +18,7 @@
 #' @importFrom tidyr pivot_wider
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
-genoPanelApp <- function() {
+genoApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
     title =  "Test Geno Panel",
@@ -48,9 +48,9 @@ genoPanelApp <- function() {
           bslib::card(
             dipParUI("dip_par")),             # allele_names
           width = 400),
-        bslib::card(genoPanelUI("geno_panel")),
-        bslib::card(genoPanelInput("geno_panel"), min_height = "100px"), # pos_Mbp
-        bslib::card(genoPanelOutput("geno_panel"))
+        bslib::card(genoUI("geno_panel")),
+        bslib::card(genoInput("geno_panel"), min_height = "100px"), # pos_Mbp
+        bslib::card(genoOutput("geno_panel"))
       )
     )
   )
@@ -65,14 +65,14 @@ genoPanelApp <- function() {
     pattern_list <- patternDataServer("pattern_list", hotspot_list, dip_par,
       pairprobs_obj, snp_list$patterns, snp_action, project_df)
     download_list <-
-      genoPanelServer("geno_panel", hotspot_list, pattern_list, snp_list,
+      genoServer("geno_panel", hotspot_list, pattern_list, snp_list,
                       pairprobs_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname genoPanelApp
-genoPanelServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_obj,
+#' @rdname genoApp
+genoServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_obj,
                        project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -106,20 +106,20 @@ genoPanelServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_
   })
 }
 #' @export
-#' @rdname genoPanelApp
-genoPanelInput <- function(id) {
+#' @rdname genoApp
+genoInput <- function(id) {
   ns <- shiny::NS(id)
   genoDataInput(ns("geno_list"))            # pos_Mbp
 }
 #' @export
-#' @rdname genoPanelApp
-genoPanelUI <- function(id) {
+#' @rdname genoApp
+genoUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("download_list"))      # download_list
 }
 #' @export
-#' @rdname genoPanelApp
-genoPanelOutput <- function(id) {
+#' @rdname genoApp
+genoOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = ns("gen_tab"),
