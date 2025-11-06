@@ -39,8 +39,8 @@ genoEffectApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            patternInput("pattern_list"),     # button, blups, pheno_name
-            patternUI("pattern_list")),       # pattern
+            patternDataInput("pattern_list"), # button, blups, pheno_name
+            patternDataUI("pattern_list")),   # pattern
           bslib::card(
             dipParInput("dip_par")),          # snp_action
           bslib::card(
@@ -67,7 +67,7 @@ genoEffectApp <- function() {
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
-    pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
+    pattern_list <- patternDataServer("pattern_list", hotspot_list, dip_par,
       pairprobs_obj, snp_list$patterns, snp_action, project_df)
     geno_list <- 
       genoServer("geno_list", hotspot_list, snp_list, pairprobs_obj, project_df)

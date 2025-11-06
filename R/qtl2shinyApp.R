@@ -55,7 +55,7 @@ qtl2shinyServer <- function(id, projects_df) {
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
     pattern_list <-
-      patternPanelServer("pattern_panel", dip_par, hotspot_list,
+      patternServer("pattern_panel", dip_par, hotspot_list,
                          pattern_snp_list, pairprobs_obj, project_df)
     DL$pattern <- pattern_list
     
@@ -86,8 +86,8 @@ qtl2shinyUI <- function(id) {
     navbar_options = bslib::navbar_options(bg = "red", theme = "dark"),
     sidebar = bslib::sidebar(
       bslib::card(
-        projectUI(ns("project_df")),          # project
-        hotspotInput(ns("hotspot_list"))),    # class, subject_model, pheno_names
+        projectUI(ns("project_df")),               # project
+        hotspotInput(ns("hotspot_list"))),         # class, subject_model, pheno_names
       bslib::card(
         shiny::uiOutput(ns("download")))
     ),
@@ -97,7 +97,7 @@ qtl2shinyUI <- function(id) {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            hotspotUI(ns("hotspot_list"))),   # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotUI(ns("hotspot_list"))),        # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
         hotspotOutput(ns("hotspot_list")))
     ),
@@ -108,8 +108,8 @@ qtl2shinyUI <- function(id) {
       value = ns("scan"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          scanPanelInput(ns("scan_panel")),   # <various>
-          snpListInput(ns("scan_snp_list"))), # scan_window, minLOD, pheno_name
+          scanPanelInput(ns("scan_panel")),        # <various>
+          snpListInput(ns("scan_snp_list"))),      # scan_window, minLOD, pheno_name
         scanPanelOutput(ns("scan_panel"))
       )
     ),
@@ -119,15 +119,15 @@ qtl2shinyUI <- function(id) {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            patternPanelInput(ns("pattern_panel"))), # <various>
+            patternInput(ns("pattern_panel"))),    # <various>
           bslib::card(
-            dipParInput(ns("dip_par"))),          # snp_action
+            dipParInput(ns("dip_par"))),           # snp_action
           bslib::card(
             snpListInput(ns("pattern_snp_list"))), # scan_window, minLOD, pheno_name
           bslib::card(
-            dipParUI(ns("dip_par"))),             # allele_names
+            dipParUI(ns("dip_par"))),              # allele_names
           width = 400),
-        bslib::card(patternPanelOutput(ns("pattern_panel")))
+        bslib::card(patternOutput(ns("pattern_panel")))
       )
     ),
     bslib::nav_panel(

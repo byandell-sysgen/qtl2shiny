@@ -1,9 +1,7 @@
-#' Shiny Pattern App
-#'
-#' Shiny module for SNP pattern plots, with interfaces \code{patternUI} and  \code{patternOutput}.
+#' Shiny Pattern Panel App
 #'
 #' @param id identifier for shiny reactive
-#' @param hotspot_list,dip_par,pairprobs_obj,patterns,snp_action,project_df reactive arguments
+#' @param dip_par,hotspot_list,snp_list,project_df reactive arguments
 #'
 #' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
 #' @keywords utilities
@@ -11,48 +9,44 @@
 #' @return No return value; called for side effects.
 #'
 #' @export
-#' 
-#' @importFrom qtl2pattern scan1pattern sdp_to_pattern
-#' @importFrom dplyr across filter mutate where
-#' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny checkboxInput column
-#'             fluidRow moduleServer NS observeEvent plotOutput radioButtons
-#'             reactive renderPlot renderUI req selectInput tagList uiOutput
-#'             updateSelectInput
-#' @importFrom grDevices dev.off pdf
-#' @importFrom utils write.csv
-#' @importFrom rlang .data
+#' @importFrom shiny mainPanel moduleServer NS radioButtons reactive renderText
+#'             renderUI req selectInput sidebarPanel strong tagList textOutput
+#'             uiOutput
+#' @importFrom bslib card layout_sidebar navbar_options navset_tab nav_panel
+#'             page_navbar sidebar
 patternApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
-    title =  "Test Pattern",
+    title =  "Test pattern",
+    navbar_options = bslib::navbar_options(bg = "#2D89C8", theme = "dark"),
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            projectUI("project_df"),       # project
-            hotspotInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+            projectUI("project_df"),            # project
+            hotspotInput("hotspot_list")),      # class, subject_model, pheno_names, hotspot
           bslib::card(
-            hotspotUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
-          width = 400),
+            hotspotUI("hotspot_list")),         # window_Mbp, radio, win_par, chr_ct, minLOD
+            width = 400),
         hotspotOutput("hotspot_list"))
     ),
     bslib::nav_panel(
-      title = "Pattern",
+      title = "Pattern Panel",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            patternInput("pattern_list"),  # blups, pheno_name
-            patternUI("pattern_list")),    # pattern
-          bslib::card(
-            dipParInput("dip_par")),       # snp_action
-          bslib::card(
-            snpListInput("snp_list")),     # scan_window, minLOD, pheno_name
-          bslib::card(
-            dipParUI("dip_par")),          # allele_names
-          width = 400),
-        bslib::card(patternOutput("pattern_list"))
+            patternInput("pattern_panel"),      # <various>
+            bslib::card(
+              dipParInput("dip_par")),          # snp_action
+            bslib::card(
+              snpListInput("snp_list")),        # scan_window, minLOD, pheno_name
+            bslib::card(
+              dipParUI("dip_par")),             # allele_names
+            width = 400),
+          bslib::card(dipParUI("dip_par")),     # allele_names
+        ),
+        bslib::card(patternOutput("pattern_panel"))
       )
     )
   )
@@ -64,123 +58,46 @@ patternApp <- function() {
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
-    pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
-      pairprobs_obj, snp_list$patterns, snp_list$snp_action, project_df)
+    patternServer("pattern_panel", dip_par, hotspot_list, snp_list,
+                       pairprobs_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname patternApp
-patternServer <- function(id, hotspot_list, dip_par, pairprobs_obj, patterns,
-                          snp_action = shiny::reactive({"basic"}), project_df) {
+patternServer <- function(id, dip_par, hotspot_list, snp_list,
+                               pairprobs_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    ## Inputs `pat_par`: pheno_name, button, blups, pattern
-    output$pheno_name_input <- shiny::renderUI({
-      shiny::selectInput(ns("pheno_name"), NULL,
-                         choices = colnames(shiny::req(hotspot_list$pheno_mx())),
-                         selected = input$pheno_name)
-    })
-    output$button_input <- shiny::renderUI({
-      shiny::radioButtons(ns("button"), "",
-                          c("LOD","Effects","LOD & Effects","Allele Means","Summary"),
-                          input$button)
-    })
-    output$blups_input <- shiny::renderUI({
-      shiny::checkboxInput(ns("blups"), "BLUPs?")
-    })
-    output$pattern_input <- shiny::renderUI({
-      shiny::req(pattern_choices(), snp_action())
-      choices <- pattern_choices()
-      if(!length(choices)) {
-        choices <- input$pattern
-      }
-      shiny::selectInput(ns("pattern"), NULL,
-                         choices = choices,
-                         selected = input$pattern)
-    })
-    
-    ## Select pattern for plots.
-    haplos <- reactive({
-      shiny::req(hotspot_list$allele_info())$code
-    })
-    pattern_choices <- shiny::reactive({
-      qtl2pattern::sdp_to_pattern(shiny::req(pats())$sdp, haplos())
-    })
-    shiny::observeEvent(patterns(), update_patterns())
-    shiny::observeEvent(input$pheno_name, update_patterns())
-    update_patterns <- function() {
-      shiny::req(snp_action(), input$pheno_name, patterns())
-      pats <- dplyr::filter(patterns(), .data$pheno == input$pheno_name)
-      if(nrow(pats)) {
-        choices <- qtl2pattern::sdp_to_pattern(pats$sdp, haplos())
-      } else {
-        choices <- input$pattern
-      }
-      if(!is.null(selected <- input$pattern)) {
-        if(!(selected %in% choices))
-          selected <- choices[1]
-      }
-      shiny::updateSelectInput(session, "pattern", NULL,
-                               choices, selected)
-    }
-    
-    # Pattern scan
-    pats <- shiny::reactive({
-      pull_patterns(shiny::req(patterns()),
-                    colnames(shiny::req(hotspot_list$pheno_mx())))
-    })
-    scan_pat <- shiny::reactive({
-      shiny::req(snp_action())
-      pheno_name <- shiny::req(input$pheno_name)
-      shiny::req(hotspot_list$pheno_mx(), hotspot_list$covar_df(),
-                 pairprobs_obj(), hotspot_list$kinship_list(),
-                 hotspot_list$peak_df(), pats())
-      withProgress(message = 'Scan Patterns ...', value = 0, {
-        setProgress(1)
-        scan1_pattern(pheno_name, hotspot_list$pheno_mx(),
-                      hotspot_list$covar_df(), pairprobs_obj(),
-                      hotspot_list$kinship_list(), hotspot_list$peak_df(),
-                      pats(), input$blups)
-      })
-    })
-    output$pattern_table <- DT::renderDataTable({
-      shiny::req(scan_pat(), pairprobs_obj())
-      withProgress(message = 'Pattern summary ...', value = 0, {
-        setProgress(1)
-        dplyr::mutate(summary(scan_pat(), pairprobs_obj()$map),
-          dplyr::across(dplyr::where(is.numeric), signif, digits = 4))
-      })
-    }, escape = FALSE,
-    options = list(scrollX = TRUE, pageLength = 5))
-    
-    # Returns `pattern_list`.
-    shiny::reactiveValues(
-      pat_par = input,
-      haplos = haplos,
-      pattern_choices = pattern_choices,
-      scan_pat = scan_pat
-    )
+    ## SDP Patterns
+    snpPatternServer("snp_pattern", snp_list, hotspot_list$allele_info)
+    pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
+      pairprobs_obj, snp_list$patterns, snp_list$snp_action, project_df)
+    patternPlotServer("pattern_plot", pattern_list, pairprobs_obj)
+    # Return.
+    pattern_list
   })
 }
 #' @export
 #' @rdname patternApp
 patternInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::uiOutput(ns("blups_input")),                      # blups
-    shiny::uiOutput(ns("pheno_name_input")))                 # pheno_name
-}
-#' @export
-#' @rdname patternApp
-patternUI <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::uiOutput(ns("pattern_input"))                       # pattern
+  bslib::card(
+    patternInput(ns("pattern_list")),  # button, blups, pheno_name
+    patternUI(ns("pattern_list")))     # pattern
 }
 #' @export
 #' @rdname patternApp
 patternOutput <- function(id) {
   ns <- shiny::NS(id)
-  DT::dataTableOutput(ns("pattern_table"))
+  bslib::navset_tab(
+    id = ns("dip_tab"),
+    bslib::nav_panel("SNP Pattern Scan",
+      bslib::card(snpPatternOutput(ns("snp_pattern")))),
+    bslib::nav_panel("SDP Pattern Scans", bslib::navset_tab(
+      bslib::nav_panel("Plot",
+        bslib::card(patternPlotOutput(ns("pattern_plot")))),
+      bslib::nav_panel("Summary",
+        bslib::card(patternOutput(ns("pattern_list")))))))
 }

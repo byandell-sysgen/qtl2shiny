@@ -27,10 +27,10 @@ genoPanelApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            projectUI("project_df"),       # project
-            hotspotInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+            projectUI("project_df"),          # project
+            hotspotInput("hotspot_list")),    # class, subject_model, pheno_names, hotspot
           bslib::card(
-            hotspotUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotUI("hotspot_list")),       # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
         hotspotOutput("hotspot_list"))
     ),
@@ -39,14 +39,14 @@ genoPanelApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            patternInput("pattern_list"),  # button, blups, pheno_name
-            patternUI("pattern_list")),    # pattern
+            patternDataInput("pattern_list"), # button, blups, pheno_name
+            patternDataUI("pattern_list")),   # pattern
           bslib::card(
-            dipParInput("dip_par")),       # snp_action
+            dipParInput("dip_par")),          # snp_action
           bslib::card(
-            snpListInput("snp_list")),     # scan_window, minLOD, pheno_name
+            snpListInput("snp_list")),        # scan_window, minLOD, pheno_name
           bslib::card(
-            dipParUI("dip_par")),          # allele_names
+            dipParUI("dip_par")),             # allele_names
           width = 400),
         bslib::card(genoPanelUI("geno_panel")),
         bslib::card(genoPanelInput("geno_panel"), min_height = "100px"), # pos_Mbp
@@ -62,7 +62,7 @@ genoPanelApp <- function() {
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
-    pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
+    pattern_list <- patternDataServer("pattern_list", hotspot_list, dip_par,
       pairprobs_obj, snp_list$patterns, snp_action, project_df)
     download_list <-
       genoPanelServer("geno_panel", hotspot_list, pattern_list, snp_list,
