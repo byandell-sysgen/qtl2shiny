@@ -5,11 +5,11 @@
 \alias{scanServer}
 \alias{scanInput}
 \alias{scanOutput}
-\title{Shiny Scan Module}
+\title{Shiny Scan Panel App}
 \usage{
 scanApp()
 
-scanServer(id, hotspot_list, probs_obj, project_df)
+scanServer(id, hotspot_list, snp_list, probs_obj, project_df)
 
 scanInput(id)
 
@@ -18,13 +18,13 @@ scanOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{hotspot_list, probs_obj, project_df}{reactive arguments}
+\item{hotspot_list, project_df}{reactive arguments}
 }
 \value{
 No return value; called for side effects.
 }
 \description{
-Shiny module for scan1 LOD and coefficient plots, with interfaces \code{scanUI} and  \code{scanOutput}.
+Shiny Scan Panel App
 }
 \author{
 Brian S Yandell, \email{brian.yandell@wisc.edu}

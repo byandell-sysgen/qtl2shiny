@@ -4,9 +4,8 @@
 \alias{mediateApp}
 \alias{mediateServer}
 \alias{mediateInput}
-\alias{mediateUI}
 \alias{mediateOutput}
-\title{Shiny Mediate App}
+\title{Shiny Mediate Panel App}
 \usage{
 mediateApp()
 
@@ -14,20 +13,18 @@ mediateServer(id, hotspot_list, snp_list, probs_obj, project_df)
 
 mediateInput(id)
 
-mediateUI(id)
-
 mediateOutput(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{hotspot_list, probs_obj, patterns, project_df}{reactive arguments}
+\item{hotspot_list, snp_list, probs_obj, project_df}{reactive arguments}
 }
 \value{
 No return value; called for side effects.
 }
 \description{
-Shiny Mediate App
+Shiny module for mediation analysis.
 }
 \author{
 Brian S Yandell, \email{brian.yandell@wisc.edu}

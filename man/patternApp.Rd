@@ -4,40 +4,27 @@
 \alias{patternApp}
 \alias{patternServer}
 \alias{patternInput}
-\alias{patternUI}
 \alias{patternOutput}
-\title{Shiny Pattern App}
+\title{Shiny Pattern Panel App}
 \usage{
 patternApp()
 
-patternServer(
-  id,
-  hotspot_list,
-  dip_par,
-  pairprobs_obj,
-  patterns,
-  snp_action = shiny::reactive({
-     "basic"
- }),
-  project_df
-)
+patternServer(id, dip_par, hotspot_list, snp_list, pairprobs_obj, project_df)
 
 patternInput(id)
-
-patternUI(id)
 
 patternOutput(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{hotspot_list, dip_par, pairprobs_obj, patterns, snp_action, project_df}{reactive arguments}
+\item{dip_par, hotspot_list, snp_list, project_df}{reactive arguments}
 }
 \value{
 No return value; called for side effects.
 }
 \description{
-Shiny module for SNP pattern plots, with interfaces \code{patternUI} and  \code{patternOutput}.
+Shiny Pattern Panel App
 }
 \author{
 Brian S Yandell, \email{brian.yandell@wisc.edu}

@@ -4,21 +4,24 @@
 \alias{genoApp}
 \alias{genoServer}
 \alias{genoInput}
+\alias{genoUI}
 \alias{genoOutput}
 \title{Shiny Allele App}
 \usage{
 genoApp()
 
-genoServer(id, hotspot_list, snp_list, pairprobs_obj, project_df)
+genoServer(id, hotspot_list, pattern_list, snp_list, pairprobs_obj, project_df)
 
 genoInput(id)
+
+genoUI(id)
 
 genoOutput(id)
 }
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{hotspot_list, pairprobs_obj, patterns, project_df, snp_action}{reactive arguments}
+\item{hotspot_list, pattern_list, pairprobs_obj, patterns, project_df, snp_action}{reactive arguments}
 }
 \value{
 No return value; called for side effects.
