@@ -12,8 +12,8 @@ patternDataApp()
 
 patternDataServer(
   id,
-  hotspot_list,
   dip_par,
+  hotspot_list,
   pairprobs_obj,
   patterns,
   snp_action = shiny::reactive({

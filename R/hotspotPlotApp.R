@@ -40,7 +40,7 @@ hotspotPlotApp <- function() {
     hotspot_obj<- 
       hotspotDataServer("hotspot_obj", set_par, peak_read_df, pmap_obj, project_df)
     hotspot_plot <- 
-      hotspotPlotServer("hotspot_plot", set_par, hotspot_obj, project_df)
+      hotspotPlotServer("hotspot_plot", set_par, hotspot_obj)
   }
   shiny::shinyApp(ui, server)
 }

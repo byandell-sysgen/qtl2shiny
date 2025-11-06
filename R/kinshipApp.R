@@ -29,8 +29,7 @@ kinshipApp <- function() {
     hotspot_obj <- hotspotDataServer("hotspot_obj", set_par, peak_read_df,
                                      pmap_obj, project_df)
     hotspot_df <- hotspotTableServer("hotspot_df", hotspot_obj)
-    win_par <- winParServer("win_par", set_par, peak_read_df, pmap_obj,
-                            hotspot_df, project_df)
+    win_par <- winParServer("win_par", hotspot_df, project_df)
     kinship_list <- kinshipServer("kinship_list", win_par, project_df)
   }
   shiny::shinyApp(ui, server)

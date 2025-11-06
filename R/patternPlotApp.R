@@ -56,8 +56,8 @@ patternPlotApp <- function() {
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
-    pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
-      pairprobs_obj, snp_list$patterns, snp_list$snp_action, project_df)
+    pattern_list <- patternServer("pattern_list", dip_par, hotspot_list,
+                                  snp_list, pairprobs_obj, project_df)
     patternPlotServer("pattern_plot", pattern_list, pairprobs_obj)
   }
   shiny::shinyApp(ui, server)

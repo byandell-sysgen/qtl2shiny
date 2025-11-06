@@ -72,7 +72,7 @@ patternServer <- function(id, dip_par, hotspot_list, snp_list,
     
     ## SDP Patterns
     snpPatternServer("snp_pattern", snp_list, hotspot_list$allele_info)
-    pattern_list <- patternServer("pattern_list", hotspot_list, dip_par,
+    pattern_list <- patternDataServer("pattern_list", dip_par, hotspot_list,
       pairprobs_obj, snp_list$patterns, snp_list$snp_action, project_df)
     patternPlotServer("pattern_plot", pattern_list, pairprobs_obj)
     # Return.

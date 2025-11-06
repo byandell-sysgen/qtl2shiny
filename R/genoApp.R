@@ -62,7 +62,7 @@ genoApp <- function() {
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
-    pattern_list <- patternDataServer("pattern_list", hotspot_list, dip_par,
+    pattern_list <- patternDataServer("pattern_list", dip_par, hotspot_list,
       pairprobs_obj, snp_list$patterns, snp_action, project_df)
     download_list <-
       genoServer("geno_panel", hotspot_list, pattern_list, snp_list,

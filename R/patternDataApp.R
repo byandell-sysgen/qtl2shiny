@@ -64,14 +64,14 @@ patternDataApp <- function() {
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
-    pattern_list <- patternDataServer("pattern_list", hotspot_list, dip_par,
+    pattern_list <- patternDataServer("pattern_list", dip_par, hotspot_list,
       pairprobs_obj, snp_list$patterns, snp_list$snp_action, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname patternDataApp
-patternDataServer <- function(id, hotspot_list, dip_par, pairprobs_obj, patterns,
+patternDataServer <- function(id, dip_par, hotspot_list, pairprobs_obj, patterns,
                           snp_action = shiny::reactive({"basic"}), project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
