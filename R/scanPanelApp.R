@@ -58,13 +58,13 @@ scanPanelServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    scan_list <- scanServer("scan", hotspot_list, probs_obj, project_df)
+    scan_list <- scanDataServer("scan_list", hotspot_list, probs_obj, project_df)
     gene_list <- snpGeneServer("snp_gene", snp_list, project_df)
 
     output$scan_input <- shiny::renderUI({
       switch(shiny::req(input$hap_tab),
-        scan = scanInput(ns("scan")),        # blups, pheno_name, scan_window
-        snp  = snpGeneInput(ns("snp_gene"))) # SNP, gene_name
+        scan = scanDataInput(ns("scan_list")), # blups, pheno_name, scan_window
+        snp  = snpGeneInput(ns("snp_gene")))   # SNP, gene_name
     })
     
     # Download.
@@ -105,7 +105,7 @@ scanPanelOutput <- function(id) {
   bslib::navset_tab(
     id = ns("hap_tab"),
     bslib::nav_panel("Genome Scans",    value = "scan",
-                     scanOutput(ns("scan"))),
+                     scanDataOutput(ns("scan_list"))),
     bslib::nav_panel("SNP Association", value = "snp",
                      snpGeneOutput(ns("snp_gene"))))
 }  
