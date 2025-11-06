@@ -32,7 +32,7 @@ qtl2shinyServer <- function(id, projects_df) {
     DL <- shiny::reactiveValues()
     
     # Hotspots and Phenotypes Panel.
-    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    hotspot_list <- hotspotServer("hotspot_list", project_df)
     DL$hotspot <- hotspot_list
     
     # Allele and SNP Scans Panel.
@@ -86,8 +86,8 @@ qtl2shinyUI <- function(id) {
     navbar_options = bslib::navbar_options(bg = "red", theme = "dark"),
     sidebar = bslib::sidebar(
       bslib::card(
-        projectUI(ns("project_df")),            # project
-        hotspotPanelInput(ns("hotspot_list"))), # class, subject_model, pheno_names
+        projectUI(ns("project_df")),          # project
+        hotspotInput(ns("hotspot_list"))),    # class, subject_model, pheno_names
       bslib::card(
         shiny::uiOutput(ns("download")))
     ),
@@ -97,9 +97,9 @@ qtl2shinyUI <- function(id) {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            hotspotPanelUI(ns("hotspot_list"))),    # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotUI(ns("hotspot_list"))),   # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
-        hotspotPanelOutput(ns("hotspot_list")))
+        hotspotOutput(ns("hotspot_list")))
     ),
     ## Currently just uses Haplo and Diplo Apps.
     ## Need to rethink dashServer
@@ -108,8 +108,8 @@ qtl2shinyUI <- function(id) {
       value = ns("scan"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          scanPanelInput(ns("scan_panel")),         # <various>
-          snpListInput(ns("scan_snp_list"))),       # scan_window, minLOD, pheno_name
+          scanPanelInput(ns("scan_panel")),   # <various>
+          snpListInput(ns("scan_snp_list"))), # scan_window, minLOD, pheno_name
         scanPanelOutput(ns("scan_panel"))
       )
     ),

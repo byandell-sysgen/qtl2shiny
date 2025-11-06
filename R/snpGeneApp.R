@@ -24,28 +24,28 @@ snpGeneApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            projectUI("project_df"),            # project
-            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+            projectUI("project_df"),       # project
+            hotspotInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
           bslib::card(
-            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
-        hotspotPanelOutput("hotspot_list"))
+        hotspotOutput("hotspot_list"))
     ),
     bslib::nav_panel(
       title = "snpGene",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          snpGeneInput("snp_gene"),             # SNP, gene_name
-          snpListInput("snp_list")),            # scan_window, minLOD, pheno_name
+          snpGeneInput("snp_gene"),        # SNP, gene_name
+          snpListInput("snp_list")),       # scan_window, minLOD, pheno_name
         bslib::card(
-          downloadInput("download"),            # download inputs for Plot or Table
+          downloadInput("download"),       # download inputs for Plot or Table
           snpGeneOutput("snp_gene"))
       )
     )
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
-    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    hotspot_list <- hotspotServer("hotspot_list", project_df)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
     download_list <- snpGeneServer("snp_gene", hotspot_list, snp_list,
                                    project_df)

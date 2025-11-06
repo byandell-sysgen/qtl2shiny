@@ -23,12 +23,12 @@ probsApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            projectUI("project_df"),            # project
-            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+            projectUI("project_df"),       # project
+            hotspotInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
           bslib::card(
-            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
-        hotspotPanelOutput("hotspot_list"))
+        hotspotOutput("hotspot_list"))
     ),
     bslib::nav_panel(
       title = "Probs",
@@ -37,7 +37,7 @@ probsApp <- function() {
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project", projects_df)
-    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    hotspot_list <- hotspotServer("hotspot_list", project_df)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     pairprobs_obj <-

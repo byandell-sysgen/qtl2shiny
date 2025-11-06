@@ -27,26 +27,26 @@ genoPanelApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            projectUI("project_df"),            # project
-            hotspotPanelInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+            projectUI("project_df"),       # project
+            hotspotInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
           bslib::card(
-            hotspotPanelUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
-        hotspotPanelOutput("hotspot_list"))
+        hotspotOutput("hotspot_list"))
     ),
     bslib::nav_panel(
       title = "Genotypes",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            patternInput("pattern_list"),   # button, blups, pheno_name
-            patternUI("pattern_list")),     # pattern
+            patternInput("pattern_list"),  # button, blups, pheno_name
+            patternUI("pattern_list")),    # pattern
           bslib::card(
-            dipParInput("dip_par")),        # snp_action
+            dipParInput("dip_par")),       # snp_action
           bslib::card(
-            snpListInput("snp_list")),      # scan_window, minLOD, pheno_name
+            snpListInput("snp_list")),     # scan_window, minLOD, pheno_name
           bslib::card(
-            dipParUI("dip_par")),           # allele_names
+            dipParUI("dip_par")),          # allele_names
           width = 400),
         bslib::card(genoPanelUI("geno_panel")),
         bslib::card(genoPanelInput("geno_panel"), min_height = "100px"), # pos_Mbp
@@ -56,7 +56,7 @@ genoPanelApp <- function() {
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
-    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    hotspot_list <- hotspotServer("hotspot_list", project_df)
     dip_par <- dipParServer("dip_par", hotspot_list)
     snp_action <- shiny::reactive({dip_par$snp_action})
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)

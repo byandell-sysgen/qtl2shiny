@@ -14,23 +14,23 @@
 #'             observeEvent radioButtons reactive renderText renderUI req
 #'             strong tagList textOutput uiOutput
 #' @importFrom bslib card page_sidebar sidebar
-phenoPanelApp <- function() {
+phenoApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Pheno Panel",
     sidebar = bslib::sidebar(
-      projectUI("project_df"),              # project
-      setParInput("set_par"),               # class, subject_model
-      phenoPanelInput("pheno_panel"),       # pheno_names
-      winParInput("win_par"),               # hotspot
+      projectUI("project_df"),            # project
+      setParInput("set_par"),             # class, subject_model
+      phenoInput("pheno_panel"),          # pheno_names
+      winParInput("win_par"),             # hotspot
       bslib::layout_columns(
         col_widths = c(4, 8),
-        setParUI("set_par"),                # window_Mbp
-        hotspotDataInput("hotspot_obj")),   # chr_ct, minLOD
+        setParUI("set_par"),              # window_Mbp
+        hotspotDataInput("hotspot_obj")), # chr_ct, minLOD
       width = 400),
-    downloadInput("download"),              # download inputs for Plot or Table
-    phenoPanelOutput("pheno_panel"),
-    phenoPanelUI("pheno_panel"),
+    downloadInput("download"),            # download inputs for Plot or Table
+    phenoOutput("pheno_panel"),
+    phenoUI("pheno_panel"),
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
@@ -45,8 +45,8 @@ phenoPanelApp <- function() {
     peak_df <- peakPanelServer("peak_df", set_par, win_par,
                                peak_read_df, project_df)
     pheno_list <-
-      phenoPanelServer("pheno_panel", set_par, win_par, peak_df,
-                       pmap_obj, hotspot_df, project_df)
+      phenoServer("pheno_panel", set_par, win_par, peak_df, pmap_obj,
+                  hotspot_df, project_df)
     
     # Download.
     download_Filename <- shiny::reactive({
@@ -64,8 +64,8 @@ phenoPanelApp <- function() {
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname phenoPanelApp
-phenoPanelServer <- function(id, set_par, win_par, peak_df,
+#' @rdname phenoApp
+phenoServer <- function(id, set_par, win_par, peak_df,
                              pmap_obj, hotspot_df, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -106,20 +106,20 @@ phenoPanelServer <- function(id, set_par, win_par, peak_df,
   })
 }
 #' @export
-#' @rdname phenoPanelApp
-phenoPanelInput <- function(id) {
+#' @rdname phenoApp
+phenoInput <- function(id) {
   ns <- shiny::NS(id)
   phenoNamesInput(ns("pheno_names"))     # pheno_names
 }
 #' @export
-#' @rdname phenoPanelApp
-phenoPanelUI <- function(id) {
+#' @rdname phenoApp
+phenoUI <- function(id) {
   ns <- shiny::NS(id)
   phenoTableOutput(ns("pheno_table"))    # pheno_table
 }
 #' @export
-#' @rdname phenoPanelApp
-phenoPanelOutput <- function(id) {
+#' @rdname phenoApp
+phenoOutput <- function(id) {
   ns <- shiny::NS(id)
   phenoPlotOutput(ns("pheno_plot"))      # pheno_plot
 }

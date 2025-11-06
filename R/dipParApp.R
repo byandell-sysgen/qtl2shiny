@@ -24,7 +24,7 @@ dipParApp <- function() {
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
-    hotspot_list <- hotspotPanelServer("hotspot_list", project_df)
+    hotspot_list <- hotspotServer("hotspot_list", project_df)
     dipParServer("dip_par", hotspot_list)
   }
   shiny::shinyApp(ui, server)
