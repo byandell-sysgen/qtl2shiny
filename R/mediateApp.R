@@ -1,6 +1,6 @@
-#' Shiny Haplotype Analysis App
+#' Shiny Mediate Panel App
 #'
-#' Shiny module for analysis based on haplotype alleles, with interface \code{mediatePanelUI}.
+#' Shiny module for mediation analysis.
 #'
 #' @param id identifier for shiny reactive
 #' @param hotspot_list,snp_list,probs_obj,project_df reactive arguments
@@ -15,7 +15,7 @@
 #'             req sidebarPanel strong tagList textOutput uiOutput
 #' @importFrom bslib card layout_sidebar navbar_options navset_tab nav_panel
 #'             page_navbar sidebar
-mediatePanelApp <- function() {
+mediateApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
     title =  "Test Mediate Panel",
@@ -36,9 +36,9 @@ mediatePanelApp <- function() {
       title = "mediate_panel",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          mediatePanelInput("mediate_panel"), # <various>
+          mediateInput("mediate_panel"), # <various>
           snpListInput("snp_list")),          # scan_window, minLOD, pheno_name
-        mediatePanelOutput("mediate_panel")
+        mediateOutput("mediate_panel")
       )
     )
   )
@@ -47,14 +47,14 @@ mediatePanelApp <- function() {
     hotspot_list <- hotspotServer("hotspot_list", project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
-    mediatePanelServer("mediate_panel", hotspot_list, snp_list, probs_obj,
+    mediateServer("mediate_panel", hotspot_list, snp_list, probs_obj,
                        project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname mediatePanelApp
-mediatePanelServer <- function(id, hotspot_list, snp_list, probs_obj,
+#' @rdname mediateApp
+mediateServer <- function(id, hotspot_list, snp_list, probs_obj,
                                project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -75,14 +75,14 @@ mediatePanelServer <- function(id, hotspot_list, snp_list, probs_obj,
   })
 }
 #' @export
-#' @rdname mediatePanelApp
-mediatePanelInput <- function(id) {
+#' @rdname mediateApp
+mediateInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("mediate_input"))
 }
 #' @export
-#' @rdname mediatePanelApp
-mediatePanelOutput <- function(id) {
+#' @rdname mediateApp
+mediateOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = ns("mediate_tab"),

@@ -43,8 +43,7 @@ qtl2shinyServer <- function(id, projects_df) {
                       project_df)
     
     # Mediation Panel.
-    DL$mediate <-
-      mediatePanelServer("mediate_panel", hotspot_list, scan_snp_list,
+    DL$mediate <- mediateServer("mediate_panel", hotspot_list, scan_snp_list,
                          probs_obj, project_df)
     
     # Patterns Panel.
@@ -147,8 +146,8 @@ qtl2shinyUI <- function(id) {
       value = ns("mediate"),
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          mediatePanelInput(ns("mediate_panel"))), # <various>
-        mediatePanelOutput(ns("mediate_panel"))
+          mediateInput(ns("mediate_panel"))), # <various>
+        mediateOutput(ns("mediate_panel"))
       )
     )
   )
