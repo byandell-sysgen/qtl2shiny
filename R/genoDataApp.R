@@ -1,4 +1,4 @@
-#' Shiny Allele App
+#' Shiny Genotype Data App
 #'
 #' @param id identifier for shiny reactive
 #' @param hotspot_list,pairprobs_obj,patterns,project_df,snp_action reactive arguments
@@ -17,10 +17,10 @@
 #' @importFrom tidyr pivot_wider
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
-genoApp <- function() {
+genoDataApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
-    title =  "Test Geno",
+    title =  "Test Geno Data",
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(
@@ -44,8 +44,10 @@ genoApp <- function() {
           bslib::card(
             dipParUI("dip_par")),          # allele_names
           width = 400),
-        bslib::card(genoInput("geno"), min_height = "100px"), # pos_Mbp
-        bslib::card(genoOutput("geno"))
+        bslib::card(
+          genoDataInput("geno"),
+          min_height = "100px"),           # pos_Mbp
+        bslib::card(genoDataOutput("geno"))
       )
     )
   )
@@ -57,13 +59,13 @@ genoApp <- function() {
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
-    genoServer("geno", hotspot_list, snp_list, pairprobs_obj, project_df)
+    genoDataServer("geno", hotspot_list, snp_list, pairprobs_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname genoApp
-genoServer <- function(id, hotspot_list, snp_list, pairprobs_obj, project_df) {
+#' @rdname genoDataApp
+genoDataServer <- function(id, hotspot_list, snp_list, pairprobs_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -116,14 +118,14 @@ genoServer <- function(id, hotspot_list, snp_list, pairprobs_obj, project_df) {
   })
 }
 #' @export
-#' @rdname genoApp
-genoInput <- function(id) {
+#' @rdname genoDataApp
+genoDataInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("pos_Mbp_input"))    # pos_Mbp
 }
 #' @export
-#' @rdname genoApp
-genoOutput <- function(id) {
+#' @rdname genoDataApp
+genoDataOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = "all_tab",

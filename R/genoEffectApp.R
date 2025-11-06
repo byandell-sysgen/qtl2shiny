@@ -48,7 +48,7 @@ genoEffectApp <- function() {
           bslib::card(
             dipParUI("dip_par")),             # allele_names
           width = 400),
-        bslib::card(genoInput("geno_list"),
+        bslib::card(genoDataInput("geno_list"),
                     min_height = "100px"),    # pos_Mbp
         bslib::navset_tab(
           id = "pat_tab",
@@ -69,8 +69,8 @@ genoEffectApp <- function() {
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
     pattern_list <- patternDataServer("pattern_list", hotspot_list, dip_par,
       pairprobs_obj, snp_list$patterns, snp_action, project_df)
-    geno_list <- 
-      genoServer("geno_list", hotspot_list, snp_list, pairprobs_obj, project_df)
+    geno_list <- genoDataServer("geno_list", hotspot_list, snp_list,
+                                pairprobs_obj, project_df)
     genoEffectServer("geno_effect", hotspot_list, pattern_list, snp_list,
                      geno_list, pairprobs_obj, project_df)
   }

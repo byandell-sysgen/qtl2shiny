@@ -78,7 +78,7 @@ genoPanelServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_
     ns <- session$ns
 
     geno_list <- 
-      genoServer("geno_list", hotspot_list, snp_list, pairprobs_obj, project_df)
+      genoDataServer("geno_list", hotspot_list, snp_list, pairprobs_obj, project_df)
     geno_effect <-
       genoEffectServer("geno_effect", hotspot_list, pattern_list, snp_list,
                      geno_list, pairprobs_obj, project_df)
@@ -109,7 +109,7 @@ genoPanelServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_
 #' @rdname genoPanelApp
 genoPanelInput <- function(id) {
   ns <- shiny::NS(id)
-  genoInput(ns("geno_list"))                # pos_Mbp
+  genoDataInput(ns("geno_list"))            # pos_Mbp
 }
 #' @export
 #' @rdname genoPanelApp
@@ -126,7 +126,7 @@ genoPanelOutput <- function(id) {
     bslib::nav_panel("Effects",
       genoEffectOutput(ns("geno_effect"))), # effect_plot
     bslib::nav_panel("Genotypes",
-      genoOutput(ns("geno_list"))),         # geno_table
+      genoDataOutput(ns("geno_list"))),     # geno_table
     bslib::nav_panel("Summary",
       genoEffectUI(ns("geno_effect"))))     # effect_table
 }
