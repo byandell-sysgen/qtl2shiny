@@ -28,10 +28,10 @@ triadApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            projectUI("project_df"),       # project
-            hotspotInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+            projectUI("project_df"),        # project
+            hotspotInput("hotspot_list")),  # class, subject_model, pheno_names, hotspot
           bslib::card(
-            hotspotUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotUI("hotspot_list")),     # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
         hotspotOutput("hotspot_list"))
     ),
@@ -39,9 +39,9 @@ triadApp <- function() {
       title = "Triad",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          triadInput("triad"),             # triad, med_name, triad_plot
-          mediateInput("mediate_list"),    # qtls, pos_Mbp
-          snpListInput("snp_list")),       # scan_window, minLOD, pheno_name
+          triadInput("triad"),              # triad, med_name, triad_plot
+          mediateDataInput("mediate_list"), # qtls, pos_Mbp
+          snpListInput("snp_list")),        # scan_window, minLOD, pheno_name
         bslib::card(triadOutput("triad"))
       )
     )
@@ -51,8 +51,8 @@ triadApp <- function() {
     hotspot_list <- hotspotServer("hotspot_list", project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
-    mediate_list <-
-      mediateServer("mediate_list", hotspot_list, snp_list, probs_obj, project_df)
+    mediate_list <- mediateDataServer("mediate_list", hotspot_list, snp_list,
+                                      probs_obj, project_df)
     triadServer("triad", hotspot_list, snp_list, mediate_list, probs_obj)
   }
   shiny::shinyApp(ui, server)

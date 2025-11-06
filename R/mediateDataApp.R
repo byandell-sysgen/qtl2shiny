@@ -1,4 +1,4 @@
-#' Shiny Mediate App
+#' Shiny Mediate Data App
 #'
 #' @param id identifier for shiny reactive
 #' @param hotspot_list,probs_obj,patterns,project_df reactive arguments
@@ -19,7 +19,7 @@
 #' @importFrom dplyr filter
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
-mediateApp <- function() {
+mediateDataApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
     title =  "Test Mediate",
@@ -28,10 +28,10 @@ mediateApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            projectUI("project_df"),       # project
-            hotspotInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+            projectUI("project_df"),        # project
+            hotspotInput("hotspot_list")),  # class, subject_model, pheno_names, hotspot
           bslib::card(
-            hotspotUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotUI("hotspot_list")),     # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
         hotspotOutput("hotspot_list"))
     ),
@@ -39,10 +39,10 @@ mediateApp <- function() {
       title = "Mediate",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          mediateInput("mediate_list"),    # pheno_name, med_type, qtls, pos_Mbp
-          snpListInput("snp_list")),       # scan_window, minLOD, pheno_name
-        mediateUI("mediate_list"),
-        bslib::card(mediateOutput("mediate_list"))
+          mediateDataInput("mediate_list"), # pheno_name, med_type, qtls, pos_Mbp
+          snpListInput("snp_list")),        # scan_window, minLOD, pheno_name
+        mediateDataUI("mediate_list"),
+        bslib::card(mediateDataOutput("mediate_list"))
       )
     )
   )
@@ -52,13 +52,13 @@ mediateApp <- function() {
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
     mediate_list <-
-      mediateServer("mediate_list", hotspot_list, snp_list, probs_obj, project_df)
+      mediateDataServer("mediate_list", hotspot_list, snp_list, probs_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname mediateApp
-mediateServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
+#' @rdname mediateDataApp
+mediateDataServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -219,8 +219,8 @@ mediateServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
   })
 }
 #' @export
-#' @rdname mediateApp
-mediateInput <- function(id) {
+#' @rdname mediateDataApp
+mediateDataInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("pheno_name_input")), # pheno_name
@@ -229,14 +229,14 @@ mediateInput <- function(id) {
     shiny::uiOutput(ns("pos_Mbp_input")))    # pos_Mbp
 }
 #' @export
-#' @rdname mediateApp
-mediateUI <- function(id) {
+#' @rdname mediateDataApp
+mediateDataUI <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("mediate_ui"))
 }
 #' @export
-#' @rdname mediateApp
-mediateOutput <- function(id) {
+#' @rdname mediateDataApp
+mediateDataOutput <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns("mediate_table"))        # mediate_table
 }

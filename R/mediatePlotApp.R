@@ -45,7 +45,7 @@ mediatePlotApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           mediatePlotInput("mediate_plot"), # static, signif, local, med_plot
-          mediateInput("mediate_list"),     # qtls, pos_Mbp
+          mediateDataInput("mediate_list"), # qtls, pos_Mbp
           snpListInput("snp_list")),        # scan_window, minLOD, pheno_name
         bslib::card(mediatePlotOutput("mediate_plot"))
       )
@@ -56,8 +56,8 @@ mediatePlotApp <- function() {
     hotspot_list <- hotspotServer("hotspot_list", project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
-    mediate_list <-
-      mediateServer("mediate_list", hotspot_list, snp_list, probs_obj, project_df)
+    mediate_list <- mediateDataServer("mediate_list", hotspot_list, snp_list,
+                                      probs_obj, project_df)
     mediatePlotServer("mediate_plot", hotspot_list, mediate_list, probs_obj, project_df)
   }
   shiny::shinyApp(ui, server)

@@ -60,8 +60,8 @@ mediatePanelServer <- function(id, hotspot_list, snp_list, probs_obj,
     ns <- session$ns
     
     ## Mediation
-    mediate_list <-
-      mediateServer("mediate_list", hotspot_list, snp_list, probs_obj, project_df)
+    mediate_list <- mediateDataServer("mediate_list", hotspot_list, snp_list,
+                                      probs_obj, project_df)
     mediatePlotServer("mediate_plot", hotspot_list, mediate_list, probs_obj, project_df)
     triadServer("triad", hotspot_list, snp_list, mediate_list, probs_obj)
     
@@ -70,7 +70,7 @@ mediatePanelServer <- function(id, hotspot_list, snp_list, probs_obj,
         switch(input$mediate_tab,
           Plot = mediatePlotInput(ns("mediate_plot")), # static, signif, local, med_plot
           Triad = triadInput(ns("triad"))),            # triad, med_name, triad_plot
-        mediateInput(ns("mediate_list")))              # qtls, pos_Mbp
+        mediateDataInput(ns("mediate_list")))          # qtls, pos_Mbp
     })
   })
 }
@@ -88,5 +88,5 @@ mediatePanelOutput <- function(id) {
     id = ns("mediate_tab"),
     bslib::nav_panel("Plot",    mediatePlotOutput(ns("mediate_plot"))),
     bslib::nav_panel("Triad",   triadOutput(ns("triad"))),
-    bslib::nav_panel("Summary", mediateOutput(ns("mediate_list"))))
+    bslib::nav_panel("Summary", mediateDataOutput(ns("mediate_list"))))
 }  
