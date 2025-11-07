@@ -1,8 +1,8 @@
 Package: qtl2shiny
 Type: Package
 Title: Shiny interface for 'qtl2' Fine Mapping
-Version: 1.4.22
-Date: 2025-11-06
+Version: 1.4.23
+Date: 2025-11-07
 Authors@R: c(person("Brian S Yandell", "Author",
                 role = c("aut", "cre"),
                 email = "brian.yandell@wisc.edu"))

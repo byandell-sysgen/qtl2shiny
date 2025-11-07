@@ -255,12 +255,19 @@ downloadServer <- function(id, download_list, addDate = FALSE) {
 #' @export
 downloadInput <- function(id) {
   ns <- shiny::NS(id)
-  # ** Would like these to be aligned vertically better. **
-  bslib::layout_columns(
-    col_widths = c(2, 4, 6),
-    shiny::selectInput(ns("plot_table"), "", c("Plot","Table")),
+  
+  shiny::div(
+    class = "d-flex flex-wrap align-items-center gap-2 mb-2",
+    # Plot/Table selector (compact, no label spacing)
+    shiny::div(class = "mb-0",
+      shiny::selectInput(ns("plot_table"), label = NULL,
+                         choices = c("Plot","Table"),
+                         width = "120px")),
+    # Buttons (rendered by server UI)
     shiny::uiOutput(ns("buttons")),
-    shiny::uiOutput(ns("filename")))
+    # Filename on the right
+    shiny::div(class = "ms-auto mb-0", shiny::uiOutput(ns("filename")))
+  )
 }
 #' @rdname downloadApp
 #' @export
