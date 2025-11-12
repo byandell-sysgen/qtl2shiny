@@ -4,7 +4,6 @@
 \alias{genoApp}
 \alias{genoServer}
 \alias{genoInput}
-\alias{genoUI}
 \alias{genoOutput}
 \title{Shiny Allele App}
 \usage{
@@ -13,8 +12,6 @@ genoApp()
 genoServer(id, hotspot_list, pattern_list, snp_list, pairprobs_obj, project_df)
 
 genoInput(id)
-
-genoUI(id)
 
 genoOutput(id)
 }

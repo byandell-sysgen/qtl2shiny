@@ -14,6 +14,7 @@
 #'             uiOutput
 #' @importFrom bslib card layout_sidebar navbar_options navset_tab nav_panel
 #'             page_navbar sidebar
+#' @importFrom downr downloadServer downloadInput
 patternApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
@@ -46,6 +47,7 @@ patternApp <- function() {
             width = 400),
           bslib::card(dipParUI("dip_par")),     # allele_names
         ),
+        downr::downloadInput("download"),       # download inputs for Plot or Table
         bslib::card(patternOutput("pattern_panel"))
       )
     )
@@ -58,8 +60,9 @@ patternApp <- function() {
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
-    patternServer("pattern_panel", dip_par, hotspot_list, snp_list,
-                       pairprobs_obj, project_df)
+    download_list <- patternServer("pattern_panel", dip_par, hotspot_list,
+                                   snp_list, pairprobs_obj, project_df)
+    downr::downloadServer("download", download_list)
   }
   shiny::shinyApp(ui, server)
 }
@@ -73,10 +76,37 @@ patternServer <- function(id, dip_par, hotspot_list, snp_list,
     ## SDP Patterns
     snpPatternServer("snp_pattern", snp_list, hotspot_list$allele_info)
     pattern_list <- patternDataServer("pattern_list", dip_par, hotspot_list,
-      pairprobs_obj, snp_list$patterns, snp_list$snp_action, project_df)
-    patternPlotServer("pattern_plot", pattern_list, pairprobs_obj)
+                                      snp_list, pairprobs_obj, project_df)
+    pattern_plot <- patternPlotServer("pattern_plot", pattern_list,
+                                      pairprobs_obj)
+    
+    # Download.
+    # ** need to add pheno_name, etc. **
+    download_Plot <- shiny::reactive({
+      switch(shiny::req(input$pat_tab),
+        SNP =, # ** need stuff from snpPattern
+        SDP = shiny::req(pattern_plot$Plot()))
+    })
+    download_Table <- shiny::reactive({
+      switch(shiny::req(input$pat_tab),
+        SNP =,
+        SDP = shiny::req(pattern_list$pattern_table()))
+    })
+    download_Filename <- shiny::reactive({
+      out <- paste(shiny::req(snp_list$snp_par$pheno_name),
+                    "Pattern", shiny::req(input$pat_tab), sep = "_")
+      c(Plot  = ifelse(shiny::req(input$pat_tab) == "SDP",
+                       paste(out, shiny::req(pattern_plot$Filename()),
+                         sep = "_"),
+                       out),
+        Table = out)
+    })
+    download_list <- shiny::reactiveValues(
+      Plot = download_Plot,
+      Table = download_Table,
+      Filename = download_Filename)
     # Return.
-    pattern_list
+    download_list
   })
 }
 #' @export
@@ -84,20 +114,21 @@ patternServer <- function(id, dip_par, hotspot_list, snp_list,
 patternInput <- function(id) {
   ns <- shiny::NS(id)
   bslib::card(
-    patternInput(ns("pattern_list")),  # button, blups, pheno_name
-    patternUI(ns("pattern_list")))     # pattern
+    patternDataInput(ns("pattern_list")),  # button, blups, pheno_name
+    patternDataUI(ns("pattern_list")))     # pattern
 }
 #' @export
 #' @rdname patternApp
 patternOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
-    id = ns("dip_tab"),
-    bslib::nav_panel("SNP Pattern Scan",
+    id = ns("pat_tab"),
+    bslib::nav_panel("SNP Pattern Scan", value = "SNP",
       bslib::card(snpPatternOutput(ns("snp_pattern")))),
-    bslib::nav_panel("SDP Pattern Scans", bslib::navset_tab(
-      bslib::nav_panel("Plot",
-        bslib::card(patternPlotOutput(ns("pattern_plot")))),
-      bslib::nav_panel("Summary",
-        bslib::card(patternOutput(ns("pattern_list")))))))
+    bslib::nav_panel("SDP Pattern Scans", value = "SDP",
+      bslib::navset_tab(
+        bslib::nav_panel("Plot",
+          bslib::card(patternPlotOutput(ns("pattern_plot")))),
+        bslib::nav_panel("Summary",
+          bslib::card(patternDataOutput(ns("pattern_list")))))))
 }

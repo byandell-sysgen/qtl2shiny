@@ -14,6 +14,7 @@
 #'             observeEvent radioButtons reactive renderText renderUI req
 #'             strong tagList textOutput uiOutput
 #' @importFrom bslib card page_sidebar sidebar
+#' @importFrom downr downloadServer downloadInput
 phenoApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
@@ -28,7 +29,7 @@ phenoApp <- function() {
         setParUI("set_par"),              # window_Mbp
         hotspotDataInput("hotspot_obj")), # chr_ct, minLOD
       width = 400),
-    downloadInput("download"),            # download inputs for Plot or Table
+    downr::downloadInput("download"),     # download inputs for Plot or Table
     phenoOutput("pheno_panel"),
     phenoUI("pheno_panel"),
   )
@@ -58,7 +59,7 @@ phenoApp <- function() {
       Plot = shiny::isolate(pheno_list$pheno_plot),
       Table = shiny::isolate(pheno_list$pheno_table),
       Filename = download_Filename)
-    downloadServer("download", download_list)
+    downr::downloadServer("download", download_list)
   }
   shiny::shinyApp(ui, server)
 }

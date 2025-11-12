@@ -136,8 +136,8 @@ genoEffectServer <- function(id, hotspot_list, pattern_list, snp_list,
     
     # Return.
     shiny::reactiveValues(
-      table = effect_table,
-      plot = effect_plot)
+      Table = effect_table,
+      Plot = effect_plot)
   })
 }
 #' @export

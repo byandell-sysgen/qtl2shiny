@@ -24,10 +24,10 @@ snpGeneApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            projectUI("project_df"),       # project
-            hotspotInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+            projectUI("project_df"),        # project
+            hotspotInput("hotspot_list")),  # class, subject_model, pheno_names, hotspot
           bslib::card(
-            hotspotUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotUI("hotspot_list")),     # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
         hotspotOutput("hotspot_list"))
     ),
@@ -35,10 +35,10 @@ snpGeneApp <- function() {
       title = "snpGene",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          snpGeneInput("snp_gene"),        # SNP, gene_name
-          snpListInput("snp_list")),       # scan_window, minLOD, pheno_name
+          snpGeneInput("snp_gene"),         # SNP, gene_name
+          snpListInput("snp_list")),        # scan_window, minLOD, pheno_name
         bslib::card(
-          downloadInput("download"),       # download inputs for Plot or Table
+          downr::downloadInput("download"), # download inputs for Plot or Table
           snpGeneOutput("snp_gene"))
       )
     )
@@ -49,7 +49,7 @@ snpGeneApp <- function() {
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
     download_list <- snpGeneServer("snp_gene", snp_list,
                                    project_df)
-    downloadServer("download", download_list)
+    downr::downloadServer("download", download_list)
   }
   shiny::shinyApp(ui, server)
 }
@@ -85,13 +85,18 @@ snpGeneServer <- function(id, snp_list, project_df) {
     })
     download_Filename <- shiny::reactive({
       gen_tab <- shiny::req(input$gen_tab)
-      pheno_names <- ifelse(
-        gen_tab == "SNP",
-        paste(shiny::req(snp_list$pheno_names()),
-              collapse = "_"),
-        shiny::req(snp_list$snp_par$pheno_name))
+      pheno_names <- switch(gen_tab,
+        SNP = paste(shiny::req(snp_list$pheno_names()), collapse = "_"),
+        Genes = shiny::req(snp_list$snp_par$pheno_name),
+        Exons = paste(shiny::req(snp_list$snp_par$pheno_name),
+                      shiny::req(exon_list$exon_par$gene_name),
+                      sep = "_"))
       out <- paste(pheno_names, gen_tab, sep = "_")
-      c(Plot = out, Table = out)
+      out_table <- pheno_names
+      if(gen_tab == "Exons")
+        out_table <- shiny::req(snp_list$snp_par$pheno_name)
+      out_table <- paste(out_table, gen_tab, sep = "_")
+      c(Plot = out, Table = out_table)
     })
     download_list <- shiny::reactiveValues(
       Plot = download_Plot,

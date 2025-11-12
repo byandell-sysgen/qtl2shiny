@@ -72,12 +72,15 @@ snpPatternServer <- function(id, snp_list, allele_info) {
       summary(shiny::req(snp_list$top_snps_tbl()))
     })
     
-    output$snp_pattern_table <- DT::renderDataTable({
+    snp_pattern_table <- shiny::reactive({
       dplyr::mutate(sum_top_pat(),
                     dplyr::across(dplyr::where(is.numeric),
                                   signif, digits = 4))
-    }, escape = FALSE,
-    options = list(scrollX = TRUE, pageLength = 5))
+    })
+    output$snp_pattern_table <- DT::renderDataTable(
+      shiny::req(snp_pattern_table()),
+      escape = FALSE,
+      options = list(scrollX = TRUE, pageLength = 5))
     
     dropHilit <- shiny::reactive({
       max(0,
@@ -94,18 +97,21 @@ snpPatternServer <- function(id, snp_list, allele_info) {
         shiny::isTruthy(snp_list$snpinfo()) |
         all(shiny::isTruthy(chr_id()))
     })
-    output$snp_pattern_plot <- shiny::renderPlot({
+    snp_pattern_plot <- shiny::reactive({
       if(!ready()) return(plot_null())
       shiny::withProgress(message = 'SNP pattern plots ...', value = 0, {
         shiny::setProgress(1)
-        print(top_pat_plot(snp_list$snp_par$pheno_name, 
+        top_pat_plot(snp_list$snp_par$pheno_name, 
                      snp_list$snp_scan_obj(), 
                      chr_id(),
                      snp_list$snpinfo(),
                      snp_list$snp_par$scan_window,
                      drop_hilit = dropHilit(),
-                     snp_action = snp_list$snp_action()))
+                     snp_action = snp_list$snp_action())
       })
+    })
+    output$snp_pattern_plot <- shiny::renderPlot({
+      print(shiny::req(snp_pattern_plot()))
     })
     
     output$snp_pattern_plotly <- plotly::renderPlotly({
@@ -124,19 +130,22 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     })
     
     ## SNP Pheno patterns
-    output$snp_phe_pat <- shiny::renderPlot({
+    snp_phe_pat <- shiny::reactive({
       if(!ready()) return(plot_null())
       shiny::withProgress(message = 'SNP Pheno patterns ...', value = 0, {
         shiny::setProgress(1)
-        print(top_pat_plot(snp_list$pheno_names(), 
+        top_pat_plot(snp_list$pheno_names(), 
                      snp_list$snp_scan_obj(), 
                      chr_id(),
                      snp_list$snpinfo(),
                      snp_list$snp_par$scan_window,
                      drop_hilit = dropHilit(),
                      facet = "pheno", 
-                     snp_action = snp_list$snp_action()))
+                     snp_action = snp_list$snp_action())
       })
+    })
+    output$snp_phe_pat <- shiny::renderPlot({
+      print(shiny::req(snp_phe_pat()))
     })
     
     haplos <- reactive({
@@ -157,22 +166,25 @@ snpPatternServer <- function(id, snp_list, allele_info) {
                          selected = selected)
     })
     ## SNP Pattern phenos
-    output$snp_pat_phe <- shiny::renderPlot({
+    snp_pat_phe <- shiny::reactive({
       if(!ready()) return(plot_null())
       #     shiny::req(input$pattern)
       top_pat <- shiny::req(snp_list$top_snps_tbl())
       patterns <- qtl2pattern::sdp_to_pattern(top_pat$sdp, haplos())
       shiny::withProgress(message = 'SNP Pattern phenos ...', value = 0, {
         shiny::setProgress(1)
-        print(top_pat_plot(snp_list$pheno_names(), 
+        top_pat_plot(snp_list$pheno_names(), 
                      snp_list$snp_scan_obj(), 
                      chr_id(),
                      snp_list$snpinfo(), 
                      snp_list$snp_par$scan_window,
                      drop_hilit = dropHilit(),
                      facet = "pattern", 
-                     snp_action = snp_list$snp_action()))
+                     snp_action = snp_list$snp_action())
       })
+    })
+    output$snp_pat_phe <- shiny::renderPlot({
+      print(shiny::req(snp_pat_phe()))
     })
     
     output$title <- shiny::renderUI({
@@ -180,23 +192,33 @@ snpPatternServer <- function(id, snp_list, allele_info) {
         shiny::strong("SNP Plots")
     })
     
-    # shiny::observeEvent(snp_list$pheno_names(), {
-    #   browser()
-    #   if(length(snp_list$pheno_names()) == 1) {
-    #     shiny::tagList(
-    #       bslib::nav_select(ns("pat_tab"), "All Phenos", session),
-    #       bslib::nav_hide(ns("pat_tab"), "Top SNPs", session),
-    #       bslib::nav_hide(ns("pat_tab"), "By Pheno", session))
-    #   } else {
-    #     shiny::tagList(
-    #       bslib::nav_select(ns("pat_tab"), "Top SNPs", session),
-    #       bslib::nav_show(ns("pat_tab"), "Top SNPs", session),
-    #       bslib::nav_show(ns("pat_tab"), "By Pheno", session))
-    #   }
-    # })
-
+    # Download.
+    download_Plot <- shiny::reactive({
+      switch(shiny::req(pat_tab),
+        Summary =,
+        Patterns = switch(shiny::req(pattern_tab),
+          "All Phenos" = shiny::req(snp_phe_pat()),
+          "All Patterns" = shiny::req(snp_pat_phe()),
+          Interactive =,
+          "By Pheno" = shiny::req(snp_pattern_plot()),
+          ),
+        Consequences = # ** snpFeature return
+        )
+    })
+    download_Table <- shiny::reactive({
+      # **
+    })
+    download_Filename <- shiny::reactive({
+      # **
+    })
+    download_list <- shiny::reactiveValues(
+      Plot = download_Plot,
+      Table = snp_pattern_table,
+      Filename = download_Filename
+    )
+    
     # Return.
-    input
+    download_list
   })
 }
 #' @export

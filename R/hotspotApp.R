@@ -14,24 +14,25 @@
 #'             observeEvent radioButtons reactive renderText renderUI req
 #'             strong tagList textOutput uiOutput
 #' @importFrom bslib card page_sidebar sidebar
+#' @importFrom downr downloadServer downloadInput
 hotspotApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
     title =  "Test Hotspot Panel",
     sidebar = bslib::sidebar(
       bslib::card(
-        projectUI("project_df"),            # project
+        projectUI("project_df"),       # project
         hotspotInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
       bslib::card(
         hotspotUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
       width = 400),
-    downloadInput("download"),              # download inputs for Plot or Table
+    downr::downloadInput("download"),  # download inputs for Plot or Table
     hotspotOutput("hotspot_list")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
     hotspot_list <- hotspotServer("hotspot_list", project_df)
-    downloadServer("download", hotspot_list$download)
+    downr::downloadServer("download", hotspot_list)
   }
   shiny::shinyApp(ui, server)
 }
@@ -75,12 +76,11 @@ hotspotServer <- function(id, project_df) {
       c(Plot = out, Table = out)
     })
     hotspot_list <- pheno_list
-    hotspot_list$download <- shiny::reactiveValues(
-      Plot = download_Plot,
-      Table = download_Table,
-      Filename = download_Filename
-    )
-    
+    # Add download elements to list.
+    hotspot_list$Plot <- download_Plot
+    hotspot_list$Table <- download_Table
+    hotspot_list$Filename <- download_Filename
+
     ## Return.
     hotspot_list
     

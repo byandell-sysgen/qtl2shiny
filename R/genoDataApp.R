@@ -114,7 +114,7 @@ genoDataServer <- function(id, hotspot_list, snp_list, pairprobs_obj, project_df
     # Return.
     shiny::reactiveValues(
       gen_par = input,
-      table = geno_table)
+      Table = geno_table)
   })
 }
 #' @export

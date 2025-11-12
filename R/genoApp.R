@@ -18,6 +18,7 @@
 #' @importFrom tidyr pivot_wider
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
+#' @importFrom downr downloadServer downloadInput
 genoApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
@@ -48,8 +49,9 @@ genoApp <- function() {
           bslib::card(
             dipParUI("dip_par")),             # allele_names
           width = 400),
-        bslib::card(genoUI("geno_panel")),
-        bslib::card(genoInput("geno_panel"), min_height = "100px"), # pos_Mbp
+        downr::downloadInput("download"),     # download inputs for Plot or Table
+        bslib::card(genoInput("geno_panel"),
+                    min_height = "100px"),    # pos_Mbp
         bslib::card(genoOutput("geno_panel"))
       )
     )
@@ -63,10 +65,11 @@ genoApp <- function() {
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
     pattern_list <- patternDataServer("pattern_list", dip_par, hotspot_list,
-      pairprobs_obj, snp_list$patterns, snp_action, project_df)
+                                      snp_list, pairprobs_obj, project_df)
     download_list <-
       genoServer("geno_panel", hotspot_list, pattern_list, snp_list,
                       pairprobs_obj, project_df)
+    downr::downloadServer("download", download_list)
   }
   shiny::shinyApp(ui, server)
 }
@@ -86,23 +89,34 @@ genoServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_obj,
     output$download_list <- shiny::renderUI({
       shiny::req(download_table(), geno_effect$plot())
       shiny::tagList(
-        shiny::renderText(paste("table:", dim(download_table()()))),
-        shiny::renderText(paste("plot:",  class(geno_effect$plot())[1])))
+        shiny::renderText(paste("table:", dim(download_Table()()))),
+        shiny::renderText(paste("plot:",  class(download_Plot())[1])))
     })
 
-    download_table <- shiny::reactive({
-      shiny::req(geno_list$table(),geno_list$table())
-      switch(shiny::req(input$gen_tab),
-        Genotypes = geno_list$table,
-        Summary   = geno_effect$table)
+    # Download.
+    download_Plot <- shiny::reactive({
+      shiny::req(geno_effect$Plot())
     })
-    # # download_list
-    # download_list <- shiny::reactiveValues(
-    #   filename = "geno",
-    #   plot  = shiny::isolate(geno_effect$plot),
-    #   table = shiny::isolate(download_table()))
-    # # Return.
-    # download_list
+    download_Table <- shiny::reactive({
+      switch(shiny::req(input$gen_tab),
+        Genotypes = shiny::req(geno_list$Table()),
+        Effects   =,
+        Summary   = shiny::req(geno_effect$Table()))
+    })
+    download_Filename <- shiny::reactive({
+      table_type <- ifelse(shiny::req(input$gen_tab) == "Genotypes",
+                       "_Geno", "_Effect")
+      out <- shiny::req(pattern_list$pat_par$pheno_name)
+      c(Plot  = paste0(out, "_Effect"),
+        Table = paste0(out, table_type))
+    })
+    download_list <- shiny::reactiveValues(
+      Filename = download_Filename,
+      Plot  = download_Plot,
+      Table = download_Table)
+    
+    # Return.
+    download_list
   })
 }
 #' @export
@@ -110,12 +124,6 @@ genoServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_obj,
 genoInput <- function(id) {
   ns <- shiny::NS(id)
   genoDataInput(ns("geno_list"))            # pos_Mbp
-}
-#' @export
-#' @rdname genoApp
-genoUI <- function(id) {
-  ns <- shiny::NS(id)
-  shiny::uiOutput(ns("download_list"))      # download_list
 }
 #' @export
 #' @rdname genoApp

@@ -21,6 +21,7 @@
 #'             withProgress
 #' @importFrom bslib card layout_sidebar navbar_options navset_tab nav_panel
 #'             page_navbar sidebar
+#' @importFrom downr downloadServer downloadInput
 scanDataApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
@@ -30,10 +31,10 @@ scanDataApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            projectUI("project_df"),       # project
-            hotspotInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+            projectUI("project_df"),        # project
+            hotspotInput("hotspot_list")),  # class, subject_model, pheno_names, hotspot
           bslib::card(
-            hotspotUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotUI("hotspot_list")),     # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
         hotspotOutput("hotspot_list"))
     ),
@@ -41,9 +42,9 @@ scanDataApp <- function() {
       title = "Scan",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          scanDataInput("scan")),          # blups, pheno_name, scan_window
+          scanDataInput("scan")),           # blups, pheno_name, scan_window
         bslib::card(
-          downloadInput("download"),       # download inputs for Plot or Table
+          downr::downloadInput("download"), # download inputs for Plot or Table
           scanDataOutput("scan")))
     )
   )
@@ -52,7 +53,7 @@ scanDataApp <- function() {
     hotspot_list <- hotspotServer("hotspot_list", project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     download_list <- scanDataServer("scan", hotspot_list, probs_obj, project_df)
-    downloadServer("download", download_list)
+    downr::downloadServer("download", download_list)
   }
   shiny::shinyApp(ui, server)
 }

@@ -24,10 +24,10 @@ patternPlotApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            projectUI("project_df"),       # project
-            hotspotInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+            projectUI("project_df"),          # project
+            hotspotInput("hotspot_list")),    # class, subject_model, pheno_names, hotspot
           bslib::card(
-            hotspotUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotUI("hotspot_list")),       # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
         hotspotOutput("hotspot_list"))
     ),
@@ -36,13 +36,13 @@ patternPlotApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            dipParInput("dip_par"),        # snp_action
-            snpListInput("snp_list")),     # scan_window, minLOD, pheno_name
+            dipParInput("dip_par"),           # snp_action
+            snpListInput("snp_list")),        # scan_window, minLOD, pheno_name
           bslib::card(
-            patternInput("pattern_list"),  # button, blups, pheno_name
-            patternUI("pattern_list")),    # pattern
+            patternDataInput("pattern_list"), # button, blups, pheno_name
+            patternDataUI("pattern_list")),   # pattern
           bslib::card(
-            dipParUI("dip_par")),          # allele_names
+            dipParUI("dip_par")),             # allele_names
           width = 400),
         bslib::card(patternPlotOutput("pattern_plot"))
       )
@@ -56,8 +56,8 @@ patternPlotApp <- function() {
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
-    pattern_list <- patternServer("pattern_list", dip_par, hotspot_list,
-                                  snp_list, pairprobs_obj, project_df)
+    pattern_list <- patternDataServer("pattern_list", dip_par, hotspot_list,
+                                      snp_list, pairprobs_obj, project_df)
     patternPlotServer("pattern_plot", pattern_list, pairprobs_obj)
   }
   shiny::shinyApp(ui, server)
@@ -94,19 +94,38 @@ patternPlotServer <- function(id, pattern_list, pairprobs_obj) {
                       pattern_list$haplos())
       })
     })
-    output$pattern_plot_lod <- shiny::renderUI({
+    pattern_plot_lod <- shiny::reactive({
       shiny::req(input$pat_plot_tab, plot_type_msg(), scan_pat_type_progress())
-      shiny::renderPlot(scan_pat_type_progress())
+      scan_pat_type_progress()
+    })
+    output$pattern_plot_lod <- shiny::renderUI({
+      shiny::renderPlot(print(shiny::req(pattern_plot_lod())))
+    })
+    pattern_plot_eff <- shiny::reactive({
+      shiny::req(input$pat_plot_tab, plot_type_msg(), scan_pat_type_progress())
+      scan_pat_type_progress()
     })
     output$pattern_plot_eff <- shiny::renderUI({
-      shiny::req(input$pat_plot_tab, plot_type_msg(), scan_pat_type_progress())
-      shiny::renderPlot(scan_pat_type_progress())
+      shiny::renderPlot(print(shiny::req(pattern_plot_eff())))
     })
     # ** This one is broken for SDP scans. **
     output$pattern_plot_both <- shiny::renderUI({
       shiny::req(input$pat_plot_tab, plot_type_msg(), scan_pat_type_progress())
       shiny::renderPlot(scan_pat_type_progress())
     })
+    
+    # Result.
+    download_Plot <- shiny::reactive({
+      switch(shiny::req(input$pat_plot_tab),
+             LOD     = shiny::req(pattern_plot_lod()),
+             Effects = shiny::req(pattern_plot_eff()))
+    })
+    download_Filename <- shiny::reactive({
+      shiny::req(input$pat_plot_tab)
+    })
+    shiny::reactiveValues(
+      Plot = download_Plot,
+      Filename = download_Filename)
   })
 }
 #' @export

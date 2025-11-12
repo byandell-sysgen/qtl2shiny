@@ -147,6 +147,7 @@ geneExonServer <- function(id, snp_list) {
     
     # Return.
     shiny::reactiveValues(
+      exon_par = input,
       Plot = exon_plot,
       Table = exon_table)
   })

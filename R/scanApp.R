@@ -13,6 +13,7 @@
 #'             req sidebarPanel strong tagList textOutput uiOutput
 #' @importFrom bslib card layout_sidebar navbar_options navset_tab nav_panel
 #'             page_navbar sidebar
+#' @importFrom downr downloadServer downloadInput
 scanApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
@@ -23,32 +24,32 @@ scanApp <- function() {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            projectUI("project_df"),    # project
-            Input("hotspot_list")),     # class, subject_model, pheno_names, hotspot
+            projectUI("project_df"),       # project
+            hotspotInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
           bslib::card(
-            UI("hotspot_list")),        # window_Mbp, radio, win_par, chr_ct, minLOD
+            hotspotUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
-        Output("hotspot_list"))
+        hotspotOutput("hotspot_list"))
     ),
     bslib::nav_panel(
       title = "scan",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          scanInput("scan_panel"), # <various>
-          snpListInput("snp_list")),    # scan_window, minLOD, pheno_name
-        downloadInput("download"),      # download inputs for Plot or Table
+          scanInput("scan_panel"),         # <various>
+          snpListInput("snp_list")),       # scan_window, minLOD, pheno_name
+        downr::downloadInput("download"),  # download inputs for Plot or Table
         scanOutput("scan_panel")
       )
     )
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
-    hotspot_list <- Server("hotspot_list", project_df)
+    hotspot_list <- hotspotServer("hotspot_list", project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
     download_list <- scanServer("scan_panel", hotspot_list, snp_list,
                                      probs_obj, project_df)
-    downloadServer("download", download_list)
+    downr::downloadServer("download", download_list)
   }
   shiny::shinyApp(ui, server)
 }

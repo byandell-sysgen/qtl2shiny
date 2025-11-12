@@ -14,6 +14,7 @@
 #' @importFrom shiny moduleServer NS reactive req 
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
+#' @importFrom downr downloadServer downloadInput
 qtl2shinyApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- qtl2shinyUI("qtl2shiny")
@@ -71,7 +72,7 @@ qtl2shinyServer <- function(id, projects_df) {
         shiny::renderText(paste("DL:", paste(names(DL), collapse = ", "))))
     })
     # Download Module
-    #downloadServer("download", DL, input$panel)
+    #downr::downloadServer("download", DL, input$panel)
   })    
 }
 #' @export

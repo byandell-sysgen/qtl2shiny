@@ -65,17 +65,19 @@ patternDataApp <- function() {
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
     pattern_list <- patternDataServer("pattern_list", dip_par, hotspot_list,
-      pairprobs_obj, snp_list$patterns, snp_list$snp_action, project_df)
+      snp_list, pairprobs_obj, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
 #' @rdname patternDataApp
-patternDataServer <- function(id, dip_par, hotspot_list, pairprobs_obj, patterns,
-                          snp_action = shiny::reactive({"basic"}), project_df) {
+patternDataServer <- function(id, dip_par, hotspot_list, snp_list,
+                              pairprobs_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    patterns <- shiny::isolate(snp_list$patterns)
+    snp_action <- shiny::isolate(snp_list$snp_action)
     ## Inputs `pat_par`: pheno_name, button, blups, pattern
     output$pheno_name_input <- shiny::renderUI({
       shiny::selectInput(ns("pheno_name"), NULL,
@@ -145,22 +147,26 @@ patternDataServer <- function(id, dip_par, hotspot_list, pairprobs_obj, patterns
                       pats(), input$blups)
       })
     })
-    output$pattern_table <- DT::renderDataTable({
+    pattern_table <- shiny::reactive({
       shiny::req(scan_pat(), pairprobs_obj())
       withProgress(message = 'Pattern summary ...', value = 0, {
         setProgress(1)
         dplyr::mutate(summary(scan_pat(), pairprobs_obj()$map),
-          dplyr::across(dplyr::where(is.numeric), signif, digits = 4))
+                      dplyr::across(dplyr::where(is.numeric), signif, digits = 4))
       })
-    }, escape = FALSE,
-    options = list(scrollX = TRUE, pageLength = 5))
+    })
+    output$pattern_table <- DT::renderDataTable(
+      shiny::req(pattern_table()),
+      escape = FALSE,
+      options = list(scrollX = TRUE, pageLength = 5))
     
     # Returns `pattern_list`.
     shiny::reactiveValues(
       pat_par = input,
       haplos = haplos,
       pattern_choices = pattern_choices,
-      scan_pat = scan_pat
+      scan_pat = scan_pat,
+      pattern_table = pattern_table
     )
   })
 }
@@ -169,14 +175,14 @@ patternDataServer <- function(id, dip_par, hotspot_list, pairprobs_obj, patterns
 patternDataInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::uiOutput(ns("blups_input")),                      # blups
-    shiny::uiOutput(ns("pheno_name_input")))                 # pheno_name
+    shiny::uiOutput(ns("blups_input")),      # blups
+    shiny::uiOutput(ns("pheno_name_input"))) # pheno_name
 }
 #' @export
 #' @rdname patternDataApp
 patternDataUI <- function(id) {
   ns <- shiny::NS(id)
-  shiny::uiOutput(ns("pattern_input"))                       # pattern
+  shiny::uiOutput(ns("pattern_input"))       # pattern
 }
 #' @export
 #' @rdname patternDataApp
