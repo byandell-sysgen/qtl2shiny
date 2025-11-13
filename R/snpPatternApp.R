@@ -66,7 +66,7 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     ns <- session$ns
     
     ## Shiny Module
-    snpFeatureServer("top_feature", snp_list)
+    feature_list <- snpFeatureServer("feature_list", snp_list)
     
     sum_top_pat <- shiny::reactive({
       summary(shiny::req(snp_list$top_snps_tbl()))
@@ -194,22 +194,28 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     
     # Download.
     download_Plot <- shiny::reactive({
-      switch(shiny::req(pat_tab),
+      switch(shiny::req(input$pat_tab),
         Summary =,
-        Patterns = switch(shiny::req(pattern_tab),
+        Patterns = switch(shiny::req(input$pattern_tab),
           "All Phenos" = shiny::req(snp_phe_pat()),
           "All Patterns" = shiny::req(snp_pat_phe()),
           Interactive =,
           "By Pheno" = shiny::req(snp_pattern_plot()),
           ),
-        Consequences = # ** snpFeature return
+        Consequence = shiny::req(feature_list$Plot())
         )
     })
     download_Table <- shiny::reactive({
-      # **
+      switch(shiny::req(input$pat_tab),
+        Summary     = ,
+        Patterns    = shiny::req(snp_pattern_table()),
+        Consequence = shiny::req(feature_list$Table()))
     })
     download_Filename <- shiny::reactive({
-      # **
+      switch(shiny::req(input$pat_tab),
+        Summary     = ,
+        Patterns    = "Pattern",
+        Consequence = shiny::req(feature_list$Filename()))
     })
     download_list <- shiny::reactiveValues(
       Plot = download_Plot,
@@ -239,6 +245,6 @@ snpPatternOutput <- function(id) {
                          shiny::plotOutput(ns("snp_pattern_plot"))),
         bslib::nav_panel("Interactive",
                          plotly::plotlyOutput(ns("snp_pattern_plotly"))))),
-    bslib::nav_panel("Consequence", snpFeatureOutput(ns("top_feature"))),
+    bslib::nav_panel("Consequence", snpFeatureOutput(ns("feature_list"))),
     bslib::nav_panel("Summary",  DT::dataTableOutput(ns("snp_pattern_table"))))
 }

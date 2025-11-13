@@ -57,12 +57,11 @@ qtl2shinyServer <- function(id, projects_df) {
     pattern_list <-
       patternServer("pattern_panel", dip_par, hotspot_list,
                          pattern_snp_list, pairprobs_obj, project_df)
-    DL$pattern <- pattern_list
+    DL$pattern <- pattern_list$download_list
     
     # Genotypes Panel.
     dipParServer("geno_dip_par", hotspot_list)
-    DL$geno <-
-      genoServer("geno_panel", hotspot_list, pattern_list,
+    DL$geno <- genoServer("geno_panel", hotspot_list, pattern_list,
                  pattern_snp_list, pairprobs_obj, project_df)
     
     output$download <- shiny::renderUI({
@@ -71,8 +70,9 @@ qtl2shinyServer <- function(id, projects_df) {
         shiny::renderText(paste("input$panel:", shiny::req(input$panel))),
         shiny::renderText(paste("DL:", paste(names(DL), collapse = ", "))))
     })
-    # Download Module
-    #downr::downloadServer("download", DL, input$panel)
+    # Download
+    download_list <- shiny::isolate(DL[[input$panel]])
+    downr::downloadServer("download", download_list)
   })    
 }
 #' @export

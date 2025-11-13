@@ -60,9 +60,9 @@ patternApp <- function() {
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
-    download_list <- patternServer("pattern_panel", dip_par, hotspot_list,
+    pattern_list <- patternServer("pattern_panel", dip_par, hotspot_list,
                                    snp_list, pairprobs_obj, project_df)
-    downr::downloadServer("download", download_list)
+    downr::downloadServer("download", pattern_list$download_list)
   }
   shiny::shinyApp(ui, server)
 }
@@ -74,7 +74,8 @@ patternServer <- function(id, dip_par, hotspot_list, snp_list,
     ns <- session$ns
     
     ## SDP Patterns
-    snpPatternServer("snp_pattern", snp_list, hotspot_list$allele_info)
+    snppat_list <- snpPatternServer("snp_pattern", snp_list,
+                                    hotspot_list$allele_info)
     pattern_list <- patternDataServer("pattern_list", dip_par, hotspot_list,
                                       snp_list, pairprobs_obj, project_df)
     pattern_plot <- patternPlotServer("pattern_plot", pattern_list,
@@ -84,17 +85,20 @@ patternServer <- function(id, dip_par, hotspot_list, snp_list,
     # ** need to add pheno_name, etc. **
     download_Plot <- shiny::reactive({
       switch(shiny::req(input$pat_tab),
-        SNP =, # ** need stuff from snpPattern
+        SNP = shiny::req(snppat_list$Plot()),
         SDP = shiny::req(pattern_plot$Plot()))
     })
     download_Table <- shiny::reactive({
       switch(shiny::req(input$pat_tab),
-        SNP =,
+        SNP = shiny::req(snppat_list$Table()),
         SDP = shiny::req(pattern_list$pattern_table()))
     })
     download_Filename <- shiny::reactive({
+      out_pat <- switch(shiny::req(input$pat_tab),
+        SNP = shiny::req(snppat_list$Filename()),
+        SDP = "Pattern")
       out <- paste(shiny::req(snp_list$snp_par$pheno_name),
-                    "Pattern", shiny::req(input$pat_tab), sep = "_")
+                    out_pat, shiny::req(input$pat_tab), sep = "_")
       c(Plot  = ifelse(shiny::req(input$pat_tab) == "SDP",
                        paste(out, shiny::req(pattern_plot$Filename()),
                          sep = "_"),
@@ -106,7 +110,8 @@ patternServer <- function(id, dip_par, hotspot_list, snp_list,
       Table = download_Table,
       Filename = download_Filename)
     # Return.
-    download_list
+    pattern_list$download_list <- download_list
+    pattern_list
   })
 }
 #' @export

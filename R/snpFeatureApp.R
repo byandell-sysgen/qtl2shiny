@@ -66,22 +66,59 @@ snpFeatureServer <- function(id, snp_list) {
       })
     })
     
-    output$feature_cons_table <- DT::renderDataTable({
-      tops <- shiny::req(top_feature(), "SNP type")
-      summary(tops)
-    }, options = list(scrollX = TRUE, paging = FALSE, searching=FALSE))
-    output$feature_pattern_table <- DT::renderDataTable({
+    # Patterns.
+    feature_pattern_table <- shiny::reactive({
       summary(shiny::req(top_feature()), "pattern")
-    }, options = list(scrollX = TRUE, paging = FALSE, searching=FALSE))
-    phename <- shiny::reactive({dimnames(snp_list$snp_scan_obj())[[2]]})
-    output$feature_pattern_plot <- shiny::renderPlot({
+    })
+    feature_pattern_plot <- shiny::reactive({
       shiny::req(top_feature(), snp_list$snp_par$pheno_name)
       ggplot2::autoplot(top_feature(), snp_list$snp_par$pheno_name, "consequence")
     })
-    output$feature_cons_plot <- shiny::renderPlot({
+    output$feature_pattern_table <- DT::renderDataTable(
+      shiny::req(feature_pattern_table()),
+      options = list(scrollX = TRUE, paging = FALSE, searching=FALSE))
+    output$feature_pattern_plot <- shiny::renderPlot({
+      print(shiny::req(feature_pattern_plot()))
+    })
+
+    # Consequences.
+    feature_cons_table <- shiny::reactive({
+      tops <- shiny::req(top_feature(), "SNP type")
+      summary(tops)
+    })
+    feature_cons_plot <- shiny::reactive({
       shiny::req(top_feature(), snp_list$snp_par$pheno_name)
       ggplot2::autoplot(top_feature(), snp_list$snp_par$pheno_name, "pattern")
     })
+    output$feature_cons_table <- DT::renderDataTable(
+      shiny::req(feature_cons_table()),
+      options = list(scrollX = TRUE, paging = FALSE, searching=FALSE))
+    output$feature_cons_plot <- shiny::renderPlot({
+      print(shiny::req(feature_cons_plot()))
+    })
+    
+    # Download.
+    download_Plot <- shiny::reactive({
+      switch(shiny::req(input$fea_tab),
+        Pattern     = shiny::req(feature_pattern_plot()),
+        Consequence = shiny::req(feature_cons_plot()))
+    })
+    download_Table <- shiny::reactive({
+      switch(shiny::req(input$fea_tab),
+        Pattern     = shiny::req(feature_pattern_table()),
+        Consequence = shiny::req(feature_cons_table()))
+    })
+    download_Filename <- shiny::reactive({
+      shiny::req(input$fea_tab)
+    })
+    download_list <- shiny::reactiveValues(
+      Plot = download_Plot,
+      Table = download_Table,
+      Filename = download_Filename
+    )
+    
+    # Return.
+    download_list
   })
 }
 #' @export
@@ -90,10 +127,10 @@ snpFeatureOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = ns("fea_tab"),
-    bslib::nav_panel("By Pattern",     shiny::tagList(
+    bslib::nav_panel("By Pattern",     value = "Pattern",     shiny::tagList(
       shiny::plotOutput(ns("feature_pattern_plot")),
       DT::dataTableOutput(ns("feature_pattern_table")))),
-    bslib::nav_panel("By Consequence", shiny::tagList(
+    bslib::nav_panel("By Consequence", value = "Consequence", shiny::tagList(
       shiny::plotOutput(ns("feature_cons_plot")),
       DT::dataTableOutput(ns("feature_cons_table")))))
 }
