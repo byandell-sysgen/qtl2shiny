@@ -102,7 +102,7 @@ mediatePlotServer <- function(id, hotspot_list, mediate_list, probs_obj, project
              "Mediator Effects" = "mediator")
     })
     ## Mediate1 plot
-    output$mediate_plot_static <- shiny::renderPlot({
+    mediate_plot <- shiny::reactive({
       if(!shiny::isTruthy(mediate_list$med_ls()) || !shiny::isTruthy(mediate_signif())) {
         plot_null("too much\nmissing data\nin mediators\nreduce window width")
       } else {
@@ -119,16 +119,12 @@ mediatePlotServer <- function(id, hotspot_list, mediate_list, probs_obj, project
         })
       }
     })
+    output$mediate_plot_static <- shiny::renderPlot({
+      print(shiny::req(mediate_plot()))
+    })
     ## Mediate1 plotly
     output$mediate_plotly <- plotly::renderPlotly({
-      shiny::req(mediate_signif())
-      shiny::withProgress(message = 'Mediation Plotly ...', value = 0, {
-        shiny::setProgress(1)
-        ggplot2::autoplot(
-          mediate_signif(), med_plot_type(),
-          local_only = input$local, 
-          significant = TRUE)
-      })
+      shiny::req(mediate_plot())
     })
     
     output$static_input <- shiny::renderUI({
@@ -160,6 +156,8 @@ mediatePlotServer <- function(id, hotspot_list, mediate_list, probs_obj, project
              Static      = shiny::plotOutput(ns("mediate_plot_static")),
              Interactive = plotly::plotlyOutput(ns("mediate_plotly")))
     })
+    # Return.
+    mediate_plot
   })
 }
 #' @export

@@ -140,7 +140,7 @@ triadServer <- function(id, hotspot_list, snp_list, mediate_list, probs_obj) {
     })
     
     ## Triad plot
-    output$triad_plot_output <- shiny::renderPlot({
+    triad_plot <- shiny::reactive({
       if(!shiny::isTruthy(patterns())) {
         return(plot_null("first run\nAllele Patterns"))
       }
@@ -151,16 +151,21 @@ triadServer <- function(id, hotspot_list, snp_list, mediate_list, probs_obj) {
                    mediate_list$phe1_mx(), mediate_list$peak_mar())
         shiny::withProgress(message = 'Triad Plot ...', value = 0, {
           shiny::setProgress(1)
-          p <- ggplot2::autoplot(triad_df(), type = input$triad_plot,
-                                 dname = mediate_list$peak_mar(),
-                                 mname = input$med_name,
-                                 tname = colnames(mediate_list$phe1_mx()),
-                                 fitlines = "sdp-parallel",
-                                 centerline = NULL)
+          ggplot2::autoplot(triad_df(), type = input$triad_plot,
+                            dname = mediate_list$peak_mar(),
+                            mname = input$med_name,
+                            tname = colnames(mediate_list$phe1_mx()),
+                            fitlines = "sdp-parallel",
+                            centerline = NULL)
         })
-        p
       }
     })
+    output$triad_plot_output <- shiny::renderPlot({
+      print(shiny::req(triad_plot()))
+    })
+    
+    # Result.
+    triad_plot
   })
 }
 #' @export

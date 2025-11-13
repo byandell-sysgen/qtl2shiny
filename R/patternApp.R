@@ -82,7 +82,6 @@ patternServer <- function(id, dip_par, hotspot_list, snp_list,
                                       pairprobs_obj)
     
     # Download.
-    # ** need to add pheno_name, etc. **
     download_Plot <- shiny::reactive({
       switch(shiny::req(input$pat_tab),
         SNP = shiny::req(snppat_list$Plot()),
