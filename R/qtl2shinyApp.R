@@ -30,22 +30,22 @@ qtl2shinyServer <- function(id, projects_df) {
     ns <- session$ns
 
     project_df <- projectServer("project_df", projects_df)
-    DL <- shiny::reactiveValues()
+    download_list <- shiny::reactiveValues()
     
     # Hotspots and Phenotypes Panel.
     hotspot_list <- hotspotServer("hotspot_list", project_df)
-    DL$hotspot <- hotspot_list
+    download_list$hotspot <- hotspot_list
     
     # Allele and SNP Scans Panel.
     scan_snp_list <- snpListServer("scan_snp_list", hotspot_list, project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
-    DL$scan <-
+    download_list$scan <-
       scanServer("scan_panel", hotspot_list, scan_snp_list, probs_obj,
                       project_df)
     
     # Mediation Panel.
-    DL$mediate <- mediateServer("mediate_panel", hotspot_list, scan_snp_list,
-                         probs_obj, project_df)
+    download_list$mediate <- mediateServer("mediate_panel", hotspot_list,
+                                           scan_snp_list, probs_obj, project_df)
     
     # Patterns Panel.
     dip_par <- dipParServer("dip_par", hotspot_list)
@@ -57,22 +57,28 @@ qtl2shinyServer <- function(id, projects_df) {
     pattern_list <-
       patternServer("pattern_panel", dip_par, hotspot_list,
                          pattern_snp_list, pairprobs_obj, project_df)
-    DL$pattern <- pattern_list$download_list
+    download_list$pattern <- shiny::isolate(pattern_list$download_list)
     
     # Genotypes Panel.
     dipParServer("geno_dip_par", hotspot_list)
-    DL$geno <- genoServer("geno_panel", hotspot_list, pattern_list,
+    download_list$geno <- genoServer("geno_panel", hotspot_list, pattern_list,
                  pattern_snp_list, pairprobs_obj, project_df)
     
     output$download <- shiny::renderUI({
       # Note: `input$panel` is of form `qtl2shiny-<panel>`.
       shiny::tagList(
         shiny::renderText(paste("input$panel:", shiny::req(input$panel))),
-        shiny::renderText(paste("DL:", paste(names(DL), collapse = ", "))))
+        shiny::renderText(paste("DL:", paste(names(download_list), collapse = ", "))))
     })
     # Download
-    download_list <- shiny::isolate(DL[[input$panel]])
-    downr::downloadServer("download", download_list)
+    download_list_panel <- shiny::reactive({
+      input_panel <- stringr::str_remove(
+        shiny::req(input$panel),
+        "qtl2shiny-")
+      download_list[[input_panel]]
+    })
+    downr::downloadServer("download",
+                          download_list_panel())
   })    
 }
 #' @export
@@ -91,6 +97,7 @@ qtl2shinyUI <- function(id) {
       bslib::card(
         shiny::uiOutput(ns("download")))
     ),
+    downr::downloadInput(ns("download")),
     bslib::nav_panel(
       title = "Hotspots and Phenotypes",
       value = ns("hotspot"),
