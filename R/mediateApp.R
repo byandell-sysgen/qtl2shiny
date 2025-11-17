@@ -94,10 +94,17 @@ mediateServer <- function(id, hotspot_list, snp_list, probs_obj,
       out <- paste0(shiny::req(mediate_list$med_par$pheno_name), med_pat)
       c(Plot = out, Table = out)
     })
+    download_Type <- shiny::reactive({
+      switch(shiny::req(input$mediate_tab),
+             Summary = "Table",
+             Plot    =,
+             Triad   = "Plot")
+    })
     download_list <- shiny::reactiveValues(
-      Plot = download_Plot,
-      Table = download_Table,
-      Filename = download_Filename)
+      Plot     = download_Plot,
+      Table    = download_Table,
+      Filename = download_Filename,
+      Type     = download_Type)
     # Return.
     download_list
   })

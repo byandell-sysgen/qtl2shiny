@@ -112,8 +112,8 @@ snpFeatureServer <- function(id, snp_list) {
       shiny::req(input$fea_tab)
     })
     download_list <- shiny::reactiveValues(
-      Plot = download_Plot,
-      Table = download_Table,
+      Plot     = download_Plot,
+      Table    = download_Table,
       Filename = download_Filename
     )
     

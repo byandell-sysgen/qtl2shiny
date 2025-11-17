@@ -104,10 +104,18 @@ patternServer <- function(id, dip_par, hotspot_list, snp_list,
                        out),
         Table = out)
     })
+    download_Type <- shiny::reactive({
+      switch(shiny::req(input$pat_tab),
+             SNP = shiny::req(snppat_list$Type()),
+             SDP = switch(shiny::req(input$sdp_pat_tab),
+                          Plot    = "Plot",
+                          Summary = "Table"))
+    })
     download_list <- shiny::reactiveValues(
-      Plot = download_Plot,
-      Table = download_Table,
-      Filename = download_Filename)
+      Plot     = download_Plot,
+      Table    = download_Table,
+      Filename = download_Filename,
+      Type     = download_Type)
     # Return.
     pattern_list$download_list <- download_list
     pattern_list
@@ -131,6 +139,7 @@ patternOutput <- function(id) {
       bslib::card(snpPatternOutput(ns("snp_pattern")))),
     bslib::nav_panel("SDP Pattern Scans", value = "SDP",
       bslib::navset_tab(
+        id = ns("sdp_pat_tab"),
         bslib::nav_panel("Plot",
           bslib::card(patternPlotOutput(ns("pattern_plot")))),
         bslib::nav_panel("Summary",

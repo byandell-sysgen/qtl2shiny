@@ -139,17 +139,25 @@ geneExonServer <- function(id, snp_list) {
       print(shiny::req(exon_plot()))
     })
     
-    ## Outputs
     output$exon_input <- shiny::renderUI({
       switch(shiny::req(input$exon_tab),
              Plot    = shiny::uiOutput(ns("gene_name")))
     })
     
-    # Return.
-    shiny::reactiveValues(
+    # Download.
+    download_Type <- shiny::reactive({
+      switch(shiny::req(input$exon_tab),
+        Plot    = "Plot",
+        Summary = "Table")
+    })
+    exon_list <- shiny::reactiveValues(
       exon_par = input,
       Plot = exon_plot,
-      Table = exon_table)
+      Table = exon_table,
+      Type  = download_Type)
+    
+    # Return.
+    exon_list
   })
 }
 #' @export

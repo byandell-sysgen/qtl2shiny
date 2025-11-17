@@ -98,10 +98,19 @@ snpGeneServer <- function(id, snp_list, project_df) {
       out_table <- paste(out_table, gen_tab, sep = "_")
       c(Plot = out, Table = out_table)
     })
+    download_Type <- shiny::reactive({
+      switch(shiny::req(input$gen_tab),
+        SNP   = switch(shiny::req(input$snp_gen_tab),
+                       Plot = "Plot",
+                       Summary = "Table"),
+        Genes = shiny::req(gene_list$Type()),
+        Exons = shiny::req(exon_list$Type()))
+    })
     download_list <- shiny::reactiveValues(
-      Plot = download_Plot,
-      Table = download_Table,
-      Filename = download_Filename)
+      Plot     = download_Plot,
+      Table    = download_Table,
+      Filename = download_Filename,
+      Type     = download_Type)
     
     # Return.
     download_list
@@ -120,6 +129,7 @@ snpGeneOutput <- function(id) {
   bslib::navset_tab(
     id = ns("gen_tab"),
     bslib::nav_panel("SNP Scan", value = "SNP", bslib::navset_tab(
+      id = ns("snp_gen_tab"),
       bslib::nav_panel("Plot", bslib::card(
         snpPlotOutput(ns("snp_scan")))),
       bslib::nav_panel("Summary", bslib::card(

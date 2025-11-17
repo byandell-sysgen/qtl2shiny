@@ -206,16 +206,23 @@ scanDataServer <- function(id, hotspot_list, probs_obj, project_df) {
     })
     download_Filename <- shiny::reactive({
       scan_tab <- shiny::req(input$scan_tab)
-      out <- shiny::req(hotspot_list$set_par$class)
+      out <- paste(shiny::req(hotspot_list$pheno_names()), collapse = "_")
       c(Plot = paste(out,
           ifelse(scan_tab == "Summary", "Both", scan_tab), sep = "_"),
         Table = paste0(out, "_Summary"))
     })
+    download_Type <- shiny::reactive({
+      switch(shiny::req(input$scan_tab),
+        LOD     =,
+        Effects =,
+        Both    = "Plot",
+        Summary = "Table")
+    })
     download_list <- shiny::reactiveValues(
-      Plot = download_Plot,
-      Table = scan_table,
-      Filename = download_Filename
-    )
+      Plot     = download_Plot,
+      Table    = scan_table,
+      Filename = download_Filename,
+      Type     = download_Type)
     
     # Return.
     download_list

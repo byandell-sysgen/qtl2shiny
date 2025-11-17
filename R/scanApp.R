@@ -84,10 +84,16 @@ scanServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
              scan = scan_list$Filename(),
              snp  = gene_list$Filename())
     })
+    download_Type <- shiny::reactive({
+      switch(shiny::req(input$hap_tab),
+             scan = scan_list$Type(),
+             snp  = gene_list$Type())
+    })
     download_list <- shiny::reactiveValues(
       Plot = download_Plot,
       Table = download_Table,
-      Filename = download_Filename)
+      Filename = download_Filename,
+      Type = download_Type)
     
     # Return.
     download_list

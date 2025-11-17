@@ -217,11 +217,17 @@ snpPatternServer <- function(id, snp_list, allele_info) {
         Patterns    = "Pattern",
         Consequence = shiny::req(feature_list$Filename()))
     })
+    download_Type <- shiny::reactive({
+      switch(shiny::req(input$pat_tab),
+             Summary     = "Table",
+             Patterns    = "Plot",
+             Consequence = "Choose")
+    })
     download_list <- shiny::reactiveValues(
-      Plot = download_Plot,
-      Table = snp_pattern_table,
-      Filename = download_Filename
-    )
+      Plot     = download_Plot,
+      Table    = snp_pattern_table,
+      Filename = download_Filename,
+      Type     = download_Type)
     
     # Return.
     download_list

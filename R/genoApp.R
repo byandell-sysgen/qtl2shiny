@@ -110,10 +110,17 @@ genoServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_obj,
       c(Plot  = paste0(out, "_Effect"),
         Table = paste0(out, table_type))
     })
+    download_Type <- shiny::reactive({
+      switch(shiny::req(input$gen_tab),
+             Effects   = "Plot",
+             Genotypes =,
+             Summary   = "Table")
+    })
     download_list <- shiny::reactiveValues(
       Filename = download_Filename,
-      Plot  = download_Plot,
-      Table = download_Table)
+      Plot     = download_Plot,
+      Table    = download_Table,
+      Type     = download_Type)
     
     # Return.
     download_list

@@ -107,10 +107,19 @@ geneRegionServer <- function(id, snp_list, project_df) {
       print(shiny::req(gene_plot()))
     })
     
-    # Return.
-    shiny::reactiveValues(
+    # Download.
+    download_Type <- shiny::reactive({
+      switch(shiny::req(input$exon_tab),
+        Plot    = "Plot",
+        Summary = "Table")
+    })
+    download_list <- shiny::reactiveValues(
       Plot  = gene_plot,
-      Table = gene_table)
+      Table = gene_table,
+      Type  = download_Type)
+    
+    # Return.
+    download_list
   })
 }
 #' @export
