@@ -294,6 +294,8 @@ for a selected genome location.
 Genotype and Effects Panel
   - [genoData](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoDataApp.R) #
 Genotypes table
+  - [genoPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoPlotApp.R) #
+Genotypes plot
   - [genoEffect](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoApp.R) #
 Genotype Effects plot and table
 

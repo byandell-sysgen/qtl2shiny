@@ -80,11 +80,11 @@ genoServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_obj,
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    geno_list <- 
-      genoDataServer("geno_list", hotspot_list, snp_list, pairprobs_obj, project_df)
-    geno_effect <-
-      genoEffectServer("geno_effect", hotspot_list, pattern_list, snp_list,
-                     geno_list, pairprobs_obj, project_df)
+    geno_list <- genoDataServer("geno_list", hotspot_list, snp_list,
+                                pairprobs_obj, project_df)
+    geno_plot <- genoPlotServer("geno_plot", hotspot_list, geno_list)
+    geno_effect <- genoEffectServer("geno_effect", hotspot_list, pattern_list,
+                                snp_list, geno_list, pairprobs_obj, project_df)
     
     output$download_list <- shiny::renderUI({
       shiny::req(download_table(), geno_effect$plot())
@@ -95,26 +95,32 @@ genoServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_obj,
 
     # Download.
     download_Plot <- shiny::reactive({
-      shiny::req(geno_effect$Plot())
+      switch(shiny::req(input$gen_tab),
+       Genotypes   =,
+       GenoTable   = shiny::req(geno_plot()),
+       Effects     =,
+       EffectTable = shiny::req(geno_effect$Plot()))
     })
     download_Table <- shiny::reactive({
       switch(shiny::req(input$gen_tab),
-        Genotypes = shiny::req(geno_list$Table()),
-        Effects   =,
-        Summary   = shiny::req(geno_effect$Table()))
+        Genotypes   =,
+        GenoTable   = shiny::req(geno_list$Table()),
+        Effects     =,
+        EffectTable = shiny::req(geno_effect$Table()))
     })
     download_Filename <- shiny::reactive({
-      table_type <- ifelse(shiny::req(input$gen_tab) == "Genotypes",
-                       "_Geno", "_Effect")
-      out <- shiny::req(pattern_list$pat_par$pheno_name)
-      c(Plot  = paste0(out, "_Effect"),
-        Table = paste0(out, table_type))
+      table_type <- ifelse(
+        shiny::req(input$gen_tab) %in% c("Genotypes","GenoTable"),
+        "_Geno", "_Effect")
+      out <- paste0(shiny::req(pattern_list$pat_par$pheno_name), table_type)
+      c(Plot  = out, Table = out)
     })
     download_Type <- shiny::reactive({
       switch(shiny::req(input$gen_tab),
-             Effects   = "Plot",
-             Genotypes =,
-             Summary   = "Table")
+             Genotypes   =,
+             Effects     = "Plot",
+             GenoTable   =,
+             EffectTable = "Table")
     })
     download_list <- shiny::reactiveValues(
       Filename = download_Filename,
@@ -139,9 +145,11 @@ genoOutput <- function(id) {
   bslib::navset_tab(
     id = ns("gen_tab"),
     bslib::nav_panel("Effects",
-      genoEffectOutput(ns("geno_effect"))), # effect_plot
+      genoEffectOutput(ns("geno_effect"))),                   # effect_plot
     bslib::nav_panel("Genotypes",
-      genoDataOutput(ns("geno_list"))),     # geno_table
-    bslib::nav_panel("Summary",
-      genoEffectUI(ns("geno_effect"))))     # effect_table
+                     genoPlotOutput(ns("geno_plot"))),        # geno_plot
+    bslib::nav_panel("Genotype Summary", value = "GenoTable",
+      genoDataOutput(ns("geno_list"))),                       # geno_table
+    bslib::nav_panel("Effect Summary", value = "EffectTable",
+      genoEffectUI(ns("geno_effect"))))                       # effect_table
 }
