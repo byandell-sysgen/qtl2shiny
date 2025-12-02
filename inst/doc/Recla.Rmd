@@ -301,7 +301,8 @@ and
 [geneExonServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/geneExonApp.R).
 
 ```{r}
-(gene_region_tbl <- qtl2shiny:::gene_region(chr_id, scan_window, project_df))
+(gene_region_tbl <- qtl2shiny:::gene_region(chr_id, scan_window, project_df)) |>
+  dplyr::select(Name, chr, start, stop, strand)
 ```
 
 ```{r}
@@ -318,7 +319,8 @@ gene_names <- exon_table$gene
 ```
 
 ```{r}
-(gene_exon_pheno <- subset(gene_exon_tbl, gene_names[1]))
+(gene_exon_pheno <- subset(gene_exon_tbl, gene_names[1])) |>
+  dplyr::count(Parent)
 ```
 
 ```{r}
@@ -422,6 +424,13 @@ effect_obj <- qtl2shiny:::effect_scan(pheno_mx, covar_df, pair_probs_obj,
 ```
 
 ```{r}
+# effect_table
+qtl2shiny:::effect_summary(effect_obj, pos = peak_Mbp) |>
+  dplyr::count(source)
+```
+
+```{r}
+# effect_plot
 ggplot2::autoplot(effect_obj, pos = peak_Mbp) +
   ggplot2::ggtitle(pheno_name)
 ```
