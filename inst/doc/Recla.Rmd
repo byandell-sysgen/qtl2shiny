@@ -95,7 +95,7 @@ Display `hotspot_df` in
 Plot `hotspot_obj` in
 [hotspotPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotPlotApp.R).
 
-```{r}
+```{r hotspot_plot}
 # hotspot_plot
 qtl2shiny:::plot_hot(hotspot_obj, project_class, window_Mbp)
 ```
@@ -163,7 +163,7 @@ qtl2shiny:::summary_na(pheno_mx, covar_df)
 Plot phenotypes with
 [phenoPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPlotApp.R).
 
-```{r warning=FALSE}
+```{r pheno_plot, warning=FALSE}
 # pheno_plot
 qtl2shiny:::plot_sex(pheno_mx, covar_df)
 ```
@@ -201,7 +201,7 @@ scan_obj <- qtl2shiny::scan1covar(pheno_mx, covar_df, probs_obj$probs,
                                    kinship_list, peak_df)
 ```
 
-```{r}
+```{r scan_plot}
 # scan_plot
 scan_window <- range(probs_obj$map[[chr_id]])
 print(qtl2shiny:::plot_scan(scan_obj, probs_obj$map, seq(ncol(scan_obj)),
@@ -222,7 +222,7 @@ eff_obj <- qtl2shiny:::scan1_effect(probs_obj$probs, pheno_mx, kinship_list,
 allele_info <- qtl2shiny::read_project(project_df, "allele_info")
 ```
 
-```{r}
+```{r effect_plot}
 # effect_plot
 qtl2shiny:::plot_eff(pheno_name, eff_obj, probs_obj$map, scan_obj, scan_window,,
                      allele_info)
@@ -291,7 +291,7 @@ SNP summaries
 and
 [snpTableServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpTableApp.R).
 
-```{r}
+```{r snp_plot}
 # snp_plot
 print(qtl2shiny:::top_snp_asso(snp_scan_obj, snpinfo, scan_window, "basic", minLOD))
 ```
@@ -314,7 +314,7 @@ and
   dplyr::distinct(Name, chr, start, stop, strand)
 ```
 
-```{r}
+```{r gene_plot}
 # gene_plot
 print(qtl2shiny:::plot_gene_region(pheno_name, gene_region_tbl, top_snps_tbl, 
                                    scan_window, use_snp = TRUE, "basic"))
@@ -329,13 +329,13 @@ print(qtl2shiny:::plot_gene_region(pheno_name, gene_region_tbl, top_snps_tbl,
 gene_names <- exon_table$gene
 ```
 
-```{r}
+```{r exon_table}
 # exon_table
 (gene_exon_pheno <- subset(gene_exon_tbl, gene_names[1])) |>
   dplyr::count(Parent)
 ```
 
-```{r}
+```{r exon_plot}
 # exon_plot
 print(qtl2shiny:::plot_gene_exons(gene_exon_pheno,
   dplyr::filter(top_snps_tbl, .data$pheno == pheno_name),
@@ -355,13 +355,13 @@ strain distribution patterns (SDPs) are handled by the pattern panel
 
 ** Make signif part of the default summary for `top_snps_tbl` object.**
 
-```{r}
+```{r snp_pattern_table}
 # snp_pattern_table
 dplyr::mutate(summary(top_snps_tbl),
   dplyr::across(dplyr::where(is.numeric), \(x) signif(x, digits = 4)))
 ```
 
-```{r}
+```{r snp_pattern_plot}
 # snp_pattern_plot
 print(qtl2shiny:::top_pat_plot(pheno_name, snp_scan_obj, chr_id, snpinfo,
                                scan_window, drop_hilit, facet = "pheno"))
@@ -380,7 +380,7 @@ scan_pattern <- qtl2shiny:::scan1_pattern(pheno_name, pheno_mx, covar_df,
   pair_probs_obj, kinship_list, peak_df, patterns_pheno, blups = FALSE)
 ```
 
-```{r}
+```{r scan_pattern_table}
 # scan_pattern_table
 dplyr::mutate(
   summary(scan_pattern, pair_probs_obj$map),
@@ -394,13 +394,13 @@ pattern_choices <- qtl2pattern::sdp_to_pattern(patterns_pheno$sdp, haplos)
 
 [patternPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternPlotApp.R)
 
-```{r}
+```{r scan_pattern_plot}
 # scan_pattern_plot
 qtl2shiny:::scan_pat_type(scan_pattern, pair_probs_obj$map, "lod",
                           pattern_choices, pheno_name, haplos)
 ```
 
-```{r}
+```{r scan_coef_plot}
 # scan_coef_plot
 qtl2shiny:::scan_pat_type(scan_pattern, pair_probs_obj$map, "coef",
                           pattern_choices, pheno_name, haplos)
@@ -413,7 +413,7 @@ Genotypes and effects estimates are handled with the geno panel
 
 [genoDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoDataApp.R)
 
-```{r}
+```{r geno_table}
 geno_table <- qtl2shiny:::pair_geno_table(pair_probs_obj, patterns,
                                            peak_Mbp)
 tidyr::pivot_longer(as.data.frame(geno_table), cols = dplyr::everything(),
@@ -423,27 +423,27 @@ tidyr::pivot_longer(as.data.frame(geno_table), cols = dplyr::everything(),
 
 [genoPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoEffectApp.R)
 
-```{r warning=FALSE}
+```{r geno_plot, warning=FALSE}
 # geno_plot
 qtl2shiny:::geno_ggplot(geno_table, pheno_mx)
 ```
 
 [genoEffectServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoEffectApp.R)
 
-```{r}
+```{r geno_effect_obj}
 effect_obj <- qtl2shiny:::effect_scan(pheno_mx, covar_df, pair_probs_obj,
                                       kinship_list, peak_df, patterns,
                                       scan_pattern, blups = FALSE)
 ```
 
-```{r}
-# effect_table
+```{r geno_effect_table}
+# geno_effect_table
 qtl2shiny:::effect_summary(effect_obj, pos = peak_Mbp) |>
   dplyr::count(source)
 ```
 
-```{r}
-# effect_plot
+```{r geno_effect_plot}
+# geno_effect_plot
 ggplot2::autoplot(effect_obj, pos = peak_Mbp) +
   ggplot2::ggtitle(pheno_name)
 ```
@@ -466,7 +466,7 @@ comed_ls <- qtl2shiny:::comediator_region(pheno_name, chr_id, scan_window,
 med_ls <- qtl2shiny:::comediator_type(comed_ls, peak_df, pheno_name, FALSE) 
 ```
 
-```{r eval=FALSE}
+```{r mediate_obj, eval=FALSE}
 mediate_obj <- qtl2mediate::mediation_test_qtl2(
   target = pheno_mx[, pheno_name, drop = FALSE],
   mediator = med_ls[[1]],
@@ -480,14 +480,14 @@ mediate_obj <- qtl2mediate::mediation_test_qtl2(
   kinship = kinship_list)
 ```
 
-```{r eval=FALSE}
+```{r mediate_table, eval=FALSE}
 # mediate_table
 mediate_obj())$best
 ```
 
 [mediatePlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediatePlotApp.R)
 
-```{r eval=FALSE}
+```{r mediate_plot, eval=FALSE}
 # mediate_plot
 ggplot2::autoplot(mediate_obj, "pos_LR", local_only = TRUE, 
   significant = TRUE)
