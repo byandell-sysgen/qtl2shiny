@@ -2,7 +2,7 @@
 title: "Recla"
 author: "Brian Yandell"
 date: "2025-12-01"
-output: html_document
+output: md_document
 params:
   rootdir: ~/Documents/Research/byandell-sysgen/qtl2shinyApp
 ---
@@ -194,7 +194,7 @@ The traditional allele (genome) scan is done with
 [scanDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/scanDataApp.R).
 
 ```{r}
-scan_obj <- qtl2shiny:::scan1covar(pheno_mx, covar_df, probs_obj$probs,
+scan_obj <- qtl2shiny::scan1covar(pheno_mx, covar_df, probs_obj$probs,
                                    kinship_list, peak_df)
 ```
 
@@ -261,8 +261,8 @@ The `snpprobs_obj` is only used below inside this panel to create other
 objects passed along via `snp_list`.
 
 ```{r}
-snp_scan_obj <- scan1covar(pheno_mx, covar_df, snpprobs_obj$snpprobs,
-                           kinship_list, peak_df)
+snp_scan_obj <- qtl2shiny::scan1covar(pheno_mx, covar_df,
+  snpprobs_obj$snpprobs, kinship_list, peak_df)
 ```
 
 ```{r}
@@ -392,6 +392,39 @@ qtl2shiny:::scan_pat_type(scan_pattern, pair_probs_obj$map, "coef",
 ```
 
 ### Genotypes
+
+Genotypes and effects estimates are handled with the geno panel
+[genoServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoApp.R)
+
+[genoDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoDataApp.R)
+
+```{r}
+geno_table <- qtl2shiny:::pair_geno_table(pair_probs_obj, patterns,
+                                           peak_Mbp)
+tidyr::pivot_longer(as.data.frame(geno_table), cols = dplyr::everything(),
+                    names_to = "type", values_to = "value") |>
+  dplyr::count(type, value)
+```
+
+[genoPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoEffectApp.R)
+
+```{r warning=FALSE}
+# geno_plot
+qtl2shiny:::geno_ggplot(geno_table, pheno_mx)
+```
+
+[genoEffectServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoEffectApp.R)
+
+```{r}
+effect_obj <- qtl2shiny:::effect_scan(pheno_mx, covar_df, pair_probs_obj,
+                                      kinship_list, peak_df, patterns,
+                                      scan_pattern, blups = FALSE)
+```
+
+```{r}
+ggplot2::autoplot(effect_obj, pos = peak_Mbp) +
+  ggplot2::ggtitle(pheno_name)
+```
 
 
 ### Mediation
