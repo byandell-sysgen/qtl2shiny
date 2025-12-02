@@ -108,6 +108,7 @@ Create hotspots in
 Display `hotspot_df` in
 [hotspotTableServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotTableApp.R).
 
+    # hotspot_table
     (hotspot_df <- summary(hotspot_obj))
 
     ## # A tibble: 20 × 4
@@ -137,6 +138,7 @@ Display `hotspot_df` in
 Plot `hotspot_obj` in
 [hotspotPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotPlotApp.R).
 
+    # hotspot_plot
     qtl2shiny:::plot_hot(hotspot_obj, project_class, window_Mbp)
 
 ![](Recla_files/figure-markdown_strict/unnamed-chunk-7-1.png)
@@ -218,6 +220,7 @@ Rankz-transform phenotype data for `pheno_name` with
 Display summary table with
 [phenoTableServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoTableApp.R).
 
+    # pheno_table
     qtl2shiny:::summary_na(pheno_mx, covar_df)
 
     ## # A tibble: 2 × 5
@@ -229,6 +232,7 @@ Display summary table with
 Plot phenotypes with
 [phenoPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPlotApp.R).
 
+    # pheno_plot
     qtl2shiny:::plot_sex(pheno_mx, covar_df)
 
 ![](Recla_files/figure-markdown_strict/unnamed-chunk-15-1.png) \##
@@ -242,17 +246,7 @@ Allele and SNP scans are performed with the scan panel
 The first step is to set up the `probs_obj` with
 [probsServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/probsApp.R).
 
-    dir()
-
-    ##  [1] "about-extended.md"  "about.md"           "app_legacy.R"      
-    ##  [4] "app.R"              "DO1200Data.html"    "DO1200Data.md"     
-    ##  [7] "DO1200Data.Rmd"     "DO1200Study.Rmd"    "doc"               
-    ## [10] "LICENSE"            "qtl2shinyApp.Rproj" "qtl2shinyData"     
-    ## [13] "ReadMe_RD.html"     "ReadMe_RD.md"       "README.md"         
-    ## [16] "Recla.html"         "Recla.Rmd"          "scan_lipid_obj.rds"
-    ## [19] "transition.Rmd"     "workflow.md"
-
-\*\* problem in qtl2pattern:::read\_probs `chr` may factor and needs
+\*\* problem in qtl2pattern:::read\_probs `chr` may factor and needs\*\*
 
     query_probs <- qtl2shiny:::read_query_rds(project_df, "query_probs.rds")
     start_val <- peak_Mbp - window_Mbp
@@ -270,12 +264,14 @@ The traditional allele (genome) scan is done with
     scan_obj <- qtl2shiny::scan1covar(pheno_mx, covar_df, probs_obj$probs,
                                        kinship_list, peak_df)
 
+    # scan_plot
     scan_window <- range(probs_obj$map[[chr_id]])
     print(qtl2shiny:::plot_scan(scan_obj, probs_obj$map, seq(ncol(scan_obj)),
                                 chr_id, scan_window, pheno_mx))
 
-![](Recla_files/figure-markdown_strict/unnamed-chunk-20-1.png)
+![](Recla_files/figure-markdown_strict/unnamed-chunk-19-1.png)
 
+    # scan_table
     summary(scan_obj, probs_obj$map)
 
     ## # A tibble: 1 × 5
@@ -288,10 +284,11 @@ The traditional allele (genome) scan is done with
 
     allele_info <- qtl2shiny::read_project(project_df, "allele_info")
 
+    # effect_plot
     qtl2shiny:::plot_eff(pheno_name, eff_obj, probs_obj$map, scan_obj, scan_window,,
                          allele_info)
 
-![](Recla_files/figure-markdown_strict/unnamed-chunk-24-1.png)
+![](Recla_files/figure-markdown_strict/unnamed-chunk-23-1.png)
 
 ### SNP Scans
 
@@ -351,10 +348,12 @@ SNP summaries
 and
 [snpTableServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpTableApp.R).
 
+    # snp_plot
     print(qtl2shiny:::top_snp_asso(snp_scan_obj, snpinfo, scan_window, "basic", minLOD))
 
-![](Recla_files/figure-markdown_strict/unnamed-chunk-30-1.png)
+![](Recla_files/figure-markdown_strict/unnamed-chunk-29-1.png)
 
+    # snp_table
     qtl2shiny:::ensembl_gene(summary(top_snps_tbl,"best"), project_df, TRUE)
 
     ## # A tibble: 2 × 20
@@ -373,6 +372,7 @@ Genes and exons are handled by
 and
 [geneExonServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/geneExonApp.R).
 
+    # gene_table
     (gene_region_tbl <- qtl2shiny:::gene_region(chr_id, scan_window, project_df)) |>
       dplyr::distinct(Name, chr, start, stop, strand)
 
@@ -408,11 +408,13 @@ and
     ## 29       Gm30926  14 22.72900 22.80187      -
     ## 30        Gm7473  14 22.77457 22.77548      -
 
+    # gene_plot
     print(qtl2shiny:::plot_gene_region(pheno_name, gene_region_tbl, top_snps_tbl, 
                                        scan_window, use_snp = TRUE, "basic"))
 
-![](Recla_files/figure-markdown_strict/unnamed-chunk-33-1.png)
+![](Recla_files/figure-markdown_strict/unnamed-chunk-32-1.png)
 
+    # exon_tables
     (exon_table <- summary(gene_exon_tbl, top_snps_tbl = top_snps_tbl))
 
     ## # A tibble: 3 × 10
@@ -425,6 +427,7 @@ and
 
     gene_names <- exon_table$gene
 
+    # exon_table
     (gene_exon_pheno <- subset(gene_exon_tbl, gene_names[1])) |>
       dplyr::count(Parent)
 
@@ -453,11 +456,12 @@ and
     ## 22    VEGA:OTTMUST00000113326  3
     ## 23                       <NA>  1
 
+    # exon_plot
     print(qtl2shiny:::plot_gene_exons(gene_exon_pheno,
       dplyr::filter(top_snps_tbl, .data$pheno == pheno_name),
       gene_names[1], paste(pheno_name, "basic")))
 
-![](Recla_files/figure-markdown_strict/unnamed-chunk-37-1.png)
+![](Recla_files/figure-markdown_strict/unnamed-chunk-36-1.png)
 
 ## Pattern Panel
 
@@ -485,7 +489,7 @@ object.\*\*
     print(qtl2shiny:::top_pat_plot(pheno_name, snp_scan_obj, chr_id, snpinfo,
                                    scan_window, drop_hilit, facet = "pheno"))
 
-![](Recla_files/figure-markdown_strict/unnamed-chunk-39-1.png)
+![](Recla_files/figure-markdown_strict/unnamed-chunk-38-1.png)
 
 ### SDP Scan patterns
 
@@ -515,13 +519,13 @@ object.\*\*
     qtl2shiny:::scan_pat_type(scan_pattern, pair_probs_obj$map, "lod",
                               pattern_choices, pheno_name, haplos)
 
-![](Recla_files/figure-markdown_strict/unnamed-chunk-44-1.png)
+![](Recla_files/figure-markdown_strict/unnamed-chunk-43-1.png)
 
     # scan_coef_plot
     qtl2shiny:::scan_pat_type(scan_pattern, pair_probs_obj$map, "coef",
                               pattern_choices, pheno_name, haplos)
 
-![](Recla_files/figure-markdown_strict/unnamed-chunk-45-1.png)
+![](Recla_files/figure-markdown_strict/unnamed-chunk-44-1.png)
 
 ## Genotypes Panel
 
@@ -556,7 +560,7 @@ Genotypes and effects estimates are handled with the geno panel
     # geno_plot
     qtl2shiny:::geno_ggplot(geno_table, pheno_mx)
 
-![](Recla_files/figure-markdown_strict/unnamed-chunk-47-1.png)
+![](Recla_files/figure-markdown_strict/unnamed-chunk-46-1.png)
 
 [genoEffectServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoEffectApp.R)
 
@@ -579,7 +583,7 @@ Genotypes and effects estimates are handled with the geno panel
     ggplot2::autoplot(effect_obj, pos = peak_Mbp) +
       ggplot2::ggtitle(pheno_name)
 
-![](Recla_files/figure-markdown_strict/unnamed-chunk-50-1.png)
+![](Recla_files/figure-markdown_strict/unnamed-chunk-49-1.png)
 
 ## Mediation Panel
 

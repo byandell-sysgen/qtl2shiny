@@ -88,6 +88,7 @@ Display `hotspot_df` in
 [hotspotTableServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotTableApp.R).
 
 ```{r}
+# hotspot_table
 (hotspot_df <- summary(hotspot_obj))
 ```
 
@@ -95,6 +96,7 @@ Plot `hotspot_obj` in
 [hotspotPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotPlotApp.R).
 
 ```{r}
+# hotspot_plot
 qtl2shiny:::plot_hot(hotspot_obj, project_class, window_Mbp)
 ```
 
@@ -116,7 +118,6 @@ Peak dataframe is now refined with
   chr_id = chr_id, pos_Mbp = peak_Mbp, win = window_Mbp)) |>
   dplyr::select(phenotype_class, phenotype_original, qtl_lod, qtl_pos, addcovar)
 ```
-
 
 ### Phenotypes
 
@@ -155,6 +156,7 @@ Display summary table with
 [phenoTableServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoTableApp.R).
 
 ```{r}
+# pheno_table
 qtl2shiny:::summary_na(pheno_mx, covar_df)
 ```
 
@@ -162,6 +164,7 @@ Plot phenotypes with
 [phenoPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPlotApp.R).
 
 ```{r warning=FALSE}
+# pheno_plot
 qtl2shiny:::plot_sex(pheno_mx, covar_df)
 ```
 ## Allele and SNP Scan Panel
@@ -174,11 +177,8 @@ Allele and SNP scans are performed with the scan panel
 The first step is to set up the `probs_obj` with
 [probsServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/probsApp.R).
 
-```{r}
-dir()
-```
+** problem in qtl2pattern:::read_probs `chr` may factor and needs**
 
-** problem in qtl2pattern:::read_probs `chr` may factor and needs
 ```{r}
 query_probs <- qtl2shiny:::read_query_rds(project_df, "query_probs.rds")
 start_val <- peak_Mbp - window_Mbp
@@ -193,7 +193,6 @@ Also need `kinship_list from
 kinship_list <- qtl2shiny::read_project(project_df, "kinship")[chr_id]
 ```
 
-
 The traditional allele (genome) scan is done with
 [scanDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/scanDataApp.R).
 
@@ -203,12 +202,14 @@ scan_obj <- qtl2shiny::scan1covar(pheno_mx, covar_df, probs_obj$probs,
 ```
 
 ```{r}
+# scan_plot
 scan_window <- range(probs_obj$map[[chr_id]])
 print(qtl2shiny:::plot_scan(scan_obj, probs_obj$map, seq(ncol(scan_obj)),
                             chr_id, scan_window, pheno_mx))
 ```
 
 ```{r}
+# scan_table
 summary(scan_obj, probs_obj$map)
 ```
 
@@ -222,6 +223,7 @@ allele_info <- qtl2shiny::read_project(project_df, "allele_info")
 ```
 
 ```{r}
+# effect_plot
 qtl2shiny:::plot_eff(pheno_name, eff_obj, probs_obj$map, scan_obj, scan_window,,
                      allele_info)
 ```
@@ -290,10 +292,12 @@ and
 [snpTableServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpTableApp.R).
 
 ```{r}
+# snp_plot
 print(qtl2shiny:::top_snp_asso(snp_scan_obj, snpinfo, scan_window, "basic", minLOD))
 ```
 
 ```{r}
+# snp_table
 qtl2shiny:::ensembl_gene(summary(top_snps_tbl,"best"), project_df, TRUE)
 ```
 
@@ -305,16 +309,19 @@ and
 [geneExonServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/geneExonApp.R).
 
 ```{r}
+# gene_table
 (gene_region_tbl <- qtl2shiny:::gene_region(chr_id, scan_window, project_df)) |>
   dplyr::distinct(Name, chr, start, stop, strand)
 ```
 
 ```{r}
+# gene_plot
 print(qtl2shiny:::plot_gene_region(pheno_name, gene_region_tbl, top_snps_tbl, 
                                    scan_window, use_snp = TRUE, "basic"))
 ```
 
 ```{r}
+# exon_tables
 (exon_table <- summary(gene_exon_tbl, top_snps_tbl = top_snps_tbl))
 ```
 
@@ -323,11 +330,13 @@ gene_names <- exon_table$gene
 ```
 
 ```{r}
+# exon_table
 (gene_exon_pheno <- subset(gene_exon_tbl, gene_names[1])) |>
   dplyr::count(Parent)
 ```
 
 ```{r}
+# exon_plot
 print(qtl2shiny:::plot_gene_exons(gene_exon_pheno,
   dplyr::filter(top_snps_tbl, .data$pheno == pheno_name),
   gene_names[1], paste(pheno_name, "basic")))
