@@ -613,6 +613,7 @@ sets up a number of objects used for plots, etc.
 
 [mediatePlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediatePlotApp.R)
 
+    # mediate_plot
     ggplot2::autoplot(mediate_obj, "pos_LR", local_only = TRUE, 
       significant = TRUE)
 
