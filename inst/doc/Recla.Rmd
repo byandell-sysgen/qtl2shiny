@@ -108,7 +108,8 @@ Peak dataframe is now refined with
 
 ```{r}
 (peak_df <- qtl2shiny:::peaks_in_pos(peak_read_df, TRUE,
-  chr_id = chr_id, pos_Mbp = peak_Mbp, win = window_Mbp))
+  chr_id = chr_id, pos_Mbp = peak_Mbp, win = window_Mbp)) |>
+  dplyr::select(phenotype_class, phenotype_original, qtl_lod, qtl_pos, addcovar)
 ```
 
 
