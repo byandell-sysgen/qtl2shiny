@@ -2,12 +2,17 @@
 % Please edit documentation in R/project_classes.R
 \name{project_classes}
 \alias{project_classes}
+\alias{project_subject_model}
 \title{Project Classes}
 \usage{
 project_classes(project_df)
+
+project_subject_model(project_df, project_class)
 }
 \arguments{
-\item{project_df}{}
+\item{project_df}{dataframe with project information}
+
+\item{project_class}{character string with project class}
 }
 \value{
 character list of classes

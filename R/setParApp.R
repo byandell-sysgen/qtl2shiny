@@ -47,25 +47,18 @@ setParServer <- function(id, project_df) {
       shiny::updateSelectInput(session, "class",
         choices = choices, selected = choices[1])
     })
-    project_class_df <- shiny::reactive({
-      shiny::req(project_df(), input$class)
-      tidyr::unite(
-        dplyr::distinct(
-          dplyr::filter(project_peaks(project_df()),
-                        .data$class %in% input$class),
-          subjects, covars),
-        subject_model)
+    project_subjmod <- shiny::reactive({
+      project_subject_model(shiny::req(project_df()), shiny::req(input$class))
     })
     output$subject_model_input <- shiny::renderUI({
-      shiny::req(project_class_df())
-      choices <- project_class_df()$subject_model
+      choices <- shiny::req(project_subjmod())
       if(is.null(selected <- input$subject_model))
         selected <- choices[1]
       shiny::selectInput(ns("subject_model"), "Subject_Model",
         choices = choices, selected = selected, multiple = TRUE)
     })
-    shiny::observeEvent(shiny::req(project_class_df()), {
-      choices <- project_class_df()$subject_model
+    shiny::observeEvent(shiny::req(project_subjmod()), {
+      choices <- project_subjmod()
       shiny::updateSelectInput(session, "subject_model",
         choices = choices, selected = choices[1])
     })

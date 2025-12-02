@@ -68,13 +68,7 @@ phenoDataServer <- function(id, pheno_names, pheno_mx, covar_df) {
       pheno_mx()[, pheno_names(), drop = FALSE]
     })
     pheno_rankz_mx <- shiny::reactive({
-      out <- shiny::req(pheno_mx_names())
-      rout <- row.names(out)
-      if(!shiny::isTruthy(input$raw_data)) {
-        out <- apply(out, 2, rankZ)
-      }
-      row.names(out) <- rout
-      out
+      pheno_rankz(shiny::req(pheno_mx_names()), shiny::isTruthy(input$raw_data))
     })
     pheno_data_mx <- shiny::reactive({
       if(shiny::isTruthy(input$raw_data))

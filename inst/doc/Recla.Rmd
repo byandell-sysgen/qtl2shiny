@@ -1,0 +1,392 @@
+---
+title: "Recla"
+author: "Brian Yandell"
+date: "2025-12-01"
+output: html_document
+params:
+  rootdir: ~/Documents/Research/byandell-sysgen/qtl2shinyApp
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = params$rootdir)
+```
+
+## Example Use
+
+### Read Data
+
+The data sit in a folder, say `qtl2shinyData`, with a file
+`projects.csv` that looks like
+
+
+|project|taxa|directory|
+|:------|:---|:--------|
+|Recla|CCmouse|qtl2shinyData|
+
+The canonical data is `Recla`, which can be found at
+[github.com/rqtl/qtl2data/DO_Recla2](https://github.com/rqtl/qtl2data/tree/main/DO_Recla2).
+
+Set up `project_df` dataframe. See
+[projectServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/projectApp.R).
+
+```{r}
+dir()
+```
+
+```{r}
+datadir <- "qtl2shinyData"
+project_df <- read.csv(file.path(datadir, "projects.csv")) |>
+  dplyr::filter(project == "Recla")
+project_df
+```
+
+The following are set up in 
+[setParServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/setParApp.R).
+
+```{r}
+(project_class <- qtl2shiny::project_classes(project_df))
+(subject_model <- qtl2shiny::project_subject_model(project_df, project_class))
+(window_Mbp <- 1)
+```
+
+Read peaks in
+[peakReadServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakReadApp.R).
+
+```{r}
+(peak_read_df <- qtl2shiny::read_peaks(project_df, project_class[1],
+                        subject_model = subject_model[1]))
+```
+
+### Hotspots and Phenotypes
+
+The
+[hotspotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotApp.R) 
+includes several steps for hotspots and phenotypes.
+
+#### Hotspots
+
+Create hotspots in
+[hotspotDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotDataApp.R).
+
+```{r}
+pmap_obj <- qtl2shiny::read_project(project_df, "pmap")
+sapply(pmap_obj, length)
+```
+
+```{r}
+minLOD <- 3
+hotspot_obj <- qtl2shiny:::hotspot(pmap_obj, peak_read_df, window_Mbp, minLOD,
+                                   chrs = NULL)
+names(hotspot_obj)
+```
+
+Display `hotspot_df` in
+[hotspotTableServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotTableApp.R).
+
+```{r}
+(hotspot_df <- summary(hotspot_obj))
+```
+
+Plot `hotspot_obj` in
+[hotspotPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotPlotApp.R).
+
+```{r}
+qtl2shiny:::plot_hot(hotspot_obj, project_class, window_Mbp)
+```
+
+The window parameter are in 
+[winParServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/winParApp.R).
+
+```{r}
+(hotspot <- hotspot_df$hotspot[1])
+(chr_id <- as.character(hotspot_df$chr[1]))
+(peak_Mbp <- hotspot_df$pos[1])
+(hotspot_count <- hotspot_df$group[1])
+```
+
+Peak dataframe is now refined with
+[peakServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakApp.R).
+
+```{r}
+(peak_df <- qtl2shiny:::peaks_in_pos(peak_read_df, TRUE,
+  chr_id = chr_id, pos_Mbp = peak_Mbp, win = window_Mbp))
+```
+
+
+#### Phenotypes
+
+Phenotypes are determined with
+[phenoServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoApp.R),
+which in itself has several steps
+
+```{r}
+covar_df <- qtl2shiny::read_project(project_df, "covar")
+```
+
+Phenotype names are pulled from `peak_df` with
+[phenoNamesServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoNamesApp.R),
+
+```{r}
+(pheno_names <- peak_df$phenotype)
+pheno_name <- pheno_names[1]
+```
+
+Read phenotype data with
+[phenoReadServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoReadApp.R),
+
+```{r}
+pheno_read_mx <- qtl2shiny::read_pheno(project_df, project_class, columns = pheno_names,
+                 peak_df = peak_df)
+```
+
+Rankz-transform phenotype data for `pheno_name` with
+[phenoDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoDataApp.R),
+
+```{r}
+pheno_mx <- qtl2shiny:::pheno_rankz(pheno_read_mx[, pheno_name, drop = FALSE])
+```
+
+Display summary table with
+[phenoTableServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoTableApp.R).
+
+```{r}
+qtl2shiny:::summary_na(pheno_mx, covar_df)
+```
+
+Plot phenotypes with
+[phenoPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoPlotApp.R).
+
+```{r warning=FALSE}
+qtl2shiny:::plot_sex(pheno_mx, covar_df)
+```
+### Allele and SNP Scans
+
+Allele and SNP scans are performed with
+[scanServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/scanApp.R).
+
+#### Allele Scan
+
+The first step is to set up the `probs_obj` with
+[probsServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/probsApp.R).
+
+```{r}
+dir()
+```
+
+** problem in qtl2pattern:::read_probs `chr` may factor and needs
+```{r}
+query_probs <- qtl2shiny:::read_query_rds(project_df, "query_probs.rds")
+start_val <- peak_Mbp - window_Mbp
+end_val <- peak_Mbp + window_Mbp
+probs_obj <- query_probs(chr_id, start_val, end_val)
+```
+
+Also need `kinship_list from
+[kinshipServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/kinshipApp.R).
+
+```{r}
+kinship_list <- qtl2shiny::read_project(project_df, "kinship")[chr_id]
+```
+
+
+The traditional allele (genome) scan is done with
+[scanDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/scanDataApp.R).
+
+```{r}
+scan_obj <- qtl2shiny:::scan1covar(pheno_mx, covar_df, probs_obj$probs,
+                                   kinship_list, peak_df)
+```
+
+```{r}
+scan_window <- range(probs_obj$map[[chr_id]])
+print(qtl2shiny:::plot_scan(scan_obj, probs_obj$map, seq(ncol(scan_obj)),
+                            chr_id, scan_window, pheno_mx))
+```
+
+```{r}
+summary(scan_obj, probs_obj$map)
+```
+
+```{r}
+eff_obj <- qtl2shiny:::scan1_effect(probs_obj$probs, pheno_mx, kinship_list,
+                                    covar_df, peak_df, blups = FALSE)
+```
+
+```{r}
+allele_info <- qtl2shiny::read_project(project_df, "allele_info")
+```
+
+```{r}
+qtl2shiny:::plot_eff(pheno_name, eff_obj, probs_obj$map, scan_obj, scan_window,,
+                     allele_info)
+```
+
+#### SNP Scans
+
+SNP scans (SNP association maps) are done with
+[snpGeneServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpGeneApp.R).
+
+##### SNP Internal List
+
+This requires a list of objects `snp_list` created with
+[snpListServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpListApp.R).
+
+The `snp_par` parameters are those already set above.
+In the shiny app, some can be modified in later sub-panels.
+
+There are two ways to set up SNP probabilities, using the allele pairs
+or directly using recomputed SNP probabilities.
+** The `qtl2shiny::snpProbsServer()` uses `qtl2pattern:::read_probs()` with
+`allelle = FALSE` (allele pairs) instead of `allele = "SNP"`.
+It should check to see if the `snpprobs_fstindex.rds` exists.
+Need to also check that this object has the `snpinfo` or if we need to 
+get it from SNP variants and add columns.**
+
+Currently, Recla is not set up to use precomputed SNP probabilities.
+
+```{r}
+# `query_probs` defined above for traditional allele scans.
+pair_probs_obj <- query_probs(chr_id, start_val, end_val, allele = FALSE)
+# define the query_variants function
+query_variants <- qtl2shiny:::read_query_rds(project_df, "query_variants.rds")
+snpinfo <- query_variants(chr_id, start_val, end_val)
+snpprobs_obj <- qtl2mediate::get_snpprobs(chr_id, peak_Mbp, window_Mbp,
+  pheno_names, pair_probs_obj$probs, pair_probs_obj$map, snpinfo)
+snpinfo <- snpprobs_obj$snpinfo
+```
+
+The `snpinfo` object is needed for other panels.
+The `snpprobs_obj` is only used below inside this panel to create other
+objects passed along via `snp_list`.
+
+```{r}
+snp_scan_obj <- scan1covar(pheno_mx, covar_df, snpprobs_obj$snpprobs,
+                           kinship_list, peak_df)
+```
+
+```{r}
+drop_hilit <- max(unclass(snp_scan_obj)) - minLOD
+top_snps_tbl <- qtl2pattern::top_snps_pattern(snp_scan_obj, snpinfo, drop_hilit)
+```
+
+```{r}
+gene_exon_tbl <- qtl2shiny:::gene_exons(top_snps_tbl, project_df)
+```
+
+```{r}
+(patterns <- qtl2shiny:::top_patterns(top_snps_tbl))
+```
+
+#### SNP Summaries
+
+SNP summaries
+[snpPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpPlotApp.R)
+and
+[snpTableServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpTableApp.R).
+
+```{r}
+print(qtl2shiny:::top_snp_asso(snp_scan_obj, snpinfo, scan_window, "basic", minLOD))
+```
+
+```{r}
+qtl2shiny:::ensembl_gene(summary(top_snps_tbl,"best"), project_df, TRUE)
+```
+
+#### Genes and Exons
+
+Genes and exons are handled by 
+[geneRegionServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/geneRegionApp.R)
+and
+[geneExonServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/geneExonApp.R).
+
+```{r}
+(gene_region_tbl <- qtl2shiny:::gene_region(chr_id, scan_window, project_df))
+```
+
+```{r}
+print(qtl2shiny:::plot_gene_region(pheno_name, gene_region_tbl, top_snps_tbl, 
+                                   scan_window, use_snp = TRUE, "basic"))
+```
+
+```{r}
+(exon_table <- summary(gene_exon_tbl, top_snps_tbl = top_snps_tbl))
+```
+
+```{r}
+gene_names <- exon_table$gene
+```
+
+```{r}
+(gene_exon_pheno <- subset(gene_exon_tbl, gene_names[1]))
+```
+
+```{r}
+print(qtl2shiny:::plot_gene_exons(gene_exon_pheno,
+  dplyr::filter(top_snps_tbl, .data$pheno == pheno_name),
+  gene_names[1], paste(pheno_name, "basic")))
+```
+
+### Patterns
+
+Detailed examination of 
+single nucleotide polymorphisms (SNPs) and
+strain distribution patterns (SDPs) are handled by 
+[patternServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternApp.R)
+
+#### SNP patterns
+
+[snpPatternServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpPatternApp.R)
+
+** Make signif part of the default summary for `top_snps_tbl` object.**
+
+```{r}
+(snp_pattern_table <- dplyr::mutate(summary(top_snps_tbl),
+  dplyr::across(dplyr::where(is.numeric), \(x) signif(x, digits = 4))))
+```
+
+```{r}
+print(qtl2shiny:::top_pat_plot(pheno_name, snp_scan_obj, chr_id, snpinfo,
+                               scan_window, drop_hilit, facet = "pheno"))
+```
+
+#### SDP patterns
+
+[patternDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternDataApp.R)
+
+```{r}
+pats <- qtl2shiny:::pull_patterns(patterns, colnames(pheno_mx))
+```
+
+```{r}
+scan_pat <- qtl2shiny:::scan1_pattern(pheno_name, pheno_mx, covar_df,
+  pair_probs_obj, kinship_list, peak_df, pats, blups = FALSE)
+```
+
+```{r}
+(pattern_table <- dplyr::mutate(summary(scan_pat, pairprobs_obj$map),
+                      dplyr::across(dplyr::where(is.numeric), 
+                                    \(x) signif(x, digits = 4))))
+```
+
+```{r}
+haplos <- allele_info$code
+pattern_choices <- qtl2pattern::sdp_to_pattern(pats$sdp, haplos)
+```
+
+[patternPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternPlotApp.R)
+
+```{r}
+qtl2shiny:::scan_pat_type(scan_pat, pair_probs_obj$map, "lod",
+                          pattern_choices, pheno_name, haplos)
+```
+
+```{r}
+qtl2shiny:::scan_pat_type(scan_pat, pair_probs_obj$map, "coef",
+                          pattern_choices, pheno_name, haplos)
+```
+
+### Genotypes
+
+
+### Mediation

@@ -246,7 +246,7 @@ Scan by Alleles and SNPs Panel
 allele-based genome scan
   - [snpGene](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpGeneApp.R) #
 SNP association and genes
-    - [snpSum](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpSumApp.R) #
+    - [snpTable](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpTableApp.R) #
 SNP association summary
     - [snpPlot](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpPlotApp.R) #
 SNP association plot

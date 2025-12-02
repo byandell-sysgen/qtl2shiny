@@ -19,7 +19,7 @@
 #' @importFrom utils write.csv
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
-snpSumApp <- function() {
+snpTableApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
     title =  "Test SNP Sum",
@@ -36,7 +36,7 @@ snpSumApp <- function() {
         hotspotOutput("hotspot_list"))
     ),
     bslib::nav_panel(
-      title = "snpSum",
+      title = "snpTable",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
@@ -44,7 +44,7 @@ snpSumApp <- function() {
           bslib::card(
             dipParUI("dip_par")),          # allele_names
           width = 400),
-        bslib::card(snpSumOutput("snp_sum"))
+        bslib::card(snpTableOutput("snp_table"))
       )
     )
   )
@@ -53,13 +53,13 @@ snpSumApp <- function() {
     hotspot_list <- hotspotServer("hotspot_list", project_df)
     dip_par <- dipParServer("dip_par", hotspot_list)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
-    snpSumServer("snp_sum", snp_list, project_df)
+    snpTableServer("snp_table", snp_list, project_df)
   }
   shiny::shinyApp(ui, server)
 }
 #' @export
-#' @rdname snpSumApp
-snpSumServer <- function(id, snp_list, project_df) {
+#' @rdname snpTableApp
+snpTableServer <- function(id, snp_list, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
@@ -111,8 +111,8 @@ snpSumServer <- function(id, snp_list, project_df) {
   })
 }
 #' @export
-#' @rdname snpSumApp
-snpSumOutput <- function(id) {
+#' @rdname snpTableApp
+snpTableOutput <- function(id) {
   ns <- shiny::NS(id)
   bslib::navset_tab(
     id = ns("sum_tab"),

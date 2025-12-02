@@ -75,26 +75,7 @@ genoPlotServer <- function(id, hotspot_list, geno_list) {
     geno_table <- shiny::isolate(geno_list$Table)
     
     geno_plot <- shiny::reactive({
-      shiny::req(geno_table())
-      pheno_df <- as.data.frame(shiny::req(pheno_mx()), make.names = FALSE)
-      pheno_names <- names(pheno_df)
-      pheno_df <- tibble::rownames_to_column(pheno_df, var = "subject")
-      geno_df <- as.data.frame(shiny::req(geno_table()), make.names = FALSE)
-      geno_names <- names(geno_df)
-      geno_df <- tibble::rownames_to_column(geno_df, var = "subject")
-      dat <- dplyr::left_join(pheno_df, geno_df, by = "subject")
-      yname <- ifelse(length(pheno_names) > 1, pheno_names[2], geno_names[2])
-      p <- ggplot2::ggplot(dat) +
-        ggplot2::aes(x = .data[[pheno_names[1]]], y = .data[[yname]],
-                     col = .data[[geno_names[2]]],
-                     label = .data[[geno_names[1]]]) +
-        ggrepel::geom_text_repel(max.overlaps = Inf, min.segment.length = Inf,
-                                 size = 3, fontface = 2)
-      if(length(pheno_names) > 1) {
-        p <- p + ggplot2::geom_smooth(se = FALSE, method = "lm",
-                                      linewidth = 2, linetype = 2)
-      }
-      p
+      geno_ggplot(shiny::req(geno_table()), shiny::req(pheno_mx()))
     })
     output$geno_plot <- shiny::renderPlot({
       print(shiny::req(geno_plot()))

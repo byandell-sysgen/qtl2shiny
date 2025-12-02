@@ -59,8 +59,8 @@ snpGeneServer <- function(id, snp_list, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    snp_plot  <- snpPlotServer("snp_scan", snp_list)
-    snp_table <- snpSumServer("best_snp", snp_list, project_df)
+    snp_plot  <- snpPlotServer("snp_plot", snp_list)
+    snp_table <- snpTableServer("snp_table", snp_list, project_df)
     gene_list <- geneRegionServer("gene_region", snp_list, project_df)
     exon_list <- geneExonServer("gene_exon", snp_list)
     
@@ -131,9 +131,9 @@ snpGeneOutput <- function(id) {
     bslib::nav_panel("SNP Scan", value = "SNP", bslib::navset_tab(
       id = ns("snp_gen_tab"),
       bslib::nav_panel("Plot", bslib::card(
-        snpPlotOutput(ns("snp_scan")))),
+        snpPlotOutput(ns("snp_plot")))),
       bslib::nav_panel("Summary", bslib::card(
-        snpSumOutput(ns("best_snp")))))),
+        snpTableOutput(ns("snp_table")))))),
     bslib::nav_panel("Genes", bslib::card(
       geneRegionOutput(ns("gene_region")))),   # gene_plot, gene_table
     bslib::nav_panel("Exons", bslib::card(

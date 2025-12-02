@@ -152,7 +152,8 @@ patternDataServer <- function(id, dip_par, hotspot_list, snp_list,
       withProgress(message = 'Pattern summary ...', value = 0, {
         setProgress(1)
         dplyr::mutate(summary(scan_pat(), pairprobs_obj()$map),
-                      dplyr::across(dplyr::where(is.numeric), signif, digits = 4))
+                      dplyr::across(dplyr::where(is.numeric), 
+                                    \(x) signif(x, digits = 4)))
       })
     })
     output$pattern_table <- DT::renderDataTable(

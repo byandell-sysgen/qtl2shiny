@@ -75,7 +75,7 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     snp_pattern_table <- shiny::reactive({
       dplyr::mutate(sum_top_pat(),
                     dplyr::across(dplyr::where(is.numeric),
-                                  signif, digits = 4))
+                                  \(x) signif(x, digits = 4)))
     })
     output$snp_pattern_table <- DT::renderDataTable(
       shiny::req(snp_pattern_table()),

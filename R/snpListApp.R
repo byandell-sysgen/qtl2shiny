@@ -153,13 +153,7 @@ snpListServer <- function(id, hotspot_list, project_df,
     patterns <- shiny::reactive({
       if(shiny::isTruthy(snp_action()) &&
          shiny::isTruthy(top_snps_tbl())) {
-        dplyr::arrange(
-          dplyr::mutate(
-            dplyr::filter(
-              summary(top_snps_tbl()), 
-              .data$max_lod >= 3), 
-            contrast = snp_action()), 
-          dplyr::desc(.data$max_lod))
+        top_patterns(top_snps_tbl(), snp_action())
       } else {
         NULL
       }
