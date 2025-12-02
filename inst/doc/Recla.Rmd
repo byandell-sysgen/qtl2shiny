@@ -31,10 +31,6 @@ Set up `project_df` dataframe. See
 [projectServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/projectApp.R).
 
 ```{r}
-dir()
-```
-
-```{r}
 datadir <- "qtl2shinyData"
 project_df <- read.csv(file.path(datadir, "projects.csv")) |>
   dplyr::filter(project == "Recla")
