@@ -48,6 +48,7 @@ The following are set up in
 (project_class <- qtl2shiny::project_classes(project_df))
 (subject_model <- qtl2shiny::project_subject_model(project_df, project_class))
 (window_Mbp <- 1)
+(minLOD <- 3)
 ```
 
 Read peaks in
@@ -55,7 +56,9 @@ Read peaks in
 
 ```{r}
 (peak_read_df <- qtl2shiny::read_peaks(project_df, project_class[1],
-                        subject_model = subject_model[1]))
+                        subject_model = subject_model[1])) |>
+  dplyr::filter(qtl_lod >= 5.5) |>
+  dplyr::count(phenotype_class, phenotype, addcovar)
 ```
 
 ### Hotspots and Phenotypes
@@ -75,7 +78,6 @@ sapply(pmap_obj, length)
 ```
 
 ```{r}
-minLOD <- 3
 hotspot_obj <- qtl2shiny:::hotspot(pmap_obj, peak_read_df, window_Mbp, minLOD,
                                    chrs = NULL)
 names(hotspot_obj)

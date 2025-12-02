@@ -61,27 +61,32 @@ The following are set up in
 
     ## [1] 1
 
+    (minLOD <- 3)
+
+    ## [1] 3
+
 Read peaks in
 [peakReadServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/peakReadApp.R).
 
     (peak_read_df <- qtl2shiny::read_peaks(project_df, project_class[1],
-                            subject_model = subject_model[1]))
+                            subject_model = subject_model[1])) |>
+      dplyr::filter(qtl_lod >= 5.5) |>
+      dplyr::count(phenotype_class, phenotype, addcovar)
 
-    ## # A tibble: 450 × 10
-    ##    phenotype_class phenotype          qtl_lod qtl_chr qtl_pos addcovar  intcovar
-    ##    <chr>           <chr>                <dbl> <fct>     <dbl> <chr>     <chr>   
-    ##  1 group           OF_distance_first4    5.25 1          84.1 ~sex+Coh… none    
-    ##  2 group           OF_distance_first4    5.67 2         116.  ~sex+Coh… none    
-    ##  3 group           OF_distance_first4    6.55 3          26.5 ~sex+Coh… none    
-    ##  4 group           OF_distance_first4    3.65 4          21.7 ~sex+Coh… none    
-    ##  5 group           OF_distance_first4    5.03 5         128.  ~sex+Coh… none    
-    ##  6 group           OF_distance_first4    3.96 6         139.  ~sex+Coh… none    
-    ##  7 group           OF_distance_first4    5.18 7         111.  ~sex+Coh… none    
-    ##  8 group           OF_distance_first4    4.11 8          26.8 ~sex+Coh… none    
-    ##  9 group           OF_distance_first4    3.18 9          65.2 ~sex+Coh… none    
-    ## 10 group           OF_distance_first4    5.06 10        128.  ~sex+Coh… none    
-    ## # ℹ 440 more rows
-    ## # ℹ 3 more variables: phenotype_original <chr>, subject <chr>, model <chr>
+    ## # A tibble: 24 × 4
+    ##    phenotype_class phenotype             addcovar                              n
+    ##    <chr>           <chr>                 <chr>                             <int>
+    ##  1 group           HP_latency            ~sex+Cohort+Group+Subgroup+ngen+…     3
+    ##  2 group           LD_distance_light     ~sex+Cohort+Group+Subgroup+ngen+…     3
+    ##  3 group           LD_light_pct          ~sex+Cohort+Group+Subgroup+ngen+…     3
+    ##  4 group           LD_transitions        ~sex+Cohort+Group+Subgroup+ngen+…     2
+    ##  5 group           OF_corner_pct         ~sex+Cohort+Group+Subgroup+ngen+…     3
+    ##  6 group           OF_distance           ~sex+Cohort+Group+Subgroup+ngen+…     3
+    ##  7 group           OF_distance_first4    ~sex+Cohort+Group+Subgroup+ngen+…     2
+    ##  8 group           OF_immobile_pct       ~sex+Cohort+Group+Subgroup+ngen+…     5
+    ##  9 group           OF_periphery_pct      ~sex+Cohort+Group+Subgroup+ngen+…     1
+    ## 10 group           TS_frequency_climbing ~sex+Cohort+Group+Subgroup+ngen+…     4
+    ## # ℹ 14 more rows
 
 ### Hotspots and Phenotypes
 
@@ -100,7 +105,6 @@ Create hotspots in
     ##   1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16  17  18  19   X 
     ## 537 544 469 452 438 447 428 376 388 430 394 356 363 369 303 300 270 261 196 442
 
-    minLOD <- 3
     hotspot_obj <- qtl2shiny:::hotspot(pmap_obj, peak_read_df, window_Mbp, minLOD,
                                        chrs = NULL)
     names(hotspot_obj)
