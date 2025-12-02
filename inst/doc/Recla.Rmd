@@ -302,7 +302,7 @@ and
 
 ```{r}
 (gene_region_tbl <- qtl2shiny:::gene_region(chr_id, scan_window, project_df)) |>
-  dplyr::select(Name, chr, start, stop, strand)
+  dplyr::distinct(Name, chr, start, stop, strand)
 ```
 
 ```{r}
