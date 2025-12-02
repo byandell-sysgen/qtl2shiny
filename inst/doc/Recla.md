@@ -1,4 +1,4 @@
-# Example Use
+# Workflow with Recla Data
 
 This illustrates the functions used in shiny modules to show the
 workflow. Functions are either exported (`qtl2shiny::xxx()`) or internal

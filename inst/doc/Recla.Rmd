@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = params$rootdir)
 ```
 
-# Example Use
+# Workflow with Recla Data
 
 This illustrates the functions used in shiny modules
 to show the workflow.

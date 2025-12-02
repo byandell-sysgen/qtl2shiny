@@ -12,6 +12,7 @@ Yandell R/qtl2shiny project.
     + [R/qtl2shiny Data Preparation](https://github.com/byandell/qtl2shiny/blob/master/vignettes/qtl2shinyData.Rmd)
 * Version 1.4 Guides:
     + [Shiny Module Organization](https://github.com/byandell-sysgen/qtl2shiny/blob/master/inst/doc/module.md)
+    + [Workflow with Recla Data](https://github.com/byandell-sysgen/qtl2shiny/blob/master/inst/doc/Recla.md)
 
 ### What has been done ###
 
