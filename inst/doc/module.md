@@ -311,15 +311,24 @@ input parameters needed across SNP and SDP modules
 ## Downloading Files
 
 Downloading files is accomplished by going to a particular view in a panel.
-One
-[downloadApp()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/downloadApp.R)
-enables the user to download a spreadsheet (`CSV`)
+This uses
+[downr::downloadApp()](https://github.com/byandell/downr/blob/main/R/downloadApp.R),
+which enables the user to download a spreadsheet (`CSV`)
 or a plot (`PNG` or `PDF`).
 The idea is that, at any time, each panel displays one plot
-or one table (summary) that could be downloaded.
-The panel server function returns a `result` with reactive components
-for a plot and/or table.
-**Not fully implemented yet**.
+or one table (summary) that could be downloaded;
+a panel with plot and table has the option to download either.
+The panel server function returns a `result` with reactiveValues object
+`download_list` that has components
+
+- `Plot` reactive plot
+- `Table` reactive table
+- `Filename` reactive filename root
+- `Type` optional reactive type (`Plot`, `Table` or `Choose`)
+
+if the `download_list$Type()` is missing, or is some value other than
+`Plot` or `Table`, then the download app input `downr::downloadInput()`
+will show a button to select `Plot` or `Table`.
 
 This is somewhat analagous to what was done in
 [foundrShiny](https://github.com/AttieLab-Systems-Genetics/foundrShiny)
@@ -329,19 +338,32 @@ and
 (see [qtlApp/R/modules/downloadApp.R](https://github.com/AttieLab-Systems-Genetics/qtlApp/blob/master/fs-reorg/R/modules/downloadApp.R)).
 Here is my current thinking
 
+- have a separate repo and package,
+[downr](https://github.com/byandell/downr),
+that can be used across apps
 - each panel returns a
 [reactiveValue](https://mastering-shiny.org/reactivity-objects.html)
-with element `download`
-  - this identifies the currently viewed `plot` or `table` and a `filename`
-- these returns are collected into another `reactiveValue` `DL`
-- pass `DL` and the current panel (`input$panel`) to `downloadServer()`
+that is `download_list`
+  - this may be the whole return object from a panel server
+  - or it may be an element of a larger `reactiveValue` from that server
+- the package app server
+[qtl2shinyServer](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/qtl2shinyApp.R)
+collect panel results into another `reactiveValue`, `download_list`
+  - the element for the current panel `download_list[[input$panel]]`
+  - the reactive `download_list_panel()` harvests this element
+  - this becomes the argument for `downr::downloadServer()`
+- pass `download_list_panel()` to `downloadServer()`
 
 ```
-DL <- shiny::reactiveValues()
-DL$hotspot <- hotspotServer()
-DL$scan    <- scanServer()
-DL$mediate <- mediateServer()
-DL$pattern <- patternServer()
-DL$geno    <- genoServer()
-downloadServer("download", DL, input$panel)
+download_list <- shiny::reactiveValues()
+download_list$hotspot <- hotspotServer()
+download_list$scan    <- scanServer()
+download_list$mediate <- mediateServer()
+download_list$pattern <- patternServer()
+download_list$geno    <- genoServer()
+download_list_panel <- shiny::reactive({
+  input_panel <- stringr::str_remove(shiny::req(input$panel), "qtl2shiny-")
+  download_list[[input_panel]]
+})
+downloadServer("download", download_list_panel())
 ```

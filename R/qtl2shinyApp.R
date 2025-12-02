@@ -11,7 +11,7 @@
 #' @export
 #' @importFrom qtl2mediate get_covar
 #' @importFrom dplyr filter 
-#' @importFrom shiny moduleServer NS reactive req 
+#' @importFrom shiny moduleServer NS reactive renderText req textOutput
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
 #' @importFrom downr downloadServer downloadInput
@@ -64,21 +64,25 @@ qtl2shinyServer <- function(id, projects_df) {
     download_list$geno <- genoServer("geno_panel", hotspot_list, pattern_list,
                  pattern_snp_list, pairprobs_obj, project_df)
     
-    output$download <- shiny::renderUI({
-      # Note: `input$panel` is of form `qtl2shiny-<panel>`.
-      shiny::tagList(
-        shiny::renderText(paste("input$panel:", shiny::req(input$panel))),
-        shiny::renderText(paste("DL:", paste(names(download_list), collapse = ", "))))
-    })
+    output$download_panel <- shiny::renderText(
+      paste("input$panel:", shiny::req(input$panel)))
+    output$download_names <- shiny::renderText(
+      paste("DL:", paste(names(download_list), collapse = ", ")))
+    # output$download <- shiny::renderUI({
+    #   # Note: `input$panel` is of form `qtl2shiny-<panel>`.
+    #   shiny::tagList(
+    #     shiny::renderText(paste("input$panel:", shiny::req(input$panel))),
+    #     shiny::renderText(paste("DL:", paste(names(download_list), collapse = ", "))))
+    # })
     # Download
     download_list_panel <- shiny::reactive({
+      # Note: `input$panel` is of form `qtl2shiny-<panel>`.
       input_panel <- stringr::str_remove(
         shiny::req(input$panel),
         "qtl2shiny-")
       download_list[[input_panel]]
     })
-    downr::downloadServer("download",
-                          download_list_panel())
+    downr::downloadServer("download", download_list_panel)
   })    
 }
 #' @export
@@ -95,9 +99,10 @@ qtl2shinyUI <- function(id) {
         projectUI(ns("project_df")),          # project
         hotspotInput(ns("hotspot_list"))),    # class, subject_model, pheno_names
       bslib::card(
-        shiny::uiOutput(ns("download")))
+        shiny::textOutput(ns("download_panel")),
+        shiny::textOutput(ns("download_names")))
     ),
-    downr::downloadInput(ns("download")),
+    header = downr::downloadInput(ns("download")),
     bslib::nav_panel(
       title = "Hotspots and Phenotypes",
       value = ns("hotspot"),
