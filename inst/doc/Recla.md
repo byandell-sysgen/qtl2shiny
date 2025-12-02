@@ -1,6 +1,10 @@
-## Example Use
+# Example Use
 
-### Read Data
+This illustrates the functions used in shiny modules to show the
+workflow. Functions are either exported (`qtl2shiny::xxx()`) or internal
+(`qtl2shiny:::xxx()`) for arcane reasons.
+
+## Read Data
 
 The data sit in a folder, say `qtl2shinyData`, with a file
 `projects.csv` that looks like
@@ -78,13 +82,13 @@ Read peaks in
     ## 10 group           TS_frequency_climbing ~sex+Cohort+Group+Subgroup+ngen+…     4
     ## # ℹ 14 more rows
 
-### Hotspots and Phenotypes
+## Hotspots and Phenotypes Panel
 
-The
+The hotspot panel
 [hotspotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotApp.R)
 includes several steps for hotspots and phenotypes.
 
-#### Hotspots
+### Hotspots
 
 Create hotspots in
 [hotspotDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/hotspotDataApp.R).
@@ -178,7 +182,7 @@ Peak dataframe is now refined with
     ## 10 group           VC_bottom_distance_first4     3.9    22.9 ~sex+Cohort+Group+…
     ## 11 group           HP_latency                    3.2    21.8 ~sex+Cohort+Group+…
 
-#### Phenotypes
+### Phenotypes
 
 Phenotypes are determined with
 [phenoServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/phenoApp.R),
@@ -227,13 +231,13 @@ Plot phenotypes with
 
     qtl2shiny:::plot_sex(pheno_mx, covar_df)
 
-![](Recla_files/figure-markdown_strict/unnamed-chunk-15-1.png) \###
-Allele and SNP Scans
+![](Recla_files/figure-markdown_strict/unnamed-chunk-15-1.png) \##
+Allele and SNP Scan Panel
 
-Allele and SNP scans are performed with
+Allele and SNP scans are performed with the scan panel
 [scanServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/scanApp.R).
 
-#### Allele Scan
+### Allele Scan
 
 The first step is to set up the `probs_obj` with
 [probsServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/probsApp.R).
@@ -289,12 +293,12 @@ The traditional allele (genome) scan is done with
 
 ![](Recla_files/figure-markdown_strict/unnamed-chunk-24-1.png)
 
-#### SNP Scans
+### SNP Scans
 
 SNP scans (SNP association maps) are done with
 [snpGeneServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpGeneApp.R).
 
-##### SNP Internal List
+#### SNP Internal List
 
 This requires a list of objects `snp_list` created with
 [snpListServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpListApp.R).
@@ -340,7 +344,7 @@ via `snp_list`.
     ##   <chr>              <dbl>   <dbl>   <dbl>   <dbl> <dbl> <chr>   <chr>  <chr>   
     ## 1 VC_bottom_trans…    21.5    21.6    3.71    3.36     2 ACDEFG… 7 SNPs basic
 
-#### SNP Summaries
+### SNP Summaries
 
 SNP summaries
 [snpPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpPlotApp.R)
@@ -362,7 +366,7 @@ and
     ## #   NZO_HlLtJ <dbl>, CAST_EiJ <dbl>, PWK_PhJ <dbl>, WSB_EiJ <dbl>, type <chr>,
     ## #   interval <int>, on_map <lgl>
 
-#### Genes and Exons
+### Genes and Exons
 
 Genes and exons are handled by
 [geneRegionServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/geneRegionApp.R)
@@ -455,13 +459,13 @@ and
 
 ![](Recla_files/figure-markdown_strict/unnamed-chunk-37-1.png)
 
-### Patterns
+## Pattern Panel
 
 Detailed examination of single nucleotide polymorphisms (SNPs) and
-strain distribution patterns (SDPs) are handled by
+strain distribution patterns (SDPs) are handled by the pattern panel
 [patternServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternApp.R)
 
-#### SNP patterns
+### SNP patterns
 
 [snpPatternServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/snpPatternApp.R)
 
@@ -483,7 +487,7 @@ object.\*\*
 
 ![](Recla_files/figure-markdown_strict/unnamed-chunk-39-1.png)
 
-#### SDP Scan patterns
+### SDP Scan patterns
 
 [patternDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternDataApp.R)
 
@@ -519,7 +523,7 @@ object.\*\*
 
 ![](Recla_files/figure-markdown_strict/unnamed-chunk-45-1.png)
 
-### Genotypes
+## Genotypes Panel
 
 Genotypes and effects estimates are handled with the geno panel
 [genoServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/genoApp.R)
@@ -577,4 +581,47 @@ Genotypes and effects estimates are handled with the geno panel
 
 ![](Recla_files/figure-markdown_strict/unnamed-chunk-50-1.png)
 
-### Mediation
+## Mediation Panel
+
+Mediation handled with the mediate panel
+[mediateServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediateApp.R).
+This takes some time, so execution is not shown here.
+
+The
+[mediateDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediateDataApp.R)
+sets up a number of objects used for plots, etc.
+
+    qtl2 <- 1
+    comed_ls <- qtl2shiny:::comediator_region(pheno_name, chr_id, scan_window,
+      covar_df, peak_df, qtls, pmap_obj, pheno_read_mx)
+    med_ls <- qtl2shiny:::comediator_type(comed_ls, peak_df, pheno_name, FALSE) 
+
+    mediate_obj <- qtl2mediate::mediation_test_qtl2(
+      target = pheno_mx[, pheno_name, drop = FALSE],
+      mediator = med_ls[[1]],
+      annotation = med_ls[[2]],
+      covar_tar = covar_df,
+      covar_med = med_ls$covar,
+      genoprobs = probs_obj$probs,
+      map = probs_obj$map,
+      chr = chr_id,
+      pos = peak_Mbp,
+      kinship = kinship_list)
+
+    # mediate_table
+    mediate_obj())$best
+
+[mediatePlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediatePlotApp.R)
+
+    ggplot2::autoplot(mediate_obj, "pos_LR", local_only = TRUE, 
+      significant = TRUE)
+
+[triadServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/triadApp.R).
+
+    peak_mar <- qtl2::find_marker(probs_obj$map, chr_id, peak_Mbp)
+    med_name <- dplyr::filter(mediate_obj$best, .data$triad == input$triad)$id[1]
+
+    # triad_plot
+    ggplot2::autoplot(triad_df, type = "by_mediator", dname = peak_mar,
+      mname = med_name, tname = pheno_name,
+      fitlines = "sdp-parallel", centerline = NULL)
