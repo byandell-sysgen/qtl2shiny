@@ -81,13 +81,13 @@ patternDataServer <- function(id, dip_par, hotspot_list, snp_list,
     ## Inputs `pat_par`: pheno_name, button, blups, pattern
     output$pheno_name_input <- shiny::renderUI({
       shiny::selectInput(ns("pheno_name"), NULL,
-                         choices = colnames(shiny::req(hotspot_list$pheno_mx())),
-                         selected = input$pheno_name)
+        choices = colnames(shiny::req(hotspot_list$pheno_mx())),
+        selected = input$pheno_name)
     })
     output$button_input <- shiny::renderUI({
       shiny::radioButtons(ns("button"), "",
-                          c("LOD","Effects","LOD & Effects","Allele Means","Summary"),
-                          input$button)
+        c("LOD","Effects","LOD & Effects","Allele Means","Summary"),
+        input$button)
     })
     output$blups_input <- shiny::renderUI({
       shiny::checkboxInput(ns("blups"), "BLUPs?")
@@ -108,15 +108,16 @@ patternDataServer <- function(id, dip_par, hotspot_list, snp_list,
       shiny::req(hotspot_list$allele_info())$code
     })
     pattern_choices <- shiny::reactive({
-      qtl2pattern::sdp_to_pattern(shiny::req(pats())$sdp, haplos())
+      qtl2pattern::sdp_to_pattern(shiny::req(pattern_pheno())$sdp, haplos())
     })
     shiny::observeEvent(patterns(), update_patterns())
     shiny::observeEvent(input$pheno_name, update_patterns())
     update_patterns <- function() {
       shiny::req(snp_action(), input$pheno_name, patterns())
-      pats <- dplyr::filter(patterns(), .data$pheno == input$pheno_name)
-      if(nrow(pats)) {
-        choices <- qtl2pattern::sdp_to_pattern(pats$sdp, haplos())
+      pattern_pheno <-
+        dplyr::filter(patterns(), .data$pheno == input$pheno_name)
+      if(nrow(pattern_pheno)) {
+        choices <- qtl2pattern::sdp_to_pattern(pattern_pheno$sdp, haplos())
       } else {
         choices <- input$pattern
       }
@@ -129,29 +130,29 @@ patternDataServer <- function(id, dip_par, hotspot_list, snp_list,
     }
     
     # Pattern scan
-    pats <- shiny::reactive({
+    pattern_pheno <- shiny::reactive({
       pull_patterns(shiny::req(patterns()),
                     colnames(shiny::req(hotspot_list$pheno_mx())))
     })
-    scan_pat <- shiny::reactive({
+    scan_pattern <- shiny::reactive({
       shiny::req(snp_action())
       pheno_name <- shiny::req(input$pheno_name)
       shiny::req(hotspot_list$pheno_mx(), hotspot_list$covar_df(),
                  pairprobs_obj(), hotspot_list$kinship_list(),
-                 hotspot_list$peak_df(), pats())
+                 hotspot_list$peak_df(), pattern_pheno())
       withProgress(message = 'Scan Patterns ...', value = 0, {
         setProgress(1)
         scan1_pattern(pheno_name, hotspot_list$pheno_mx(),
                       hotspot_list$covar_df(), pairprobs_obj(),
                       hotspot_list$kinship_list(), hotspot_list$peak_df(),
-                      pats(), input$blups)
+                      pattern_pheno(), input$blups)
       })
     })
     pattern_table <- shiny::reactive({
-      shiny::req(scan_pat(), pairprobs_obj())
+      shiny::req(scan_pattern(), pairprobs_obj())
       withProgress(message = 'Pattern summary ...', value = 0, {
         setProgress(1)
-        dplyr::mutate(summary(scan_pat(), pairprobs_obj()$map),
+        dplyr::mutate(summary(scan_pattern(), pairprobs_obj()$map),
                       dplyr::across(dplyr::where(is.numeric), 
                                     \(x) signif(x, digits = 4)))
       })
@@ -166,7 +167,7 @@ patternDataServer <- function(id, dip_par, hotspot_list, snp_list,
       pat_par = input,
       haplos = haplos,
       pattern_choices = pattern_choices,
-      scan_pat = scan_pat,
+      scan_pattern = scan_pattern,
       pattern_table = pattern_table
     )
   })

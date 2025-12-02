@@ -341,48 +341,53 @@ strain distribution patterns (SDPs) are handled by
 ** Make signif part of the default summary for `top_snps_tbl` object.**
 
 ```{r}
-(snp_pattern_table <- dplyr::mutate(summary(top_snps_tbl),
-  dplyr::across(dplyr::where(is.numeric), \(x) signif(x, digits = 4))))
+# snp_pattern_table
+dplyr::mutate(summary(top_snps_tbl),
+  dplyr::across(dplyr::where(is.numeric), \(x) signif(x, digits = 4)))
 ```
 
 ```{r}
+# snp_pattern_plot
 print(qtl2shiny:::top_pat_plot(pheno_name, snp_scan_obj, chr_id, snpinfo,
                                scan_window, drop_hilit, facet = "pheno"))
 ```
 
-#### SDP patterns
+#### SDP Scan patterns
 
 [patternDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternDataApp.R)
 
 ```{r}
-pats <- qtl2shiny:::pull_patterns(patterns, colnames(pheno_mx))
+patterns_pheno <- qtl2shiny:::pull_patterns(patterns, colnames(pheno_mx))
 ```
 
 ```{r}
-scan_pat <- qtl2shiny:::scan1_pattern(pheno_name, pheno_mx, covar_df,
-  pair_probs_obj, kinship_list, peak_df, pats, blups = FALSE)
+scan_pattern <- qtl2shiny:::scan1_pattern(pheno_name, pheno_mx, covar_df,
+  pair_probs_obj, kinship_list, peak_df, patterns_pheno, blups = FALSE)
 ```
 
 ```{r}
-(pattern_table <- dplyr::mutate(summary(scan_pat, pairprobs_obj$map),
-                      dplyr::across(dplyr::where(is.numeric), 
-                                    \(x) signif(x, digits = 4))))
+# scan_pattern_table
+dplyr::mutate(
+  summary(scan_pattern, pair_probs_obj$map),
+  dplyr::across(dplyr::where(is.numeric), \(x) signif(x, digits = 4)))
 ```
 
 ```{r}
 haplos <- allele_info$code
-pattern_choices <- qtl2pattern::sdp_to_pattern(pats$sdp, haplos)
+pattern_choices <- qtl2pattern::sdp_to_pattern(patterns_pheno$sdp, haplos)
 ```
 
 [patternPlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/patternPlotApp.R)
 
 ```{r}
-qtl2shiny:::scan_pat_type(scan_pat, pair_probs_obj$map, "lod",
+# scan_pattern_plot
+qtl2shiny:::scan_pat_type(scan_pattern, pair_probs_obj$map, "lod",
                           pattern_choices, pheno_name, haplos)
 ```
 
 ```{r}
-qtl2shiny:::scan_pat_type(scan_pat, pair_probs_obj$map, "coef",
+# scan_coef_plot
+qtl2shiny:::scan_pat_type(scan_pattern, pair_probs_obj$map, "coef",
                           pattern_choices, pheno_name, haplos)
 ```
 

@@ -96,14 +96,15 @@ genoEffectServer <- function(id, hotspot_list, pattern_list, snp_list,
                  hotspot_list$kinship_list(), hotspot_list$covar_df(),
                  hotspot_list$peak_df())
       pheno_name <- shiny::req(pattern_list$pat_par$pheno_name)
-      pheno_mx <- shiny::req(hotspot_list$pheno_mx())[, pheno_name, drop = FALSE]
-      blups <- attr(pattern_list$scan_pat(), "blups")
+      pheno_mx <-
+        shiny::req(hotspot_list$pheno_mx())[, pheno_name, drop = FALSE]
+      blups <- attr(pattern_list$scan_pattern(), "blups")
       shiny::withProgress(message = 'Effect scans ...', value = 0, {
         shiny::setProgress(1)
         effect_scan(pheno_mx, hotspot_list$covar_df(),
                     pairprobs_obj(), hotspot_list$kinship_list(),
-                    hotspot_list$peak_df(), patterns(), pattern_list$scan_pat(),
-                    blups)
+                    hotspot_list$peak_df(), patterns(),
+                    pattern_list$scan_pattern(), blups)
       })
     })
     effect_plot <- shiny::reactive({

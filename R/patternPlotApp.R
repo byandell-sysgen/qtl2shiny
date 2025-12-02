@@ -16,7 +16,8 @@
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
 patternPlotApp <- function() {
-  projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
+  projects_df <-
+    read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
     title =  "Test Pattern Plot",
     bslib::nav_panel(
@@ -76,18 +77,18 @@ patternPlotServer <- function(id, pattern_list, pairprobs_obj) {
       #** Effects garbled if more that 4.
       #** Warning in matrix(pattern, nrow(lod), ncol(lod)) :
       #** data length differs from size of matrix: [441 != 63 x 3]
-      #** Warning: Removed 378 rows containing missing values or values outside the scale range
-      #** (`geom_line()`).
+      #** Warning: Removed 378 rows containing missing values or values outside
+      #** the scale range (`geom_line()`).
     })
     scan_pat_type_progress <- shiny::reactive({
-      if(is.null(pattern_list$scan_pat()))
+      if(is.null(pattern_list$scan_pattern()))
         return(plot_null())
-      shiny::req(pattern_list$scan_pat(), pattern_list$pattern_choices(),
+      shiny::req(pattern_list$scan_pattern(), pattern_list$pattern_choices(),
                  pattern_list$pat_par$pheno_name, pairprobs_obj(),
                  plot_type_msg())
       shiny::withProgress(message = plot_type_msg()$msg, value = 0, {
         shiny::setProgress(1)
-        scan_pat_type(pattern_list$scan_pat(), pairprobs_obj()$map,
+        scan_pat_type(pattern_list$scan_pattern(), pairprobs_obj()$map,
                       plot_type_msg()$type,
                       pattern_list$pattern_choices(), 
                       pattern_list$pat_par$pheno_name,
