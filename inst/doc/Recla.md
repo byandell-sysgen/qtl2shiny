@@ -593,9 +593,10 @@ This takes some time, so execution is not shown here.
 
 The
 [mediateDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediateDataApp.R)
-sets up a number of objects used for plots, etc.
+sets up a number of objects used for plots, etc. This panel can take a
+long time to run.
 
-    qtl2 <- 1
+    qtls <- 1
     comed_ls <- qtl2shiny:::comediator_region(pheno_name, chr_id, scan_window,
       covar_df, peak_df, qtls, pmap_obj, pheno_read_mx)
     med_ls <- qtl2shiny:::comediator_type(comed_ls, peak_df, pheno_name, FALSE) 
@@ -613,20 +614,57 @@ sets up a number of objects used for plots, etc.
       kinship = kinship_list)
 
     # mediate_table
-    mediate_obj())$best
+    mediate_obj$best |>
+      dplyr::rename(phenotype = "id") |>
+      dplyr::mutate(LOD_adj = round(LR_mediation / log(10), 2)) |>
+      dplyr::select(phenotype, qtl_chr, qtl_pos, qtl_lod, LOD_adj)
+
+    ## # A tibble: 10 × 5
+    ##    phenotype                 qtl_chr qtl_pos qtl_lod LOD_adj
+    ##    <chr>                     <fct>     <dbl>   <dbl>   <dbl>
+    ##  1 VC_bottom_distance        14         22.8     6.4    2.41
+    ##  2 VC_top_velocity           14         22.9     5.8    3.52
+    ##  3 LD_light_pct              14         22.9     5.3    5.61
+    ##  4 VC_top_time_pct           14         22.8     5.1    4.88
+    ##  5 VC_bottom_time_pct        14         22.8     5.1    4.99
+    ##  6 LD_distance_light         14         22.9     5      4.93
+    ##  7 VC_top_time_first4        14         22.9     4.2    4.45
+    ##  8 VC_bottom_time_first4     14         22.9     3.9    4.83
+    ##  9 VC_bottom_distance_first4 14         22.9     3.9    5.23
+    ## 10 HP_latency                14         21.8     3.2    7.37
 
 [mediatePlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediatePlotApp.R)
 
     # mediate_plot
-    ggplot2::autoplot(mediate_obj, "pos_LR", local_only = TRUE, 
-      significant = TRUE)
+    ggplot2::autoplot(qtl2shiny:::mediate_signif(mediate_obj))
 
-[triadServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/triadApp.R).
+![](Recla_files/figure-markdown_strict/mediate_plot-1.png)
+
+[triadServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/triadApp.R)
 
     peak_mar <- qtl2::find_marker(probs_obj$map, chr_id, peak_Mbp)
-    med_name <- dplyr::filter(mediate_obj$best, .data$triad == input$triad)$id[1]
+    (triads <- levels(mediate_obj$best$triad))
+
+    ## [1] "causal"      "reactive"    "independent" "undecided"
+
+    med_name <- dplyr::filter(mediate_obj$best, .data$triad == triads[1])$id[1]
+    sdps <- unique(dplyr::filter(patterns, .data$pheno == pheno_name)$sdp)
+
+    triad_df <- qtl2mediate::mediation_triad_qtl2(target = pheno_mx,
+            mediator = med_ls[[1]][, med_name, drop = FALSE],
+            annotation = med_ls[[2]],
+            covar_tar = covar_df,
+            covar_med = med_ls$covar,
+            genoprobs = probs_obj$probs,
+            map = probs_obj$map,
+            chr = chr_id,
+            pos = peak_Mbp,
+            kinship = kinship_list[[1]],
+            sdp = sdps[1])
 
     # triad_plot
     ggplot2::autoplot(triad_df, type = "by_mediator", dname = peak_mar,
       mname = med_name, tname = pheno_name,
       fitlines = "sdp-parallel", centerline = NULL)
+
+![](Recla_files/figure-markdown_strict/triad_plot-1.png)

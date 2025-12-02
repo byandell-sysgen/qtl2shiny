@@ -53,9 +53,9 @@ genoEffectApp <- function() {
         bslib::navset_tab(
           id = "pat_tab",
           bslib::nav_panel("Plot",
-            genoEffectOutput("geno_effect")), # effect_plot
+            genoEffectOutput("geno_effect")), # geno_effect_plot
           bslib::nav_panel("Summary",
-            genoEffectUI("geno_effect")))     # effect_table
+            genoEffectUI("geno_effect")))     # geno_effect_table
       )
     )
   )
@@ -107,7 +107,7 @@ genoEffectServer <- function(id, hotspot_list, pattern_list, snp_list,
                     pattern_list$scan_pattern(), blups)
       })
     })
-    effect_plot <- shiny::reactive({
+    geno_effect_plot <- shiny::reactive({
       if(!shiny::isTruthy(patterns()) || !shiny::isTruthy(effect_obj()))
         return(plot_null("Visit Patterns Panel First"))
       shiny::req(effect_obj(), gen_par$pos_Mbp)
@@ -121,35 +121,35 @@ genoEffectServer <- function(id, hotspot_list, pattern_list, snp_list,
         }
       })
     })
-    output$effect_plot_output <- shiny::renderPlot(
-      print(shiny::req(effect_plot())))
+    output$geno_effect_plot_output <- shiny::renderPlot(
+      print(shiny::req(geno_effect_plot())))
     
-    effect_table <- shiny::reactive({
+    geno_effect_table <- shiny::reactive({
       shiny::req(effect_obj(), gen_par$pos_Mbp)
       shiny::withProgress(message = 'Effect summary ...', value = 0, {
         shiny::setProgress(1)
         effect_summary(effect_obj(), pos = gen_par$pos_Mbp)
       })
     })
-    output$effect_table_output <- DT::renderDataTable(
-      shiny::req(effect_table()),
+    output$geno_effect_table_output <- DT::renderDataTable(
+      shiny::req(geno_effect_table()),
       escape = FALSE, options = list(scrollX = TRUE, pageLength = 5))
     
     # Return.
     shiny::reactiveValues(
-      Table = effect_table,
-      Plot = effect_plot)
+      Table = geno_effect_table,
+      Plot = geno_effect_plot)
   })
 }
 #' @export
 #' @rdname genoEffectApp
 genoEffectUI <- function(id) {
   ns <- shiny::NS(id)
-  DT::dataTableOutput(ns("effect_table_output")) # effect_table
+  DT::dataTableOutput(ns("geno_effect_table_output")) # geno_effect_table
 }
 #' @export
 #' @rdname genoEffectApp
 genoEffectOutput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::plotOutput(ns("effect_plot_output"))    # effect_plot
+  shiny::plotOutput(ns("geno_effect_plot_output"))    # geno_effect_plot
 }

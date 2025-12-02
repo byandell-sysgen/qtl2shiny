@@ -458,15 +458,16 @@ This takes some time, so execution is not shown here.
 The
 [mediateDataServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediateDataApp.R)
 sets up a number of objects used for plots, etc.
+This panel can take a long time to run.
 
-```{r eval=FALSE}
-qtl2 <- 1
+```{r}
+qtls <- 1
 comed_ls <- qtl2shiny:::comediator_region(pheno_name, chr_id, scan_window,
   covar_df, peak_df, qtls, pmap_obj, pheno_read_mx)
 med_ls <- qtl2shiny:::comediator_type(comed_ls, peak_df, pheno_name, FALSE) 
 ```
 
-```{r mediate_obj, eval=FALSE}
+```{r mediate_obj}
 mediate_obj <- qtl2mediate::mediation_test_qtl2(
   target = pheno_mx[, pheno_name, drop = FALSE],
   mediator = med_ls[[1]],
@@ -480,27 +481,45 @@ mediate_obj <- qtl2mediate::mediation_test_qtl2(
   kinship = kinship_list)
 ```
 
-```{r mediate_table, eval=FALSE}
+```{r mediate_table}
 # mediate_table
-mediate_obj())$best
+mediate_obj$best |>
+  dplyr::rename(phenotype = "id") |>
+  dplyr::mutate(LOD_adj = round(LR_mediation / log(10), 2)) |>
+  dplyr::select(phenotype, qtl_chr, qtl_pos, qtl_lod, LOD_adj)
 ```
 
 [mediatePlotServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/mediatePlotApp.R)
 
-```{r mediate_plot, eval=FALSE}
+```{r mediate_plot}
 # mediate_plot
-ggplot2::autoplot(mediate_obj, "pos_LR", local_only = TRUE, 
-  significant = TRUE)
+ggplot2::autoplot(qtl2shiny:::mediate_signif(mediate_obj))
 ```
 
-[triadServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/triadApp.R).
+[triadServer()](https://github.com/byandell-sysgen/qtl2shiny/blob/master/R/triadApp.R)
 
-```{r eval=FALSE}
+```{r}
 peak_mar <- qtl2::find_marker(probs_obj$map, chr_id, peak_Mbp)
-med_name <- dplyr::filter(mediate_obj$best, .data$triad == input$triad)$id[1]
+(triads <- levels(mediate_obj$best$triad))
+med_name <- dplyr::filter(mediate_obj$best, .data$triad == triads[1])$id[1]
+sdps <- unique(dplyr::filter(patterns, .data$pheno == pheno_name)$sdp)
 ```
 
-```{r eval=FALSE}
+```{r}
+triad_df <- qtl2mediate::mediation_triad_qtl2(target = pheno_mx,
+        mediator = med_ls[[1]][, med_name, drop = FALSE],
+        annotation = med_ls[[2]],
+        covar_tar = covar_df,
+        covar_med = med_ls$covar,
+        genoprobs = probs_obj$probs,
+        map = probs_obj$map,
+        chr = chr_id,
+        pos = peak_Mbp,
+        kinship = kinship_list[[1]],
+        sdp = sdps[1])
+```
+
+```{r triad_plot}
 # triad_plot
 ggplot2::autoplot(triad_df, type = "by_mediator", dname = peak_mar,
   mname = med_name, tname = pheno_name,

@@ -69,18 +69,6 @@ mediatePlotServer <- function(id, hotspot_list, mediate_list, probs_obj, project
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    mediate_signif <- shiny::reactive({
-      out <- shiny::req(mediate_list$mediate_obj())
-      out$best <- 
-        # Rename `qtl_pos` as `pos` for `intermediate::ggplot_mediation_test`.
-        dplyr::rename(
-          # Filter out n.s. entries.
-          dplyr::filter(out$best, .data$pvalue <= 0.1),
-          pos = "qtl_pos")
-      class(out) <- class(mediate_list$mediate_obj())
-      out
-    })
-    
     ## Select plot format.
     output$med_plot_input <- shiny::renderUI({
       shiny::selectInput(ns("med_plot"), NULL,
@@ -103,16 +91,18 @@ mediatePlotServer <- function(id, hotspot_list, mediate_list, probs_obj, project
     })
     ## Mediate1 plot
     mediate_plot <- shiny::reactive({
-      if(!shiny::isTruthy(mediate_list$med_ls()) || !shiny::isTruthy(mediate_signif())) {
+      med_signif <- mediate_signif(shiny::req(mediate_obj))
+      if(!shiny::isTruthy(mediate_list$med_ls()) ||
+         !shiny::isTruthy(med_signif)) {
         plot_null("too much\nmissing data\nin mediators\nreduce window width")
       } else {
-        shiny::req(med_plot_type(), mediate_signif())
+        shiny::req(med_plot_type())
         local <- shiny::isTruthy(input$local)
         signif <- shiny::isTruthy(input$signif)
         shiny::withProgress(message = 'Mediation Plot ...', value = 0, {
           shiny::setProgress(1)
           ggplot2::autoplot(
-            mediate_signif(), med_plot_type(),
+            med_signif, med_plot_type(),
             local_only = local, 
             significant = signif) +
             ggplot2::geom_point(size = 4)
