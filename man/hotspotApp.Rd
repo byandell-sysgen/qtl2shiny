@@ -10,7 +10,7 @@
 \usage{
 hotspotApp()
 
-hotspotServer(id, project_df)
+hotspotServer(id, project_df, active_panel = shiny::reactive(TRUE))
 
 hotspotInput(id)
 

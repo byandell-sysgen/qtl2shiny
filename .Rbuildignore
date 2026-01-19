@@ -3,3 +3,4 @@
 Makefile
 ^/inst/doc/*.csv
 ^/inst/doc/*.tex
+inst/scripts/
