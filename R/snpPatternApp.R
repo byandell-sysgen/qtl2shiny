@@ -188,7 +188,7 @@ snpPatternServer <- function(id, snp_list, allele_info) {
     })
     
     output$title <- shiny::renderUI({
-      if(snp_action() == "basic")
+      if(snp_action() == "add+dom")
         shiny::strong("SNP Plots")
     })
     

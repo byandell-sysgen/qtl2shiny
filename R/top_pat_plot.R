@@ -6,14 +6,13 @@ top_pat_plot <- function(pheno,
                          xlim,
                          drop_hilit = 1.5,
                          facet = "pheno",
-                         snp_action = "basic",
+                         snp_action = "add+dom",
                          cex = 4, ...) {
   if(is.null(pheno) || is.null(snp_action)) return(plot_null())
   mytitle <- FALSE
   if(length(pheno) == 1) {
     mytitle <- paste(pheno, "chr", chr_id)
-    if(snp_action != "basic")
-      mytitle <- paste(mytitle, snp_action)
+    mytitle <- paste(mytitle, snp_action)
   }
   legend.title <- "pattern"
   if(length(pheno) == 1) {

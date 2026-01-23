@@ -4,7 +4,7 @@
 ## Filtering removes feature_tbl class, so need to be explicit.
 ##
 plot_gene_region <- function(pheno, gene_region_tbl, top_snps_tbl, wrng,
-                             use_snp, snp_action = "basic") {
+                             use_snp, snp_action = "add+dom") {
   if(use_snp) {
     top_snps_rng <- subset(top_snps_tbl, 
                            wrng[1], wrng[2],

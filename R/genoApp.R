@@ -23,6 +23,7 @@ genoApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
     title =  "Test Geno Panel",
+    navbar_options = bslib::navbar_options(bg = "#2D89C8", theme = "dark"),
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(

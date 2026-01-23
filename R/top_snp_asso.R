@@ -1,6 +1,6 @@
 # Top SNP Association Plot Wrapper
 top_snp_asso <- function(scan_obj, snpinfo, xlim,
-                         snp_action="basic",
+                         snp_action="add+dom",
                          phename = dimnames(scan_obj)[[2]],
                          minLOD = NULL,
                          show_all_snps = FALSE, cex = 4) {

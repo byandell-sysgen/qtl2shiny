@@ -34,10 +34,7 @@ qtl2shinyServer <- function(id, projects_df) {
 
     # Hotspots and Phenotypes Panel.
     hotspot_list <- hotspotServer(
-      "hotspot_list", project_df,
-      shiny::reactive({
-        shiny::req(input$panel)
-      })
+      "hotspot_list", project_df, input
     )
     download_list$hotspot <- hotspot_list
 

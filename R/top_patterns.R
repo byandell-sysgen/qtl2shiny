@@ -1,4 +1,4 @@
-top_patterns <- function(top_snps_tbl, snp_action = "basic") {
+top_patterns <- function(top_snps_tbl, snp_action = "add+dom") {
   dplyr::arrange(
     dplyr::mutate(
       dplyr::filter(

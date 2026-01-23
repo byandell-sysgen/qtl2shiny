@@ -58,6 +58,14 @@ Minor issues
 * winpar
     + get `chr:pos` from winParApp for user selection
     + better rationalize how this changes when classes change
+    
+* update of panels
+    + using `active_panels` = `input` in `qtl2shinyServer()`
+    + as argument to `hotspotServer()`
+    + need to propagate to other instances or have better default
+    + goal is to only update other panels when visited
+    + genoServer depends on `pattern_list$scan_pattern()`
+and in particular on `blup` attribute
 
 ### Contribution guidelines ###
 

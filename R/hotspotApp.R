@@ -1,9 +1,9 @@
 #' Shiny Hotspot Panel App
 #'
 #' @param id identifier for shiny reactive
-#' @param set_par,peak_df,pmap_obj,project_df reactive arguments
+#' @param project_df,main_par reactive arguments
 #'
-#' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
+#' @author Brian S Yandell, \email{brian.yandell@wisc.edu}
 #' @keywords utilities
 #'
 #' @return No return value; called for side effects.
@@ -41,8 +41,7 @@ hotspotApp <- function() {
 }
 #' @export
 #' @rdname hotspotApp
-hotspotServer <- function(id, project_df,
-                          active_panel = shiny::reactive(TRUE)) {
+hotspotServer <- function(id, project_df, main_par = NULL) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -89,7 +88,7 @@ hotspotServer <- function(id, project_df,
     hotspot_list$Plot <- download_Plot
     hotspot_list$Table <- download_Table
     hotspot_list$Filename <- download_Filename
-    hotspot_list$active_panel <- active_panel
+    hotspot_list$main_par <- main_par
 
     ## Return.
     hotspot_list
@@ -109,7 +108,7 @@ hotspotServer <- function(id, project_df,
     #   Plot = shiny::isolate(pheno_list$plot),
     #   Table = shiny::isolate(pheno_list$table)),
     #   Filename = download_Filename,
-    #   active_panel = active_panel
+    #   main_par = main_par
   })
 }
 #' @export

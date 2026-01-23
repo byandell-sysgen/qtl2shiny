@@ -5,7 +5,7 @@
 #' @param id identifier for shiny reactive
 #' @param hotspot_list,project_df,snp_action reactive arguments
 #'
-#' @author Brian S Yandell, \email{brian.yandell@@wisc.edu}
+#' @author Brian S Yandell, \email{brian.yandell@wisc.edu}
 #' @keywords utilities
 #'
 #' @export
@@ -21,24 +21,29 @@
 snpListApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
-    title =  "Test SNP List",
+    title = "Test SNP List",
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(
-            projectUI("project_df"),       # project
-            hotspotInput("hotspot_list")), # class, subject_model, pheno_names, hotspot
+            projectUI("project_df"), # project
+            hotspotInput("hotspot_list")
+          ), # class, subject_model, pheno_names, hotspot
           bslib::card(
-            hotspotUI("hotspot_list")),    # window_Mbp, radio, win_par, chr_ct, minLOD
-          width = 400),
-        hotspotOutput("hotspot_list"))
+            hotspotUI("hotspot_list")
+          ), # window_Mbp, radio, win_par, chr_ct, minLOD
+          width = 400
+        ),
+        hotspotOutput("hotspot_list")
+      )
     ),
     bslib::nav_panel(
       title = "snpList",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          snpListInput("snp_list")),       # scan_window, minLOD, pheno_name
+          snpListInput("snp_list")
+        ), # scan_window, minLOD, pheno_name
         bslib::card(snpListOutput("snp_list"))
       )
     )
@@ -53,64 +58,81 @@ snpListApp <- function() {
 #' @export
 #' @rdname snpListApp
 snpListServer <- function(id, hotspot_list, project_df,
-                          snp_action = shiny::reactive({"basic"})) { 
+                          snp_action = shiny::reactive({
+                            "add+dom"
+                          })) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
-    
+
     win_par <- shiny::isolate(hotspot_list$win_par)
     pheno_names <- shiny::reactive({
       shiny::req(project_df(), hotspot_list$pheno_mx())
       colnames(hotspot_list$pheno_mx())
     })
     ## SNP Probabilities.
-    snpprobs_obj <- 
+    snpprobs_obj <-
       snpProbsServer("snp_probs", win_par, pheno_names, project_df)
     snpinfo <- reactive({
       shiny::req(project_df(), hotspot_list$pheno_mx())
       shiny::req(snpprobs_obj())$snpinfo
     })
-    
+
     ## SNP Scan.
     snp_scan_obj <- shiny::reactive({
-      shiny::req(snpprobs_obj(), hotspot_list$pheno_mx(),
-        hotspot_list$peak_df(), hotspot_list$covar_df())
+      if(!match_main_par(hotspot_list, "panel", c("scan", "pattern", "geno")))
+        return(NULL)
+      shiny::req(
+        snpprobs_obj(), hotspot_list$pheno_mx(),
+        hotspot_list$peak_df(), hotspot_list$covar_df(), snp_action()
+      )
       kinship_list <- shiny::req(hotspot_list$kinship_list())[
-        shiny::req(win_par())$chr_id]
+        shiny::req(win_par())$chr_id
+      ]
       snpprobs <- snpprobs_obj()$snpprobs
-      shiny::withProgress(message = "SNP Scan ...", value = 0, {
-        shiny::setProgress(1)
-        snpprobs_act <- 
-          qtl2pattern::snpprob_collapse(snpprobs, snp_action())
-        scan1covar(hotspot_list$pheno_mx(), hotspot_list$covar_df(),
-                   snpprobs_act, kinship_list, hotspot_list$peak_df())
-      })
+      appProgress(
+        "SNP Scan", 
+        paste(hotspot_list$pheno_names()[1], hotspot_list$main_par$panel,
+              snp_action()),
+        {
+          shiny::setProgress(1)
+          snpprobs_act <-
+            qtl2pattern::snpprob_collapse(snpprobs, snp_action())
+          scan1covar(
+            hotspot_list$pheno_mx(), hotspot_list$covar_df(),
+            snpprobs_act, kinship_list, hotspot_list$peak_df()
+          )
+        },
+        hotspot_list
+      )
     })
     ## Top SNPs table.
     top_snps_tbl <- shiny::reactive({
       shiny::req(snp_action(), snpinfo())
-      drop_hilit <- max(unclass(shiny::req(snp_scan_obj()))) - 
-        minLOD() 
-      shiny::withProgress(message = 'Get Top SNPs ...', value = 0, {
+      drop_hilit <- max(unclass(shiny::req(snp_scan_obj()))) -
+        minLOD()
+      shiny::withProgress(message = "Get Top SNPs ...", value = 0, {
         shiny::setProgress(1)
-        qtl2pattern::top_snps_pattern(snp_scan_obj(),
-                                      snpinfo(),
-                                      drop_hilit)
+        qtl2pattern::top_snps_pattern(
+          snp_scan_obj(),
+          snpinfo(),
+          drop_hilit
+        )
       })
     })
     ## Genes and Exons.
     gene_exon_tbl <- shiny::reactive({
       shiny::req(snp_action())
-      shiny::withProgress(message = 'Gene Exon Calc ...', value = 0, {
+      shiny::withProgress(message = "Gene Exon Calc ...", value = 0, {
         shiny::setProgress(1)
         tops <- shiny::req(top_snps_tbl())
         gene_exons(tops, project_df())
       })
     })
-    
+
     ## SNP Parameters
     # Minimum LOD for SNP top values.
     minLOD <- reactive({
-      if(shiny::isTruthy(input$minLOD)) {
+      if (shiny::isTruthy(input$minLOD)) {
         input$minLOD
       } else {
         max(3, round(max(unclass(shiny::req(snp_scan_obj()))), 1) - 1.5)
@@ -120,45 +142,53 @@ snpListServer <- function(id, hotspot_list, project_df,
       shiny::req(snp_scan_obj())
       value <- minLOD()
       shiny::numericInput(ns("minLOD"), "LOD threshold", value,
-                          min = 0, step = 0.5)
+        min = 0, step = 0.5
+      )
     })
     # Scan Window slider
     output$scan_window_input <- shiny::renderUI({
       shiny::req(pheno_names())
-      rng <- round(shiny::req(win_par()$peak_Mbp) + 
-                     c(-1,1) * shiny::req(win_par()$window_Mbp), 
-                   1)
+      rng <- round(
+        shiny::req(win_par()$peak_Mbp) +
+          c(-1, 1) * shiny::req(win_par()$window_Mbp),
+        1
+      )
       selected <- select_range(input$scan_window, rng)
       shiny::sliderInput(ns("scan_window"), NULL, rng[1], rng[2],
-                         selected, step=.1)
+        selected,
+        step = .1
+      )
     })
     ## Select phenotype for plots.
     output$pheno_name_input <- shiny::renderUI({
       shiny::req(pheno_names())
       shiny::selectInput(ns("pheno_name"), NULL,
-                         choices = shiny::req(pheno_names()),
-                         selected = input$pheno_name)
+        choices = shiny::req(pheno_names()),
+        selected = input$pheno_name
+      )
     })
-    
+
     output$show_snp_par <- shiny::renderUI({
       shiny::tagList(
         shiny::renderText(paste("minLOD:", input$minLOD)),
-        shiny::renderText(paste("scan_window:",
-                                paste(input$scan_window, collapse = "-"))),
+        shiny::renderText(paste(
+          "scan_window:",
+          paste(input$scan_window, collapse = "-")
+        )),
         shiny::renderText(paste("pheno_name:", input$pheno_name))
       )
     })
-    
+
     # `patterns` for return
     patterns <- shiny::reactive({
-      if(shiny::isTruthy(snp_action()) &&
-         shiny::isTruthy(top_snps_tbl())) {
+      if (shiny::isTruthy(snp_action()) &&
+        shiny::isTruthy(top_snps_tbl())) {
         top_patterns(top_snps_tbl(), snp_action())
       } else {
         NULL
       }
     })
-    
+
     ## Return `snp_list`.
     shiny::reactiveValues(
       snp_par = input,
@@ -169,7 +199,8 @@ snpListServer <- function(id, hotspot_list, project_df,
       top_snps_tbl = top_snps_tbl,
       gene_exon_tbl = gene_exon_tbl,
       patterns = patterns,
-      snp_action = snp_action)
+      snp_action = snp_action
+    )
   })
 }
 #' @export
@@ -178,8 +209,9 @@ snpListInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shiny::uiOutput(ns("scan_window_input")), # scan_window
-    shiny::uiOutput(ns("minLOD_input")),      # minLOD
-    shiny::uiOutput(ns("pheno_name_input")))  # pheno_name
+    shiny::uiOutput(ns("minLOD_input")), # minLOD
+    shiny::uiOutput(ns("pheno_name_input"))
+  ) # pheno_name
 }
 #' @export
 #' @rdname snpListApp

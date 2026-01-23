@@ -73,12 +73,13 @@ patternDataApp <- function() {
       dip_par$snp_action
     })
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
-    pairprobs_obj <-
-      pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
-    pattern_list <- patternDataServer(
-      "pattern_list", dip_par, hotspot_list,
-      snp_list, pairprobs_obj, project_df
-    )
+    # ** This leads to 2 calls to SNP Scan **
+    # pairprobs_obj <-
+    #   pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
+    # pattern_list <- patternDataServer(
+    #   "pattern_list", dip_par, hotspot_list,
+    #   snp_list, pairprobs_obj, project_df
+    # )
   }
   shiny::shinyApp(ui, server)
 }
@@ -157,14 +158,15 @@ patternDataServer <- function(id, dip_par, hotspot_list, snp_list,
       )
     })
     scan_pattern <- shiny::reactive({
-      shiny::req(hotspot_list$active_panel() == ns("pattern"), snp_action())
+      if(!match_main_par(hotspot_list, "panel", "pattern")) return(NULL)
+      shiny::req(snp_action())
       pheno_name <- shiny::req(input$pheno_name)
       shiny::req(
         hotspot_list$pheno_mx(), hotspot_list$covar_df(),
         pairprobs_obj(), hotspot_list$kinship_list(),
         hotspot_list$peak_df(), pattern_pheno()
       )
-      withProgress(message = "Scan Patterns ...", value = 0, {
+      appProgress("Scan Patterns", pheno_name, {
         setProgress(1)
         scan1_pattern(
           pheno_name, hotspot_list$pheno_mx(),

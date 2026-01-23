@@ -10,7 +10,7 @@
 \usage{
 hotspotApp()
 
-hotspotServer(id, project_df, active_panel = shiny::reactive(TRUE))
+hotspotServer(id, project_df, main_par = NULL)
 
 hotspotInput(id)
 
@@ -21,7 +21,7 @@ hotspotOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{set_par, peak_df, pmap_obj, project_df}{reactive arguments}
+\item{project_df, main_par}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

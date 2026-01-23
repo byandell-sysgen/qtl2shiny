@@ -68,7 +68,7 @@ probsServer <- function(id, win_par, project_df) {
   probs_obj <- shiny::reactive({
     shiny::req(project_df(), win_par())
     chr_id <- win_par()$chr_id
-    shiny::withProgress(message = 'Read probs ...', value = 0, {
+    appProgress('Allele probs', "", {
       shiny::setProgress(1)
       mid <- win_par()$peak_Mbp
       win <- win_par()$window_Mbp
@@ -96,7 +96,7 @@ pairProbsServer <- function(id, win_par, project_df) {
     shiny::req(project_df(), win_par())
     chr_id <- win_par()$chr_id
     range_val <- win_par()$peak_Mbp + c(-1,1) * win_par()$window_Mbp
-    shiny::withProgress(message = 'Diplotype Probs ...', value = 0, {
+    appProgress('Pair Probs', "", {
       shiny::setProgress(1)
       
       # Define query_probs function
@@ -119,8 +119,8 @@ snpProbsServer <- function(id, win_par, pheno_names, project_df) {
     chr_id <- win_par()$chr_id
     peak_Mbp <- win_par()$peak_Mbp 
     window_Mbp <- win_par()$window_Mbp
-    shiny::req(pheno_names())
-    shiny::withProgress(message = 'SNP Probs ...', value = 0, {
+    #shiny::req(pheno_names())
+    appProgress("SNP Probs", "", {
       shiny::setProgress(1)
 
       # Define query_probs function

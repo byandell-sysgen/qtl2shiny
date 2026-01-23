@@ -68,7 +68,7 @@ genoEffectApp <- function() {
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
     pattern_list <- patternDataServer("pattern_list", dip_par, hotspot_list,
-      pairprobs_obj, snp_list$patterns, snp_action, project_df)
+      snp_list, pairprobs_obj, project_df)
     geno_list <- genoDataServer("geno_list", hotspot_list, snp_list,
                                 pairprobs_obj, project_df)
     genoEffectServer("geno_effect", hotspot_list, pattern_list, snp_list,
@@ -94,12 +94,14 @@ genoEffectServer <- function(id, hotspot_list, pattern_list, snp_list,
     effect_obj <- shiny::reactive({
       shiny::req(snp_action(), project_df(), pairprobs_obj(),
                  hotspot_list$kinship_list(), hotspot_list$covar_df(),
-                 hotspot_list$peak_df())
+                 hotspot_list$peak_df(), pattern_list$scan_pattern())
       pheno_name <- shiny::req(pattern_list$pat_par$pheno_name)
       pheno_mx <-
         shiny::req(hotspot_list$pheno_mx())[, pheno_name, drop = FALSE]
+      # ** may not have yet **
       blups <- attr(pattern_list$scan_pattern(), "blups")
-      shiny::withProgress(message = 'Effect scans ...', value = 0, {
+      
+      appProgress('Effect scans', pheno_name, {
         shiny::setProgress(1)
         effect_scan(pheno_mx, hotspot_list$covar_df(),
                     pairprobs_obj(), hotspot_list$kinship_list(),
@@ -111,7 +113,7 @@ genoEffectServer <- function(id, hotspot_list, pattern_list, snp_list,
       if(!shiny::isTruthy(patterns()) || !shiny::isTruthy(effect_obj()))
         return(plot_null("Visit Patterns Panel First"))
       shiny::req(effect_obj(), gen_par$pos_Mbp)
-      shiny::withProgress(message = 'Allele plots ...', value = 0, {
+      appProgress('Allele plots', "", {
         shiny::setProgress(1)
         p <- ggplot2::autoplot(effect_obj(), pos = gen_par$pos_Mbp)
         if(is.null(p)) {
