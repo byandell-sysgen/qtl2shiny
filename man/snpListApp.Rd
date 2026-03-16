@@ -14,7 +14,7 @@ snpListServer(
   hotspot_list,
   project_df,
   snp_action = shiny::reactive({
-     "basic"
+     "add+dom"
  })
 )
 

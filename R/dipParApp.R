@@ -36,7 +36,7 @@ dipParServer <- function(id, hotspot_list) {
     ns <- session$ns
     
     output$snp_action_input <- shiny::renderUI({
-      shiny::selectInput(ns("snp_action"), "",
+      shiny::selectInput(ns("snp_action"), NULL,
                          c("add+dom","additive","non-add",
                            "recessive","dominant"),
                          input$snp_action)

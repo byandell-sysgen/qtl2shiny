@@ -72,19 +72,22 @@ snpListServer <- function(id, hotspot_list, project_df,
     ## SNP Probabilities.
     snpprobs_obj <-
       snpProbsServer("snp_probs", win_par, pheno_names, project_df)
-    snpinfo <- reactive({
+    snpinfo <- shiny::reactive({
+      message("snpinfo")
       shiny::req(project_df(), hotspot_list$pheno_mx())
       shiny::req(snpprobs_obj())$snpinfo
     })
 
     ## SNP Scan.
     snp_scan_obj <- shiny::reactive({
-      if(!match_main_par(hotspot_list, "panel", c("scan", "pattern", "geno")))
-        return(NULL)
+      message(paste("snpList snp_action", snp_action()))
       shiny::req(
         snpprobs_obj(), hotspot_list$pheno_mx(),
         hotspot_list$peak_df(), hotspot_list$covar_df(), snp_action()
       )
+      message(paste("panel", hotspot_list$main_par$panel))
+      if(!match_main_par(hotspot_list, "panel", c("scan", "pattern", "geno")))
+        return(NULL)
       kinship_list <- shiny::req(hotspot_list$kinship_list())[
         shiny::req(win_par())$chr_id
       ]
@@ -131,17 +134,19 @@ snpListServer <- function(id, hotspot_list, project_df,
 
     ## SNP Parameters
     # Minimum LOD for SNP top values.
-    minLOD <- reactive({
+    minLOD <- shiny::reactive({
       if (shiny::isTruthy(input$minLOD)) {
         input$minLOD
       } else {
-        max(3, round(max(unclass(shiny::req(snp_scan_obj()))), 1) - 1.5)
+        if(shiny::isTruthy(snp_scan_obj())) {
+          max(3, round(max(unclass(shiny::req(snp_scan_obj()))), 1) - 1.5)
+        } else {
+          3
+        }
       }
     })
     output$minLOD_input <- shiny::renderUI({
-      shiny::req(snp_scan_obj())
-      value <- minLOD()
-      shiny::numericInput(ns("minLOD"), "LOD threshold", value,
+      shiny::numericInput(ns("minLOD"), "LOD threshold", shiny::req(minLOD()),
         min = 0, step = 0.5
       )
     })
@@ -162,7 +167,7 @@ snpListServer <- function(id, hotspot_list, project_df,
     ## Select phenotype for plots.
     output$pheno_name_input <- shiny::renderUI({
       shiny::req(pheno_names())
-      shiny::selectInput(ns("pheno_name"), NULL,
+      shiny::selectInput(ns("pheno_name"), "SNP phenotype",
         choices = shiny::req(pheno_names()),
         selected = input$pheno_name
       )
@@ -210,8 +215,8 @@ snpListInput <- function(id) {
   shiny::tagList(
     shiny::uiOutput(ns("scan_window_input")), # scan_window
     shiny::uiOutput(ns("minLOD_input")), # minLOD
-    shiny::uiOutput(ns("pheno_name_input"))
-  ) # pheno_name
+    shiny::uiOutput(ns("pheno_name_input")) # pheno_name
+  )
 }
 #' @export
 #' @rdname snpListApp

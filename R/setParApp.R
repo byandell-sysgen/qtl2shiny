@@ -19,7 +19,8 @@ setParApp <- function() {
     sidebar = bslib::sidebar(
       projectUI("project"),
       setParInput("set_par"), # class, subject_model
-      setParUI("set_par")),   # window_Mbp
+      setParUI("set_par"),   # window_Mbp
+      gap = 0),
     setParOutput("set_par")
   )
   server <- function(input, output, session) {
@@ -39,7 +40,7 @@ setParServer <- function(id, project_df) {
       shiny::req(project_df())
       choices <- project_classes(project_df())
       selected <- input$class
-      shiny::selectInput(ns("class"), "Class",
+      shiny::selectInput(ns("class"), NULL,
         choices = as.list(choices), selected = selected, multiple = TRUE)
     })
     shiny::observeEvent(shiny::req(project_df()), {
@@ -54,7 +55,7 @@ setParServer <- function(id, project_df) {
       choices <- shiny::req(project_subjmod())
       if(is.null(selected <- input$subject_model))
         selected <- choices[1]
-      shiny::selectInput(ns("subject_model"), "Subject_Model",
+      shiny::selectInput(ns("subject_model"), NULL,
         choices = choices, selected = selected, multiple = TRUE)
     })
     shiny::observeEvent(shiny::req(project_subjmod()), {

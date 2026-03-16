@@ -20,13 +20,10 @@ hotspotApp <- function() {
   ui <- bslib::page_sidebar(
     title = "Test Hotspot Panel",
     sidebar = bslib::sidebar(
-      bslib::card(
-        projectUI("project_df"), # project
-        hotspotInput("hotspot_list")
-      ), # class, subject_model, pheno_names, hotspot
-      bslib::card(
-        hotspotUI("hotspot_list")
-      ), # window_Mbp, radio, win_par, chr_ct, minLOD
+      projectUI("project_df"), # project
+      hotspotInput("hotspot_list"), # class, subject_model, pheno_names, hotspot
+      hotspotUI("hotspot_list"), # window_Mbp, radio, win_par, chr_ct, minLOD
+      gap = 0,
       width = 400
     ),
     downr::downloadInput("download"), # download inputs for Plot or Table

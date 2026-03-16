@@ -19,20 +19,19 @@ phenoNamesApp <- function() {
   ui <- bslib::page_sidebar(
     title =  "Test Phenotype Names",
     sidebar = bslib::sidebar(
-      bslib::card(
-        projectUI("project_df"),             # project
-        setParInput("set_par"),              # class, subject_model
-        phenoNamesInput("pheno_names")),     # pheno_names
+      projectUI("project_df"),             # project
+      setParInput("set_par"),              # class, subject_model
+      phenoNamesInput("pheno_names"),     # pheno_names
       bslib::card(
         winParInput("win_par"),              # hotspot
         bslib::layout_columns(
           col_widths = c(4, 8),
           setParUI("set_par"),               # window_Mbp 
           hotspotDataInput("hotspot_obj"))), # chr_ct, minLOD
+      gap = 0,
       width = 400
     ),
-    phenoNamesOutput("pheno_names"),
-    peakPanelOutput("peak_df")
+    phenoNamesOutput("pheno_names")
   )
   server <- function(input, output, session) {
     project_df <- projectServer("project_df", projects_df)
@@ -80,7 +79,7 @@ phenoNamesServer <- function(id, set_par, peak_df, pheno_mx, covar_df,
     })
     shiny::observeEvent(set_par$class, {
       if(!shiny::isTruthy(set_par$class)) {
-        shiny::updateSelectizeInput(session, "pheno_name", "Primary phenotype",
+        shiny::updateSelectizeInput(session, "pheno_name",
           choices = NULL, selected = NULL, server = TRUE)
       } else {
         out <- select_phenames(shiny::req(peak_df()))

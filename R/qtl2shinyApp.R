@@ -33,61 +33,46 @@ qtl2shinyServer <- function(id, projects_df) {
     download_list <- shiny::reactiveValues()
 
     # Hotspots and Phenotypes Panel.
-    hotspot_list <- hotspotServer(
-      "hotspot_list", project_df, input
-    )
+    hotspot_list <- hotspotServer("hotspot_list", project_df, input)
     download_list$hotspot <- hotspot_list
 
+    # SNP Parameters and List
+    dip_par <- dipParServer("dip_par", hotspot_list)
+    snp_action <- shiny::reactive({
+      if(shiny::isTruthy(dip_par$snp_action)) {
+        dip_par$snp_action
+      } else {
+        "add+dom"
+      }
+    })
+    snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
+    
     # Allele and SNP Scans Panel.
-    scan_snp_list <- snpListServer("scan_snp_list", hotspot_list, project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     download_list$scan <-
       scanServer(
-        "scan_panel", hotspot_list, scan_snp_list, probs_obj,
+        "scan_panel", hotspot_list, snp_list, probs_obj,
         project_df
       )
 
-    # Mediation Panel.
-    download_list$mediate <- mediateServer(
-      "mediate_panel", hotspot_list,
-      scan_snp_list, probs_obj, project_df
-    )
-
     # Patterns Panel.
-    dip_par <- dipParServer("dip_par", hotspot_list)
-    snp_action <- shiny::reactive({
-      dip_par$snp_action
-    })
-    pattern_snp_list <-
-      snpListServer("pattern_snp_list", hotspot_list, project_df, snp_action)
     pairprobs_obj <-
       pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
-    pattern_list <-
-      patternServer(
-        "pattern_panel", dip_par, hotspot_list,
-        pattern_snp_list, pairprobs_obj, project_df
-      )
+    pattern_list <- 
+      patternServer("pattern_panel", dip_par, hotspot_list, snp_list,
+                    pairprobs_obj, project_df)
     download_list$pattern <- shiny::isolate(pattern_list$download_list)
 
     # Genotypes Panel.
-    dipParServer("geno_dip_par", hotspot_list)
-    download_list$geno <- genoServer(
-      "geno_panel", hotspot_list, pattern_list,
-      pattern_snp_list, pairprobs_obj, project_df
+    download_list$geno <-
+      genoServer("geno_panel", hotspot_list, pattern_list, snp_list,
+                 pairprobs_obj, project_df
     )
-
-    output$download_panel <- shiny::renderText(
-      paste("input$panel:", shiny::req(input$panel))
-    )
-    output$download_names <- shiny::renderText(
-      paste("DL:", paste(names(download_list), collapse = ", "))
-    )
-    # output$download <- shiny::renderUI({
-    #   # Note: `input$panel` is of form `qtl2shiny-<panel>`.
-    #   shiny::tagList(
-    #     shiny::renderText(paste("input$panel:", shiny::req(input$panel))),
-    #     shiny::renderText(paste("DL:", paste(names(download_list), collapse = ", "))))
-    # })
+    
+    # Mediation Panel.
+    download_list$mediate <- mediateServer(
+      "mediate_panel", hotspot_list, snp_list, probs_obj, project_df)
+    
     # Download
     download_list_panel <- shiny::reactive({
       # Note: `input$panel` is of form `qtl2shiny-<panel>`.
@@ -110,14 +95,13 @@ qtl2shinyUI <- function(id) {
     id = ns("panel"),
     navbar_options = bslib::navbar_options(bg = "red", theme = "dark"),
     sidebar = bslib::sidebar(
-      bslib::card(
-        projectUI(ns("project_df")), # project
-        hotspotInput(ns("hotspot_list"))
-      ), # class, subject_model, pheno_names
-      bslib::card(
-        shiny::textOutput(ns("download_panel")),
-        shiny::textOutput(ns("download_names"))
-      )
+      projectUI(ns("project_df")), # project
+      hotspotInput(ns("hotspot_list")), # class, subject_model, pheno_names
+      "SNP Settings",
+      dipParInput(ns("dip_par")), # snp_action
+      snpListInput(ns("snp_list")), # scan_window, minLOD, pheno_name
+      dipParUI(ns("dip_par")), # allele_names
+      gap = 0
     ),
     header = downr::downloadInput(ns("download")),
     bslib::nav_panel(
@@ -139,8 +123,7 @@ qtl2shinyUI <- function(id) {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           scanInput(ns("scan_panel")), # <various>
-          snpListInput(ns("scan_snp_list"))
-        ), # scan_window, minLOD, pheno_name
+        ),
         scanOutput(ns("scan_panel"))
       )
     ),
@@ -150,9 +133,6 @@ qtl2shinyUI <- function(id) {
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
           bslib::card(patternInput(ns("pattern_panel"))), # <various>
-          bslib::card(dipParInput(ns("dip_par"))), # snp_action
-          bslib::card(snpListInput(ns("pattern_snp_list"))), # scan_window, minLOD, pheno_name
-          bslib::card(dipParUI(ns("dip_par"))), # allele_names
           width = 400
         ),
         bslib::card(patternOutput(ns("pattern_panel")))
@@ -162,13 +142,7 @@ qtl2shinyUI <- function(id) {
       title = "Genotypes",
       value = ns("geno"),
       bslib::layout_sidebar(
-        bslib::card(
-          dipParUI(ns("geno_dip_par"))
-        ), # allele_names
-        bslib::card(
-          genoInput(ns("geno_panel")),
-          min_height = "100px"
-        ), # pos_Mbp
+        genoInput(ns("geno_panel")),
         width = 400
       ),
       bslib::card(genoOutput(ns("geno_panel")))

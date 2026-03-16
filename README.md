@@ -58,13 +58,20 @@ Minor issues
 * winpar
     + get `chr:pos` from winParApp for user selection
     + better rationalize how this changes when classes change
+* scan_window
+    + in `scanDataApp.R` and `snpListApp.R`
+    + tied to `win_par$hotspot_code`
+    + useful for subset of window for most panels
+    + move to `hotspot_list`
+    + rethink `pheno_list` up to `hotspot_list`
+    + need to change dependencies on `snp_list$snp_par$scan_window` to `hotspot_list
     
 * update of panels
-    + using `active_panels` = `input` in `qtl2shinyServer()`
-    + as argument to `hotspotServer()`
-    + need to propagate to other instances or have better default
-    + goal is to only update other panels when visited
-    + genoServer depends on `pattern_list$scan_pattern()`
+    + `qtl2shinyServer()` supplies `main_par` = `input` to `hotspotServer()`
+    + use `appProgress()` with global `qtldebug` to show messages
+    + `snpListServer()` runs `SNP Scan` too much
+    + do we need separate `snp_list` for `scan` and `pattern` panels?
+    + genoServer depends on `pattern_list$scan_pattern()` and seems broken
 and in particular on `blup` attribute
 
 ### Contribution guidelines ###
