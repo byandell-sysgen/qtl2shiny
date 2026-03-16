@@ -86,16 +86,19 @@ snpListServer <- function(id, hotspot_list, project_df,
         hotspot_list$peak_df(), hotspot_list$covar_df(), snp_action()
       )
       message(paste("panel", hotspot_list$main_par$panel))
-      if(!match_main_par(hotspot_list, "panel", c("scan", "pattern", "geno")))
+      if (!match_main_par(hotspot_list, "panel", c("scan", "pattern", "geno"))) {
         return(NULL)
+      }
       kinship_list <- shiny::req(hotspot_list$kinship_list())[
         shiny::req(win_par())$chr_id
       ]
       snpprobs <- snpprobs_obj()$snpprobs
       appProgress(
-        "SNP Scan", 
-        paste(hotspot_list$pheno_names()[1], hotspot_list$main_par$panel,
-              snp_action()),
+        "SNP Scan",
+        paste(
+          hotspot_list$pheno_names()[1], hotspot_list$main_par$panel,
+          snp_action()
+        ),
         {
           shiny::setProgress(1)
           snpprobs_act <-
@@ -138,7 +141,7 @@ snpListServer <- function(id, hotspot_list, project_df,
       if (shiny::isTruthy(input$minLOD)) {
         input$minLOD
       } else {
-        if(shiny::isTruthy(snp_scan_obj())) {
+        if (shiny::isTruthy(snp_scan_obj())) {
           max(3, round(max(unclass(shiny::req(snp_scan_obj()))), 1) - 1.5)
         } else {
           3
@@ -167,7 +170,7 @@ snpListServer <- function(id, hotspot_list, project_df,
     ## Select phenotype for plots.
     output$pheno_name_input <- shiny::renderUI({
       shiny::req(pheno_names())
-      shiny::selectInput(ns("pheno_name"), "SNP phenotype",
+      shiny::selectInput(ns("pheno_name"), "Phenotype",
         choices = shiny::req(pheno_names()),
         selected = input$pheno_name
       )
@@ -213,9 +216,9 @@ snpListServer <- function(id, hotspot_list, project_df,
 snpListInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
+    shiny::uiOutput(ns("pheno_name_input")), # pheno_name
     shiny::uiOutput(ns("scan_window_input")), # scan_window
-    shiny::uiOutput(ns("minLOD_input")), # minLOD
-    shiny::uiOutput(ns("pheno_name_input")) # pheno_name
+    shiny::uiOutput(ns("minLOD_input")) # minLOD
   )
 }
 #' @export

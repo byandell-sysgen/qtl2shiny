@@ -51,7 +51,6 @@ mediateDataApp <- function() {
     hotspot_list <- hotspotServer("hotspot_list", project_df)
     probs_obj <- probsServer("probs", hotspot_list$win_par, project_df)
     snp_list <- snpListServer("snp_list", hotspot_list, project_df)
-    mediate_list <-
       mediateDataServer("mediate_list", hotspot_list, snp_list, probs_obj, project_df)
   }
   shiny::shinyApp(ui, server)
@@ -74,8 +73,12 @@ mediateDataServer <- function(id, hotspot_list, snp_list, probs_obj, project_df)
       shiny::req(win_par()$window_Mbp)
     })
     scan_window <- shiny::reactive({
-      shiny::req(win_par())
-      peak_Mbp() + c(-1,1) * window_Mbp()
+      if(shiny::isTruthy(snp_list$snp_par$scan_window)) {
+        snp_list$snp_par$scan_window
+      } else {
+        shiny::req(win_par())
+        peak_Mbp() + c(-1,1) * window_Mbp()
+      }
     })
     
     ## Expression data
@@ -109,14 +112,14 @@ mediateDataServer <- function(id, hotspot_list, snp_list, probs_obj, project_df)
         expression = expr_ls(),
         phenotype = comediator_type(
           shiny::req(comed_ls()), shiny::req(hotspot_list$peak_df()),
-          shiny::req(input$pheno_name), shiny::isTruthy(input$other)))
+          shiny::req(pheno_name()), shiny::isTruthy(input$other)))
       out
     })
     
     # Select pattern 
     sdps <- shiny::reactive({
-      shiny::req(patterns(), input$pheno_name)
-      unique(dplyr::filter(patterns(), .data$pheno == input$pheno_name)$sdp)
+      shiny::req(patterns(), pheno_name())
+      unique(dplyr::filter(patterns(), .data$pheno == pheno_name())$sdp)
     })
     peak_mar <- shiny::reactive({
       qtl2::find_marker(probs_obj()$map, chr_id(), input$pos_Mbp)
@@ -148,11 +151,20 @@ mediateDataServer <- function(id, hotspot_list, snp_list, probs_obj, project_df)
 
     phe1_mx <- shiny::reactive({
       shiny::req(hotspot_list$pheno_mx())
-      phename <- shiny::req(input$pheno_name)
+      phename <- shiny::req(pheno_name())
       if(phename %in% colnames(hotspot_list$pheno_mx())) {
         hotspot_list$pheno_mx()[, phename, drop = FALSE]
       } else {
         NULL
+      }
+    })
+    
+    pheno_name <- shiny::reactive({
+      if(shiny::isTruthy(snp_list$snp_par$pheno_name)) {
+        snp_list$snp_par$pheno_name
+      } else {
+        shiny::req(hotspot_list$pheno_mx())
+        colnames(hotspot_list$pheno_mx())[1]
       }
     })
 
@@ -180,13 +192,6 @@ mediateDataServer <- function(id, hotspot_list, snp_list, probs_obj, project_df)
                           c("1 QTL" = 1, "2 QTLs" = 2),
                           selected, inline = TRUE)
     })
-    ## Select phenotype.
-    output$pheno_name_input <- shiny::renderUI({
-      shiny::req(hotspot_list$pheno_mx())
-      shiny::selectInput(ns("pheno_name"), NULL,
-                         choices = colnames(hotspot_list$pheno_mx()),
-                         selected = input$pheno_name)
-    })
     output$med_type_input <- shiny::renderUI({
       shiny::selectInput(ns("med_type"), NULL,
                          choices = c("phenotype","expression"),
@@ -196,7 +201,7 @@ mediateDataServer <- function(id, hotspot_list, snp_list, probs_obj, project_df)
     output$mediate_ui <- shiny::renderUI({
       shiny::tagList(
         shiny::renderText(paste("qtls:", input$qtls)),
-        shiny::renderText(paste("pheno_name:", input$pheno_name)),
+        shiny::renderText(paste("pheno_name:", pheno_name())),
         shiny::renderText(paste("pos_Mbp:", input$pos_Mbp)))
     })
     output$mediate_table <- shiny::renderUI({
@@ -223,7 +228,6 @@ mediateDataServer <- function(id, hotspot_list, snp_list, probs_obj, project_df)
 mediateDataInput <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shiny::uiOutput(ns("pheno_name_input")), # pheno_name
     shiny::uiOutput(ns("med_type_input")),   # med_type
     shiny::uiOutput(ns("qtls_input")),       # qtls
     shiny::uiOutput(ns("pos_Mbp_input")))    # pos_Mbp

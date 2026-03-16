@@ -9,7 +9,7 @@
 \usage{
 scanDataApp()
 
-scanDataServer(id, hotspot_list, probs_obj, project_df)
+scanDataServer(id, hotspot_list, snp_list, probs_obj, project_df)
 
 scanDataInput(id)
 
@@ -18,7 +18,7 @@ scanDataOutput(id)
 \arguments{
 \item{id}{identifier for shiny reactive}
 
-\item{hotspot_list, probs_obj, project_df}{reactive arguments}
+\item{hotspot_list, snp_list, probs_obj, project_df}{reactive arguments}
 }
 \value{
 No return value; called for side effects.

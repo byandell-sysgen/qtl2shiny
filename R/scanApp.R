@@ -59,7 +59,7 @@ scanServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
-    scan_list <- scanDataServer("scan_list", hotspot_list, probs_obj, project_df)
+    scan_list <- scanDataServer("scan_list", hotspot_list, snp_list, probs_obj)
     gene_list <- snpGeneServer("snp_gene", snp_list, project_df)
 
     output$scan_input <- shiny::renderUI({
