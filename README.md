@@ -6,73 +6,58 @@ Yandell R/qtl2shiny project.
 
 * Code to create shiny interface for [R/qtl2](https://cran.r-project.org/package=qtl2).
 * Version 1.1 Guides:
-    + [R/qtl2shiny Screen Shots](http://pages.stat.wisc.edu/~yandell/software/qtl2shiny/screenshots.html)
-    + [R/qtl2shiny User Guide](https://github.com/byandell/qtl2shiny/blob/master/vignettes/UserGuide.Rmd)
-    + [R/qtl2shiny Developer Guide](https://github.com/byandell/qtl2shiny/blob/master/vignettes/DeveloperGuide.Rmd)
-    + [R/qtl2shiny Data Preparation](https://github.com/byandell/qtl2shiny/blob/master/vignettes/qtl2shinyData.Rmd)
+  * [R/qtl2shiny Screen Shots](http://pages.stat.wisc.edu/~yandell/software/qtl2shiny/screenshots.html)
+  * [R/qtl2shiny User Guide](https://github.com/byandell/qtl2shiny/blob/master/vignettes/UserGuide.Rmd)
+  * [R/qtl2shiny Developer Guide](https://github.com/byandell/qtl2shiny/blob/master/vignettes/DeveloperGuide.Rmd)
+  * [R/qtl2shiny Data Preparation](https://github.com/byandell/qtl2shiny/blob/master/vignettes/qtl2shinyData.Rmd)
 * Version 1.4 Guides:
-    + [Shiny Module Organization](https://github.com/byandell-sysgen/qtl2shiny/blob/master/inst/doc/module.md)
-    + [Workflow with Recla Data](https://github.com/byandell-sysgen/qtl2shiny/blob/master/inst/doc/Recla.md)
+  * [Shiny Module Organization](https://github.com/byandell-sysgen/qtl2shiny/blob/master/inst/doc/module.md)
+  * [Workflow with Recla Data](https://github.com/byandell-sysgen/qtl2shiny/blob/master/inst/doc/Recla.md)
 
 ### What has been done ###
 
-- created [Shiny](https://shiny.rstudio.com) interface for [R/qtl2](https://cran.r-project.org/package=qtl2) data
-    + handles multiple phenotypes and multiple projects
-    + creates plots and scans on the fly
-    + uses Shiny modules and dashboard
-- organized in package R/qtl2shiny
-- depends on related packages
-    + [R/qtl2](https://cran.r-project.org/package=qtl2)
-    + [R/qtl2ggplot2](https://cran.r-project.org/package=qtl2ggplot)
-    + [R/qtl2fst](https://cran.r-project.org/package=qtl2fst)
-    + [R/qtl2pattern](https://cran.r-project.org/package=qtl2pattern)
-    + [R/qtl2mediate](https://github.com/byandell/qtl2mediate)
-    + [R/intermediate](https://github.com/byandell/intermediate)
+* created [Shiny](https://shiny.rstudio.com) interface for [R/qtl2](https://cran.r-project.org/package=qtl2) data
+  * handles multiple phenotypes and multiple projects
+  * creates plots and scans on the fly
+  * uses Shiny modules and dashboard
+* organized in package R/qtl2shiny
+* depends on related packages
+  * [R/qtl2](https://cran.r-project.org/package=qtl2)
+  * [R/qtl2ggplot2](https://cran.r-project.org/package=qtl2ggplot)
+  * [R/qtl2fst](https://cran.r-project.org/package=qtl2fst)
+  * [R/qtl2pattern](https://cran.r-project.org/package=qtl2pattern)
+  * [R/qtl2mediate](https://github.com/byandell/qtl2mediate)
+  * [R/intermediate](https://github.com/byandell/intermediate)
 
 ### What are open development issues ###
 
 Major issues
 
-- speed up access
-- save intermediate calculations that are reused
-- make sure multiple taxa work smoothly
+* speed up access
+* save intermediate calculations that are reused
+* make sure multiple taxa work smoothly
 
 Minor issues
 
 * shiny
-    + reveal plots more (settings on sidebar? tabs?)
-    + user save settings for quick replay of shiny
+  * reveal plots more (settings on sidebar? tabs?)
+  * user save settings for quick replay of shiny
 * markdown
-    + flexdashboard for Rmd to create dynamic reports
-    + link Rmd and shiny documents
+  * flexdashboard for Rmd to create dynamic reports
+  * link Rmd and shiny documents
 * genes
-    + GeneRegion and GeneExon for multiple traits giving different results
-    + upgrade these to use `plot_genes`
+  * GeneRegion and GeneExon for multiple traits giving different results
+  * upgrade these to use `plot_genes`
 * scans
-    + multiple traits now use superset of covariates
-    + fixed for Scan1Plot; need to do same for Scan1SNP and possibly elsewhere
+  * multiple traits now use superset of covariates
+  * fixed for Scan1Plot; need to do same for Scan1SNP and possibly elsewhere
 * SNP/Gene Action
-    + panel appears not to work at all
+  * panel appears not to work at all
 * reset
-    + reset buttons when new dataset (i.e. to Genome Scan)
+  * reset buttons when new dataset (i.e. to Genome Scan)
 * winpar
-    + get `chr:pos` from winParApp for user selection
-    + better rationalize how this changes when classes change
-* scan_window
-    + in `scanDataApp.R` and `snpListApp.R`
-    + tied to `win_par$hotspot_code`
-    + useful for subset of window for most panels
-    + move to `hotspot_list`
-    + rethink `pheno_list` up to `hotspot_list`
-    + need to change dependencies on `snp_list$snp_par$scan_window` to `hotspot_list
-    
-* update of panels
-    + `qtl2shinyServer()` supplies `main_par` = `input` to `hotspotServer()`
-    + use `appProgress()` with global `qtldebug` to show messages
-    + `snpListServer()` runs `SNP Scan` too much
-    + do we need separate `snp_list` for `scan` and `pattern` panels?
-    + genoServer depends on `pattern_list$scan_pattern()` and seems broken
-and in particular on `blup` attribute
+  * get `chr:pos` from winParApp for user selection
+  * better rationalize how this changes when classes change
 
 ### Contribution guidelines ###
 
@@ -84,7 +69,7 @@ and in particular on `blup` attribute
 
 * [Brian Yandell](http://github.com/byandell)
 * [Karl Broman](http://github.com/kbroman)
-  + [R/qtl2](https://cran.r-project.org/package=qtl2)
+  * [R/qtl2](https://cran.r-project.org/package=qtl2)
 
 ### Installation
 
