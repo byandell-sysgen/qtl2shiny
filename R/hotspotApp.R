@@ -25,6 +25,7 @@ hotspotApp <- function() {
       width = 400
     ),
     downr::downloadInput("download"), # download inputs for Plot or Table
+    downr::downloadOutput("download"),
     hotspotOutput("hotspot_list")
   )
   server <- function(input, output, session) {

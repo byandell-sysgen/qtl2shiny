@@ -112,6 +112,7 @@ qtl2shinyUI <- function(id) {
           bslib::card(hotspotUI(ns("hotspot_list"))), # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400
         ),
+        downr::downloadOutput(ns("download")),
         hotspotOutput(ns("hotspot_list"))
       )
     ),
