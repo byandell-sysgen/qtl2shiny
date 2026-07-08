@@ -2,13 +2,18 @@
 
 ## Overview
 
-**qtl2shiny** is an R package providing an interactive Shiny web interface for QTL (Quantitative Trait Loci) fine mapping analysis using the R/qtl2 framework. It lets researchers interactively explore genome scans, SNP associations, genotype effects, mediation analysis, and hotspot detection across multiple phenotypes and experimental projects.
+**qtl2shiny** is an R package providing an interactive Shiny web interface for
+QTL (Quantitative Trait Loci) fine mapping analysis using the R/qtl2 framework.
+It lets researchers interactively explore genome scans, SNP associations,
+genotype effects, mediation analysis, and hotspot detection across
+multiple phenotypes and experimental projects.
 
 - **Version**: 1.5.9
 - **License**: GPL-3
 - **Maintainer**: Brian S. Yandell (brian.yandell@wisc.edu), UW-Madison
 - **Repo**: https://github.com/byandell-sysgen/qtl2shiny
-- **Install**: `pak::pak("byandell-sysgen/qtl2shiny")` (use `pak::pak()` for all GitHub installs; `devtools::install_github()` is deprecated)
+- **Install**: `pak::pak("byandell-sysgen/qtl2shiny")` (use `pak::pak()`
+for all GitHub installs; `devtools::install_github()` is deprecated)
 
 ---
 
@@ -41,7 +46,8 @@ man/                    # Roxygen2-generated documentation
 shiny::runApp("app.R")
 ```
 
-The app reads `qtl2shinyData/projects.csv` to discover available projects, then calls:
+The app reads `qtl2shinyData/projects.csv` to discover available projects,
+then calls:
 ```r
 ui     <- qtl2shinyUI("qtl2shiny")
 server <- function(input, output, session) {
@@ -98,8 +104,10 @@ All modules use `shiny::moduleServer()` with `NS()` namespacing.
 
 ### UI Framework
 
-- **bslib** (Bootstrap 5): `page_navbar()`, `page_sidebar()`, `nav_panel()`, `card()`, `layout_sidebar()`
-- Main panels: Hotspots & Phenotypes, Allele & SNP Scans, Patterns, Genotypes, Mediation
+- **bslib** (Bootstrap 5): `page_navbar()`, `page_sidebar()`, `nav_panel()`,
+`card()`, `layout_sidebar()`
+- Main panels: Hotspots & Phenotypes, Allele & SNP Scans, Patterns, Genotypes,
+Mediation
 
 ### Main Module Hierarchy
 
@@ -129,9 +137,15 @@ qtl2shinyApp
 
 ## Development Notes
 
-- **Docs for new contributors**: Start with `inst/doc/module.md` and `vignettes/DeveloperGuide.Rmd`
-- **Recent refactoring**: Sidebar inputs unified—phenotype and scan window selection consolidated into `snpListInput`; see `inst/doc/walkthrough.md`
-- **Hotspot S3 class**: `R/hotspot.R` defines `cbind`, `subset`, and `summary` methods
+- **Docs for new contributors**: Start with `inst/doc/module.md` and
+`vignettes/DeveloperGuide.Rmd`
+- **Recent refactoring**: Sidebar inputs unified—phenotype and
+scan window selection consolidated into `snpListInput`;
+see `inst/doc/walkthrough.md`
+- **Hotspot S3 class**: `R/hotspot.R` defines `cbind`, `subset`, and `summary`
+methods
 - **Phenotype transform**: `rankZ()` / `pheno_rankz()` for rank-Z normalization
-- **Known gaps**: mRNA integration incomplete; multi-taxa handling needs refinement; SNP/gene action panel needs rework
-- **downr reinstall**: If you see `lazy-load database ... downr.rdb is corrupt`, reinstall with `pak::pak("byandell/downr")`
+- **Known gaps**: mRNA integration incomplete; multi-taxa handling
+needs refinement; SNP/gene action panel needs rework
+- **downr reinstall**: If you see `lazy-load database ... downr.rdb is corrupt`,
+reinstall with `pak::pak("byandell/downr")`
