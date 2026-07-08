@@ -13,8 +13,7 @@
 #' @export
 #' @importFrom dplyr filter
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny moduleServer NS reactive renderUI req selectInput
-#'             setProgress tagList uiOutput withProgress
+#' @importFrom shiny moduleServer NS reactive renderUI req selectInput setProgress tagList uiOutput withProgress
 #' @importFrom ggplot2 autoplot
 #' @importFrom utils write.csv
 #' @importFrom rlang .data

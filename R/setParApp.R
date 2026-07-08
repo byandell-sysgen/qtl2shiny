@@ -9,8 +9,7 @@
 #' @export
 #' @importFrom dplyr distinct filter 
 #' @importFrom tidyr unite
-#' @importFrom shiny moduleServer NS observeEvent reactive renderText
-#'             renderUI req selectInput tagList uiOutput updateSelectInput
+#' @importFrom shiny moduleServer NS observeEvent reactive renderText renderUI req selectInput tagList uiOutput updateSelectInput
 #' @importFrom bslib layout_columns page_sidebar sidebar
 setParApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)

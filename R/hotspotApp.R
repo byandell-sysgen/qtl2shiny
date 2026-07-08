@@ -10,9 +10,7 @@
 #'
 #' @export
 #' @importFrom dplyr filter
-#' @importFrom shiny checkboxInput isTruthy moduleServer NS
-#'             observeEvent radioButtons reactive renderText renderUI req
-#'             strong tagList textOutput uiOutput
+#' @importFrom shiny checkboxInput isTruthy moduleServer NS observeEvent radioButtons reactive renderText renderUI req strong tagList textOutput uiOutput
 #' @importFrom bslib card page_sidebar sidebar
 #' @importFrom downr downloadServer downloadInput
 hotspotApp <- function() {

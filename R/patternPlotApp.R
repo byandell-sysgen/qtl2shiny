@@ -11,8 +11,7 @@
 #' @export
 #' 
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny moduleServer NS observeEvent plotOutput reactive renderPlot
-#'             renderUI req setProgress uiOutput withProgress
+#' @importFrom shiny moduleServer NS observeEvent plotOutput reactive renderPlot renderUI req setProgress uiOutput withProgress
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
 patternPlotApp <- function() {

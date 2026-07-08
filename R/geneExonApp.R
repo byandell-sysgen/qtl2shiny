@@ -14,11 +14,9 @@
 #' @importFrom dplyr filter
 #' @importFrom ggplot2 autoplot ggtitle
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny moduleServer NS plotOutput reactive renderPlot renderUI req
-#'             selectInput setProgress uiOutput updateSelectInput withProgress
+#' @importFrom shiny moduleServer NS plotOutput reactive renderPlot renderUI req selectInput setProgress uiOutput updateSelectInput withProgress
 #' @importFrom rlang .data
-#' @importFrom bslib card layout_sidebar navset_tab nav_panel
-#'             page_navbar sidebar
+#' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
 geneExonApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(

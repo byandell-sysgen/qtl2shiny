@@ -39,8 +39,7 @@
 #' @export
 #'
 #' @importFrom purrr map transpose
-#' @importFrom dplyr arrange bind_rows bind_cols bind_rows distinct everything
-#'             filter group_by mutate one_of select summarize ungroup
+#' @importFrom dplyr arrange bind_rows bind_cols bind_rows distinct everything filter group_by mutate one_of select summarize ungroup
 #' @importFrom rlang .data
 #' @importFrom qtl2ggplot summary_scan1
 hotspot <- function(map, peak_df, peak_window = 1, minLOD = 5.5,

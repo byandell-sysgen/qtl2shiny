@@ -11,10 +11,8 @@
 #' @return tbl with top SNPs
 #'
 #' @export
-#' @importFrom shiny column fluidRow moduleServer NS reactive
-#'             renderUI req tagList uiOutput
-#' @importFrom bslib card layout_sidebar navset_tab nav_panel
-#'             page_navbar sidebar
+#' @importFrom shiny column fluidRow moduleServer NS reactive renderUI req tagList uiOutput
+#' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
 snpGeneApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(

@@ -3,11 +3,7 @@
 #' @param id identifier for shiny reactive
 #' @param download_list reactiveValues object
 #'
-#' @importFrom shiny actionButton br checkboxInput div downloadButton
-#'             downloadHandler h4 isTruthy moduleServer NS numericInput
-#'             observeEvent reactive reactiveVal reactiveValues renderPlot
-#'             renderUI req selectInput shinyApp tagList textAreaInput textInput
-#'             uiOutput updateNumericInput
+#' @importFrom shiny actionButton br checkboxInput div downloadButton downloadHandler h4 isTruthy moduleServer NS numericInput observeEvent reactive reactiveVal reactiveValues renderPlot renderUI req selectInput shinyApp tagList textAreaInput textInput uiOutput updateNumericInput
 #' @importFrom bslib card card_header page_sidebar sidebar
 #' @importFrom utils write.csv    
 #' @importFrom ggplot2 ggsave

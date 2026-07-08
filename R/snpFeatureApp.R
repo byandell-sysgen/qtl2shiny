@@ -9,13 +9,10 @@
 #' @export
 #' @importFrom ggplot2 autoplot
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny column fluidRow moduleServer
-#'             NS plotOutput reactive renderPlot renderUI req selectInput
-#'             setProgress tagList uiOutput withProgress
+#' @importFrom shiny column fluidRow moduleServer NS plotOutput reactive renderPlot renderUI req selectInput setProgress tagList uiOutput withProgress
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf   
-#' @importFrom bslib card layout_sidebar navset_tab nav_hide nav_panel
-#'             nav_select nav_show page_navbar sidebar
+#' @importFrom bslib card layout_sidebar navset_tab nav_hide nav_panel nav_select nav_show page_navbar sidebar
 snpFeatureApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(

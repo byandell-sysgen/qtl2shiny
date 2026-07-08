@@ -12,10 +12,7 @@
 #' @importFrom qtl2 find_marker
 #' @importFrom qtl2mediate expr_region mediation_test_qtl2
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny isolate isTruthy moduleServer NS observeEvent
-#'             radioButtons reactive renderUI req selectInput
-#'             setProgress sliderInput strong tagList uiOutput updateSelectInput
-#'             updateSliderInput withProgress
+#' @importFrom shiny isolate isTruthy moduleServer NS observeEvent radioButtons reactive renderUI req selectInput setProgress sliderInput strong tagList uiOutput updateSelectInput updateSliderInput withProgress
 #' @importFrom dplyr filter
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar

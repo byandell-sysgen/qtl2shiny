@@ -13,13 +13,10 @@
 #' @export
 #' @importFrom ggplot2 autoplot ggtitle
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny checkboxInput column
-#'             fluidRow isTruthy moduleServer NS plotOutput reactive renderPlot
-#'             renderUI req setProgress tagList uiOutput withProgress
+#' @importFrom shiny checkboxInput column fluidRow isTruthy moduleServer NS plotOutput reactive renderPlot renderUI req setProgress tagList uiOutput withProgress
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
-#' @importFrom bslib card layout_sidebar navset_tab nav_panel
-#'             page_navbar sidebar
+#' @importFrom bslib card layout_sidebar navset_tab nav_panel page_navbar sidebar
 geneRegionApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(

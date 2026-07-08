@@ -10,8 +10,7 @@
 #'
 #' @export
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny moduleServer NS plotOutput reactive renderPlot renderUI req
-#'             setProgress sliderInput uiOutput updateSliderInput withProgress
+#' @importFrom shiny moduleServer NS plotOutput reactive renderPlot renderUI req setProgress sliderInput uiOutput updateSliderInput withProgress
 #' @importFrom ggplot2 autoplot ggtitle
 #' @importFrom dplyr mutate select
 #' @importFrom tidyr pivot_wider

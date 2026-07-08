@@ -11,13 +11,9 @@
 #' @importFrom dplyr across distinct mutate where
 #' @importFrom qtl2pattern sdp_to_pattern
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny column fluidRow moduleServer
-#'             NS plotOutput reactive renderPlot renderUI req
-#'             selectInput setProgress strong tagList uiOutput
-#'             withProgress
+#' @importFrom shiny column fluidRow moduleServer NS plotOutput reactive renderPlot renderUI req selectInput setProgress strong tagList uiOutput withProgress
 #' @importFrom rlang .data
-#' @importFrom bslib card layout_sidebar navset_tab nav_hide nav_panel
-#'             nav_select nav_show page_navbar sidebar
+#' @importFrom bslib card layout_sidebar navset_tab nav_hide nav_panel nav_select nav_show page_navbar sidebar
 snpPatternApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(

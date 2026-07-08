@@ -12,9 +12,7 @@
 #' @importFrom dplyr arrange desc filter mutate
 #' @importFrom qtl2pattern gene_exon top_snps_pattern snpprob_collapse
 #' @importFrom qtl2mediate scan1covar covar_matrix which_covar
-#' @importFrom shiny isolate isTruthy moduleServer NS numericInput reactive
-#'             renderUI req selectInput setProgress sliderInput tagList uiOutput
-#'             withProgress
+#' @importFrom shiny isolate isTruthy moduleServer NS numericInput reactive renderUI req selectInput setProgress sliderInput tagList uiOutput withProgress
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar

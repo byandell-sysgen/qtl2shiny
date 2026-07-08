@@ -13,9 +13,7 @@
 #' @importFrom rlang .data
 #' @importFrom ggplot2 autoplot
 #' @importFrom qtl2mediate mediation_triad_qtl2
-#' @importFrom shiny isolate isTruthy
-#'             moduleServer NS plotOutput reactive renderPlot renderUI req
-#'             selectInput setProgress tagList uiOutput withProgress
+#' @importFrom shiny isolate isTruthy moduleServer NS plotOutput reactive renderPlot renderUI req selectInput setProgress tagList uiOutput withProgress
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #

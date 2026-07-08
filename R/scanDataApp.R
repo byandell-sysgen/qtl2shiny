@@ -14,13 +14,8 @@
 #' @importFrom qtl2mediate scan1covar
 #' @importFrom ggplot2 autoplot
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny checkboxInput column
-#'             fluidRow isTruthy moduleServer NS plotOutput
-#'             reactive renderPlot renderUI req selectInput setProgress
-#'             sliderInput strong tagList uiOutput updateSliderInput
-#'             withProgress
-#' @importFrom bslib card layout_sidebar navbar_options navset_tab nav_panel
-#'             page_navbar sidebar
+#' @importFrom shiny checkboxInput column fluidRow isTruthy moduleServer NS plotOutput reactive renderPlot renderUI req selectInput setProgress sliderInput strong tagList uiOutput updateSliderInput withProgress
+#' @importFrom bslib card layout_sidebar navbar_options navset_tab nav_panel page_navbar sidebar
 #' @importFrom downr downloadServer downloadInput
 scanDataApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)

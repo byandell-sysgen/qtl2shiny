@@ -13,8 +13,7 @@
 #'
 #' @export
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny moduleServer NS plotOutput renderPlot renderUI req
-#'             setProgress tagList uiOutput withProgress
+#' @importFrom shiny moduleServer NS plotOutput renderPlot renderUI req setProgress tagList uiOutput withProgress
 #' @importFrom bslib card layout_columns page_sidebar sidebar
 phenoDataApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)

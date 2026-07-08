@@ -1,8 +1,8 @@
 Package: qtl2shiny
 Type: Package
 Title: Shiny interface for 'qtl2' Fine Mapping
-Version: 1.5.8
-Date: 2026-03-16
+Version: 1.5.9
+Date: 2026-07-08
 Authors@R: c(person("Brian S Yandell", "Author",
                 role = c("aut", "cre"),
                 email = "brian.yandell@wisc.edu"))
@@ -15,5 +15,5 @@ Imports:
 Suggests:
     igraph, knitr, qtl2fst, readr, rmarkdown
 VignetteBuilder: knitr
-RoxygenNote: 7.3.3
 Encoding: UTF-8
+Config/roxygen2/version: 8.0.0

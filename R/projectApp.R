@@ -11,8 +11,7 @@
 #' @return No return value; called for side effects.
 #'
 #' @export
-#' @importFrom shiny isTruthy moduleServer NS renderTable renderUI selectInput
-#'             tableOutput tagList uiOutput
+#' @importFrom shiny isTruthy moduleServer NS renderTable renderUI selectInput tableOutput tagList uiOutput
 #' @importFrom dplyr distinct filter
 #' @importFrom rlang .data
 #' @importFrom bslib page

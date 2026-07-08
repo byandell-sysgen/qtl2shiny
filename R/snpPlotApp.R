@@ -7,8 +7,7 @@
 #' @keywords utilities
 #'
 #' @export
-#' @importFrom shiny isTruthy moduleServer NS
-#'             plotOutput reactive renderPlot req setProgress withProgress
+#' @importFrom shiny isTruthy moduleServer NS plotOutput reactive renderPlot req setProgress withProgress
 #' @importFrom bslib card layout_sidebar nav_panel page_navbar sidebar
 snpPlotApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)

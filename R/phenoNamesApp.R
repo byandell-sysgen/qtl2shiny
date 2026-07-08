@@ -10,8 +10,7 @@
 #'
 #' @export
 #' @importFrom dplyr arrange desc filter select
-#' @importFrom shiny moduleServer NS observeEvent reactive renderText req
-#'             selectizeInput tagList uiOutput updateSelectizeInput
+#' @importFrom shiny moduleServer NS observeEvent reactive renderText req selectizeInput tagList uiOutput updateSelectizeInput
 #' @importFrom rlang .data
 #' @importFrom bslib card layout_columns page_sidebar sidebar
 phenoNamesApp <- function() {

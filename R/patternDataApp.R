@@ -15,10 +15,7 @@
 #' @importFrom qtl2pattern scan1pattern sdp_to_pattern
 #' @importFrom dplyr across filter mutate where
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny checkboxInput column
-#'             fluidRow moduleServer NS observeEvent plotOutput radioButtons
-#'             reactive renderPlot renderUI req selectInput tagList uiOutput
-#'             updateSelectInput
+#' @importFrom shiny checkboxInput column fluidRow moduleServer NS observeEvent plotOutput radioButtons reactive renderPlot renderUI req selectInput tagList uiOutput updateSelectInput
 #' @importFrom grDevices dev.off pdf
 #' @importFrom utils write.csv
 #' @importFrom rlang .data

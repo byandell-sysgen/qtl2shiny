@@ -13,11 +13,7 @@
 #' @importFrom qtl2mediate expr_region mediation_test_qtl2
 #' @importFrom ggplot2 autoplot geom_point
 #' @importFrom DT dataTableOutput renderDataTable
-#' @importFrom shiny checkboxInput 
-#'             isolate isTruthy moduleServer NS observeEvent plotOutput
-#'             radioButtons reactive renderPlot renderUI req selectInput
-#'             setProgress sliderInput strong tagList uiOutput updateSelectInput
-#'             updateSliderInput withProgress
+#' @importFrom shiny checkboxInput isolate isTruthy moduleServer NS observeEvent plotOutput radioButtons reactive renderPlot renderUI req selectInput setProgress sliderInput strong tagList uiOutput updateSelectInput updateSliderInput withProgress
 #' @importFrom plotly renderPlotly plotlyOutput
 #' @importFrom dplyr filter
 #' @importFrom utils write.csv

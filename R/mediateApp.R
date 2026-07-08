@@ -11,10 +11,8 @@
 #' @return No return value; called for side effects.
 #'
 #' @export
-#' @importFrom shiny mainPanel moduleServer NS radioButtons renderText renderUI
-#'             req sidebarPanel strong tagList textOutput uiOutput
-#' @importFrom bslib card layout_sidebar navbar_options navset_tab nav_panel
-#'             page_navbar sidebar
+#' @importFrom shiny mainPanel moduleServer NS radioButtons renderText renderUI req sidebarPanel strong tagList textOutput uiOutput
+#' @importFrom bslib card layout_sidebar navbar_options navset_tab nav_panel page_navbar sidebar
 mediateApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(

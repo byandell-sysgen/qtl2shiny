@@ -9,9 +9,7 @@
 #' @return No return value; called for side effects.
 #'
 #' @export
-#' @importFrom shiny mainPanel moduleServer NS radioButtons reactive renderText
-#'             renderUI req selectInput sidebarPanel strong tagList textOutput
-#'             uiOutput
+#' @importFrom shiny mainPanel moduleServer NS radioButtons reactive renderText renderUI req selectInput sidebarPanel strong tagList textOutput uiOutput
 dipParApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_sidebar(
