@@ -176,11 +176,13 @@ mediateDataServer <- function(id, hotspot_list, snp_list, probs_obj, project_df)
     })
     ## Reset pos_Mbp if chromosome changes.
     observeEvent(chr_id(), {
-      map <- shiny::req(probs_obj()$map)
-      rng <- round(2 * range(map[[chr_id()]])) / 2
-      shiny::updateSliderInput(session, "pos_Mbp", NULL, 
-                               req(peak_Mbp()), 
-                               rng[1], rng[2], step=.1)
+      if (shiny::isTruthy(input$pos_Mbp)) {
+        map <- shiny::req(probs_obj()$map)
+        rng <- round(2 * range(map[[chr_id()]])) / 2
+        shiny::updateSliderInput(session, "pos_Mbp", NULL, 
+                                 req(peak_Mbp()), 
+                                 rng[1], rng[2], step=.1)
+      }
     })
     output$qtls_input <- shiny::renderUI({
       if(is.null(selected <- input$qtls))

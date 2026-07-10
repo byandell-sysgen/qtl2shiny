@@ -131,6 +131,9 @@ patternDataServer <- function(id, dip_par, hotspot_list, snp_list,
     shiny::observeEvent(patterns(), update_patterns())
     shiny::observeEvent(pheno_name(), update_patterns())
     update_patterns <- function() {
+      if (!shiny::isTruthy(patterns()) || !shiny::isTruthy(pheno_name())) {
+        return(NULL)
+      }
       pattern_pheno <-
         dplyr::filter(patterns(), .data$pheno == pheno_name())
       if (nrow(pattern_pheno)) {
@@ -151,12 +154,14 @@ patternDataServer <- function(id, dip_par, hotspot_list, snp_list,
 
     # Pattern scan
     pattern_pheno <- shiny::reactive({
+      message("=== PP1: pattern_pheno start ===")
       pull_patterns(
         shiny::req(patterns()),
         colnames(shiny::req(hotspot_list$pheno_mx()))
       )
     })
     scan_pattern <- shiny::reactive({
+      message("=== S1: scan_pattern start ===")
       if(!match_main_par(hotspot_list, "panel", "pattern")) return(NULL)
       shiny::req(snp_action())
       phename <- shiny::req(pheno_name())
@@ -165,6 +170,7 @@ patternDataServer <- function(id, dip_par, hotspot_list, snp_list,
         pairprobs_obj(), hotspot_list$kinship_list(),
         hotspot_list$peak_df(), pattern_pheno()
       )
+      message("=== S2: scan_pattern reqs passed ===")
       appProgress("Scan Patterns", phename, {
         setProgress(1)
         scan1_pattern(

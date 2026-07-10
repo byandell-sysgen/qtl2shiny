@@ -71,26 +71,35 @@ snpListServer <- function(id, hotspot_list, project_df,
     snpprobs_obj <-
       snpProbsServer("snp_probs", win_par, pheno_names, project_df)
     snpinfo <- shiny::reactive({
-      message("snpinfo")
-      shiny::req(project_df(), hotspot_list$pheno_mx())
-      shiny::req(snpprobs_obj())$snpinfo
+      message("=== SI1: snpinfo start ===")
+      if (!shiny::isTruthy(project_df()) || 
+          !shiny::isTruthy(hotspot_list$pheno_mx()) || 
+          !shiny::isTruthy(win_par()) || 
+          !shiny::isTruthy(snpprobs_obj())) {
+        return(NULL)
+      }
+      message("=== SI2: snpinfo reqs passed ===")
+      snpprobs_obj()$snpinfo
     })
 
     ## SNP Scan.
     snp_scan_obj <- shiny::reactive({
-      message(paste("snpList snp_action", snp_action()))
-      shiny::req(
-        snpprobs_obj(), hotspot_list$pheno_mx(),
-        hotspot_list$peak_df(), hotspot_list$covar_df(), snp_action()
-      )
-      message(paste("panel", hotspot_list$main_par$panel))
+      message("=== SS1: snp_scan_obj start ===")
       if (!match_main_par(hotspot_list, "panel", c("scan", "pattern", "geno"))) {
         return(NULL)
       }
-      kinship_list <- shiny::req(hotspot_list$kinship_list())[
-        shiny::req(win_par())$chr_id
-      ]
+      if (!shiny::isTruthy(win_par()$chr_id) || 
+          !shiny::isTruthy(hotspot_list$kinship_list()) || 
+          !shiny::isTruthy(snpprobs_obj()) || 
+          !shiny::isTruthy(hotspot_list$pheno_mx()) || 
+          !shiny::isTruthy(hotspot_list$peak_df()) || 
+          !shiny::isTruthy(hotspot_list$covar_df()) || 
+          !shiny::isTruthy(snp_action())) {
+        return(NULL)
+      }
+      kinship_list <- hotspot_list$kinship_list()[win_par()$chr_id]
       snpprobs <- snpprobs_obj()$snpprobs
+      message("=== SS2: snp_scan_obj reqs passed ===")
       appProgress(
         "SNP Scan",
         paste(
@@ -111,8 +120,12 @@ snpListServer <- function(id, hotspot_list, project_df,
     })
     ## Top SNPs table.
     top_snps_tbl <- shiny::reactive({
-      shiny::req(snp_action(), snpinfo())
-      drop_hilit <- max(unclass(shiny::req(snp_scan_obj()))) -
+      message("=== T1: top_snps_tbl start ===")
+      if (!shiny::isTruthy(snp_action()) || !shiny::isTruthy(snpinfo()) || !shiny::isTruthy(snp_scan_obj())) {
+        return(NULL)
+      }
+      message("=== T2: top_snps_tbl reqs passed ===")
+      drop_hilit <- max(unclass(snp_scan_obj())) -
         minLOD()
       shiny::withProgress(message = "Get Top SNPs ...", value = 0, {
         shiny::setProgress(1)
@@ -140,23 +153,31 @@ snpListServer <- function(id, hotspot_list, project_df,
         input$minLOD
       } else {
         if (shiny::isTruthy(snp_scan_obj())) {
-          max(3, round(max(unclass(shiny::req(snp_scan_obj()))), 1) - 1.5)
+          max(3, round(max(unclass(snp_scan_obj())), 1) - 1.5)
         } else {
           3
         }
       }
     })
     output$minLOD_input <- shiny::renderUI({
-      shiny::numericInput(ns("minLOD"), "LOD threshold", shiny::req(minLOD()),
+      if (!shiny::isTruthy(minLOD())) {
+        return(NULL)
+      }
+      shiny::numericInput(ns("minLOD"), "LOD threshold", minLOD(),
         min = 0, step = 0.5
       )
     })
     # Scan Window slider
     output$scan_window_input <- shiny::renderUI({
-      shiny::req(pheno_names())
+      if (!shiny::isTruthy(pheno_names()) || 
+          !shiny::isTruthy(win_par()) || 
+          !shiny::isTruthy(win_par()$peak_Mbp) || 
+          !shiny::isTruthy(win_par()$window_Mbp)) {
+        return(NULL)
+      }
       rng <- round(
-        shiny::req(win_par()$peak_Mbp) +
-          c(-1, 1) * shiny::req(win_par()$window_Mbp),
+        win_par()$peak_Mbp +
+          c(-1, 1) * win_par()$window_Mbp,
         1
       )
       selected <- select_range(input$scan_window, rng)
@@ -167,9 +188,11 @@ snpListServer <- function(id, hotspot_list, project_df,
     })
     ## Select phenotype for plots.
     output$pheno_name_input <- shiny::renderUI({
-      shiny::req(pheno_names())
+      if (!shiny::isTruthy(pheno_names())) {
+        return(NULL)
+      }
       shiny::selectInput(ns("pheno_name"), "Phenotype",
-        choices = shiny::req(pheno_names()),
+        choices = pheno_names(),
         selected = input$pheno_name
       )
     })
@@ -187,10 +210,13 @@ snpListServer <- function(id, hotspot_list, project_df,
 
     # `patterns` for return
     patterns <- shiny::reactive({
+      message("=== PT1: patterns start ===")
       if (shiny::isTruthy(snp_action()) &&
         shiny::isTruthy(top_snps_tbl())) {
+        message("=== PT2: patterns reqs passed ===")
         top_patterns(top_snps_tbl(), snp_action())
       } else {
+        message("=== PT3: patterns NULL returned ===")
         NULL
       }
     })

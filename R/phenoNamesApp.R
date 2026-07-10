@@ -70,21 +70,25 @@ phenoNamesServer <- function(id, set_par, peak_df, pheno_mx, covar_df,
       shiny::selectizeInput(ns("pheno_name"), "", choices = "", multiple = FALSE)
     })
     shiny::observeEvent(shiny::req(project_df(), peak_df()), {
-      out <- select_phenames(shiny::req(peak_df()))
-      if(!is.null(out)) {
-        shiny::updateSelectizeInput(session, "pheno_name", out$label,
-          choices = out$choices, selected = out$selected, server = TRUE)
-      }
-    })
-    shiny::observeEvent(set_par$class, {
-      if(!shiny::isTruthy(set_par$class)) {
-        shiny::updateSelectizeInput(session, "pheno_name",
-          choices = NULL, selected = NULL, server = TRUE)
-      } else {
+      if (shiny::isTruthy(input$pheno_name)) {
         out <- select_phenames(shiny::req(peak_df()))
         if(!is.null(out)) {
           shiny::updateSelectizeInput(session, "pheno_name", out$label,
-                                      choices = out$choices, selected = out$selected, server = TRUE)
+            choices = out$choices, selected = out$selected, server = TRUE)
+        }
+      }
+    })
+    shiny::observeEvent(set_par$class, {
+      if (shiny::isTruthy(input$pheno_name)) {
+        if(!shiny::isTruthy(set_par$class)) {
+          shiny::updateSelectizeInput(session, "pheno_name",
+            choices = NULL, selected = NULL, server = TRUE)
+        } else {
+          out <- select_phenames(shiny::req(peak_df()))
+          if(!is.null(out)) {
+            shiny::updateSelectizeInput(session, "pheno_name", out$label,
+                                        choices = out$choices, selected = out$selected, server = TRUE)
+          }
         }
       }
     }, ignoreNULL = FALSE)
@@ -96,12 +100,14 @@ phenoNamesServer <- function(id, set_par, peak_df, pheno_mx, covar_df,
     # Use correlation of residuals after covariates.
     shiny::observeEvent(shiny::req(project_df(), peak_df(), pheno_mx(),
                                    covar_df(), input$pheno_name), {
-      out <- select_phenames(peak_df(), input$pheno_name,
-                             shiny::req(pheno_mx()),
-                             cor_covar = TRUE, shiny::req(covar_df()))
-      if(!is.null(out)) {
-        shiny::updateSelectizeInput(session, "pheno_names", out$label,
-          choices = out$choices, selected = out$selected, server = TRUE)
+      if (shiny::isTruthy(input$pheno_names)) {
+        out <- select_phenames(peak_df(), input$pheno_name,
+                               shiny::req(pheno_mx()),
+                               cor_covar = TRUE, shiny::req(covar_df()))
+        if(!is.null(out)) {
+          shiny::updateSelectizeInput(session, "pheno_names", out$label,
+            choices = out$choices, selected = out$selected, server = TRUE)
+        }
       }
     })
     output$pheno_names_output <- shiny::renderUI({

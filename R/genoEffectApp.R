@@ -20,13 +20,22 @@ genoEffectApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
     title =  "Test Geno Panel",
+    id = "panel",
+    sidebar = bslib::sidebar(
+      projectUI("project_df"),          # project
+      hotspotInput("hotspot_list"),     # class, subject_model, pheno_names, hotspot
+      "SNP Settings",
+      patternDataInput("pattern_list"), # button, blups, pheno_name
+      patternDataUI("pattern_list"),    # pattern
+      dipParInput("dip_par"),          # snp_action
+      snpListInput("snp_list"),        # scan_window, minLOD, pheno_name
+      dipParUI("dip_par"),             # allele_names
+      gap = 0
+    ),
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          bslib::card(
-            projectUI("project_df"),          # project
-            hotspotInput("hotspot_list")),    # class, subject_model, pheno_names, hotspot
           bslib::card(
             hotspotUI("hotspot_list")),       # window_Mbp, radio, win_par, chr_ct, minLOD
           width = 400),
@@ -34,27 +43,14 @@ genoEffectApp <- function() {
     ),
     bslib::nav_panel(
       title = "Genotypes",
-      bslib::layout_sidebar(
-        sidebar = bslib::sidebar(
-          bslib::card(
-            patternDataInput("pattern_list"), # button, blups, pheno_name
-            patternDataUI("pattern_list")),   # pattern
-          bslib::card(
-            dipParInput("dip_par")),          # snp_action
-          bslib::card(
-            snpListInput("snp_list")),        # scan_window, minLOD, pheno_name
-          bslib::card(
-            dipParUI("dip_par")),             # allele_names
-          width = 400),
-        bslib::card(genoDataInput("geno_list"),
-                    min_height = "100px"),    # pos_Mbp
-        bslib::navset_tab(
-          id = "pat_tab",
-          bslib::nav_panel("Plot",
-            genoEffectOutput("geno_effect")), # geno_effect_plot
-          bslib::nav_panel("Summary",
-            genoEffectUI("geno_effect")))     # geno_effect_table
-      )
+      bslib::card(genoDataInput("geno_list"),
+                  min_height = "100px"),    # pos_Mbp
+      bslib::navset_tab(
+        id = "pat_tab",
+        bslib::nav_panel("Plot",
+          genoEffectOutput("geno_effect")), # geno_effect_plot
+        bslib::nav_panel("Summary",
+          genoEffectUI("geno_effect")))     # geno_effect_table
     )
   )
   server <- function(input, output, session) {
@@ -86,7 +82,7 @@ genoEffectServer <- function(id, hotspot_list, pattern_list, snp_list,
     snp_action <- shiny::isolate(snp_list$snp_action)
     chr_id <- shiny::reactive(shiny::req(win_par())$chr_id)
     peak_Mbp <- shiny::reactive(shiny::req(win_par())$peak_Mbp)
-    gen_par <- shiny::isolate(geno_list$gen_par)
+    pos_Mbp <- geno_list$pos_Mbp
 
     ## Coefficient Effects.
     effect_obj <- shiny::reactive({
@@ -108,12 +104,24 @@ genoEffectServer <- function(id, hotspot_list, pattern_list, snp_list,
       })
     })
     geno_effect_plot <- shiny::reactive({
-      if(!shiny::isTruthy(patterns()) || !shiny::isTruthy(effect_obj()))
+      if(!shiny::isTruthy(patterns()) || 
+         !shiny::isTruthy(snp_action()) || 
+         !shiny::isTruthy(project_df()) || 
+         !shiny::isTruthy(pairprobs_obj()) || 
+         !shiny::isTruthy(hotspot_list$kinship_list()) || 
+         !shiny::isTruthy(hotspot_list$covar_df()) || 
+         !shiny::isTruthy(hotspot_list$peak_df()) || 
+         !shiny::isTruthy(pattern_list$scan_pattern()) ||
+         !shiny::isTruthy(pos_Mbp())) {
         return(plot_null("Visit Patterns Panel First"))
-      shiny::req(effect_obj(), gen_par$pos_Mbp)
+      }
+      eff <- effect_obj()
+      if(!shiny::isTruthy(eff))
+        return(plot_null("Visit Patterns Panel First"))
+
       appProgress('Allele plots', "", {
         shiny::setProgress(1)
-        p <- ggplot2::autoplot(effect_obj(), pos = gen_par$pos_Mbp)
+        p <- ggplot2::autoplot(eff, pos = pos_Mbp())
         if(is.null(p)) {
           plot_null("Visit Patterns Panel First")
         } else {
@@ -125,10 +133,24 @@ genoEffectServer <- function(id, hotspot_list, pattern_list, snp_list,
       print(shiny::req(geno_effect_plot())))
     
     geno_effect_table <- shiny::reactive({
-      shiny::req(effect_obj(), gen_par$pos_Mbp)
+      if(!shiny::isTruthy(patterns()) || 
+         !shiny::isTruthy(snp_action()) || 
+         !shiny::isTruthy(project_df()) || 
+         !shiny::isTruthy(pairprobs_obj()) || 
+         !shiny::isTruthy(hotspot_list$kinship_list()) || 
+         !shiny::isTruthy(hotspot_list$covar_df()) || 
+         !shiny::isTruthy(hotspot_list$peak_df()) || 
+         !shiny::isTruthy(pattern_list$scan_pattern()) ||
+         !shiny::isTruthy(pos_Mbp())) {
+        return(NULL)
+      }
+      eff <- effect_obj()
+      if(!shiny::isTruthy(eff))
+        return(NULL)
+
       shiny::withProgress(message = 'Effect summary ...', value = 0, {
         shiny::setProgress(1)
-        effect_summary(effect_obj(), pos = gen_par$pos_Mbp)
+        effect_summary(eff, pos = pos_Mbp())
       })
     })
     output$geno_effect_table_output <- DT::renderDataTable(

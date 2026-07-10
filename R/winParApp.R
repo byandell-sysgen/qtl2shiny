@@ -56,17 +56,19 @@ winParServer <- function(id, hotspot_df, project_df) {
     ns <- session$ns
     
     shiny::observeEvent(project_df(), {
-      choices <- shiny::req(hotspot_df())$hotspot
-      shiny::updateSelectInput(session, "hotspot",
-                               choices = choices,
-                               selected = NULL)
+      if (shiny::isTruthy(input$hotspot_code)) {
+        choices <- shiny::req(hotspot_df())$hotspot
+        shiny::updateSelectInput(session, "hotspot_code",
+                                 choices = choices,
+                                 selected = NULL)
+      }
     })
 
     # Select chromosome. Defaults to blank.
     output$hotspot_code_input <- shiny::renderUI({
       shiny::req(project_df())
       choices <- shiny::req(hotspot_df())$hotspot
-      selected <- input$hotspot
+      selected <- input$hotspot_code
       if(!shiny::isTruthy(selected))
         selected <- choices[1]
       shiny::selectInput(ns("hotspot_code"), "hotspot",

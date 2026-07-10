@@ -88,14 +88,16 @@ genoDataServer <- function(id, hotspot_list, snp_list, pairprobs_obj, project_df
     })
     ## Reset pos_Mbp if chromosome changes.
     observeEvent(shiny::req(win_par()), {
-      map <- shiny::req(pairprobs_obj()$map)
-      chr <- shiny::req(chr_id())
-      rng <- round(2 * range(map[[chr]])) / 2
-      value <- shiny::req(peak_Mbp())
-      if(value < rng[1] | value > rng[2]) value <- mean(rng)
-      shiny::updateSliderInput(session, "pos_Mbp", NULL, 
-                               value, 
-                               rng[1], rng[2], step=.1)
+      if (shiny::isTruthy(input$pos_Mbp)) {
+        map <- shiny::req(pairprobs_obj()$map)
+        chr <- shiny::req(chr_id())
+        rng <- round(2 * range(map[[chr]])) / 2
+        value <- shiny::req(peak_Mbp())
+        if(value < rng[1] | value > rng[2]) value <- mean(rng)
+        shiny::updateSliderInput(session, "pos_Mbp", NULL, 
+                                 value, 
+                                 rng[1], rng[2], step=.1)
+      }
     })
     
     ## Genotypes
@@ -111,8 +113,8 @@ genoDataServer <- function(id, hotspot_list, snp_list, pairprobs_obj, project_df
       escape = FALSE, options = list(scrollX = TRUE, pageLength = 5))
     
     # Return.
-    shiny::reactiveValues(
-      gen_par = input,
+    list(
+      pos_Mbp = shiny::reactive(input$pos_Mbp),
       Table = geno_table)
   })
 }

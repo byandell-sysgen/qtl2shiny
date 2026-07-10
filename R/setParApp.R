@@ -43,9 +43,11 @@ setParServer <- function(id, project_df) {
         choices = as.list(choices), selected = selected, multiple = TRUE)
     })
     shiny::observeEvent(shiny::req(project_df()), {
-      choices <- project_classes(project_df())
-      shiny::updateSelectInput(session, "class",
-        choices = choices, selected = choices[1])
+      if (shiny::isTruthy(input$class)) {
+        choices <- project_classes(project_df())
+        shiny::updateSelectInput(session, "class",
+          choices = choices, selected = choices[1])
+      }
     })
     project_subjmod <- shiny::reactive({
       project_subject_model(shiny::req(project_df()), shiny::req(input$class))
@@ -58,9 +60,11 @@ setParServer <- function(id, project_df) {
         choices = choices, selected = selected, multiple = TRUE)
     })
     shiny::observeEvent(shiny::req(project_subjmod()), {
-      choices <- project_subjmod()
-      shiny::updateSelectInput(session, "subject_model",
-        choices = choices, selected = choices[1])
+      if (shiny::isTruthy(input$subject_model)) {
+        choices <- project_subjmod()
+        shiny::updateSelectInput(session, "subject_model",
+          choices = choices, selected = choices[1])
+      }
     })
     
     ## Window numeric

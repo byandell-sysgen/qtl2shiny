@@ -98,13 +98,15 @@ scanDataServer <- function(id, hotspot_list, snp_list, probs_obj, project_df) {
 
     ## Reset scan_window if chromosome changes.
     observeEvent(probs_obj()$map, {
-      map <- shiny::req(probs_obj()$map)
-      chr <- shiny::req(win_par())$chr_id
-      rng <- round(2 * range(map[[chr]])) / 2
-      shiny::updateSliderInput(session, "scan_window", NULL, rng,
-        rng[1], rng[2],
-        step = .5
-      )
+      if (shiny::isTruthy(input$scan_window)) {
+        map <- shiny::req(probs_obj()$map)
+        chr <- shiny::req(win_par())$chr_id
+        rng <- round(2 * range(map[[chr]])) / 2
+        shiny::updateSliderInput(session, "scan_window", NULL, rng,
+          rng[1], rng[2],
+          step = .5
+        )
+      }
     })
 
     ## Select phenotype for plots.
