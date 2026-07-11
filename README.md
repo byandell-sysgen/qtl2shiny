@@ -2,6 +2,8 @@
 
 Yandell R/qtl2shiny project.
 
+[Developer's Guide](inst/doc/devel_guide/)
+
 ### What is this repository for? ###
 
 * Code to create shiny interface for [R/qtl2](https://cran.r-project.org/package=qtl2).
