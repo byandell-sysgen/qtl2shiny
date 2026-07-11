@@ -1,10 +1,13 @@
 # Developer's Guide to the Mediation Panel (`mediateApp`)
 
+*[Developer's Guide to the `qtl2shiny` Package](./)*
+
 ## Overview
 
 The **Mediation** panel performs causal inference to identify intermediate variables (e.g. mRNA transcript expression, protein abundance) that mediate the path between a genomic QTL driver locus and a downstream target clinical phenotype.
 
 It integrates:
+
 1. **`mediateDataApp`**: Computes regression models to measure how conditioning on candidates drops the QTL LOD score.
 2. **`mediatePlotApp`**: Visualizes LOD drop profiles along chromosomes.
 3. **`triadApp`**: Renders scatterplot matrices of the Driver-Mediator-Trait triad.
@@ -64,11 +67,13 @@ graph TD
 ## 2. Mediation Regressions & Plotting (`mediateDataApp` & `mediatePlotApp`)
 
 ### Data Used
+
 - **Mediator Expressional Matrix**: Expression or abundance records.
 - **Genotype Probabilities (`probs_obj`)**: Disk-backed multi-point probabilities.
 - **LOCO Kinship & Covariates**: `hotspot_list$kinship_list` and `hotspot_list$covar_df`.
 
 ### Logic and Code Workflow
+
 1. **Mediation Calculations**:
    - `mediateDataServer` runs `qtl2mediate::mediate1()` to evaluate candidates. It calculates:
      - Target phenotype LOD score.
@@ -82,11 +87,13 @@ graph TD
 ## 3. Triad Scatterplots (`triadApp`)
 
 ### Data Used
+
 - **Genotypes (Driver)**: Allele probabilities at the target locus.
 - **Mediator Expression**: Candidate intermediate profile values.
 - **Target Phenotype**: Clinical record observations.
 
 ### Logic and Code Workflow
+
 1. **Grid Generation**:
    - Groups individuals by ancestral founder alleles.
    - Plots pairwise comparisons:

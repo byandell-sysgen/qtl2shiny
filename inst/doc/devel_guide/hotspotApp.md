@@ -1,10 +1,13 @@
 # Developer's Guide to the Hotspots & Phenotypes Panel (`hotspotApp`)
 
+*[Developer's Guide to the `qtl2shiny` Package](./)*
+
 ## Overview
 
 The **Hotspots & Phenotypes** panel is the entry point for data exploration in the `qtl2shiny` application. It allows researchers to load experimental datasets, view precomputed QTL peak densities (genomic hotspots), and explore the statistical distributions of raw and normalized phenotype variables.
 
 It coordinates two primary sub-panel structures:
+
 1. **Hotspot Analysis Sub-Panel**: Deals with peaks filtering, chromosomal density computations, and coordinate window selections.
 2. **Phenotypes Sub-Panel**: Handles the loading, filtering, normalization, and graphical plotting of phenotype records.
 
@@ -70,10 +73,12 @@ graph TD
 ## 2. Hotspot Density Scans (`hotspotDataApp` & Sub-modules)
 
 ### Data Used
+
 - **`peaks.rds`**: A precomputed dataframe listing LOD scores, marker names, and Mbp positions of QTL peaks.
 - **`pmap.rds`**: The physical map of markers and Mbp locations.
 
 ### Logic and Code Workflow
+
 1. **Hotspot Densities Calculation**:
    - `hotspotDataServer` scans precomputed peaks across the genome. It determines the number of peaks exceeding a lod threshold within moving chromosomal windows.
 2. **Visualizing Hotspots (`hotspotPlotServer`)**:
@@ -86,10 +91,12 @@ graph TD
 ## 3. Phenotype Distributions (`phenoApp` & Sub-modules)
 
 ### Data Used
+
 - **`pheno_data.rds`**: A matrix storing raw measurements (rows = individuals, columns = phenotypes).
 - **`covar.rds`**: Covariates data frame (e.g. sex, age, batch) for adjusting phenotype averages.
 
 ### Logic and Code Workflow
+
 1. **Filtering & Loading**:
    - `phenoReadServer` reads the `pheno_data.rds` file relative to the selected project.
    - `phenoNamesServer` lists available phenotype parameters.

@@ -1,8 +1,11 @@
 # Developer's Guide to the Allele & SNP Scans Panel (`scanApp`)
 
+*[Developer's Guide to the `qtl2shiny` Package](./)*
+
 ## Overview
 
 The **Allele & SNP Scans** panel helps researchers run genome scans to identify QTL signals and overlay high-density variant mappings to narrow down candidate genes. It integrates:
+
 1. **`scanDataApp`**: Generates founder-allele-based genome scans (LOD and BLUP curves).
 2. **`snpGeneApp`**: Performs high-density SNP association scans, annotations, and gene/exon coordinate views.
 
@@ -62,11 +65,13 @@ graph TD
 ## 2. Allele Genome Scans (`scanDataApp`)
 
 ### Data Used
+
 - **Genotype Probabilities (`probs_obj`)**: disk-backed multi-point probabilities loaded via `probsServer`.
 - **LOCO Kinship Matrices**: kinship objects corresponding to the active chromosome (`hotspot_list$kinship_list`).
 - **Phenotypes & Covariates**: `hotspot_list$pheno_mx` and `hotspot_list$covar_df`.
 
 ### Logic and Code Workflow
+
 1. **QTL Scanning**:
    - Computes QTL genome scans using `qtl2::scan1()` for the selected phenotype, accounting for covariates and kinship models.
 2. **Founder BLUPs/Coefficients**:
@@ -79,10 +84,12 @@ graph TD
 ## 3. SNP Association & Gene Mapping (`snpGeneApp` & Sub-modules)
 
 ### Data Used
+
 - **SNP Probabilities SQLite DB (`cc-variants.sqlite`)**: High-density variants query function (`query_variants`).
 - **Gene Annotation SQLite DB (`mouse_genes_mgi.sqlite`)**: Database listing gene boundaries (`query_genes`).
 
 ### Logic and Code Workflow
+
 1. **SNP Scan & Association**:
    - Collaborates with `snpListServer` which collapses founder probabilities into SNP patterns (`snpprob_collapse`).
    - Runs fast association mappings (`scan1covar`) to calculate SNP LOD scores.

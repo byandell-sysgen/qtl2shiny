@@ -1,8 +1,11 @@
 # Developer's Guide to the Genotypes Panel (`genoApp`)
 
+*[Developer's Guide to the `qtl2shiny` Package](./)*
+
 ## Overview
 
 The **Genotypes** panel is a high-level visual container designed to investigate genotype probabilities, strain distribution patterns (SDPs), and phenotypic effects at specific chromosomal locations. It acts as an integration layer, coordinating three sub-modules:
+
 1. **`genoDataApp`**: Loads and filters pairwise founder genotype probabilities.
 2. **`genoPlotApp`**: Plots individual genotype probabilities along chromosomes.
 3. **`genoEffectApp`**: Evaluates phenotype associations (averages/BLUPs) by genotype class or pattern.
@@ -69,6 +72,7 @@ graph TD
 `genoDataApp()` is a module designed to retrieve, filter, and format pairwise genotype probability tables (`geno_table`) for a selected chromosomal region, strain distribution patterns (SDPs), and physical map positions (Mbp).
 
 ### Data Used by the Module
+
 - **Genotype Probabilities (`genoprob/` directory / FST format)**: 36-state (or collapsed 8-state) genotype probabilities.
 - **Physical Map (`pmap.rds`)**: Map of markers and physical coordinates.
 - **Strain Distribution Patterns**: Alleles mapping founder lines to distinct strain distribution groups (from `snp_list$patterns`).
@@ -99,6 +103,7 @@ graph TD
    - Extracts `chr_id` and `peak_Mbp` from `hotspot_list$win_par`.
    - Renders a slider selector `pos_Mbp` dynamically inside `output$pos_Mbp_input` mapped to the chromosome physical map boundaries.
    - Observes resets to update slider values when chromosome selection changes:
+
      ```r
      observeEvent(shiny::req(win_par()), {
        if (shiny::isTruthy(input$pos_Mbp)) {
@@ -111,6 +116,7 @@ graph TD
        }
      })
      ```
+
 2. **Genotype Table Calculation**:
    - Computes `geno_table` reactively using `qtl2pattern::pair_geno_table()` at the current coordinate.
 3. **Data Table Output**:
@@ -126,16 +132,20 @@ graph TD
 `genoPlotApp` visualizes individual genotype probabilities along chromosomes to help developers and researchers examine founder ancestry.
 
 ### Data Used by the Module
+
 - **Phenotype Matrix (`pheno_mx`)**: Passed reactively from `hotspot_list$pheno_mx`.
 - **Genotype Table (`geno_table`)**: Passed reactively from `geno_list$Table`.
 
 ### Logic and Code Workflow
+
 - **`geno_plot`**: Computes the ggplot object reactively by calling `geno_ggplot` from the `qtl2pattern` package, passing the active genotypes table and phenotype matrix:
+
   ```r
   geno_plot <- shiny::reactive({
     geno_ggplot(shiny::req(geno_table()), shiny::req(pheno_mx()))
   })
   ```
+
 - **Rendering**: Outputs the ggplot object in `output$geno_plot` using `shiny::renderPlot`.
 
 ---
@@ -145,6 +155,7 @@ graph TD
 `genoEffectApp` models and visualizes phenotypic effects by grouping experimental individuals according to their genotype probabilities and patterns at the selected locus.
 
 ### Data Used by the Module
+
 - **Genotype Probabilities (`pairprobs_obj`)**
 - **Phenotypes (`pheno_mx`)**: Selected phenotype column.
 - **Covariates & Kinship**: `covar_df` and LOCO `kinship_list` for statistical regression.
@@ -154,6 +165,7 @@ graph TD
 
 1. **Effect Scanning (`effect_obj`)**:
    - Executes the statistical scan by running `effect_scan()` when genotypes, phenotypes, and patterns become valid:
+
      ```r
      effect_obj <- shiny::reactive({
        shiny::req(snp_action(), project_df(), pairprobs_obj(),
@@ -172,12 +184,15 @@ graph TD
        })
      })
      ```
+
 2. **Visualizing Effects (`geno_effect_plot`)**:
    - Generates the ggplot object by calling `ggplot2::autoplot()` on the effect scan object at the chosen physical position `pos_Mbp()`:
+
      ```r
      p <- ggplot2::autoplot(eff, pos = pos_Mbp())
      p + ggplot2::ggtitle(colnames(hotspot_list$pheno_mx()))
      ```
+
 3. **Summary Table (`geno_effect_table`)**:
    - Summarizes effect estimates at `pos_Mbp()` by calling `effect_summary(eff, pos = pos_Mbp())`.
    - Renders the summary in `output$geno_effect_table_output` using `DT::renderDataTable`.
