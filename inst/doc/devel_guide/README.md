@@ -1,7 +1,8 @@
 # Developer's Guide to the `qtl2shiny` Package
 
 This directory contains developer-facing documentation for the `qtl2shiny` package. It details the architecture of the Shiny application, how data flows through the system, and how the 40+ module files (`R/*App.R`) are organized into visual panels and utility layers.
-
+Prompts and process to create this guide are documented in
+[Create Developer’s Guide to `qtl2shiny`](https://byandell.github.io/Documentation/prompts/devel_guide.html)
 
 ## Table of Contents
 
@@ -28,13 +29,14 @@ This directory contains developer-facing documentation for the `qtl2shiny` packa
 
 ---
 
-
 ## 1. High-Level Architecture & Layout
 
 The main entry point for the application is defined in [R/qtl2shinyApp.R](../../../R/qtl2shinyApp.R). It uses the **Bootstrap 5 (`bslib`)** framework to construct a responsive, sidebar-driven dashboard.
 
 ### UI Layout
+
 The dashboard layout is defined in `qtl2shinyUI()`:
+
 - **Global Sidebar**: Contains global configuration selectors loaded dynamically:
   - Project registry selection (`projectUI`)
   - Phenotype dataset class and model parameters (`hotspotInput`)
@@ -49,6 +51,7 @@ The dashboard layout is defined in `qtl2shinyUI()`:
   5. **Mediation**
 
 ### Module Communication
+
 The panels communicate using reactive values passed down from parent modules or shared via returned reactive lists. The server logic in `qtl2shinyServer()` instantiates and links these modules together.
 
 ```mermaid
@@ -76,7 +79,9 @@ graph TD
 ```
 
 ### Download Framework (`downr` Integration)
+
 At any point, the active panel exposes a reactive list containing:
+
 - `Plot`: A reactive expression returning the currently displayed ggplot or plotly object.
 - `Table`: A reactive expression returning the currently displayed dataframe or data table.
 - `Filename`: The output prefix name based on current settings (e.g. phenotype names).
@@ -89,6 +94,7 @@ The server observes the active tab (`input$panel`) and routes the corresponding 
 ## 2. Analysis Panels
 
 ### A. Hotspots & Phenotypes
+
 - **Purpose**: Allows users to load experimental projects, select phenotype datasets, run genome-wide hotspot scans, and view specific raw phenotype distributions.
 - **Entrypoint**: [R/hotspotApp.R](../../../R/hotspotApp.R)
 - **Constituent Modules**:
@@ -105,6 +111,7 @@ The server observes the active tab (`input$panel`) and routes the corresponding 
   - [R/phenoPlotApp.R](../../../R/phenoPlotApp.R): Plots boxplots, scatterplots, or density distributions.
 
 ### B. Allele & SNP Scans
+
 - **Purpose**: Computes and compares genome-wide scans using multi-parent allele founder coefficients versus high-density SNP association mapping.
 - **Entrypoint**: [R/scanApp.R](../../../R/scanApp.R)
 - **Constituent Modules**:
@@ -116,6 +123,7 @@ The server observes the active tab (`input$panel`) and routes the corresponding 
   - [R/geneExonApp.R](../../../R/geneExonApp.R): Pulls detailed exon structures for a clicked or queried gene.
 
 ### C. Pattern Analysis
+
 - **Purpose**: Groups high-density SNPs in a QTL region into Strain Distribution Patterns (SDPs) to narrow down candidates based on shared founder ancestral alleles.
 - **Entrypoint**: [R/patternApp.R](../../../R/patternApp.R)
 - **Constituent Modules**:
@@ -125,6 +133,7 @@ The server observes the active tab (`input$panel`) and routes the corresponding 
   - [R/snpFeatureApp.R](../../../R/snpFeatureApp.R): Maps variants to genomic consequences (synonymous, coding, intron, splice site, etc.) and catalogs SDP details.
 
 ### D. Genotypes
+
 - **Purpose**: Inspects multi-point raw founder genotype probabilities, strain distribution pattern assignments, and their phenotypic effects at specific genomic locations.
 - **Entrypoint**: [R/genoApp.R](../../../R/genoApp.R)
 - **Constituent Modules**:
@@ -133,6 +142,7 @@ The server observes the active tab (`input$panel`) and routes the corresponding 
   - [R/genoEffectApp.R](../../../R/genoEffectApp.R): Evaluates phenotypic averages by genotype group, providing tables and plots of genetic effects.
 
 ### E. Mediation
+
 - **Purpose**: Performs regression-based QTL mediation analysis (e.g., intermediate mRNA expression or protein abundance) to identify candidate causal drivers.
 - **Entrypoint**: [R/mediateApp.R](../../../R/mediateApp.R)
 - **Constituent Modules**:
