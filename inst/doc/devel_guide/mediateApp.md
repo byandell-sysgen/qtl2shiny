@@ -24,7 +24,7 @@ It integrates:
 
 - **Sub-Modules**:
   - **Mediation Data (`mediateDataApp`)**: Computes mediation regression models. Server: `mediateDataServer`.
-  - **Mediation Plot (`mediatePlotApp`)**: Plots mediation drop profiles. Server: `mediatePlotServer`.
+  - **Mediation Plot (`mediatePlotApp`)**: Plots mediation drop profiles and integrates the **Scatter Plot (`scatterPlotApp`)** module. Server: `mediatePlotServer`.
   - **Triad Scatterplot (`triadApp`)**: Draws triad relationship grids. Server: `triadServer`.
 
 ---
@@ -81,6 +81,7 @@ graph TD
      - LOD drop (original LOD - conditioned LOD).
 2. **Drop Plotting (`mediatePlotServer`)**:
    - Generates scatterplots mapping candidate gene physical coordinates (X-axis) against their conditioned LOD values (Y-axis). Candidates causing a significant LOD drop are highlighted.
+   - Includes a **Scatter Plot** option utilizing the generic `scatterPlotServer` module to visualize mediator expression vs. target phenotype, with options to color/shape/facet by sex, diet, and genotype.
 
 ---
 

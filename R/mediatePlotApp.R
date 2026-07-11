@@ -15,7 +15,7 @@
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom shiny checkboxInput isolate isTruthy moduleServer NS observeEvent plotOutput radioButtons reactive renderPlot renderUI req selectInput setProgress sliderInput strong tagList uiOutput updateSelectInput updateSliderInput withProgress
 #' @importFrom plotly renderPlotly plotlyOutput
-#' @importFrom dplyr filter
+#' @importFrom dplyr filter left_join
 #' @importFrom utils write.csv
 #' @importFrom grDevices dev.off pdf
 #' @importFrom rlang .data
@@ -65,6 +65,63 @@ mediatePlotServer <- function(id, hotspot_list, mediate_list, probs_obj, project
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
     
+    # Instantiate pairProbsServer to retrieve diplotype/allele pair probabilities
+    pairprobs_obj <- pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
+    
+    # Generate genotypes dynamically at the pos_Mbp location
+    geno_table <- shiny::reactive({
+      shiny::req(mediate_list$patterns, pairprobs_obj, mediate_list$med_par$pos_Mbp)
+      shiny::withProgress(message = 'Genotypes ...', value = 0, {
+        shiny::setProgress(1)
+        pair_geno_table(pairprobs_obj(), mediate_list$patterns(), mediate_list$med_par$pos_Mbp)
+      })
+    })
+
+    # Dropdown for mediator selection
+    output$med_name_input <- shiny::renderUI({
+      shiny::req(mediate_list$mediate_obj())
+      choices <- mediate_list$mediate_obj()$best$id
+      shiny::selectInput(ns("med_name"), "Select Mediator:", choices = choices, selected = input$med_name)
+    })
+
+    # Build the data frame for the generic scatter plot
+    scatter_df <- shiny::reactive({
+      shiny::req(input$med_name, mediate_list$med_ls(), mediate_list$phe1_mx(),
+                 geno_table(), hotspot_list$covar_df())
+                 
+      med_mx <- mediate_list$med_ls()[[1]]
+      phe_mx <- mediate_list$phe1_mx()
+      geno_tab <- geno_table()
+      cov_df <- hotspot_list$covar_df()
+      
+      med_name <- input$med_name
+      shiny::req(med_name %in% colnames(med_mx))
+      
+      # Prepare data frames for merging
+      df_x <- data.frame(subject = rownames(med_mx), x = med_mx[, med_name])
+      df_y <- data.frame(subject = rownames(phe_mx), y = phe_mx[, 1])
+      df_geno <- data.frame(subject = rownames(geno_tab), geno = geno_tab[, 1])
+      df_cov <- data.frame(subject = rownames(cov_df), cov_df, check.names = FALSE)
+      
+      # Standardize covariate names case-insensitively
+      if(m <- match("sex", tolower(colnames(df_cov)), nomatch = 0)) {
+        colnames(df_cov)[m] <- "sex"
+      }
+      if(md <- match("diet", tolower(colnames(df_cov)), nomatch = 0)) {
+        colnames(df_cov)[md] <- "diet"
+      }
+      
+      plot_df <- df_x %>%
+        dplyr::left_join(df_y, by = "subject") %>%
+        dplyr::left_join(df_geno, by = "subject") %>%
+        dplyr::left_join(df_cov, by = "subject")
+        
+      plot_df
+    })
+
+    # Call the new generic scatterPlotServer module
+    scatter_plot_obj <- scatterPlotServer("scatter", scatter_df)
+
     ## Select plot format.
     output$med_plot_input <- shiny::renderUI({
       shiny::selectInput(ns("med_plot"), NULL,
@@ -72,11 +129,11 @@ mediatePlotServer <- function(id, hotspot_list, mediate_list, probs_obj, project
                                      "Position by P-value", 
                                      "P-value by LR",
                                      "Allele Effects",
-                                     "Mediator Effects"),
+                                     "Mediator Effects",
+                                     "Scatter Plot"),
                          selected = input$med_plot)
     })
     # Translate `med_plot` into internal option.
-    # ** Plots not correct.
     med_plot_type <- shiny::reactive({
       switch(shiny::req(input$med_plot),
              "Position by LR" = "pos_LR",
@@ -87,7 +144,7 @@ mediatePlotServer <- function(id, hotspot_list, mediate_list, probs_obj, project
     })
     ## Mediate1 plot
     mediate_plot <- shiny::reactive({
-      med_signif <- mediate_signif(shiny::req(mediate_obj))
+      med_signif <- mediate_signif(shiny::req(mediate_list$mediate_obj()))
       if(!shiny::isTruthy(mediate_list$med_ls()) ||
          !shiny::isTruthy(med_signif)) {
         plot_null("too much\nmissing data\nin mediators\nreduce window width")
@@ -119,7 +176,7 @@ mediatePlotServer <- function(id, hotspot_list, mediate_list, probs_obj, project
     istrue <- function(input_value)
       ifelse(shiny::isTruthy(input_value), input_value, TRUE)
     output$local_other <- shiny::renderUI({
-      switch(shiny::req(input$med_type),
+      switch(shiny::req(mediate_list$med_par$med_type),
         expression = shiny::checkboxInput(ns("local"), "Local?",
                                           istrue(input$local)),
         phenotype  = shiny::checkboxInput(ns("other"), "Other types?",
@@ -130,20 +187,42 @@ mediatePlotServer <- function(id, hotspot_list, mediate_list, probs_obj, project
     })
     
     output$mediate_input <- shiny::renderUI({
-      shiny::tagList(
-        shiny::uiOutput(ns("static_input")),
-        shiny::fluidRow(
-          shiny::column(6, shiny::uiOutput(ns("signif_input"))),
-          shiny::column(6, shiny::uiOutput(ns("local_other")))),
-        shiny::uiOutput(ns("med_plot_input")))
+      if (shiny::req(input$med_plot) == "Scatter Plot") {
+        shiny::tagList(
+          shiny::uiOutput(ns("med_plot_input")),
+          shiny::uiOutput(ns("med_name_input")),
+          scatterPlotInput(ns("scatter"))
+        )
+      } else {
+        shiny::tagList(
+          shiny::uiOutput(ns("static_input")),
+          shiny::fluidRow(
+            shiny::column(6, shiny::uiOutput(ns("signif_input"))),
+            shiny::column(6, shiny::uiOutput(ns("local_other")))),
+          shiny::uiOutput(ns("med_plot_input")))
+      }
     })
     output$mediate_plot <- shiny::renderUI({
-      switch(shiny::req(input$static),
-             Static      = shiny::plotOutput(ns("mediate_plot_static")),
-             Interactive = plotly::plotlyOutput(ns("mediate_plotly")))
+      if (shiny::req(input$med_plot) == "Scatter Plot") {
+        scatterPlotOutput(ns("scatter"))
+      } else {
+        switch(shiny::req(input$static),
+               Static      = shiny::plotOutput(ns("mediate_plot_static")),
+               Interactive = plotly::plotlyOutput(ns("mediate_plotly")))
+      }
     })
+    
+    # Active plot (either profile scan or scatter plot)
+    active_plot <- shiny::reactive({
+      if (shiny::req(input$med_plot) == "Scatter Plot") {
+        scatter_plot_obj()
+      } else {
+        mediate_plot()
+      }
+    })
+    
     # Return.
-    mediate_plot
+    active_plot
   })
 }
 #' @export

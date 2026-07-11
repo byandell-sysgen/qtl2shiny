@@ -26,6 +26,7 @@ Prompts and process to create this guide are documented in
 - [Patterns Panel (`patternApp`)](./patternApp.md)
 - [Genotypes Panel (`genoApp`)](./genoApp.md)
 - [Mediation Panel (`mediateApp`)](./mediateApp.md)
+- [Scatter Plot Module (`scatterPlotApp`)](./scatter_plot.md)
 
 ---
 
@@ -164,6 +165,7 @@ These modules do not represent individual analysis panels but act as shared glob
 - **[R/probsApp.R](../../../R/probsApp.R)**: Reactive server utility to load high-dimensional multi-point founder genotype probabilities using fast disk-backed serialization (`FST` database queries).
 - **[R/kinshipApp.R](../../../R/kinshipApp.R)**: Reactively loads LOCO (Leave-One-Chromosome-Out) kinship matrix objects corresponding to the active chromosome.
 - **[R/downloadApp.R](../../../R/downloadApp.R)**: Wrapper server interfacing with the `downr` external package to manage CSV exports and vector plot rendering (PNG/PDF).
+- **[R/scatterPlotApp.R](../../../R/scatterPlotApp.R)**: Generic reusable module to plot static or interactive scatter plots (X vs Y, with option to map Sex, Diet, and Genotype to Color/Shape/Facet aesthetics).
 
 ---
 
@@ -221,3 +223,4 @@ Here is the complete mapping of all 41 `R/*App.R` files:
 | [R/probsApp.R](../../../R/probsApp.R) | Data / Probs Loader | Generic Utility | `probsServer` |
 | [R/kinshipApp.R](../../../R/kinshipApp.R) | Data / Kinship Loader | Generic Utility | `kinshipServer` |
 | [R/downloadApp.R](../../../R/downloadApp.R) | Global Header | Generic Utility | `downloadServer` |
+| [R/scatterPlotApp.R](../../../R/scatterPlotApp.R) | Generic & Utilities | Generic Utility | `scatterPlotServer` |
