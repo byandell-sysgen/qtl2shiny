@@ -1,4 +1,12 @@
-# Developer's Guide to the `qtl2shiny` Package
+---
+title: "Module Architecture"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Module Architecture}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
 
 This directory contains developer-facing documentation for the `qtl2shiny` package. It details the architecture of the Shiny application, how data flows through the system, and how the 40+ module files (`R/*App.R`) are organized into visual panels and utility layers.
 Prompts and process to create this guide are documented in
@@ -21,12 +29,12 @@ Prompts and process to create this guide are documented in
 
 ### Detailed Module Guides
 
-- [Hotspots & Phenotypes Panel (`hotspotApp`)](./hotspotApp.md)
-- [Allele & SNP Scans Panel (`scanApp`)](./scanApp.md)
-- [Patterns Panel (`patternApp`)](./patternApp.md)
-- [Genotypes Panel (`genoApp`)](./genoApp.md)
-- [Mediation Panel (`mediateApp`)](./mediateApp.md)
-- [Scatter Plot Module (`scatterPlotApp`)](./scatter_plot.md)
+- [Hotspots & Phenotypes Panel (`hotspotApp`)](./hotspotApp.html)
+- [Allele & SNP Scans Panel (`scanApp`)](./scanApp.html)
+- [Patterns Panel (`patternApp`)](./patternApp.html)
+- [Genotypes Panel (`genoApp`)](./genoApp.html)
+- [Mediation Panel (`mediateApp`)](./mediateApp.html)
+- [Scatter Plot Module (`scatterPlotApp`)](./scatter_plot.html)
 
 ---
 
@@ -138,7 +146,7 @@ The server observes the active tab (`input$panel`) and routes the corresponding 
 - **Purpose**: Inspects multi-point raw founder genotype probabilities, strain distribution pattern assignments, and their phenotypic effects at specific genomic locations.
 - **Entrypoint**: [R/genoApp.R](../../../R/genoApp.R)
 - **Constituent Modules**:
-  - [R/genoDataApp.R](../../../R/genoDataApp.R): Renders genotype probabilities and SDP pairings at a chosen physical marker. For a deep-dive, see the [Genotypes Panel Guide](genoApp.md).
+  - [R/genoDataApp.R](../../../R/genoDataApp.R): Renders genotype probabilities and SDP pairings at a chosen physical marker. For a deep-dive, see the [Genotypes Panel Guide](genoApp.html).
   - [R/genoPlotApp.R](../../../R/genoPlotApp.R): Visualizes individuals' genotype probabilities along chromosomal segments.
   - [R/genoEffectApp.R](../../../R/genoEffectApp.R): Evaluates phenotypic averages by genotype group, providing tables and plots of genetic effects.
 

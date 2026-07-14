@@ -1,4 +1,12 @@
-# Create a generic scatterplot shiny app
+---
+title: "Scatter Plot Module"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Scatter Plot Module}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
 
 ## Prompt
 
@@ -25,4 +33,4 @@ Here is a summary of the achievements:
 3. **Verified and Documented**:
    - Verified that both standalone `scatterPlotApp()` and integrated `mediatePlotApp()` return valid Shiny app objects.
    - Re-generated documentation and NAMESPACE entries using `devtools::document()`.
-   - Recorded progress and details in the task tracker [task.md](file:///Users/brianyandell/.gemini/antigravity-ide/brain/fdc63a13-d0a4-4e0b-8649-bf752ad67457/task.md) and the walkthrough document [walkthrough.md](file:///Users/brianyandell/.gemini/antigravity-ide/brain/fdc63a13-d0a4-4e0b-8649-bf752ad67457/walkthrough.md).
+   - Recorded progress and details in the task tracker [task.md](file:///Users/brianyandell/.gemini/antigravity-ide/brain/fdc63a13-d0a4-4e0b-8649-bf752ad67457/task.html) and the walkthrough document [walkthrough.md](file:///Users/brianyandell/.gemini/antigravity-ide/brain/fdc63a13-d0a4-4e0b-8649-bf752ad67457/walkthrough.html).

@@ -4,3 +4,7 @@ Makefile
 ^/inst/doc/*.csv
 ^/inst/doc/*.tex
 inst/scripts/
+^docs$
+^_pkgdown\.yml$
+^vignettes/devel_guide/
+^\.github$

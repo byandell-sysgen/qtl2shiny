@@ -1,6 +1,14 @@
-# Developer's Guide to the Patterns Panel (`patternApp`)
+---
+title: "Patterns Module"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Patterns Module}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
-*[Developer's Guide to the `qtl2shiny` Package](./)*
+
+*[Developer's Guide to the `qtl2shiny` Package](./index.html)*
 
 ## Overview
 

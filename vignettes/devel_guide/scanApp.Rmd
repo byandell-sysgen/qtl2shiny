@@ -1,6 +1,14 @@
-# Developer's Guide to the Allele & SNP Scans Panel (`scanApp`)
+---
+title: "Allele & SNP Scans Module"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Allele & SNP Scans Module}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
 
-*[Developer's Guide to the `qtl2shiny` Package](./)*
+
+*[Developer's Guide to the `qtl2shiny` Package](./index.html)*
 
 ## Overview
 

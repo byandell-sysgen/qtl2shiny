@@ -2,7 +2,7 @@
 
 Yandell R/qtl2shiny project.
 
-[Developer's Guide](inst/doc/devel_guide/)
+[Developer's Guide](articles/devel_guide/index.html)
 
 ### What is this repository for? ###
 

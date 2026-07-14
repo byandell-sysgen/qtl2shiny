@@ -1,0 +1,51 @@
+url: https://byandell-sysgen.github.io/qtl2shiny/
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    left:  [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    articles:
+      text: Guides
+      menu:
+        - text: "User Guides"
+        - text: "User Guide"
+          href: articles/UserGuide.html
+        - text: "Data Preparation Guide"
+          href: articles/qtl2shinyData.html
+        - text: "-------"
+        - text: "Developer Guides"
+        - text: "Developer Guide Overview"
+          href: articles/DeveloperGuide.html
+        - text: "Module Architecture (New)"
+          href: articles/devel_guide/index.html
+        - text: "Hotspots & Phenotypes Module"
+          href: articles/devel_guide/hotspotApp.html
+        - text: "Allele & SNP Scans Module"
+          href: articles/devel_guide/scanApp.html
+        - text: "Patterns Module"
+          href: articles/devel_guide/patternApp.html
+        - text: "Genotypes Module"
+          href: articles/devel_guide/genoApp.html
+        - text: "Mediation Module"
+          href: articles/devel_guide/mediateApp.html
+        - text: "Scatter Plot Module"
+          href: articles/devel_guide/scatter_plot.html
+
+articles:
+  - title: "User Documentation"
+    contents:
+      - UserGuide
+      - qtl2shinyData
+  - title: "Developer Documentation"
+    contents:
+      - DeveloperGuide
+      - devel_guide/index
+      - devel_guide/hotspotApp
+      - devel_guide/scanApp
+      - devel_guide/patternApp
+      - devel_guide/genoApp
+      - devel_guide/mediateApp
+      - devel_guide/scatter_plot

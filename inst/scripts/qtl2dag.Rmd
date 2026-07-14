@@ -65,7 +65,7 @@ igraph::tkplot(net_server)
 ```{r message=FALSE, warning=FALSE, fig.width=7, fig.height=7}
 #jpeg("net.jpg", width = 700, height = 700)
 plot(net_server, vertex.shape="none", 
-     vertex.label=igraph::V(netModule)$node, 
+     vertex.label=igraph::V(net_server)$node, 
      vertex.label.font=2, vertex.label.color="black",
      vertex.label.cex=1, edge.color="gray50",
      layout = igraph::layout_as_tree)
