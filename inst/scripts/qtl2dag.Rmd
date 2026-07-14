@@ -58,7 +58,7 @@ net_server <-
     unclass(igraph::V(net)[logic != "server"]))
 ```
 
-```{r}
+```{r, eval=FALSE}
 igraph::tkplot(net_server)
 ```
 
@@ -81,7 +81,7 @@ net_ui <-
     unclass(igraph::V(net)[logic != "ui"]))
 ```
 
-```{r}
+```{r, eval=FALSE}
 igraph::tkplot(net_ui)
 ```
 
