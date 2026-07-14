@@ -2,8 +2,8 @@
 
 Yandell R/qtl2shiny project.
 
-[Developer’s
-Guide](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/index.md)
+[Articles for
+`qtl2shiny`](https://byandell-sysgen.github.io/qtl2shiny/articles/)
 
 ### What is this repository for?
 
