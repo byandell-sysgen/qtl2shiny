@@ -17,3 +17,10 @@ Suggests:
 VignetteBuilder: knitr
 Encoding: UTF-8
 Config/roxygen2/version: 8.0.0
+Remotes:
+    byandell/downr,
+    byandell-sysgen/intermediate,
+    byandell-sysgen/qtl2mediate,
+    byandell-sysgen/qtl2ggplot,
+    byandell-sysgen/qtl2pattern
+
