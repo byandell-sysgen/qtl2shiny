@@ -14,14 +14,14 @@
 - [Module
   Architecture](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/index.md):
 - [Hotspots & Phenotypes
-  Module](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/hotspotApp.md):
+  Module](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/hotspot.md):
 - [Allele & SNP Scans
-  Module](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/scanApp.md):
+  Module](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/scan.md):
 - [Patterns
-  Module](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/patternApp.md):
+  Module](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/pattern.md):
 - [Genotypes
-  Module](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/genoApp.md):
-- [Mediation
-  Module](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/mediateApp.md):
+  Module](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/geno.md):
 - [Scatter Plot
-  Module](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/scatter_plot.md):
+  Module](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/scatter.md):
+- [Mediation
+  Module](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/mediate.md):

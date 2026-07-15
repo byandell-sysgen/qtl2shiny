@@ -40,12 +40,12 @@
     <li><h6 class="dropdown-header" data-toc-skip>Developer Guides</h6></li>
     <li><a class="dropdown-item" href="../../articles/DeveloperGuide.html">Developer Guide Overview</a></li>
     <li><a class="dropdown-item" href="../../articles/devel_guide/index.html">Module Architecture (New)</a></li>
-    <li><a class="dropdown-item" href="../../articles/devel_guide/hotspotApp.html">Hotspots &amp; Phenotypes Module</a></li>
-    <li><a class="dropdown-item" href="../../articles/devel_guide/scanApp.html">Allele &amp; SNP Scans Module</a></li>
-    <li><a class="dropdown-item" href="../../articles/devel_guide/patternApp.html">Patterns Module</a></li>
-    <li><a class="dropdown-item" href="../../articles/devel_guide/genoApp.html">Genotypes Module</a></li>
-    <li><a class="dropdown-item" href="../../articles/devel_guide/mediateApp.html">Mediation Module</a></li>
-    <li><a class="dropdown-item" href="../../articles/devel_guide/scatter_plot.html">Scatter Plot Module</a></li>
+    <li><a class="dropdown-item" href="../../articles/devel_guide/hotspot.html">Hotspots &amp; Phenotypes Module</a></li>
+    <li><a class="dropdown-item" href="../../articles/devel_guide/scan.html">Allele &amp; SNP Scans Module</a></li>
+    <li><a class="dropdown-item" href="../../articles/devel_guide/pattern.html">Patterns Module</a></li>
+    <li><a class="dropdown-item" href="../../articles/devel_guide/geno.html">Genotypes Module</a></li>
+    <li><a class="dropdown-item" href="../../articles/devel_guide/scatter.html">Scatter Plot Module</a></li>
+    <li><a class="dropdown-item" href="../../articles/devel_guide/mediate.html">Mediation Module</a></li>
   </ul>
 </li>
       </ul>
@@ -116,18 +116,18 @@ Mapping</a></li>
 <h3 id="detailed-module-guides">Detailed Module Guides<a class="anchor" aria-label="anchor" href="#detailed-module-guides"></a>
 </h3>
 <ul>
-<li><a href="./hotspotApp.html">Hotspots &amp; Phenotypes Panel
+<li><a href="./hotspot.html">Hotspots &amp; Phenotypes Panel
 (<code>hotspotApp</code>)</a></li>
-<li><a href="./scanApp.html">Allele &amp; SNP Scans Panel
+<li><a href="./scan.html">Allele &amp; SNP Scans Panel
 (<code>scanApp</code>)</a></li>
-<li><a href="./patternApp.html">Patterns Panel
+<li><a href="./pattern.html">Patterns Panel
 (<code>patternApp</code>)</a></li>
-<li><a href="./genoApp.html">Genotypes Panel
+<li><a href="./geno.html">Genotypes Panel
 (<code>genoApp</code>)</a></li>
-<li><a href="./mediateApp.html">Mediation Panel
+<li><a href="./scatter.html">Scatter Plot Modules
+(<code>scatterPlotApp</code> / <code>scatterApp</code>)</a></li>
+<li><a href="./mediate.html">Mediation Panel
 (<code>mediateApp</code>)</a></li>
-<li><a href="./scatter_plot.html">Scatter Plot Module
-(<code>scatterPlotApp</code>)</a></li>
 </ul>
 <hr>
 </div>
@@ -159,13 +159,14 @@ selectors loaded dynamically:
 widget (<code><a href="https://rdrr.io/pkg/downr/man/downloadApp.html" class="external-link">downr::downloadInput</a></code>) which connects dynamically to
 the active panel.</li>
 <li>
-<strong>Main Body</strong>: Organizes the app into five major
+<strong>Main Body</strong>: Organizes the app into six major
 navigation tabs (<code><a href="https://rstudio.github.io/bslib/reference/nav-items.html" class="external-link">bslib::nav_panel</a></code>):
 <ol style="list-style-type: decimal">
 <li><strong>Hotspots &amp; Phenotypes</strong></li>
 <li><strong>Allele &amp; SNP Scans</strong></li>
 <li><strong>Patterns</strong></li>
 <li><strong>Genotypes</strong></li>
+<li><strong>Scatter Plot</strong></li>
 <li><strong>Mediation</strong></li>
 </ol>
 </li>
@@ -370,8 +371,7 @@ phenotypic effects at specific genomic locations.</li>
 <li>
 <a href="../../../R/genoDataApp.R">R/genoDataApp.R</a>: Renders
 genotype probabilities and SDP pairings at a chosen physical marker. For
-a deep-dive, see the <a href="genoApp.html">Genotypes Panel
-Guide</a>.</li>
+a deep-dive, see the <a href="geno.html">Genotypes Panel Guide</a>.</li>
 <li>
 <a href="../../../R/genoPlotApp.R">R/genoPlotApp.R</a>: Visualizes
 individuals’ genotype probabilities along chromosomal segments.</li>
@@ -384,7 +384,29 @@ plots of genetic effects.</li>
 </ul>
 </div>
 <div class="section level3">
-<h3 id="e--mediation">E. Mediation<a class="anchor" aria-label="anchor" href="#e--mediation"></a>
+<h3 id="e--scatter-plot">E. Scatter Plot<a class="anchor" aria-label="anchor" href="#e--scatter-plot"></a>
+</h3>
+<ul>
+<li>
+<strong>Purpose</strong>: Displays scatter plots of selected
+phenotypes, grouped and colored by ancestral strain distribution
+patterns (SDPs), sex, or diet.</li>
+<li>
+<strong>Entrypoint</strong>: <a href="../../../R/scatterApp.R">R/scatterApp.R</a>
+</li>
+<li>
+<strong>Constituent Modules</strong>:
+<ul>
+<li>
+<a href="../../../R/scatterPlotApp.R">R/scatterPlotApp.R</a>:
+Reusable generic plotting module managing aesthetic mappings, open
+symbol selections, and linetypes.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="f--mediation">F. Mediation<a class="anchor" aria-label="anchor" href="#f--mediation"></a>
 </h3>
 <ul>
 <li>
@@ -687,94 +709,106 @@ files:</p>
 <td align="left"><code>genoEffectServer</code></td>
 </tr>
 <tr class="odd">
+<td align="left"><strong>Scatter Plot</strong></td>
+<td align="left"></td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left"><a href="../../../R/scatterApp.R">R/scatterApp.R</a></td>
+<td align="left">Scatter Plot</td>
+<td align="left">Entrypoint Panel</td>
+<td align="left"><code>scatterServer</code></td>
+</tr>
+<tr class="odd">
+<td align="left"><a href="../../../R/scatterPlotApp.R">R/scatterPlotApp.R</a></td>
+<td align="left">Scatter Plot</td>
+<td align="left">Integral Submodule</td>
+<td align="left"><code>scatterPlotServer</code></td>
+</tr>
+<tr class="even">
 <td align="left"><strong>Mediation</strong></td>
 <td align="left"></td>
 <td align="left"></td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><a href="../../../R/mediateApp.R">R/mediateApp.R</a></td>
 <td align="left">Mediation</td>
 <td align="left">Entrypoint Panel</td>
 <td align="left"><code>mediateServer</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><a href="../../../R/mediateDataApp.R">R/mediateDataApp.R</a></td>
 <td align="left">Mediation</td>
 <td align="left">Integral Submodule</td>
 <td align="left"><code>mediateDataServer</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><a href="../../../R/mediatePlotApp.R">R/mediatePlotApp.R</a></td>
 <td align="left">Mediation</td>
 <td align="left">Integral Submodule</td>
 <td align="left"><code>mediatePlotServer</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><a href="../../../R/triadApp.R">R/triadApp.R</a></td>
 <td align="left">Mediation</td>
 <td align="left">Integral Submodule</td>
 <td align="left"><code>triadServer</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><strong>Generic &amp; Utilities</strong></td>
 <td align="left"></td>
 <td align="left"></td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><a href="../../../R/projectApp.R">R/projectApp.R</a></td>
 <td align="left">Global Sidebar</td>
 <td align="left">Generic Utility</td>
 <td align="left"><code>projectServer</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><a href="../../../R/setParApp.R">R/setParApp.R</a></td>
 <td align="left">Global Sidebar</td>
 <td align="left">Generic Utility</td>
 <td align="left"><code>setParServer</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><a href="../../../R/winParApp.R">R/winParApp.R</a></td>
 <td align="left">Global Sidebar</td>
 <td align="left">Generic Utility</td>
 <td align="left"><code>winParServer</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><a href="../../../R/dipParApp.R">R/dipParApp.R</a></td>
 <td align="left">Global Sidebar</td>
 <td align="left">Generic Utility</td>
 <td align="left"><code>dipParServer</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><a href="../../../R/snpListApp.R">R/snpListApp.R</a></td>
 <td align="left">Global Sidebar</td>
 <td align="left">Generic Utility</td>
 <td align="left"><code>snpListServer</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><a href="../../../R/probsApp.R">R/probsApp.R</a></td>
 <td align="left">Data / Probs Loader</td>
 <td align="left">Generic Utility</td>
 <td align="left"><code>probsServer</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><a href="../../../R/kinshipApp.R">R/kinshipApp.R</a></td>
 <td align="left">Data / Kinship Loader</td>
 <td align="left">Generic Utility</td>
 <td align="left"><code>kinshipServer</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><a href="../../../R/downloadApp.R">R/downloadApp.R</a></td>
 <td align="left">Global Header</td>
 <td align="left">Generic Utility</td>
 <td align="left"><code>downloadServer</code></td>
-</tr>
-<tr class="odd">
-<td align="left"><a href="../../../R/scatterPlotApp.R">R/scatterPlotApp.R</a></td>
-<td align="left">Generic &amp; Utilities</td>
-<td align="left">Generic Utility</td>
-<td align="left"><code>scatterPlotServer</code></td>
 </tr>
 </tbody>
 </table>

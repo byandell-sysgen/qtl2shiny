@@ -28,17 +28,17 @@ Developer’s Guide to
 ### Detailed Module Guides
 
 - [Hotspots & Phenotypes Panel
-  (`hotspotApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/hotspotApp.md)
+  (`hotspotApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/hotspot.md)
 - [Allele & SNP Scans Panel
-  (`scanApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/scanApp.md)
+  (`scanApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/scan.md)
 - [Patterns Panel
-  (`patternApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/patternApp.md)
+  (`patternApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/pattern.md)
 - [Genotypes Panel
-  (`genoApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/genoApp.md)
+  (`genoApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/geno.md)
+- [Scatter Plot Modules (`scatterPlotApp` /
+  `scatterApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/scatter.md)
 - [Mediation Panel
-  (`mediateApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/mediateApp.md)
-- [Scatter Plot Module
-  (`scatterPlotApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/scatter_plot.md)
+  (`mediateApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/mediate.md)
 
 ------------------------------------------------------------------------
 
@@ -63,13 +63,14 @@ The dashboard layout is defined in
 - **Header**: Contains the download button/dropdown widget
   ([`downr::downloadInput`](https://rdrr.io/pkg/downr/man/downloadApp.html))
   which connects dynamically to the active panel.
-- **Main Body**: Organizes the app into five major navigation tabs
+- **Main Body**: Organizes the app into six major navigation tabs
   ([`bslib::nav_panel`](https://rstudio.github.io/bslib/reference/nav-items.html)):
   1.  **Hotspots & Phenotypes**
   2.  **Allele & SNP Scans**
   3.  **Patterns**
   4.  **Genotypes**
-  5.  **Mediation**
+  5.  **Scatter Plot**
+  6.  **Mediation**
 
 ### Module Communication
 
@@ -211,7 +212,7 @@ corresponding panel’s download reactive list to
   - [R/genoDataApp.R](https://byandell-sysgen.github.io/R/genoDataApp.R):
     Renders genotype probabilities and SDP pairings at a chosen physical
     marker. For a deep-dive, see the [Genotypes Panel
-    Guide](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/genoApp.md).
+    Guide](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/geno.md).
   - [R/genoPlotApp.R](https://byandell-sysgen.github.io/R/genoPlotApp.R):
     Visualizes individuals’ genotype probabilities along chromosomal
     segments.
@@ -219,7 +220,19 @@ corresponding panel’s download reactive list to
     Evaluates phenotypic averages by genotype group, providing tables
     and plots of genetic effects.
 
-### E. Mediation
+### E. Scatter Plot
+
+- **Purpose**: Displays scatter plots of selected phenotypes, grouped
+  and colored by ancestral strain distribution patterns (SDPs), sex, or
+  diet.
+- **Entrypoint**:
+  [R/scatterApp.R](https://byandell-sysgen.github.io/R/scatterApp.R)
+- **Constituent Modules**:
+  - [R/scatterPlotApp.R](https://byandell-sysgen.github.io/R/scatterPlotApp.R):
+    Reusable generic plotting module managing aesthetic mappings, open
+    symbol selections, and linetypes.
+
+### F. Mediation
 
 - **Purpose**: Performs regression-based QTL mediation analysis (e.g.,
   intermediate mRNA expression or protein abundance) to identify
@@ -317,6 +330,9 @@ Here is the complete mapping of all 41 `R/*App.R` files:
 | [R/genoDataApp.R](https://byandell-sysgen.github.io/R/genoDataApp.R) | Genotypes | Integral Submodule | `genoDataServer` |
 | [R/genoPlotApp.R](https://byandell-sysgen.github.io/R/genoPlotApp.R) | Genotypes | Integral Submodule | `genoPlotServer` |
 | [R/genoEffectApp.R](https://byandell-sysgen.github.io/R/genoEffectApp.R) | Genotypes | Integral Submodule | `genoEffectServer` |
+| **Scatter Plot** |  |  |  |
+| [R/scatterApp.R](https://byandell-sysgen.github.io/R/scatterApp.R) | Scatter Plot | Entrypoint Panel | `scatterServer` |
+| [R/scatterPlotApp.R](https://byandell-sysgen.github.io/R/scatterPlotApp.R) | Scatter Plot | Integral Submodule | `scatterPlotServer` |
 | **Mediation** |  |  |  |
 | [R/mediateApp.R](https://byandell-sysgen.github.io/R/mediateApp.R) | Mediation | Entrypoint Panel | `mediateServer` |
 | [R/mediateDataApp.R](https://byandell-sysgen.github.io/R/mediateDataApp.R) | Mediation | Integral Submodule | `mediateDataServer` |
@@ -331,4 +347,3 @@ Here is the complete mapping of all 41 `R/*App.R` files:
 | [R/probsApp.R](https://byandell-sysgen.github.io/R/probsApp.R) | Data / Probs Loader | Generic Utility | `probsServer` |
 | [R/kinshipApp.R](https://byandell-sysgen.github.io/R/kinshipApp.R) | Data / Kinship Loader | Generic Utility | `kinshipServer` |
 | [R/downloadApp.R](https://byandell-sysgen.github.io/R/downloadApp.R) | Global Header | Generic Utility | `downloadServer` |
-| [R/scatterPlotApp.R](https://byandell-sysgen.github.io/R/scatterPlotApp.R) | Generic & Utilities | Generic Utility | `scatterPlotServer` |
