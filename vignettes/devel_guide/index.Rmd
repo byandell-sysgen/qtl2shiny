@@ -29,12 +29,12 @@ Prompts and process to create this guide are documented in
 
 ### Detailed Module Guides
 
-- [Hotspots & Phenotypes Panel (`hotspotApp`)](./hotspotApp.html)
-- [Allele & SNP Scans Panel (`scanApp`)](./scanApp.html)
-- [Patterns Panel (`patternApp`)](./patternApp.html)
-- [Genotypes Panel (`genoApp`)](./genoApp.html)
-- [Mediation Panel (`mediateApp`)](./mediateApp.html)
-- [Scatter Plot Module (`scatterPlotApp`)](./scatter_plot.html)
+- [Hotspots & Phenotypes Panel (`hotspotApp`)](./hotspot.html)
+- [Allele & SNP Scans Panel (`scanApp`)](./scan.html)
+- [Patterns Panel (`patternApp`)](./pattern.html)
+- [Genotypes Panel (`genoApp`)](./geno.html)
+- [Scatter Plot Modules (`scatterPlotApp` / `scatterApp`)](./scatter.html)
+- [Mediation Panel (`mediateApp`)](./mediate.html)
 
 ---
 
@@ -52,12 +52,13 @@ The dashboard layout is defined in `qtl2shinyUI()`:
   - SNP parameters (`dipParInput`)
   - SNP and phenotype subset filters (`snpListInput`)
 - **Header**: Contains the download button/dropdown widget (`downr::downloadInput`) which connects dynamically to the active panel.
-- **Main Body**: Organizes the app into five major navigation tabs (`bslib::nav_panel`):
+- **Main Body**: Organizes the app into six major navigation tabs (`bslib::nav_panel`):
   1. **Hotspots & Phenotypes**
   2. **Allele & SNP Scans**
   3. **Patterns**
   4. **Genotypes**
-  5. **Mediation**
+  5. **Scatter Plot**
+  6. **Mediation**
 
 ### Module Communication
 
@@ -146,11 +147,18 @@ The server observes the active tab (`input$panel`) and routes the corresponding 
 - **Purpose**: Inspects multi-point raw founder genotype probabilities, strain distribution pattern assignments, and their phenotypic effects at specific genomic locations.
 - **Entrypoint**: [R/genoApp.R](../../../R/genoApp.R)
 - **Constituent Modules**:
-  - [R/genoDataApp.R](../../../R/genoDataApp.R): Renders genotype probabilities and SDP pairings at a chosen physical marker. For a deep-dive, see the [Genotypes Panel Guide](genoApp.html).
+  - [R/genoDataApp.R](../../../R/genoDataApp.R): Renders genotype probabilities and SDP pairings at a chosen physical marker. For a deep-dive, see the [Genotypes Panel Guide](geno.html).
   - [R/genoPlotApp.R](../../../R/genoPlotApp.R): Visualizes individuals' genotype probabilities along chromosomal segments.
   - [R/genoEffectApp.R](../../../R/genoEffectApp.R): Evaluates phenotypic averages by genotype group, providing tables and plots of genetic effects.
 
-### E. Mediation
+### E. Scatter Plot
+
+- **Purpose**: Displays scatter plots of selected phenotypes, grouped and colored by ancestral strain distribution patterns (SDPs), sex, or diet.
+- **Entrypoint**: [R/scatterApp.R](../../../R/scatterApp.R)
+- **Constituent Modules**:
+  - [R/scatterPlotApp.R](../../../R/scatterPlotApp.R): Reusable generic plotting module managing aesthetic mappings, open symbol selections, and linetypes.
+
+### F. Mediation
 
 - **Purpose**: Performs regression-based QTL mediation analysis (e.g., intermediate mRNA expression or protein abundance) to identify candidate causal drivers.
 - **Entrypoint**: [R/mediateApp.R](../../../R/mediateApp.R)
@@ -217,6 +225,9 @@ Here is the complete mapping of all 41 `R/*App.R` files:
 | [R/genoDataApp.R](../../../R/genoDataApp.R) | Genotypes | Integral Submodule | `genoDataServer` |
 | [R/genoPlotApp.R](../../../R/genoPlotApp.R) | Genotypes | Integral Submodule | `genoPlotServer` |
 | [R/genoEffectApp.R](../../../R/genoEffectApp.R) | Genotypes | Integral Submodule | `genoEffectServer` |
+| **Scatter Plot** | | | |
+| [R/scatterApp.R](../../../R/scatterApp.R) | Scatter Plot | Entrypoint Panel | `scatterServer` |
+| [R/scatterPlotApp.R](../../../R/scatterPlotApp.R) | Scatter Plot | Integral Submodule | `scatterPlotServer` |
 | **Mediation** | | | |
 | [R/mediateApp.R](../../../R/mediateApp.R) | Mediation | Entrypoint Panel | `mediateServer` |
 | [R/mediateDataApp.R](../../../R/mediateDataApp.R) | Mediation | Integral Submodule | `mediateDataServer` |
@@ -231,4 +242,3 @@ Here is the complete mapping of all 41 `R/*App.R` files:
 | [R/probsApp.R](../../../R/probsApp.R) | Data / Probs Loader | Generic Utility | `probsServer` |
 | [R/kinshipApp.R](../../../R/kinshipApp.R) | Data / Kinship Loader | Generic Utility | `kinshipServer` |
 | [R/downloadApp.R](../../../R/downloadApp.R) | Global Header | Generic Utility | `downloadServer` |
-| [R/scatterPlotApp.R](../../../R/scatterPlotApp.R) | Generic & Utilities | Generic Utility | `scatterPlotServer` |

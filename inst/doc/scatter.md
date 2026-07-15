@@ -1,15 +1,16 @@
 # Generic Scatter Plot Shiny Module
 
-This document outlines the design prompt, implementation walkthrough, and recent bug fixes/enhancements for the generic scatter plot Shiny module ([R/scatterPlotApp.R](/R/scatterPlotApp.R)) and its integration in [R/scatterApp.R](/R/scatterApp.R).
+This document outlines the design prompt, implementation walkthrough, and recent bug fixes/enhancements for the generic scatter plot Shiny module ([R/scatterPlotApp.R](/R/scatterPlotApp.R)), its integration in [R/scatterApp.R](/R/scatterApp.R), and its dashboard panel integration in [R/qtl2shinyApp.R](/R/qtl2shinyApp.R).
 
 - [/R/scatterPlotApp.R](/R/scatterPlotApp.R)
 - [/R/scatterApp.R](/R/scatterApp.R)
+- [/R/qtl2shinyApp.R](/R/qtl2shinyApp.R)
 
 ## Table of Contents
 
 - [Initial Prompt / Requirements](#1-initial-prompt--requirements)
 - [Walkthrough & Implementation Details](#2-walkthrough--implementation-details)
-- [Creating R/scatterApp.R as a Combined App](#3-creating-rscatterappr-as-a-combined-app)
+- [Creating R/scatterApp.R and R/qtl2shinyApp.R Panels](#3-creating-rscatterappr-and-rqtl2shinyappr-panels)
 - [Global Layout and Theme Customization](#4-global-layout-and-theme-customization)
 - [Walkthrough of Bug Fixes and Enhancements](#5-walkthrough-of-bug-fixes-and-enhancements)
 
@@ -55,13 +56,15 @@ The server constructs a single `ggplot` object reactively based on the parameter
 
 ---
 
-## 3. Creating `R/scatterApp.R` as a Combined App
+## 3. Creating `R/scatterApp.R` and `R/qtl2shinyApp.R` Panels
 
 **Prompt:**
-Using `R/genoApp.R` as a model, build `R/scatterApp.R` that gathers phenotype data via `R/hotspotApp.R` and genotype data via `R/genoDataApp.R`, and uses `R/scatterPlotApp.R` to plot the data.
+Using `R/genoApp.R` as a model, build `R/scatterApp.R` that gathers phenotype data via `R/hotspotApp.R` and genotype data via `R/genoDataApp.R`, and uses `R/scatterPlotApp.R` to plot the data. Put it as a nav panel just before Mediation.
 
 **Implementation:**
 Following [R/genoApp.R](file:///Users/brianyandell/Documents/Research/byandell-sysgen/qtl2shiny/R/genoApp.R) as a model, we built [R/scatterApp.R](file:///Users/brianyandell/Documents/Research/byandell-sysgen/qtl2shiny/R/scatterApp.R) to orchestrate data collection from `hotspot_list` (phenotype data) and `geno_list` (genotype data) and route it to the generic `scatterPlotServer()` module.
+
+Additionally, we integrated the Scatter Plot panel into the main [R/qtl2shinyApp.R](file:///Users/brianyandell/Documents/Research/byandell-sysgen/qtl2shiny/R/qtl2shinyApp.R) dashboard just before the Mediation Panel.
 
 ### How it Works
 1. **Instantiation**:

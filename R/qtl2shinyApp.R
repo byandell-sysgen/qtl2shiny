@@ -69,6 +69,12 @@ qtl2shinyServer <- function(id, projects_df) {
                  pairprobs_obj, project_df
     )
     
+    # Scatter Plot Panel.
+    download_list$scatter <-
+      scatterServer("scatter_panel", hotspot_list, pattern_list, snp_list,
+                    pairprobs_obj, project_df
+      )
+    
     # Mediation Panel.
     download_list$mediate <- mediateServer(
       "mediate_panel", hotspot_list, snp_list, probs_obj, project_df)
@@ -148,6 +154,21 @@ qtl2shinyUI <- function(id) {
         width = 400
       ),
       bslib::card(genoOutput(ns("geno_panel")))
+    ),
+    bslib::nav_panel(
+      title = "Scatter Plot",
+      value = ns("scatter"),
+      bslib::layout_sidebar(
+        sidebar = bslib::sidebar(
+          scatterInput(ns("scatter_panel")),
+          width = 300,
+          position = "right"
+        ),
+        bslib::card(
+          scatterOutput(ns("scatter_panel")),
+          full_screen = TRUE
+        )
+      )
     ),
     bslib::nav_panel(
       title = "Mediation",
