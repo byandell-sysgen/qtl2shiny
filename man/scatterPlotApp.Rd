@@ -9,7 +9,12 @@
 \usage{
 scatterPlotApp()
 
-scatterPlotServer(id, plot_df)
+scatterPlotServer(
+  id,
+  plot_df,
+  x_label = shiny::reactive("x"),
+  y_label = shiny::reactive("y")
+)
 
 scatterPlotInput(id)
 

@@ -93,6 +93,7 @@ qtl2shinyUI <- function(id) {
   bslib::page_navbar(
     title = "QTL2 Shiny App",
     id = ns("panel"),
+    theme = qtl2shiny_theme(),
     navbar_options = bslib::navbar_options(bg = "red", theme = "dark"),
     sidebar = bslib::sidebar(
       projectUI(ns("project_df")), # project

@@ -9,7 +9,7 @@
 #' @return No return value; called for side effects.
 #'
 #' @export
-#' @importFrom ggplot2 ggplot aes geom_point geom_smooth theme_minimal scale_color_brewer scale_color_hue facet_wrap
+#' @importFrom ggplot2 ggplot aes geom_point geom_smooth theme_minimal scale_color_brewer scale_color_hue facet_wrap labs vars scale_shape_manual
 #' @importFrom plotly renderPlotly plotlyOutput ggplotly
 #' @importFrom shiny checkboxInput fluidRow column isolate isTruthy moduleServer NS observeEvent plotOutput radioButtons reactive renderPlot renderUI req selectInput sliderInput strong tagList uiOutput updateSelectInput updateSliderInput withProgress
 #' @importFrom bslib card layout_sidebar page_sidebar sidebar
@@ -50,7 +50,7 @@ scatterPlotApp <- function() {
 }
 #' @export
 #' @rdname scatterPlotApp
-scatterPlotServer <- function(id, plot_df) {
+scatterPlotServer <- function(id, plot_df, x_label = shiny::reactive("x"), y_label = shiny::reactive("y")) {
   shiny::moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
@@ -89,10 +89,6 @@ scatterPlotServer <- function(id, plot_df) {
         shiny::selectInput(ns("shape_by"), "Shape by:", choices = shape_choices, selected = "none"),
         shiny::selectInput(ns("facet_by"), "Facet by:", choices = facet_choices, selected = "none"),
         shiny::checkboxInput(ns("add_line"), "Add regression line?", TRUE),
-        shiny::conditionalPanel(
-          condition = sprintf("input['%s'] == true && input['%s'] != 'none'", ns("add_line"), ns("color_by")),
-          shiny::checkboxInput(ns("group_line"), "Separate line per group?", FALSE)
-        ),
         shiny::sliderInput(ns("point_size"), "Point Size:", min = 1, max = 10, value = 3, step = 0.5),
         shiny::sliderInput(ns("point_alpha"), "Transparency (Alpha):", min = 0.1, max = 1, value = 0.7, step = 0.1)
       )
@@ -125,7 +121,7 @@ scatterPlotServer <- function(id, plot_df) {
       }
 
       # Convert candidates to factors if present
-      for(col in c("sex", "diet", "geno")) {
+      for(col in c("sex", "diet", "geno", "Genotype")) {
         if(col %in% colnames(dat)) {
           dat[[col]] <- factor(dat[[col]])
         }
@@ -162,26 +158,33 @@ scatterPlotServer <- function(id, plot_df) {
       p_size <- ifelse(is.null(input$point_size), 3, input$point_size)
       p_alpha <- ifelse(is.null(input$point_alpha), 0.7, input$point_alpha)
 
-      # Add scatter points
-      p <- p + ggplot2::geom_point(size = p_size, alpha = p_alpha)
-
-      # Add regression lines
+      # Add regression lines first (so they are plotted behind/below the symbols)
       if(shiny::isTruthy(input$add_line)) {
-        if(shiny::isTruthy(input$group_line) && !is.null(col_var) && col_var != "none" && col_var %in% colnames(dat)) {
-          p <- p + ggplot2::geom_smooth(ggplot2::aes(label = NULL), method = "lm", formula = y ~ x, se = FALSE, linewidth = 1)
+        if(!is.null(col_var) && col_var != "none" && col_var %in% colnames(dat)) {
+          p <- p + ggplot2::geom_smooth(ggplot2::aes(label = NULL), method = "lm", formula = y ~ x, se = FALSE, linetype = "solid", linewidth = 1)
         } else {
-          p <- p + ggplot2::geom_smooth(ggplot2::aes(group = 1, label = NULL), method = "lm", formula = y ~ x, se = FALSE, col = "black", linetype = "dashed", linewidth = 1)
+          p <- p + ggplot2::geom_smooth(ggplot2::aes(group = 1, label = NULL), method = "lm", formula = y ~ x, se = FALSE, col = "black", linetype = "solid", linewidth = 1)
         }
+      }
+
+      # Add scatter points on top of regression lines
+      if (is.null(shape_var) || shape_var == "none") {
+        p <- p + ggplot2::geom_point(shape = 1, size = p_size, alpha = p_alpha, stroke = 1.5)
+      } else {
+        p <- p + ggplot2::geom_point(size = p_size, alpha = p_alpha, stroke = 1.5)
+        p <- p + ggplot2::scale_shape_manual(values = c(1, 2, 5, 0, 6, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14))
       }
 
       # Faceting
       facet_var <- input$facet_by
       if(!is.null(facet_var) && facet_var != "none" && facet_var %in% colnames(dat)) {
-        p <- p + ggplot2::facet_wrap(stats::as.formula(paste("~", facet_var)))
+        p <- p + ggplot2::facet_wrap(ggplot2::vars(.data[[facet_var]]))
       }
 
       # Apply theme and colors
-      p <- p + ggplot2::theme_minimal()
+      p <- p + qtl2shiny_plot_theme()
+      # Apply custom axis labels
+      p <- p + ggplot2::labs(x = x_label(), y = y_label())
       if (!is.null(col_var) && col_var != "none" && col_var %in% colnames(dat)) {
         num_levels <- length(unique(dat[[col_var]]))
         if (num_levels <= 8) {

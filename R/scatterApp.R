@@ -17,6 +17,7 @@ scatterApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
     title =  "Test Scatter Panel",
+    theme = qtl2shiny_theme(),
     navbar_options = bslib::navbar_options(bg = "#2D89C8", theme = "dark"),
     bslib::nav_panel(
       title = "Hotspots",
@@ -44,10 +45,17 @@ scatterApp <- function() {
           bslib::card(
             dipParUI("dip_par")),             # allele_names
           width = 400),
-        downr::downloadInput("download"),     # download inputs for Plot or Table
-        bslib::card(scatterInput("scatter_panel"),
-                    min_height = "100px"),    # pos_Mbp, x_var, y_var
-        bslib::card(scatterOutput("scatter_panel"))
+        bslib::layout_sidebar(
+          sidebar = bslib::sidebar(
+            scatterInput("scatter_panel"),
+            width = 300,
+            position = "right"),
+          downr::downloadInput("download"),
+          bslib::card(
+            scatterOutput("scatter_panel"),
+            full_screen = TRUE
+          )
+        )
       )
     )
   )
@@ -81,16 +89,14 @@ scatterServer <- function(id, hotspot_list, pattern_list, snp_list,
 
     # UI inputs for X and Y variable selection
     output$x_var_input <- shiny::renderUI({
-      shiny::req(hotspot_list$pheno_names())
-      choices <- c("Genotype", hotspot_list$pheno_names())
-      selected <- ifelse("Genotype" %in% choices && length(choices) > 1, choices[2], choices[1])
+      choices <- shiny::req(hotspot_list$pheno_names())
+      selected <- choices[1]
       shiny::selectInput(ns("x_var"), "X Variable:", choices = choices, selected = selected)
     })
     
     output$y_var_input <- shiny::renderUI({
-      shiny::req(hotspot_list$pheno_names())
-      choices <- c("Genotype", hotspot_list$pheno_names())
-      selected <- choices[1]
+      choices <- shiny::req(hotspot_list$pheno_names())
+      selected <- ifelse(length(choices) > 1, choices[2], choices[1])
       shiny::selectInput(ns("y_var"), "Y Variable:", choices = choices, selected = selected)
     })
 
@@ -105,58 +111,44 @@ scatterServer <- function(id, hotspot_list, pattern_list, snp_list,
       # Determine row names matching subjects
       subjects <- rownames(phe_mx)
       
-      # Build X column
-      if (input$x_var == "Genotype") {
-        x_val <- geno_tab[, 1]
-      } else {
-        x_val <- phe_mx[, input$x_var]
-      }
+      # Build X and Y columns (phenotype names only)
+      x_val <- phe_mx[, input$x_var]
+      y_val <- phe_mx[, input$y_var]
       
-      # Build Y column
-      if (input$y_var == "Genotype") {
-        y_val <- geno_tab[, 1]
-      } else {
-        y_val <- phe_mx[, input$y_var]
-      }
-      
-      # Create X and Y data frames
-      df_xy <- data.frame(
+      # Create X and Y data frame
+      plot_df <- data.frame(
         subject = subjects,
         x = x_val,
         y = y_val,
         stringsAsFactors = FALSE
       )
       
-      # Add genotype to data frame for color/shape groupings
-      df_geno <- data.frame(
-        subject = rownames(geno_tab),
-        geno = factor(geno_tab[, 1]),
-        stringsAsFactors = FALSE
-      )
+      # Add scan patterns (all columns after the first one)
+      if (ncol(geno_tab) > 1) {
+        for (col in colnames(geno_tab)[-1]) {
+          plot_df[[col]] <- factor(geno_tab[, col])
+        }
+      }
       
-      # Merge all into one data frame
-      plot_df <-
-        dplyr::left_join(df_xy, df_geno, by = "subject")
-        
-      # Add covariates (like sex and diet) if available
+      # Add covariates (only sex and diet) if available
       cov_df <- hotspot_list$covar_df()
       if (!is.null(cov_df) && nrow(cov_df) > 0) {
         df_cov <- data.frame(subject = rownames(cov_df), cov_df, check.names = FALSE)
         if (m <- match("sex", tolower(colnames(df_cov)), nomatch = 0)) {
-          colnames(df_cov)[m] <- "sex"
+          plot_df$sex <- factor(df_cov[[m]])
         }
         if (md <- match("diet", tolower(colnames(df_cov)), nomatch = 0)) {
-          colnames(df_cov)[md] <- "diet"
+          plot_df$diet <- factor(df_cov[[md]])
         }
-        plot_df <-
-          dplyr::left_join(plot_df, df_cov, by = "subject")
       }
         
       plot_df
     })
 
     # Call the generic scatterPlotServer module
-    scatter_plot_obj <- scatterPlotServer("scatter_plot", scatter_df)
+    scatter_plot_obj <- scatterPlotServer("scatter_plot", scatter_df,
+                                          shiny::reactive(input$x_var),
+                                          shiny::reactive(input$y_var))
 
     # Download interface
     download_Plot <- shiny::reactive({

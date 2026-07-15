@@ -105,15 +105,8 @@ patternDataServer <- function(id, dip_par, hotspot_list, snp_list,
       shiny::checkboxInput(ns("blups"), "BLUPs?")
     })
     output$pattern_input <- shiny::renderUI({
-      shiny::req(pattern_choices(), snp_action())
-      choices <- pattern_choices()
-      if (!length(choices)) {
-        choices <- input$pattern
-      }
-      shiny::selectInput(ns("pattern"), NULL,
-        choices = choices,
-        selected = input$pattern
-      )
+      shiny::req(snp_action())
+      shiny::selectInput(ns("pattern"), NULL, choices = "")
     })
 
     ## Select pattern for plots.

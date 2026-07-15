@@ -24,6 +24,7 @@ mediatePlotApp <- function() {
   projects_df <- read.csv("qtl2shinyData/projects.csv", stringsAsFactors = FALSE)
   ui <- bslib::page_navbar(
     title =  "Test Mediate Plot",
+    theme = qtl2shiny_theme(),
     bslib::nav_panel(
       title = "Hotspots",
       bslib::layout_sidebar(
