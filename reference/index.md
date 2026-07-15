@@ -165,6 +165,10 @@
   [`qtl2shinyServer()`](https://byandell-sysgen.github.io/qtl2shiny/reference/qtl2shinyApp.md)
   [`qtl2shinyUI()`](https://byandell-sysgen.github.io/qtl2shiny/reference/qtl2shinyApp.md)
   : Shiny QTL2 Shiny App
+- [`qtl2shiny_plot_theme()`](https://byandell-sysgen.github.io/qtl2shiny/reference/qtl2shiny_plot_theme.md)
+  : QTL2 Shiny Plot Theme
+- [`qtl2shiny_theme()`](https://byandell-sysgen.github.io/qtl2shiny/reference/qtl2shiny_theme.md)
+  : QTL2 Shiny UI Theme
 - [`read_peaks()`](https://byandell-sysgen.github.io/qtl2shiny/reference/read_peaks.md)
   [`create_peak_class()`](https://byandell-sysgen.github.io/qtl2shiny/reference/read_peaks.md)
   : Read Peaks for Phenotypes by Class
