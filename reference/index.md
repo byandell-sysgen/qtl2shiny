@@ -186,6 +186,11 @@
   [`scanDataInput()`](https://byandell-sysgen.github.io/qtl2shiny/reference/scanDataApp.md)
   [`scanDataOutput()`](https://byandell-sysgen.github.io/qtl2shiny/reference/scanDataApp.md)
   : Shiny Scan Module
+- [`scatterApp()`](https://byandell-sysgen.github.io/qtl2shiny/reference/scatterApp.md)
+  [`scatterServer()`](https://byandell-sysgen.github.io/qtl2shiny/reference/scatterApp.md)
+  [`scatterInput()`](https://byandell-sysgen.github.io/qtl2shiny/reference/scatterApp.md)
+  [`scatterOutput()`](https://byandell-sysgen.github.io/qtl2shiny/reference/scatterApp.md)
+  : Shiny Scatter App
 - [`scatterPlotApp()`](https://byandell-sysgen.github.io/qtl2shiny/reference/scatterPlotApp.md)
   [`scatterPlotServer()`](https://byandell-sysgen.github.io/qtl2shiny/reference/scatterPlotApp.md)
   [`scatterPlotInput()`](https://byandell-sysgen.github.io/qtl2shiny/reference/scatterPlotApp.md)
