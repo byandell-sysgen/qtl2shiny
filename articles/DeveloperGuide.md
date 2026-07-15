@@ -15,7 +15,10 @@ library(qtl2shiny)
 Those wishing to *use* the shiny interface with their own data will want
 to read about the data structures, or contact me. Those wishing to
 *extend* capabilities of the package, or understand its inner working,
-will be interested in the package organization.
+will be interested in the package organization. This developer guide was
+generated with the help of Antigravity, with significant editing and
+rewriting; see [Create Developer’s Guide to
+`qtl2shiny`](https://byandell.github.io/Documentation/prompts/devel_guide.html).
 
 ## Data Structures and Folder Organization
 
