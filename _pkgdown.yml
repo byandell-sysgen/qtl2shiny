@@ -22,17 +22,17 @@ navbar:
         - text: "Module Architecture (New)"
           href: articles/devel_guide/index.html
         - text: "Hotspots & Phenotypes Module"
-          href: articles/devel_guide/hotspotApp.html
+          href: articles/devel_guide/hotspot.html
         - text: "Allele & SNP Scans Module"
-          href: articles/devel_guide/scanApp.html
+          href: articles/devel_guide/scan.html
         - text: "Patterns Module"
-          href: articles/devel_guide/patternApp.html
+          href: articles/devel_guide/pattern.html
         - text: "Genotypes Module"
-          href: articles/devel_guide/genoApp.html
-        - text: "Mediation Module"
-          href: articles/devel_guide/mediateApp.html
+          href: articles/devel_guide/geno.html
         - text: "Scatter Plot Module"
-          href: articles/devel_guide/scatter_plot.html
+          href: articles/devel_guide/scatter.html
+        - text: "Mediation Module"
+          href: articles/devel_guide/mediate.html
 
 articles:
   - title: "User Documentation"
@@ -42,10 +42,10 @@ articles:
   - title: "Developer Documentation"
     contents:
       - DeveloperGuide
-      - devel_guide/index
-      - devel_guide/hotspotApp
-      - devel_guide/scanApp
-      - devel_guide/patternApp
-      - devel_guide/genoApp
-      - devel_guide/mediateApp
-      - devel_guide/scatter_plot
+      - "devel_guide/index"
+      - "devel_guide/hotspot"
+      - "devel_guide/scan"
+      - "devel_guide/pattern"
+      - "devel_guide/geno"
+      - "devel_guide/scatter"
+      - "devel_guide/mediate"
