@@ -43,13 +43,9 @@ patternDataApp <- function() {
       title = "Pattern Data",
       bslib::layout_sidebar(
         sidebar = bslib::sidebar(
-          bslib::card(
-            patternDataInput("pattern_list"), # blups, pheno_name
-            patternDataUI("pattern_list")
-          ), # pattern
-          bslib::card(
-            dipParInput("dip_par")
-          ), # snp_action
+          patternDataInput("pattern_list"), # blups, pheno_name
+          patternDataUI("pattern_list"), # pattern
+          dipParInput("dip_par"), # snp_action
           bslib::card(
             snpListInput("snp_list")
           ), # scan_window, minLOD, pheno_name
@@ -70,13 +66,12 @@ patternDataApp <- function() {
       dip_par$snp_action
     })
     snp_list <- snpListServer("snp_list", hotspot_list, project_df, snp_action)
-    # ** This leads to 2 calls to SNP Scan **
-    # pairprobs_obj <-
-    #   pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
-    # pattern_list <- patternDataServer(
-    #   "pattern_list", dip_par, hotspot_list,
-    #   snp_list, pairprobs_obj, project_df
-    # )
+    pairprobs_obj <-
+      pairProbsServer("pairprobs", hotspot_list$win_par, project_df)
+    pattern_list <- patternDataServer(
+      "pattern_list", dip_par, hotspot_list,
+      snp_list, pairprobs_obj, project_df
+    )
   }
   shiny::shinyApp(ui, server)
 }
@@ -203,6 +198,7 @@ patternDataServer <- function(id, dip_par, hotspot_list, snp_list,
     # Returns `pattern_list`.
     shiny::reactiveValues(
       pat_par = input,
+      pheno_name = pheno_name,
       haplos = haplos,
       pattern_choices = pattern_choices,
       scan_pattern = scan_pattern,
@@ -214,8 +210,7 @@ patternDataServer <- function(id, dip_par, hotspot_list, snp_list,
 #' @rdname patternDataApp
 patternDataInput <- function(id) {
   ns <- shiny::NS(id)
-  shiny::tagList(
-    shiny::uiOutput(ns("blups_input"))) # blups
+  shiny::uiOutput(ns("blups_input")) # blups
 }
 #' @export
 #' @rdname patternDataApp

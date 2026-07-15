@@ -168,9 +168,9 @@ scatterPlotServer <- function(id, plot_df) {
       # Add regression lines
       if(shiny::isTruthy(input$add_line)) {
         if(shiny::isTruthy(input$group_line) && !is.null(col_var) && col_var != "none" && col_var %in% colnames(dat)) {
-          p <- p + ggplot2::geom_smooth(method = "lm", formula = y ~ x, se = FALSE, linewidth = 1)
+          p <- p + ggplot2::geom_smooth(ggplot2::aes(label = NULL), method = "lm", formula = y ~ x, se = FALSE, linewidth = 1)
         } else {
-          p <- p + ggplot2::geom_smooth(ggplot2::aes(group = 1), method = "lm", formula = y ~ x, se = FALSE, col = "black", linetype = "dashed", linewidth = 1)
+          p <- p + ggplot2::geom_smooth(ggplot2::aes(group = 1, label = NULL), method = "lm", formula = y ~ x, se = FALSE, col = "black", linetype = "dashed", linewidth = 1)
         }
       }
 

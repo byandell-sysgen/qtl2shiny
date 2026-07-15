@@ -83,14 +83,14 @@ patternPlotServer <- function(id, pattern_list, pairprobs_obj) {
       if(is.null(pattern_list$scan_pattern()))
         return(plot_null())
       shiny::req(pattern_list$scan_pattern(), pattern_list$pattern_choices(),
-                 pattern_list$pat_par$pheno_name, pairprobs_obj(),
+                 pattern_list$pheno_name(), pairprobs_obj(),
                  plot_type_msg())
       shiny::withProgress(message = plot_type_msg()$msg, value = 0, {
         shiny::setProgress(1)
         scan_pat_type(pattern_list$scan_pattern(), pairprobs_obj()$map,
                       plot_type_msg()$type,
                       pattern_list$pattern_choices(), 
-                      pattern_list$pat_par$pheno_name,
+                      pattern_list$pheno_name(),
                       pattern_list$haplos())
       })
     })

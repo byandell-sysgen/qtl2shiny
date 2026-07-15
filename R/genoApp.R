@@ -111,7 +111,7 @@ genoServer <- function(id, hotspot_list, pattern_list, snp_list, pairprobs_obj,
       table_type <- ifelse(
         shiny::req(input$gen_tab) %in% c("Genotypes","GenoTable"),
         "_Geno", "_Effect")
-      out <- paste0(shiny::req(pattern_list$pat_par$pheno_name), table_type)
+      out <- paste0(shiny::req(pattern_list$pheno_name()), table_type)
       c(Plot  = out, Table = out)
     })
     download_Type <- shiny::reactive({

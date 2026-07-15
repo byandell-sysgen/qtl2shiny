@@ -111,9 +111,9 @@ mediatePlotServer <- function(id, hotspot_list, mediate_list, probs_obj, project
         colnames(df_cov)[md] <- "diet"
       }
       
-      plot_df <- df_x %>%
-        dplyr::left_join(df_y, by = "subject") %>%
-        dplyr::left_join(df_geno, by = "subject") %>%
+      plot_df <- df_x |>
+        dplyr::left_join(df_y, by = "subject") |>
+        dplyr::left_join(df_geno, by = "subject") |>
         dplyr::left_join(df_cov, by = "subject")
         
       plot_df

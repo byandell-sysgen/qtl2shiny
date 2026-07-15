@@ -22,7 +22,7 @@ geno_ggplot <- function(geno_table, pheno_mx) {
     ggrepel::geom_text_repel(max.overlaps = Inf, min.segment.length = Inf,
                              size = 3, fontface = 2)
   if(length(pheno_names) > 1) {
-    p <- p + ggplot2::geom_smooth(ggplot2::aes(group = group),
+    p <- p + ggplot2::geom_smooth(ggplot2::aes(group = group, label = NULL),
       se = FALSE, method = "lm", formula = "y ~ x", linewidth = 2, linetype = 2)
   }
   p

@@ -89,7 +89,7 @@ genoEffectServer <- function(id, hotspot_list, pattern_list, snp_list,
       shiny::req(snp_action(), project_df(), pairprobs_obj(),
                  hotspot_list$kinship_list(), hotspot_list$covar_df(),
                  hotspot_list$peak_df(), pattern_list$scan_pattern())
-      pheno_name <- shiny::req(pattern_list$pat_par$pheno_name)
+      pheno_name <- shiny::req(pattern_list$pheno_name())
       pheno_mx <-
         shiny::req(hotspot_list$pheno_mx())[, pheno_name, drop = FALSE]
       # ** may not have yet **
