@@ -1,6 +1,5 @@
 ---
-title: "qtl2shiny Developer Guide"
-subtitle: "Overview"
+title: "Developer Guide Overview"
 author: "Brian S. Yandell"
 date: "`r format(Sys.Date(), '%d %b %Y')`"
 output: rmarkdown::html_vignette
