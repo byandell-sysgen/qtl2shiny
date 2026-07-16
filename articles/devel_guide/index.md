@@ -1,349 +1,350 @@
-# Module Architecture
+# qtl2shiny Developer Guide
 
-This directory contains developer-facing documentation for the
-`qtl2shiny` package. It details the architecture of the Shiny
-application, how data flows through the system, and how the 40+ module
-files (`R/*App.R`) are organized into visual panels and utility layers.
-Prompts and process to create this guide are documented in [Create
-Developer’s Guide to
-`qtl2shiny`](https://byandell.github.io/Documentation/prompts/devel_guide.html)
+This document is a Developer Guide for the
+[R/qtl2shiny](https://github.com/byandell/qtl2shiny) package, with goals
+to explain:
+
+- data structures and folder organization
+- package workflow and shiny tool components
+
+``` r
+
+library(qtl2shiny)
+```
+
+Those wishing to *use* the shiny interface with their own data will want
+to read about the data structures, or contact me. Those wishing to
+*extend* capabilities of the package, or understand its inner working,
+will be interested in the package organization. This developer guide was
+generated with the help of Antigravity, with significant editing and
+rewriting; see [Create Developer’s Guide to
+`qtl2shiny`](https://byandell.github.io/Documentation/prompts/devel_guide.html).
 
 ## Table of Contents
 
-- [1. High-Level Architecture &
-  Layout](#id_1-high-level-architecture--layout)
-  - [UI Layout](#ui-layout)
-  - [Module Communication](#module-communication)
-  - [Download Framework (`downr`
-    Integration)](#download-framework-downr-integration)
-- [2. Analysis Panels](#id_2-analysis-panels)
-  - [A. Hotspots & Phenotypes](#a-hotspots--phenotypes)
-  - [B. Allele & SNP Scans](#b-allele--snp-scans)
-  - [C. Pattern Analysis](#c-pattern-analysis)
-  - [D. Genotypes](#d-genotypes)
-  - [E. Mediation](#e-mediation)
-- [3. Generic & Utility Modules](#id_3-generic--utility-modules)
-- [4. Comprehensive File Mapping](#id_4-comprehensive-file-mapping)
+- [Data Structures and Folder
+  Organization](#data-structures-and-folder-organization)
+  - [Taxa Information](#taxa-information)
+  - [Project Information](#project-information)
+- [Data files](#data-files)
+- [Genotype probabilities](#genotype-probabilities)
+- [Query files](#query-files)
+  - [Remote files and connections](#remote-files-and-connections)
+  - [File types](#file-types)
+- [Package Workflow and Shiny Tool
+  Components](#package-workflow-and-shiny-tool-components)
+- Detailed Module Guides
+  - [Module
+    Architecture](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/module.md)
+  - [Hotspots & Phenotypes Panel
+    (`hotspotApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/hotspot.md)
+  - [Allele & SNP Scans Panel
+    (`scanApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/scan.md)
+  - [Patterns Panel
+    (`patternApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/pattern.md)
+  - [Genotypes Panel
+    (`genoApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/geno.md)
+  - [Scatter Plot Modules (`scatterPlotApp` /
+    `scatterApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/scatter.md)
+  - [Mediation Panel
+    (`mediateApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/mediate.md)
 
-### Detailed Module Guides
+## Data Structures and Folder Organization
 
-- [Hotspots & Phenotypes Panel
-  (`hotspotApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/hotspot.md)
-- [Allele & SNP Scans Panel
-  (`scanApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/scan.md)
-- [Patterns Panel
-  (`patternApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/pattern.md)
-- [Genotypes Panel
-  (`genoApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/geno.md)
-- [Scatter Plot Modules (`scatterPlotApp` /
-  `scatterApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/scatter.md)
-- [Mediation Panel
-  (`mediateApp`)](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/mediate.md)
+The interface assumes the Shiny app file
+[app.R](https://github.com/byandell/qtl2shiny/blob/master/inst/qtl2shinyApp/app.R)
+is in a directory with other support documents and the data folder,
+`qtl2shinyData`. There is no need to change this file; just put it in
+place.
 
-------------------------------------------------------------------------
+The CSV file
+[`projects.csv`](https://github.com/byandell/qtl2shiny/blob/master/inst/qtl2shinyApp/projects.csv),
+in the sub-folder, `qtl2shinyData`, contains project information. This
+file has the following content:
 
-## 1. High-Level Architecture & Layout
+    project,taxa,directory
+    Recla,CCmouse,qtl2shinyData
 
-The main entry point for the application is defined in
-[R/qtl2shinyApp.R](https://byandell-sysgen.github.io/R/qtl2shinyApp.R).
-It uses the **Bootstrap 5 (`bslib`)** framework to construct a
-responsive, sidebar-driven dashboard.
+The column names are fixed. The `project` is the project name (`Recla`),
+`taxa` has the taxa name (`CCmouse`), and `directory` is the relative or
+absolute address of the directory where data are kept (`qtl2shinyData`,
+which is relative here). In this case, the basic structure of the app
+is:
 
-### UI Layout
+[`app.R`](https://github.com/byandell/qtl2shiny/blob/master/inst/qtl2shinyApp/app.R)  
+[`about.md`](https://github.com/byandell/qtl2shiny/blob/master/inst/qtl2shinyApp/about.md)  
+[`about-extended.md`](https://github.com/byandell/qtl2shiny/blob/master/inst/qtl2shinyApp/about-extended.md)  
+`qtl2shinyData/`  
+[`qtl2shinyData/projects.csv`](https://github.com/byandell/qtl2shiny/blob/master/inst/qtl2shinyApp/qtl2shinyData/projects.csv)  
+`qtl2shinyData/CCmouse/`  
+`qtl2shinyData/CCmouse/Recla/`
 
-The dashboard layout is defined in
-[`qtl2shinyUI()`](https://byandell-sysgen.github.io/qtl2shiny/reference/qtl2shinyApp.md):
+The `about.md` and `about-extended.md` files are place-holders for now
+for online documentation. All data may be stored under the directory
+(`qtl2shinyData`).
 
-- **Global Sidebar**: Contains global configuration selectors loaded
-  dynamically:
-  - Project registry selection (`projectUI`)
-  - Phenotype dataset class and model parameters (`hotspotInput`)
-  - SNP parameters (`dipParInput`)
-  - SNP and phenotype subset filters (`snpListInput`)
-- **Header**: Contains the download button/dropdown widget
-  ([`downr::downloadInput`](https://rdrr.io/pkg/downr/man/downloadApp.html))
-  which connects dynamically to the active panel.
-- **Main Body**: Organizes the app into six major navigation tabs
-  ([`bslib::nav_panel`](https://rstudio.github.io/bslib/reference/nav-items.html)):
-  1.  **Hotspots & Phenotypes**
-  2.  **Allele & SNP Scans**
-  3.  **Patterns**
-  4.  **Genotypes**
-  5.  **Scatter Plot**
-  6.  **Mediation**
+Detailed information about the `taxa` and `project` can be found with
+the
+[CCmouse.Rmd](https://github.com/byandell/qtl2shiny/blob/master/inst/doc/CCmouse.Rmd)
+and
+[Recla.Rmd](https://github.com/byandell/qtl2shiny/blob/master/inst/doc/Recla.Rmd)
+examples, respectively.
 
-### Module Communication
+### Taxa information
 
-The panels communicate using reactive values passed down from parent
-modules or shared via returned reactive lists. The server logic in
-[`qtl2shinyServer()`](https://byandell-sysgen.github.io/qtl2shiny/reference/qtl2shinyApp.md)
-instantiates and links these modules together.
+The `taxa` sub-directory (`CCmouse`) contains the following files. See
+<https://github.com/rqtl/qtl2db> for explanation of the SQL databases
+and query routines.
 
-``` mermaid
-graph TD
-    ProjectDF[projectApp.R] -->|project_df| Hotspot[hotspotApp.R]
-    ProjectDF -->|project_df| Probs[probsApp.R]
-    ProjectDF -->|project_df| SnpList[snpListApp.R]
-    
-    Hotspot -->|hotspot_list| SnpList
-    Hotspot -->|hotspot_list| Scan[scanApp.R]
-    Hotspot -->|hotspot_list| Pattern[patternApp.R]
-    Hotspot -->|hotspot_list| Geno[genoApp.R]
-    Hotspot -->|hotspot_list| Mediate[mediateApp.R]
-    
-    SnpList -->|snp_list| Scan
-    SnpList -->|snp_list| Pattern
-    SnpList -->|snp_list| Geno
-    SnpList -->|snp_list| Mediate
-    
-    Probs -->|probs_obj| Scan
-    Probs -->|probs_obj| Mediate
-    
-    PairProbs[pairProbs] -->|pairprobs_obj| Pattern
-    PairProbs -->|pairprobs_obj| Geno
+| file | contents |
+|----|----|
+| `allele_info.rds` | information on alleles for taxa |
+| `taxa_info.rds` | information on taxa (name of species for Ensembl lookup) |
+| `cc-variants.sqlite` | CC structural variants in SQL database |
+| `mouse_genes_mgi.sqlite` | mouse genes curated by MGI in SQL database |
+| `query_genes.rds` | query routine for genes |
+| `query_variants.rds` | query routines for structural variants |
+
+### Project information
+
+The `project` sub-sub-directory (`Recla`) has the data specific to the
+project. An example of how this is created can be found in
+[Recla.Rmd](https://github.com/byandell/qtl2shiny/blob/master/inst/doc/Recla.Rmd).
+Most of the objects are stored as
+[RDS](https://www.rdocumentation.org/packages/base/versions/3.4.3/topics/readRDS).
+The genotype probabilities are converted from `calc_genoprob` to
+`fst_genoprob` format using
+[R/qtl2fst](https://github.com/byandell/qtl2fst). Query routines are
+somewhat analogous to those used for `taxa` above.
+
+Note that [R/qtl2](http://www.rqtl.org/qtl2) wants data files to be
+consistent in terms of individual identifiers. The `covar.rds` and
+`pheno_data.rds` files have identifiers as row names, which are also
+used in the genotype probabilities.
+
+| file | contents |
+|----|----|
+| `genoprob/` | directory with genotype probabilities created with [R/qtl2fst](https://github.com/byandell/qtl2fst) |
+| `kinship.rds` | kinship object using LOCO (see [R/qtl2](http://kbroman.org/qtl2/assets/vignettes/user_guide.html#calculating_a_kinship_matrix)) |
+| `pmap.rds` | physical map |
+| `covar.rds` | data frame of covariates (row = individual, column = covariate) |
+| `pheno_data.rds` | matrix of phenotype data (row = individual, column = phenotype) |
+| `analyses.rds` | data frame of information about analyses (one row per phenotype) |
+| `peaks.rds` | data frame of peak information (one row per peak) |
+| `hotspot.rds` | hotspot object with counts of peaks by position and phenotype set |
+| `query_mrna.rds` | query of mRNA data |
+| `query_probs.rds` | query of genotype probabilities |
+
+Likely changes:
+
+- pheno_data.rds may become a fst database
+- analyses.rds will be redesigned
+
+Some projects have an `RNAseq` folder. This, and accompanying routines
+for mRNA now in [R/qtl2pattern](https://github.com/byandell/qtl2pattern)
+and other packages, will likely be redesigned. Currently, code is set up
+for only one type of mRNA data.
+
+## Data files
+
+The easiest way to set up data files is to look at the example in
+[Recla.Rmd](https://github.com/byandell/qtl2shiny/blob/master/inst/doc/Recla.Rmd).
+Once you have created the objects in R, you can save them as, for
+instance, RDS files (here using the same names as in
+[Recla.Rmd](https://github.com/byandell/qtl2shiny/blob/master/inst/doc/Recla.Rmd)).
+
+``` r
+
+project_info <- utils::read.csv("project.csv")
+project_dir <- file.path(project_info$taxa[1],
+                         project_info$project[1])
+saveRDS(kinship, file.path(project_dir, "kinship.rds"))
+saveRDS(pmap, file.path(project_dir, "pmap.rds"))
+saveRDS(covar, file.path(project_dir, "covar.rds"))
+saveRDS(pheno, file.path(project_dir, "pheno_data.rds"))
+saveRDS(analyses_tbl, file.path(project_dir, "analyses.rds"))
+saveRDS(peaks, file.path(project_dir, "peaks.rds"))
+saveRDS(hots, file.path(project_dir, "hotspot.rds"))
 ```
 
-### Download Framework (`downr` Integration)
+## Genotype probabilities
 
-At any point, the active panel exposes a reactive list containing:
+Genotype probabilities get stored in `fst` databases by chromosome for
+rapid access. This takes a few steps, starting with creating a directory
+to store files and calculating genotype probabilities for allele pairs.
 
-- `Plot`: A reactive expression returning the currently displayed ggplot
-  or plotly object.
-- `Table`: A reactive expression returning the currently displayed
-  dataframe or data table.
-- `Filename`: The output prefix name based on current settings
-  (e.g. phenotype names).
-- `Type`: A selector determining if the user downloads a plot, table, or
-  has to choose.
+``` r
 
-The server observes the active tab (`input$panel`) and routes the
-corresponding panel’s download reactive list to
-`downr::downloadServer("download", download_list_panel)`.
+# Create directory for fst data; must call it "genoprob"
+fst_dir <- file.path(project_dir, "genoprob")
+dir.create(fst_dir)
 
-------------------------------------------------------------------------
+# Calculate allele pair genotype probabilities
+probs <- qtl2::calc_genoprob(recla, gmap, err=0.002)
+# Convert allele pair probs to fst via qtl2fst
+fprobs <- qtl2pattern::fst_genoprob(probs, "probs", fst_dir)
+saveRDS(fprobs, file = file.path(fst_dir, "fprobs.rds"))
 
-## 2. Analysis Panels
+# Compute allele genotype probabilities from those for allele pairs
+aprobs <- genoprob_to_alleleprob(probs)
+# Convert allele probs to fst via qtl2fst
+faprobs <- fst_genoprob(aprobs, "aprobs", fst_dir)
+saveRDS(faprobs, file = file.path(fst_dir, "faprobs.rds"))
+```
 
-### A. Hotspots & Phenotypes
+## Query files
 
-- **Purpose**: Allows users to load experimental projects, select
-  phenotype datasets, run genome-wide hotspot scans, and view specific
-  raw phenotype distributions.
-- **Entrypoint**:
-  [R/hotspotApp.R](https://byandell-sysgen.github.io/R/hotspotApp.R)
-- **Constituent Modules**:
-  - [R/hotspotDataApp.R](https://byandell-sysgen.github.io/R/hotspotDataApp.R):
-    Computes the hotspot object by calculating the density of
-    precomputed QTL peaks across chromosomes.
-  - [R/hotspotPlotApp.R](https://byandell-sysgen.github.io/R/hotspotPlotApp.R):
-    Generates plots of hotspot scans (LOD or peak count vs. genomic
-    coordinates).
-  - [R/hotspotTableApp.R](https://byandell-sysgen.github.io/R/hotspotTableApp.R):
-    Renders a searchable data table of peaks within the selected
-    hotspot.
-  - [R/peakApp.R](https://byandell-sysgen.github.io/R/peakApp.R):
-    Manages peak summaries filtered to the hotspot.
-  - [R/peakReadApp.R](https://byandell-sysgen.github.io/R/peakReadApp.R):
-    Performs file reading of the `peaks.rds` data file.
-  - [R/phenoApp.R](https://byandell-sysgen.github.io/R/phenoApp.R): Acts
-    as the container module for phenotype distribution panels.
-  - [R/phenoReadApp.R](https://byandell-sysgen.github.io/R/phenoReadApp.R):
-    Reads the `pheno_data.rds` matrix.
-  - [R/phenoNamesApp.R](https://byandell-sysgen.github.io/R/phenoNamesApp.R):
-    Controls selectors for phenotype name filtering.
-  - [R/phenoDataApp.R](https://byandell-sysgen.github.io/R/phenoDataApp.R):
-    Normalizes and filters phenotype values (e.g. rank-Z transformation
-    via `rankZ()`).
-  - [R/phenoTableApp.R](https://byandell-sysgen.github.io/R/phenoTableApp.R):
-    Displays raw or normalized phenotype values.
-  - [R/phenoPlotApp.R](https://byandell-sysgen.github.io/R/phenoPlotApp.R):
-    Plots boxplots, scatterplots, or density distributions.
+The query files are designed to encapsulate specific information about
+where data are stored and how to retrieve them, so that different
+projects might use different strategies. For instance, some projects
+might use CSV or RDS files, while others might use SQL or fst databases.
+There are four query objects, for genes, variants, mrna and probs.
 
-### B. Allele & SNP Scans
+Note that if you use a similar format as
+[CCmouse.Rmd](https://github.com/byandell/qtl2shiny/blob/master/inst/doc/CCmouse.Rmd)
+and
+[Recla.Rmd](https://github.com/byandell/qtl2shiny/blob/master/inst/doc/Recla.Rmd)
+examples to create and store the queries, you may have to quit RStudio
+and restart it to have it properly pick up the `project` or `taxa`
+directory.
 
-- **Purpose**: Computes and compares genome-wide scans using
-  multi-parent allele founder coefficients versus high-density SNP
-  association mapping.
-- **Entrypoint**:
-  [R/scanApp.R](https://byandell-sysgen.github.io/R/scanApp.R)
-- **Constituent Modules**:
-  - [R/scanDataApp.R](https://byandell-sysgen.github.io/R/scanDataApp.R):
-    Computes and plots allele founder coefficients scans (LOD/BLUP
-    curves) for selected chromosomes.
-  - [R/snpGeneApp.R](https://byandell-sysgen.github.io/R/snpGeneApp.R):
-    Top-level wrapper linking SNP tables, SNP plots, gene region
-    overlays, and exon plots.
-  - [R/snpTableApp.R](https://byandell-sysgen.github.io/R/snpTableApp.R):
-    Lists top SNPs/variants in the region.
-  - [R/snpPlotApp.R](https://byandell-sysgen.github.io/R/snpPlotApp.R):
-    Renders the Manhattan-style SNP association LOD scan.
-  - [R/geneRegionApp.R](https://byandell-sysgen.github.io/R/geneRegionApp.R):
-    Queries gene annotation databases and draws gene models in the
-    window.
-  - [R/geneExonApp.R](https://byandell-sysgen.github.io/R/geneExonApp.R):
-    Pulls detailed exon structures for a clicked or queried gene.
+The following two `create` functions are in
+[R/qtl2](http://www.rqtl.org/qtl2). They create functions (`query_genes`
+and `query_variants`) that contain, in their local environment, the
+location of the respective SQL database. Saving these as RDS preserves
+this environment information for later reuse.
 
-### C. Pattern Analysis
+``` r
 
-- **Purpose**: Groups high-density SNPs in a QTL region into Strain
-  Distribution Patterns (SDPs) to narrow down candidates based on shared
-  founder ancestral alleles.
-- **Entrypoint**:
-  [R/patternApp.R](https://byandell-sysgen.github.io/R/patternApp.R)
-- **Constituent Modules**:
-  - [R/snpPatternApp.R](https://byandell-sysgen.github.io/R/snpPatternApp.R):
-    Top-level module coordinating pattern scans, features, and plotting.
-  - [R/patternDataApp.R](https://byandell-sysgen.github.io/R/patternDataApp.R):
-    Runs the underlying scan for the top SDPs and generates summaries.
-  - [R/patternPlotApp.R](https://byandell-sysgen.github.io/R/patternPlotApp.R):
-    Generates SDP scan plots comparing multiple phenotypes.
-  - [R/snpFeatureApp.R](https://byandell-sysgen.github.io/R/snpFeatureApp.R):
-    Maps variants to genomic consequences (synonymous, coding, intron,
-    splice site, etc.) and catalogs SDP details.
+query_genes <- 
+  qtl2::create_gene_query_func("CCmouse/mouse_genes.sqlite")
+saveRDS(query_genes, "query_genes.rds")
+```
 
-### D. Genotypes
+``` r
+query_variants <- 
+  qtl2::create_variant_query_func("CCmouse/cc_variants.sqlite"))
+saveRDS(query_variants, "query_variants.rds")
+```
 
-- **Purpose**: Inspects multi-point raw founder genotype probabilities,
-  strain distribution pattern assignments, and their phenotypic effects
-  at specific genomic locations.
-- **Entrypoint**:
-  [R/genoApp.R](https://byandell-sysgen.github.io/R/genoApp.R)
-- **Constituent Modules**:
-  - [R/genoDataApp.R](https://byandell-sysgen.github.io/R/genoDataApp.R):
-    Renders genotype probabilities and SDP pairings at a chosen physical
-    marker. For a deep-dive, see the [Genotypes Panel
-    Guide](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/geno.md).
-  - [R/genoPlotApp.R](https://byandell-sysgen.github.io/R/genoPlotApp.R):
-    Visualizes individuals’ genotype probabilities along chromosomal
-    segments.
-  - [R/genoEffectApp.R](https://byandell-sysgen.github.io/R/genoEffectApp.R):
-    Evaluates phenotypic averages by genotype group, providing tables
-    and plots of genetic effects.
+This allows calls of the following form to be embedded in code, without
+reference to where the database is, or even what type of database it
+might be. Here we look on chromosome `"1"` between `39` and `40` Mbp.
 
-### E. Scatter Plot
+``` r
 
-- **Purpose**: Displays scatter plots of selected phenotypes, grouped
-  and colored by ancestral strain distribution patterns (SDPs), sex, or
-  diet.
-- **Entrypoint**:
-  [R/scatterApp.R](https://byandell-sysgen.github.io/R/scatterApp.R)
-- **Constituent Modules**:
-  - [R/scatterPlotApp.R](https://byandell-sysgen.github.io/R/scatterPlotApp.R):
-    Reusable generic plotting module managing aesthetic mappings, open
-    symbol selections, and linetypes.
+genes <- query_genes("1", 39, 40)
+variants <- query_variants("1", 39, 40)
+```
 
-### F. Mediation
+The above two routines would generally be used across all projects
+involving the CC mouse. The following two routines are project specific,
+refering to genotype probabilities and `mRNA` data. They do not directly
+identify the data file, as that is currently hard-coded into the
+[R/qtl2pattern](https://github.com/byandell/qtl2pattern) package. These
+will change substantially in the near future.
 
-- **Purpose**: Performs regression-based QTL mediation analysis (e.g.,
-  intermediate mRNA expression or protein abundance) to identify
-  candidate causal drivers.
-- **Entrypoint**:
-  [R/mediateApp.R](https://byandell-sysgen.github.io/R/mediateApp.R)
-- **Constituent Modules**:
-  - [R/mediateDataApp.R](https://byandell-sysgen.github.io/R/mediateDataApp.R):
-    Calls mediation libraries (`qtl2mediate`) to compute the drop in QTL
-    LOD score when conditioning on mediators.
-  - [R/mediatePlotApp.R](https://byandell-sysgen.github.io/R/mediatePlotApp.R):
-    Visualizes mediation results (LOD drops vs. physical coordinates).
-  - [R/triadApp.R](https://byandell-sysgen.github.io/R/triadApp.R):
-    Plots individual scatterplot grids illustrating relationships among
-    driver locus, mediator, and target phenotype.
+``` r
 
-------------------------------------------------------------------------
+query_probs <- qtl2pattern::create_probs_query_func_do("CCmouse/Recla")
+saveRDS(query_probs, "query_probs.rds")
+```
 
-## 3. Generic & Utility Modules
+``` r
 
-These modules do not represent individual analysis panels but act as
-shared global selectors or data managers. They are essential for feeding
-reactive parameters into multiple tabs:
+query_mrna <- qtl2pattern::create_mrna_query_func_do(NULL)
+saveRDS(query_probs, "query_mrna.rds")
+```
 
-- **[R/projectApp.R](https://byandell-sysgen.github.io/R/projectApp.R)**:
-  Loads the initial project list from `projects.csv` and allows the user
-  to switch between taxa, databases, and study setups.
-- **[R/setParApp.R](https://byandell-sysgen.github.io/R/setParApp.R)**:
-  Dynamically extracts study-specific parameters (such as the phenotype
-  `class` and `subject_model`) depending on the selected project
-  registry.
-- **[R/winParApp.R](https://byandell-sysgen.github.io/R/winParApp.R)**:
-  Tracks the active chromosomal window (Chr, Start/End Mbp) selected
-  from a peak or hotspot table.
-- **[R/dipParApp.R](https://byandell-sysgen.github.io/R/dipParApp.R)**:
-  Manages genetic model parameters (additive vs. dominance actions,
-  founder allele codes).
-- **[R/snpListApp.R](https://byandell-sysgen.github.io/R/snpListApp.R)**:
-  Consolidated input selector for SNP filters. It handles local
-  coordinates, min LOD score sliders, and active phenotype selections.
-- **[R/probsApp.R](https://byandell-sysgen.github.io/R/probsApp.R)**:
-  Reactive server utility to load high-dimensional multi-point founder
-  genotype probabilities using fast disk-backed serialization (`FST`
-  database queries).
-- **[R/kinshipApp.R](https://byandell-sysgen.github.io/R/kinshipApp.R)**:
-  Reactively loads LOCO (Leave-One-Chromosome-Out) kinship matrix
-  objects corresponding to the active chromosome.
-- **[R/downloadApp.R](https://byandell-sysgen.github.io/R/downloadApp.R)**:
-  Wrapper server interfacing with the `downr` external package to manage
-  CSV exports and vector plot rendering (PNG/PDF).
-- **[R/scatterPlotApp.R](https://byandell-sysgen.github.io/R/scatterPlotApp.R)**:
-  Generic reusable module to plot static or interactive scatter plots (X
-  vs Y, with option to map Sex, Diet, and Genotype to Color/Shape/Facet
-  aesthetics).
+Again, these enable calls to access data in a region. The `Recla` data
+does not have mRNA data, but we still have to create a `NULL` query. I
+include additional arguments that are used for these routines. They
+call, respectively,
+[`qtl2pattern::read_probs`](https://rdrr.io/pkg/qtl2pattern/man/read_probs.html)
+and `qtl2pattern::read_mrna` (at least, when there are `mRNA` data).
 
-------------------------------------------------------------------------
+``` r
 
-## 4. Comprehensive File Mapping
+probs <- query_probs("1", 39, 40, allele = TRUE, method = "fst")
+mrna <- query_mrna("1", 39, 40, local = TRUE, qtl = FALSE)
+```
 
-Here is the complete mapping of all 41 `R/*App.R` files:
+#### Remote files and connections
 
-| File Name | Primary Tab / Area | Module Type | Key Server Function |
-|:---|:---|:---|:---|
-| **Main App** |  |  |  |
-| [R/qtl2shinyApp.R](https://byandell-sysgen.github.io/R/qtl2shinyApp.R) | Top-Level Coordinator | Entrypoint | `qtl2shinyServer` |
-| **Hotspots & Phenotypes** |  |  |  |
-| [R/hotspotApp.R](https://byandell-sysgen.github.io/R/hotspotApp.R) | Hotspots & Phenotypes | Entrypoint Panel | `hotspotServer` |
-| [R/hotspotDataApp.R](https://byandell-sysgen.github.io/R/hotspotDataApp.R) | Hotspots & Phenotypes | Integral Submodule | `hotspotDataServer` |
-| [R/hotspotPlotApp.R](https://byandell-sysgen.github.io/R/hotspotPlotApp.R) | Hotspots & Phenotypes | Integral Submodule | `hotspotPlotServer` |
-| [R/hotspotTableApp.R](https://byandell-sysgen.github.io/R/hotspotTableApp.R) | Hotspots & Phenotypes | Integral Submodule | `hotspotTableServer` |
-| [R/peakApp.R](https://byandell-sysgen.github.io/R/peakApp.R) | Hotspots & Phenotypes | Integral Submodule | `peakServer` |
-| [R/peakReadApp.R](https://byandell-sysgen.github.io/R/peakReadApp.R) | Hotspots & Phenotypes | Data Loader | `peakReadServer` |
-| [R/phenoApp.R](https://byandell-sysgen.github.io/R/phenoApp.R) | Hotspots & Phenotypes | Entrypoint Subpanel | `phenoServer` |
-| [R/phenoReadApp.R](https://byandell-sysgen.github.io/R/phenoReadApp.R) | Hotspots & Phenotypes | Data Loader | `phenoReadServer` |
-| [R/phenoNamesApp.R](https://byandell-sysgen.github.io/R/phenoNamesApp.R) | Hotspots & Phenotypes | Selector | `phenoNamesServer` |
-| [R/phenoDataApp.R](https://byandell-sysgen.github.io/R/phenoDataApp.R) | Hotspots & Phenotypes | Normalizer | `phenoDataServer` |
-| [R/phenoTableApp.R](https://byandell-sysgen.github.io/R/phenoTableApp.R) | Hotspots & Phenotypes | Renders UI Table | `phenoTableServer` |
-| [R/phenoPlotApp.R](https://byandell-sysgen.github.io/R/phenoPlotApp.R) | Hotspots & Phenotypes | Renders UI Plot | `phenoPlotServer` |
-| **Allele & SNP Scans** |  |  |  |
-| [R/scanApp.R](https://byandell-sysgen.github.io/R/scanApp.R) | Allele & SNP Scans | Entrypoint Panel | `scanServer` |
-| [R/scanDataApp.R](https://byandell-sysgen.github.io/R/scanDataApp.R) | Allele & SNP Scans | Integral Submodule | `scanDataServer` |
-| [R/snpGeneApp.R](https://byandell-sysgen.github.io/R/snpGeneApp.R) | Allele & SNP Scans | Integral Subpanel | `snpGeneServer` |
-| [R/snpTableApp.R](https://byandell-sysgen.github.io/R/snpTableApp.R) | Allele & SNP Scans | Integral Submodule | `snpTableServer` |
-| [R/snpPlotApp.R](https://byandell-sysgen.github.io/R/snpPlotApp.R) | Allele & SNP Scans | Integral Submodule | `snpPlotServer` |
-| [R/geneRegionApp.R](https://byandell-sysgen.github.io/R/geneRegionApp.R) | Allele & SNP Scans | DB Query & Plot | `geneRegionServer` |
-| [R/geneExonApp.R](https://byandell-sysgen.github.io/R/geneExonApp.R) | Allele & SNP Scans | DB Query & Plot | `geneExonServer` |
-| **Patterns** |  |  |  |
-| [R/patternApp.R](https://byandell-sysgen.github.io/R/patternApp.R) | Patterns | Entrypoint Panel | `patternServer` |
-| [R/snpPatternApp.R](https://byandell-sysgen.github.io/R/snpPatternApp.R) | Patterns | Integral Subpanel | `snpPatternServer` |
-| [R/patternDataApp.R](https://byandell-sysgen.github.io/R/patternDataApp.R) | Patterns | Integral Submodule | `patternDataServer` |
-| [R/patternPlotApp.R](https://byandell-sysgen.github.io/R/patternPlotApp.R) | Patterns | Integral Submodule | `patternPlotServer` |
-| [R/snpFeatureApp.R](https://byandell-sysgen.github.io/R/snpFeatureApp.R) | Patterns | Annotation Overlay | `snpFeatureServer` |
-| **Genotypes** |  |  |  |
-| [R/genoApp.R](https://byandell-sysgen.github.io/R/genoApp.R) | Genotypes | Entrypoint Panel | `genoServer` |
-| [R/genoDataApp.R](https://byandell-sysgen.github.io/R/genoDataApp.R) | Genotypes | Integral Submodule | `genoDataServer` |
-| [R/genoPlotApp.R](https://byandell-sysgen.github.io/R/genoPlotApp.R) | Genotypes | Integral Submodule | `genoPlotServer` |
-| [R/genoEffectApp.R](https://byandell-sysgen.github.io/R/genoEffectApp.R) | Genotypes | Integral Submodule | `genoEffectServer` |
-| **Scatter Plot** |  |  |  |
-| [R/scatterApp.R](https://byandell-sysgen.github.io/R/scatterApp.R) | Scatter Plot | Entrypoint Panel | `scatterServer` |
-| [R/scatterPlotApp.R](https://byandell-sysgen.github.io/R/scatterPlotApp.R) | Scatter Plot | Integral Submodule | `scatterPlotServer` |
-| **Mediation** |  |  |  |
-| [R/mediateApp.R](https://byandell-sysgen.github.io/R/mediateApp.R) | Mediation | Entrypoint Panel | `mediateServer` |
-| [R/mediateDataApp.R](https://byandell-sysgen.github.io/R/mediateDataApp.R) | Mediation | Integral Submodule | `mediateDataServer` |
-| [R/mediatePlotApp.R](https://byandell-sysgen.github.io/R/mediatePlotApp.R) | Mediation | Integral Submodule | `mediatePlotServer` |
-| [R/triadApp.R](https://byandell-sysgen.github.io/R/triadApp.R) | Mediation | Integral Submodule | `triadServer` |
-| **Generic & Utilities** |  |  |  |
-| [R/projectApp.R](https://byandell-sysgen.github.io/R/projectApp.R) | Global Sidebar | Generic Utility | `projectServer` |
-| [R/setParApp.R](https://byandell-sysgen.github.io/R/setParApp.R) | Global Sidebar | Generic Utility | `setParServer` |
-| [R/winParApp.R](https://byandell-sysgen.github.io/R/winParApp.R) | Global Sidebar | Generic Utility | `winParServer` |
-| [R/dipParApp.R](https://byandell-sysgen.github.io/R/dipParApp.R) | Global Sidebar | Generic Utility | `dipParServer` |
-| [R/snpListApp.R](https://byandell-sysgen.github.io/R/snpListApp.R) | Global Sidebar | Generic Utility | `snpListServer` |
-| [R/probsApp.R](https://byandell-sysgen.github.io/R/probsApp.R) | Data / Probs Loader | Generic Utility | `probsServer` |
-| [R/kinshipApp.R](https://byandell-sysgen.github.io/R/kinshipApp.R) | Data / Kinship Loader | Generic Utility | `kinshipServer` |
-| [R/downloadApp.R](https://byandell-sysgen.github.io/R/downloadApp.R) | Global Header | Generic Utility | `downloadServer` |
+It is possible for data for a `taxa` and `project` to be stored in
+another place, in which case an absolute address would be supplied in
+the `projects.csv` file. For efficient access, that absolute address
+should probably be in a filesystem that is locally accessible. However,
+it is possible to have a connection, such as a URL; this has not been
+tried yet.
+
+#### File types
+
+Most data files work well to be RDS, which preserve attributes of an R
+object. This is useful if some data columns should be interpreted as
+character or factor, for instance. Also, the `query` calls must be
+stored as RDS to preserve the calling environment.
+
+Genotype probabilities are assumed to be `fst` databases. This ensures
+rapid access to this information, which is the largest set of data
+besides the SNP information.
+
+## Package Workflow and Shiny Tool Components
+
+The `qtl2shiny` interface can be invoked within R using
+[runApp](https://shiny.rstudio.com/reference/shiny/latest/runApp.html)
+on the file
+[app.R](https://github.com/byandell/qtl2shiny/blob/master/inst/qtl2shinyApp/app.R).
+There is a routine
+[qtl2shinyApp](https://github.com/byandell/qtl2shiny/blob/master/R/qtl2shinyApp.R)
+in the package to do this as well:
+
+``` r
+
+qtl2shiny::qtl2shinyApp
+```
+
+However, one first should set up the data and query files as described
+above.
+
+The shiny server consists of the server app (`server()` and `ui()` in
+file `app.R`) and 27 shiny modules. The modules form a directed acyclic
+graph with `Main` being the root node.
+
+The `Main` module calls the `Setup`, `Haplo` and `Diplo` modules,
+corresponding to the three dashboard menu items. Each of these modules
+in turn calls other modules. The modules were each designed to do one
+task, and be kept small, ideally about 100 lines of code (including
+documentation). Here is a list of modules:
+
+| modeul | lines | task | output |
+|----|----|----|----|
+| [`Main`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyMain.R) | 129 | call Setup, Haplo, Diplo |  |
+| [`Setup`](https://github.com/byandell/qtl2shiny/blob/master/R/shinySetup.R) | 209 | set up project |  |
+| [`Haplo`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyHaplo.R) | 103 | Haplotype Scans |  |
+| [`Diplo`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyDiplo.R) | 107 | SNP/Gene Action |  |
+|  |  |  |  |
+| [`Project`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyProject.R) | 47 | pick project |  |
+| [`Peaks`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyPeaks.R) | 175 | select chr, peak and window width |  |
+| [`Phenos`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyPhenos.R) | 88 | phenotype information | table |
+| [`Hotspot`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyHotspot.R) | 190 | hotspot count by location | plot, table |
+| [`PhenoPlot`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyPhenoPlot.R) | 66 | plot phenotypes | plot |
+|  |  |  |  |
+| [`Probs`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyProbs.R) | 93 | allele genotype probabilities |  |
+| [`ScanCoef`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyScanCoef.R) | 210 | allele genome LOD and effect scans | plot, table |
+| [`Mediate`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyMediate.R) | 306 | mediation by other phenotypes | plot, table |
+| [`Scatter`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyScatter.R) | 149 | scatter plot for mediator | plot |
+|  |  |  |  |
+| [`PairProbs`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyPairProbs.R) | 93 | allele pair genotype probabilities |  |
+| [`Pattern`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyPattern.R) | 247 | LOD and imputed SNP effects by pattern | plot, table |
+| [`Allele`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyAllele.R) | 126 | allele and allele pair means | plot, tablt |
+|  |  |  |  |
+| [`SNPSetup`](https://github.com/byandell/qtl2shiny/blob/master/R/shinySNPSetup.R) | 225 | set up SNP processng |  |
+| [`SNPPattern`](https://github.com/byandell/qtl2shiny/blob/master/R/shinySNPPattern.R) | 276 | SNP allele patterns | plot, table |
+| [`SNPFeature`](https://github.com/byandell/qtl2shiny/blob/master/R/shinySNPFeature.R) | 113 | top SNP features | plot, table |
+| [`SNPProbs`](https://github.com/byandell/qtl2shiny/blob/master/R/shinySNPProbs.R) | 93 | SNP genotype probabilities |  |
+| [`SNPGene`](https://github.com/byandell/qtl2shiny/blob/master/R/shinySNPGene.R) | 102 | SNP & Gene Choice | table |
+| [`SNPPlot`](https://github.com/byandell/qtl2shiny/blob/master/R/shinySNPPlot.R) | 64 | plot SNP association | plot |
+| [`SNPSum`](https://github.com/byandell/qtl2shiny/blob/master/R/shinySNPSum.R) | 143 | create table of top SNPs | table |
+| [`GeneRegion`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyGeneRegion.R) | 115 | genes and SNPs in region | plot, table |
+| [`GeneExon`](https://github.com/byandell/qtl2shiny/blob/master/R/shinyGeneExon.R) | 162 | exons for individual genes | plot, table |
