@@ -12,7 +12,7 @@ articles:
   devel_guide/scan: devel_guide/scan.html
   devel_guide/scatter: devel_guide/scatter.html
   UserGuide: UserGuide.html
-last_built: 2026-07-16T14:33Z
+last_built: 2026-07-16T14:56Z
 urls:
   reference: https://byandell-sysgen.github.io/qtl2shiny/reference
   article: https://byandell-sysgen.github.io/qtl2shiny/articles

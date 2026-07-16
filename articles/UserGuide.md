@@ -66,7 +66,7 @@ Shiny server:
 - [R/qtl2shiny](https://github.com/byandell/qtl2shiny)
 - [R/qtl2mediate](https://github.com/byandell/qtl2mediate)
 
-The three other packages can be employed on their own separate from the
+The four other packages can be employed on their own separate from the
 server. In particular,
 [R/qtl2ggplot](https://github.com/byandell/qtl2ggplot) provides full
 capability for `ggplot2` plot objects.
