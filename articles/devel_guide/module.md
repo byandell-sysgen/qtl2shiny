@@ -1,4 +1,4 @@
-# qtl2shiny Developer Guide
+# Module Architecture
 
 This directory contains developer-facing documentation for the
 `qtl2shiny` package. It details the architecture of the Shiny

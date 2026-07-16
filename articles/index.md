@@ -9,10 +9,10 @@
 
 ### Developer Documentation
 
-- [qtl2shiny Developer
-  Guide](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/index.md):
-- [qtl2shiny Developer
-  Guide](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/module.md):
+- [Developer Guide
+  Overview](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/index.md):
+- [Module
+  Architecture](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/module.md):
 - [Hotspots & Phenotypes
   Module](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/hotspot.md):
 - [Allele & SNP Scans

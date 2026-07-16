@@ -1,4 +1,4 @@
-# qtl2shiny Developer Guide
+# Developer Guide Overview
 
 This document is a Developer Guide for the
 [R/qtl2shiny](https://github.com/byandell/qtl2shiny) package, with goals
