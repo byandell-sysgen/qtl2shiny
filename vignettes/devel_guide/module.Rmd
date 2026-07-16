@@ -13,7 +13,7 @@ vignette: >
 
 This directory contains developer-facing documentation for the `qtl2shiny` package. It details the architecture of the Shiny application, how data flows through the system, and how the 40+ module files (`R/*App.R`) are organized into visual panels and utility layers.
 Prompts and process to create this guide are documented in
-[Create Developer’s Guide to `qtl2shiny`](https://byandell.github.io/Documentation/prompts/devel_guide.html)
+[Create Developer Guide to `qtl2shiny`](https://byandell.github.io/Documentation/prompts/devel_guide.html)
 
 ## Table of Contents
 

@@ -234,7 +234,7 @@ However, one first should set up the data and query files as described above.
 
 The shiny server consists of the server app (`server()` and `ui()` in file `app.R`) and 27 shiny modules. The modules form a directed acyclic graph with `Main` being the root node.
 
-```{r echo=FALSE, child="../inst/scripts/qtl2dag.Rmd"}
+```{r echo=FALSE, child=system.file("scripts", "qtl2dag.Rmd", package = "qtl2shiny")}
 
 ```
 
