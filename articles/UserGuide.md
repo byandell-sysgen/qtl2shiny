@@ -12,7 +12,10 @@ publicly available dataset from Recla (see
 <https://github.com/rqtl/qtl2data>). However, this Shiny server is set
 up with project-specific login and password protection for data that has
 not been published, using [server side Apache
-htaccess](https://httpd.apache.org/docs/current/howto/ssi.html).
+htaccess](https://httpd.apache.org/docs/current/howto/ssi.html). See in
+addition the [qtl2shiny Developer
+Guide](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/index.md)
+for more details on the package structure and flow.
 
 ## Strategy to Study Small Interval
 
@@ -59,22 +62,25 @@ This document describes companion packages that are used to build the
 Shiny server:
 
 - [R/qtl2ggplot](https://github.com/byandell/qtl2ggplot)
-- [R/qtl2feather](https://github.com/byandell/qtl2feather)
 - [R/qtl2pattern](https://github.com/byandell/qtl2pattern)
 - [R/qtl2shiny](https://github.com/byandell/qtl2shiny)
+- [R/qtl2mediate](https://github.com/byandell/qtl2mediate)
 
 The three other packages can be employed on their own separate from the
 server. In particular,
 [R/qtl2ggplot](https://github.com/byandell/qtl2ggplot) provides full
-capability for `ggplot2` plot objects. The
-[R/qtl2feather](https://github.com/byandell/qtl2feather) package
-transforms large, slow `calc_genoprob` objects central to
-[R/qtl2](http://www.rqtl.org/qtl2) into a set of `feather` databases for
-quick access. See each package for its own documentation.
+capability for `ggplot2` plot objects.
 
-There is another package that is more specialized and still need
-documentation: [R/CausalMST](https://github.com/byandell/CausalMST)
-concerns Causal Model Selection Tests, which are used in conjunction
-with mediation to formally infer causal relationship between a phenotype
-and other phenotypes that co-map. Plan is to try to combine this with
-[R/intermediate](https://github.com/churchill-lab/intermediate).
+Additional packages used are
+
+- [R/intermediate](https://github.com/byandell/intermediate)
+- [R/qtl2fst](https://kbroman.org/qtl2/assets/vignettes/qtl2fst.html)
+
+The `intermediate` package is used by `qtl2mediate` to manage analysis
+results and keep code clean and readable; it is a fork of
+[R/intermediate](https://github.com/churchill-lab/intermediate) The
+[R/qtl2fst](https://kbroman.org/qtl2/assets/vignettes/qtl2fst.html)
+package transforms large, slow `calc_genoprob` objects central to
+[R/qtl2](http://www.rqtl.org/qtl2) into a set of
+[fst](https://www.fstpackage.org/) databases for quick access. See each
+package for its own documentation.

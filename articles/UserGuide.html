@@ -86,7 +86,8 @@ intervals.</p>
 demonstrate with a publicly available dataset from Recla (see <a href="https://github.com/rqtl/qtl2data" class="external-link uri">https://github.com/rqtl/qtl2data</a>). However, this Shiny
 server is set up with project-specific login and password protection for
 data that has not been published, using <a href="https://httpd.apache.org/docs/current/howto/ssi.html" class="external-link">server side
-Apache htaccess</a>.</p>
+Apache htaccess</a>. See in addition the <a href="./devel_guide/index.html">qtl2shiny Developer Guide</a> for more
+details on the package structure and flow.</p>
 <div class="section level2">
 <h2 id="strategy-to-study-small-interval">Strategy to Study Small Interval<a class="anchor" aria-label="anchor" href="#strategy-to-study-small-interval"></a>
 </h2>
@@ -152,21 +153,26 @@ improve.</p>
 Shiny server:</p>
 <ul>
 <li><a href="https://github.com/byandell/qtl2ggplot" class="external-link">R/qtl2ggplot</a></li>
-<li><a href="https://github.com/byandell/qtl2feather" class="external-link">R/qtl2feather</a></li>
 <li><a href="https://github.com/byandell/qtl2pattern" class="external-link">R/qtl2pattern</a></li>
 <li><a href="https://github.com/byandell/qtl2shiny" class="external-link">R/qtl2shiny</a></li>
+<li><a href="https://github.com/byandell/qtl2mediate" class="external-link">R/qtl2mediate</a></li>
 </ul>
 <p>The three other packages can be employed on their own separate from
 the server. In particular, <a href="https://github.com/byandell/qtl2ggplot" class="external-link">R/qtl2ggplot</a> provides
-full capability for <code>ggplot2</code> plot objects. The <a href="https://github.com/byandell/qtl2feather" class="external-link">R/qtl2feather</a> package
-transforms large, slow <code>calc_genoprob</code> objects central to <a href="http://www.rqtl.org/qtl2" class="external-link">R/qtl2</a> into a set of
-<code>feather</code> databases for quick access. See each package for
-its own documentation.</p>
-<p>There is another package that is more specialized and still need
-documentation: <a href="https://github.com/byandell/CausalMST" class="external-link">R/CausalMST</a> concerns
-Causal Model Selection Tests, which are used in conjunction with
-mediation to formally infer causal relationship between a phenotype and
-other phenotypes that co-map. Plan is to try to combine this with <a href="https://github.com/churchill-lab/intermediate" class="external-link">R/intermediate</a>.</p>
+full capability for <code>ggplot2</code> plot objects.</p>
+<p>Additional packages used are</p>
+<ul>
+<li><a href="https://github.com/byandell/intermediate" class="external-link">R/intermediate</a></li>
+<li><a href="https://kbroman.org/qtl2/assets/vignettes/qtl2fst.html" class="external-link">R/qtl2fst</a></li>
+</ul>
+<p>The <code>intermediate</code> package is used by
+<code>qtl2mediate</code> to manage analysis results and keep code clean
+and readable; it is a fork of <a href="https://github.com/churchill-lab/intermediate" class="external-link">R/intermediate</a>
+The <a href="https://kbroman.org/qtl2/assets/vignettes/qtl2fst.html" class="external-link">R/qtl2fst</a>
+package transforms large, slow <code>calc_genoprob</code> objects
+central to <a href="http://www.rqtl.org/qtl2" class="external-link">R/qtl2</a> into a set of
+<a href="https://www.fstpackage.org/" class="external-link">fst</a> databases for quick
+access. See each package for its own documentation.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
