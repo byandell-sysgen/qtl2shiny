@@ -1,5 +1,6 @@
 ---
 title: "qtl2shiny Developer Guide"
+subtitle: "Overview"
 author: "Brian S. Yandell"
 date: "`r format(Sys.Date(), '%d %b %Y')`"
 output: rmarkdown::html_vignette
@@ -30,6 +31,26 @@ Those wishing to _extend_ capabilities of the package, or understand its inner w
 This developer guide was generated with the help of Antigravity, with significant editing and rewriting;
 see
 [Create Developer’s Guide to `qtl2shiny`](https://byandell.github.io/Documentation/prompts/devel_guide.html).
+
+## Table of Contents
+
+- [Data Structures and Folder Organization](#data-structures-and-folder-organization)
+  - [Taxa Information](#taxa-information)
+  - [Project Information](#project-information)
+- [Data files](#data-files)
+- [Genotype probabilities](#genotype-probabilities)
+- [Query files](#query-files)
+  - [Remote files and connections](#remote-files-and-connections)
+  - [File types](#file-types)
+- [Package Workflow and Shiny Tool Components](#package-workflow-and-shiny-tool-components)
+- Detailed Module Guides
+  - [Module Architecture](./module.html)
+  - [Hotspots & Phenotypes Panel (`hotspotApp`)](./hotspot.html)
+  - [Allele & SNP Scans Panel (`scanApp`)](./scan.html)
+  - [Patterns Panel (`patternApp`)](./pattern.html)
+  - [Genotypes Panel (`genoApp`)](./geno.html)
+  - [Scatter Plot Modules (`scatterPlotApp` / `scatterApp`)](./scatter.html)
+  - [Mediation Panel (`mediateApp`)](./mediate.html)
 
 ## Data Structures and Folder Organization
 
@@ -71,7 +92,7 @@ file | contents
 `query_genes.rds` | query routine for genes
 `query_variants.rds` | query routines for structural variants
 
-### Project Information
+### Project information
 
 The `project` sub-sub-directory (`Recla`) has the data specific to the project. An example of how this is created can be found in [Recla.Rmd](https://github.com/byandell/qtl2shiny/blob/master/inst/doc/Recla.Rmd).
 Most of the objects are stored as [RDS](https://www.rdocumentation.org/packages/base/versions/3.4.3/topics/readRDS).

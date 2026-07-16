@@ -18,9 +18,9 @@ navbar:
         - text: "-------"
         - text: "Developer Guides"
         - text: "Developer Guide Overview"
-          href: articles/DeveloperGuide.html
-        - text: "Module Architecture (New)"
           href: articles/devel_guide/index.html
+        - text: "Module Architecture"
+          href: articles/devel_guide/module.html
         - text: "Hotspots & Phenotypes Module"
           href: articles/devel_guide/hotspot.html
         - text: "Allele & SNP Scans Module"
@@ -41,8 +41,8 @@ articles:
       - qtl2shinyData
   - title: "Developer Documentation"
     contents:
-      - DeveloperGuide
       - "devel_guide/index"
+      - "devel_guide/module"
       - "devel_guide/hotspot"
       - "devel_guide/scan"
       - "devel_guide/pattern"

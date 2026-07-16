@@ -1,5 +1,8 @@
 ---
-title: "Module Architecture"
+title: "qtl2shiny Developer Guide"
+subtitle: "Module Architecture"
+author: "Brian S. Yandell"
+date: "`r format(Sys.Date(), '%d %b %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Module Architecture}
