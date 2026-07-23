@@ -2,8 +2,14 @@
 
 Yandell R/qtl2shiny project.
 
-[Articles for
-`qtl2shiny`](https://byandell-sysgen.github.io/qtl2shiny/articles/)
+- [Articles for
+  `qtl2shiny`](https://byandell-sysgen.github.io/qtl2shiny/articles/)
+  - [Developer
+    Guide](https://byandell-sysgen.github.io/qtl2shiny/articles/devel_guide/index.html)
+  - [Prepare qtl2 data for
+    qtl2shiny](https://byandell-sysgen.github.io/qtl2shiny/articles/qtl2shinyData.html)
+- [DEVELOPER.md](https://byandell-sysgen.github.io/qtl2shiny/DEVELOPER.md)
+- [AGENTS.md](https://byandell-sysgen.github.io/qtl2shiny/AGENTS.md)
 
 ### What is this repository for?
 
